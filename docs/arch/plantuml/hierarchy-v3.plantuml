@@ -1,0 +1,65 @@
+@startuml
+object merchant_1 {
+    name = "BNI"
+    parent = null
+}
+
+object merchant_2 {
+    name = "LOTTE"
+    parent = "BNI"
+}
+object merchant_21 {
+    name = "LOTTE Mart BEC"
+    parent = "LOTTE"
+}
+object merchant_22 {
+    name = "LOTTE Grosir Bandung"
+    parent = "LOTTE"
+}
+object agent_211 {
+    name = "Kasir Wayan"
+    merchant = "LOTTE Mart BEC"
+}
+object agent_212 {
+    name = "Kasir Made"
+    merchant = "LOTTE Mart BEC"
+}
+object agent_221 {
+    name = "Kasir Nyoman"
+    merchant = "LOTTE Grosir Bandung"
+}
+object agent_222 {
+    name = "Kasir Ketut"
+    merchant = "LOTTE Grosir Bandung"
+}
+
+object merchant_3 {
+    name = "Hotel Ghotic"
+    parent = "BNI"
+}
+object agent_31 {
+    name = "Resepsionis Gede"
+    merchant = "Hotel Ghotic"
+}
+object agent_32 {
+    name = "Resepsionis Kadek"
+    merchant = "Hotel Ghotic"
+}
+object agent_33 {
+    name = "Resepsionis Komang"
+    merchant = "Hotel Ghotic"
+}
+
+merchant_1 o-- merchant_2
+merchant_2 o-- merchant_21
+merchant_2 o-- merchant_22
+merchant_21 o-- agent_211
+merchant_21 o-- agent_212
+merchant_22 o-- agent_221
+merchant_22 o-- agent_222
+merchant_1 o-- merchant_3
+merchant_3 o-- agent_31
+merchant_3 o-- agent_32
+merchant_3 o-- agent_33
+
+@enduml

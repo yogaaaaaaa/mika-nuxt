@@ -1,0 +1,125 @@
+@startuml
+
+entity user {
+    id
+    --
+    entity_type: {admin, merchant, agent}
+    entity_id
+    username
+    password
+}
+
+entity user_extra_data {
+    id
+    --
+    address
+    phone
+    email
+}
+
+entity admin {
+    id
+    --
+    name
+    user_extra_data_id
+}
+
+entity merchant {
+    id
+    friendly_id
+    --
+    name
+    parent_id
+    user_extra_data_id
+    settlement_destination_id
+}
+
+entity agent {
+    id
+    --
+    name
+    merchant_id
+    user_extra_data_id
+    settlement_destination_id
+    typical_latitude
+    typical_longitude
+}
+
+entity terminal {
+    id
+    friendly_id
+    serial_number
+    --
+    typical_latitude
+    typical_longitude
+}
+
+entity payment_gateway_type {
+    id
+    --
+    name
+}
+
+entity payment_gateway {
+    id
+    --
+    payment_gateway_type_id
+}
+
+entity transaction {
+    id
+    --
+    date
+    amount
+    status = {inquiry, success, failed}
+    agent_id
+    terminal_id
+    payment_gateway_id
+    latitude
+    longitude
+    extra (JSON)
+    extra.reference_number_field_name
+    extra.customer_number_field_name
+}
+
+entity settlement {
+    id
+    --
+    date
+    amount
+    destination_id
+}
+
+entity settlement_rule {
+    id
+    --
+    medium_type: {bankbni, walletyap}
+    trigger_type: {manual, immediately, eod}
+    share_percentage
+    per_transaction_fee
+}
+
+user .. admin: user.entity_type = admin
+user .. merchant: user.entity_type = merchant
+user .. agent: user.entity_type = agent
+user_extra_data .. admin
+user_extra_data .. merchant
+user_extra_data .. agent
+merchant ..{ merchant: parent merchant
+merchant --{ agent
+agent }--{ terminal
+
+payment_gateway_type --{ payment_gateway
+merchant }..{ payment_gateway
+agent }..{ payment_gateway
+
+agent --{ transaction
+terminal --{ transaction
+payment_gateway --{ transaction
+
+transaction }--{ settlement
+settlement_rule --{ settlement
+settlement_rule ..{ merchant
+settlement_rule ..{ agent
+
+@enduml
