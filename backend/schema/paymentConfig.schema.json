@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "paymentConfig.schema.json",
+  "title": "Payment Config Document 1.0",
+  "description": "Document containing payment method and its configuration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "definitions.schema.json#/definitions/documentStandard"
+    },
+    {
+      "properties": {
+        "method": {
+          "description": "Payment method which this config intended to use for",
+          "$ref": "definitions.schema.json#/definitions/paymentMethod"
+        },
+        "content": {
+          "type": "object",
+          "description": "Config content"
+        }
+      },
+      "required": [
+        "method",
+        "content"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "definitions.schema.json",
+  "title": "Definitions schema 1.0",
+  "description": "Contain definitions commonly used on all schema",
+  "definitions": {
+    "documentStandard": {
+      "description": "Standard properties shared on all Documents",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Universal and monotonically increasing identifier for this document. KSUID is used for this purpose"
+        },
+        "doc": {
+          "type": "object",
+          "description": "Contain document type and its version",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Document type",
+              "enum": [
+                "payment",
+                "user",
+                "resources",
+                "config.payment",
+                "auth",
+                "key",
+                "log"
+              ]
+            },
+            "ver": {
+              "type": "string",
+              "description": "Version of document type"
+            }
+          },
+          "required": [
+            "type",
+            "ver"
+          ]
+        },
+        "docRev": {
+          "type": "object",
+          "description": "Contain document revision, a linked list",
+          "properties": {
+            "num": {
+              "type": "integer",
+              "description": "Revision number (sequential)"
+            },
+            "prevId": {
+              "description": "Previous Document in revision list",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextId": {
+              "description": "Next Document in revision list",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "num",
+            "prevId",
+            "nextId"
+          ]
+        },
+        "docState": {
+          "type": "string",
+          "description": "State of document whether its ACTIVE or INACTIVE. Used in soft deletion and revision.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "INVALID"
+          ]
+        },
+        "docNote": {
+          "type": "string",
+          "description": "Optional note for this document, intended for development and maintenance"
+        },
+        "docFlags": {
+          "type": "array",
+          "description": "Optional flags describing this document",
+          "items": {
+            "type": "string",
+            "enum": [
+              "DOC_DUMMY",
+              "DOC_MIGRATION"
+            ]
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Document creation time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Document last update time. Updated on document every revision"
+        },
+        "friendlyId": {
+          "type": "string",
+          "description": "Friendly Identifier of document, dependent of document type"
+        },
+        "oldId": {
+          "type": "string",
+          "description": "Old id for compatibility only"
+        }
+      },
+      "required": [
+        "id",
+        "doc",
+        "docState",
+        "docRev",
+        "createdAt"
+      ]
+    },
+    "paymentMethod": {
+      "type": "string",
+      "enum": [
+        "telkomsel.tcash",
+        "midtrans.gopay",
+        "alto.wechat",
+        "alto.alipay",
+        "fairpay.bni.debit",
+        "fairpay.bni.credit",
+        "dam.mandiri.ecash"
+      ]
+    },
+    "paymentStatus": {
+      "type": "string",
+      "description": "Status of transaction, begin with 'CREATED' then to 'SUCCESS' or 'FAILED'. Use 'invalid' when exception happen and need manual intervention",
+      "enum": [
+        null,
+        "CREATED",
+        "SUCCESS",
+        "FAILED",
+        "ERROR"
+      ]
+    },
+    "currencyISO": {
+      "type": "string",
+      "description": "Currency Codes of ISO 4217",
+      "minLength": 3,
+      "enum": [
+        "IDR",
+        "USD",
+        "CNY"
+      ]
+    },
+    "languageISO": {
+      "type": "string",
+      "description": "Language Codes of ISO 639",
+      "enum": [
+        "id",
+        "us"
+      ]
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "longitude": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "string"
+        }
+      }
+    },
+    "dataFlags": {
+      "description": "Flags describing data (mostly used in Payment Document)",
+      "type": "string",
+      "enum": [
+        "USER_TOKEN",
+        "TOKEN",
+        "PAYMENT_REFERENCE",
+        "COSTUMER_REFERENCE",
+        "SENSITIVE",
+        "FORMAT_MASK_B3E4",
+        "FORMAT_PHONENUMBER",
+        "FORMAT_DATE_ISO86601",
+        "PHONENUMBER",
+        "DATA",
+        "BINARY",
+        "TOKEN_PIN",
+        "TOKEN_QRCODE_CONTENT",
+        "TOKEN_QRCODE_URL_IMAGE",
+        "UNKNOWN"
+      ]
+    },
+    "userType": {
+      "description": "User type enumeration",
+      "type": "string",
+      "enum": [
+        "ADMIN",
+        "MERCHANT",
+        "AGENT"
+      ]
+    },
+    "userFlags": {
+      "description": "User flags, describing capability and user information",
+      "type": "string",
+      "enum": [
+        "MAKE_PAYMENT",
+        "DO_ADMIN",
+        "AGENT"
+      ]
+    },
+    "eventType": {
+      "description": "Log type enumeration",
+      "type": "string",
+      "enum": [
+        "PAYMENT_CREATE",
+        "PAYMENT_UPDATE",
+        "USER_CREATE",
+        "USER_UPDATE",
+        "USER_REMOVE",
+        "API_CALL"
+      ]
+    }
+  }
+}

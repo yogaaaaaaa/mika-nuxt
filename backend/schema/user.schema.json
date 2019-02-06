@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "user.schema.json",
+  "title": "User Document 1.0",
+  "description": "Contain user of mika system",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "definitions.schema.json#/definitions/documentStandard"
+    },
+    {
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "Name used in login"
+        },
+        "passwordHash": {
+          "type": "string",
+          "description": "Password hash of user"
+        },
+        "type": {
+          "$ref": "definitions.schema.json#/definitions/userType"
+        },
+        "parentUserId": {
+          "type": "string",
+          "description": "User UID that are parent for this user"
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "$ref": "definitions.schema.json#/definitions/paymentMethod"
+          }
+        },
+        "location": {
+          "$ref": "definitions.schema.json#/definitions/location"
+        },
+        "terminalIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "$ref": "definitions.schema.json#/definitions/userFlags"
+          }
+        },
+        "details": {
+          "type": "object",
+          "description": "User details data",
+          "properties": {
+            "orgName": {
+              "description": "Organization name",
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "username",
+        "passwordHash",
+        "type"
+      ]
+    }
+  ]
+}

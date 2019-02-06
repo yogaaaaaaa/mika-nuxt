@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "payment.schema.json",
+  "title": "Payment Document 1.0",
+  "description": "Contain records of payment event, used by payment services",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "definitions.schema.json#/definitions/documentStandard"
+    },
+    {
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Universal Identifier of user document that initiated this payment"
+        },
+        "paymentConfigId": {
+          "type": "string",
+          "description": "Universal Identifier of config document that used in this payment"
+        },
+        "terminalId": {
+          "type": "string",
+          "description": "Universal Identifier of terminal document used in this payment"
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Amount of payment",
+          "minimum": 1
+        },
+        "currency": {
+          "$ref": "definitions.schema.json#/definitions/currencyISO"
+        },
+        "method": {
+          "description": "Payment method used",
+          "$ref": "definitions.schema.json#/definitions/paymentMethod"
+        },
+        "location": {
+          "$ref": "definitions.schema.json#/definitions/location"
+        },
+        "status": {
+          "$ref": "definitions.schema.json#/definitions/paymentStatus"
+        },
+        "data": {
+          "type": "array",
+          "description": "Contain array of object containing data dependent to Payment Method",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Technical name of data, used by payment method services and/or payment provider"
+              },
+              "note": {
+                "type": "string",
+                "description": "Optional note about this data, intended for development and maintenance"
+              },
+              "friendlyName": {
+                "type": "string",
+                "description": "Friendly name of this data, preferably in english"
+              },
+              "friendlyNameResAlias": {
+                "type": "string",
+                "description": "Resource alias for friendly name. Can be used for i18n"
+              },
+              "content": {
+                "type": "string",
+                "description": "Content of data itself"
+              },
+              "flags": {
+                "$ref": "definitions.schema.json#/definitions/dataFlags"
+              }
+            },
+            "required": [
+              "name",
+              "dataName",
+              "flags",
+              "note"
+            ]
+          }
+        }
+      },
+      "required": [
+        "userId",
+        "configId",
+        "terminalId",
+        "amount",
+        "method",
+        "location",
+        "currency",
+        "data"
+      ]
+    }
+  ]
+}
