@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "log.schema.json",
+  "title": "Log Document 1.0",
+  "description": "Contain records of event, used by payment services",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "definitions.schema.json#/definitions/documentStandard"
+    },
+    {
+      "properties": {
+        "event": {
+          "description": "Event type",
+          "$ref": "definitions.schema.json#/definitions/eventType"
+        },
+        "traceId": {
+          "type": "string",
+          "description": "Trace UID is used to group several log document and called by saga orchestrator. For example, trace id is generated when payment saga is started, consisting of several event (create payment, check fraud, external webhook, etc)"
+        },
+        "docIds": {
+          "type": "array",
+          "description": "Array of affected document UID in this event",
+          "items": {
+            "type": "string"
+          }
+        },
+        "userIds": {
+          "type": "array",
+          "description": "Array of user UID involved in this event",
+          "items": {
+            "type": "string"
+          }
+        },
+        "content": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "event",
+        "traceId",
+        "content"
+      ]
+    }
+  ]
+}

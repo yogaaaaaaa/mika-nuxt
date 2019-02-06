@@ -16,17 +16,7 @@
           "description": "Contain document type and its version",
           "properties": {
             "type": {
-              "type": "string",
-              "description": "Document type",
-              "enum": [
-                "payment",
-                "user",
-                "resources",
-                "config.payment",
-                "auth",
-                "key",
-                "log"
-              ]
+              "$ref": "#/definitions/documentType"
             },
             "ver": {
               "type": "string",
@@ -126,6 +116,19 @@
         "createdAt"
       ]
     },
+    "documentType": {
+      "type": "string",
+      "description": "Document type",
+      "enum": [
+        "payment",
+        "user",
+        "resources",
+        "config.payment",
+        "auth",
+        "key",
+        "log"
+      ]
+    },
     "paymentMethod": {
       "type": "string",
       "enum": [
@@ -213,7 +216,7 @@
       "type": "string",
       "enum": [
         "MAKE_PAYMENT",
-        "DO_ADMIN",
+        "MANAGE_AGENT",
         "AGENT"
       ]
     },
@@ -223,10 +226,15 @@
       "enum": [
         "PAYMENT_CREATE",
         "PAYMENT_UPDATE",
+        "PAYMENT_SUCCESS",
+        "PAYMENT_FAILED",
+        "PAYMENT_EXTERNAL_API_CALL",
+        "PAYMENT_EXTERNAL_API_RESPONSE",
         "USER_CREATE",
         "USER_UPDATE",
         "USER_REMOVE",
-        "API_CALL"
+        "API_CALL",
+        "API_RESPONSE"
       ]
     }
   }
