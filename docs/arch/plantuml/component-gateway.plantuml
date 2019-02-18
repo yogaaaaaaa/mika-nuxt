@@ -1,0 +1,52 @@
+@startuml
+
+left to right direction
+
+skinparam component {
+    TitleFontColor          #070707
+    ArrowColor              #0793D7
+    BorderColor             #04618E
+    BackgroundColor         #FFE298
+    FontColor               #070707
+    StereotypeFontColor     #070707
+    BorderColor<<CDE>>      #F63300
+}
+
+skinparam interface {
+    BorderColor             #04618E
+    BackgroundColor         #FFE298
+    FontColor               #070707
+    StereotypeFontColor     #070707
+}
+
+skinparam usecase {
+    BorderColor             #04618E
+    BackgroundColor         #FFE298
+    FontColor               #070707
+    StereotypeFontColor     #070707
+    BorderColor<<CDE>>      #F63300
+}
+
+component "Mobile Application"              as MobileApp
+component "Merchant Dashboard"              as MerchantDash
+component "Admin Dashboard"                 as AdminDash
+component "Kong\nAPI Gateway"               as Kong <<CDE>>
+component "Mobile API"                      as MobileApi <<CDE>>
+component "Merchant\nDashboard API"         as MerchantApi <<CDE>>
+component "Admin\nDashboard API"            as AdminApi <<CDE>>
+component "Public API"                      as PublicApi
+
+MobileApp       <--[#FF3500]> Kong
+MerchantDash    <--[#FF3500]> Kong
+AdminDash       <--[#FF3500]> Kong
+interface "Receive API calls\nfrom partners" as PublicApiCalls
+PublicApiCalls -- Kong
+interface "Receive webhook calls\nfrom wallet providers" as WalletPaymentApiCalls
+WalletPaymentApiCalls -- Kong
+
+Kong            <--[#FF3500]> MobileApi
+Kong            <--[#FF3500]> MerchantApi
+Kong            <--[#FF3500]> AdminApi
+Kong            <--> PublicApi
+
+@enduml

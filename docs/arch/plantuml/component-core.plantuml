@@ -1,0 +1,100 @@
+@startuml
+
+left to right direction
+
+skinparam component {
+    TitleFontColor          #070707
+    ArrowColor              #0793D7
+    BorderColor             #04618E
+    BackgroundColor         #FFE298
+    FontColor               #070707
+    StereotypeFontColor     #070707
+    BorderColor<<CDE>>      #F63300
+}
+
+skinparam interface {
+    BorderColor             #04618E
+    BackgroundColor         #FFE298
+    FontColor               #070707
+    StereotypeFontColor     #070707
+}
+
+skinparam usecase {
+    BorderColor             #04618E
+    BackgroundColor         #FFE298
+    FontColor               #070707
+    StereotypeFontColor     #070707
+    BorderColor<<CDE>>      #F63300
+}
+
+component "Logger API"                      as LogApi <<CDE>>
+    interface "Retrieve logs" as LogApiGet
+LogApi -[#FF3500]> LogApiGet : Audit trails\nLog messages
+
+component "Reporting API"                   as ReportApi
+    interface "Retrieve report" as ReportApiGet
+ReportApiGet <-- ReportApi : Reports
+
+component "User API"                        as UserApi
+    interface "Authorize\nusers"            as UserApiAuthorize
+    interface "Manage\nusers"               as UserApiManageUsers
+UserApiAuthorize <--> UserApi : Username\nPassword\nJWT
+UserApiManageUsers <--> UserApi : Merchants\nAgents\nTerminals\nAdmins
+
+component "Cipher API"                      as CipherApi <<CDE>>
+    interface "Generate\ncommon key"        as CipherApiGenerateCommonKey
+CipherApi <--> CipherApiGenerateCommonKey : Terminal ID\nCommon key
+
+component "Accounting API"                  as AccountingApi
+    interface "Manage\nstandards"           as AccountingApiManageStandards
+    interface "Manage entries\nand settlements" as AccountingApiManage
+AccountingApiManageStandards <--> AccountingApi : Standards
+AccountingApiManage <--> AccountingApi : Entries\nSettlements
+
+component "Card\nPayment API"               as CardPaymentApi <<CDE>>
+    interface "Manage credentials"          as CardPaymentApiManageCredentials
+CardPaymentApiManageCredentials <--> CardPaymentApi : Credentials
+
+component "Wallet\nPayment API"             as WalletPaymentApi
+    interface "Manage credentials"          as WalletPaymentApiManageCredentials
+    interface "Payment provider\nwebhook"   as WalletPaymentApiWebhook
+WalletPaymentApiManageCredentials <--> WalletPaymentApi : Credentials
+WalletPaymentApi <--> WalletPaymentApiWebhook : Transaction inquiry\nTransaction status
+
+component "Fraud\nManagement API"           as FraudApi <<CDE>>
+    interface "Manage\nblacklist"           as FraudApiManageBlacklist
+FraudApi <--[#FF3500]> FraudApiManageBlacklist : Blacklist
+
+component "Bank\nTransfer API"              as BankApi
+component "Messenger API"                   as MessengerApi
+component "Transaction\nExpiry Job"         as TxnExpiryJob <<Timer>>
+component "Daily Settle\nOut Job"           as EodSettleOutJob <<Timer>>
+
+UserApi             --> LogApi          : Audit events
+AccountingApi       --> LogApi          : Audit events
+CardPaymentApi      --[#FF3500]> LogApi : Audit events\nLog messages
+WalletPaymentApi    --> LogApi          : Audit events\nLog messages
+BankApi             --> LogApi          : Audit events\nLog messages
+MessengerApi        --> LogApi          : Audit events\nLog messages
+ReportApi           <-- AccountingApi   : Entries\nSettlements
+ReportApi           <-- UserApi         : Merchants\nAgents\nTerminals
+WalletPaymentApi    --> MessengerApi    : Push notification
+UserApi             --> MessengerApi    : 2FA OTP\nPassword reset token
+ReportApi           --> MessengerApi    : Email reports
+WalletPaymentApi    --> TxnExpiryJob    : Expired transactions
+AccountingApi       --> EodSettleOutJob : Outgoing settlements
+EodSettleOutJob     --> BankApi         : Bank transfers
+
+
+usecase "Create a new\ncard transaction" as UsecaseCreateCardTxn<<CDE>>
+UsecaseCreateCardTxn <--[#FF3500]> CipherApi : Session keys\nPlaintext\nCiphertext
+UsecaseCreateCardTxn <--[#FF3500]> FraudApi : Transactions\nFraud score
+UsecaseCreateCardTxn --> AccountingApi : Transactions
+UsecaseCreateCardTxn <--[#FF3500]> CardPaymentApi : Transactions\nARPC
+
+usecase "Create a new\nwallet transaction" as UsecaseCreateWalletTxn
+UsecaseCreateWalletTxn <--> FraudApi : Transactions\nFraud score
+UsecaseCreateWalletTxn --> AccountingApi : Transactions
+UsecaseCreateWalletTxn <--> WalletPaymentApi : Transactions\nBarcodes
+
+@enduml
