@@ -1,0 +1,140 @@
+@startuml
+
+entity logical_group {
+    name
+}
+
+entity visibility_group {
+    name
+    slug
+}
+
+entity outlet {
+    name
+    website
+    phone_number
+    email_address
+    address.street_address
+    address.locality
+    address.district
+    address.city
+    address.province
+    address.postal_code
+    longitude
+    latitude
+    premise.ownership_status
+    premise.rental_start_date
+    premise.rental_duration
+    premise.other_systems
+    premise.photos[]
+    premise.photos_cashier_desk[]
+    business.type
+    business.start_date
+    business.monthly_turnover
+}
+
+entity settlement_standard {
+    friendly_id
+    name
+    description
+    ---
+    bank_name
+    bank_branch_name
+    bank_account_number
+    bank_account_name
+    ---
+    standard_rule...
+    ---
+    corporate.form
+    corporate.tax_id
+    corporate.website
+    corporate.phone_number
+    corporate.email_address
+    corporate.domicile_address.street_address
+    corporate.domicile_address.locality
+    corporate.domicile_address.district
+    corporate.domicile_address.city
+    corporate.domicile_address.province
+    corporate.domicile_address.postal_code
+    ---
+    owner.name
+    owner.occupation
+    owner.phone_number
+    owner.email_address
+    owner.domicile_address.street_address
+    owner.domicile_address.locality
+    owner.domicile_address.district
+    owner.domicile_address.city
+    owner.domicile_address.province
+    owner.domicile_address.postal_code
+    owner.id.type
+    owner.id.number
+    ---
+    scanned_documents.owner.id_card
+    scanned_documents.owner.tax_card
+    scanned_documents.owner.bank_statement
+    scanned_documents.corporate.tax_card
+    scanned_documents.corporate.charter[]
+    scanned_documents.corporate.siup
+    scanned_documents.corporate.tdp
+    scanned_documents.corporate.skdp
+    scanned_documents.corporate.skmenkumham
+}
+
+entity payment_provider_set {
+    name
+    description
+    enabled_providers
+}
+
+entity member {
+    name
+    username
+    password
+}
+
+entity agent {
+    name
+    username
+    password
+    ---
+    occupation
+    phone_number
+    email_address
+    domicile_address.street_address
+    domicile_address.locality
+    domicile_address.district
+    domicile_address.city
+    domicile_address.province
+    domicile_address.postal_code
+    id.type
+    id.number
+}
+
+entity terminal {
+    serial_number
+    friendly_id
+    model
+    manufacturer
+    batch_number
+    status
+    keys...
+}
+
+logical_group --{ visibility_group
+logical_group --{ payment_provider_set
+logical_group --{ settlement_standard
+logical_group --{ outlet
+
+visibility_group }--{ agent
+visibility_group }--{ member
+payment_provider_set --{ agent
+settlement_standard --{ agent
+outlet --{ agent
+agent }--{ terminal
+
+logical_group --{ agent
+logical_group --{ terminal
+logical_group --{ member
+
+@enduml
