@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cbkey.schema.json",
+  "title": "Cipherbox key Document 1.0",
+  "description": "Contain Key used by cipherbox",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "definitions.schema.json#/definitions/documentStandard"
+    },
+    {
+      "properties": {
+        "cbx": {
+          "description": "Cipherbox this key intended to use",
+          "type": "string"
+        },
+        "key": {
+          "description": "Key in base64 form",
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "description": "Key type (Optional)"
+        }
+      },
+      "required": [
+        "cbx",
+        "key"
+      ]
+    }
+  ]
+}

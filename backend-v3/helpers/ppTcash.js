@@ -1,0 +1,67 @@
+'use strict'
+
+/**
+ * Providing various constant and function related to Tcash payment gateway
+ */
+
+module.exports.baseConfig = require('../config/ppTcashConfig')
+
+module.exports.tcashMessageCode = {
+  TCASH_INQUIRY_SUCCESS: {
+    code: '00',
+    message: 'Inquiry OK'
+  },
+  TCASH_PAY_SUCCESS: {
+    code: '00',
+    message: 'Payment Success'
+  },
+  TCASH_ERROR_TRANSACTION_NOT_FOUND: {
+    code: '40',
+    message: 'Transaction Not Found'
+  },
+  TCASH_ERROR_TRANSACTION_NOT_VALID: {
+    code: '41',
+    message: 'Transaction Not Valid'
+  },
+  TCASH_ERROR_INTERNAL: {
+    code: '10',
+    message: 'System Error'
+  }
+}
+
+module.exports.tcashTrxType = {
+  TCASH_INQUIRY: '021',
+  TCASH_PAY: '022'
+}
+
+module.exports.tcashInquiryResponse = (
+  tcashMerchantName,
+  transactionId,
+  amount,
+  tcashMessageCode = exports.tcashMessageCode.TCASH_INQUIRY_SUCCESS
+) => {
+  return `${tcashMessageCode.code}:${tcashMerchantName}:${amount}:${transactionId}:${tcashMessageCode.message}`
+}
+
+module.exports.tcashPayResponse = (
+  tcashTransactionId,
+  transactionId,
+  tcashMessageCode = exports.tcashMessageCode.TCASH_PAY_SUCCESS
+) => {
+  return `${tcashMessageCode.code}:${tcashTransactionId}:${transactionId}:${tcashMessageCode.message}`
+}
+
+module.exports.tcashErrorResponse = (
+  tcashMessageCode = exports.tcashMessageCode.TCASH_ERROR_INTERNAL
+) => {
+  return `${tcashMessageCode.code}:${tcashMessageCode.message}`
+}
+
+module.exports.mixConfig = (config) => {
+  return Object.assign({}, exports.baseConfig, config)
+}
+
+module.exports.createQrCode = (config) => {
+  let mixedConfig = exports.mixConfig(config)
+  return `TWALLET|O|${mixedConfig.username}|${mixedConfig.transactionId}`
+}

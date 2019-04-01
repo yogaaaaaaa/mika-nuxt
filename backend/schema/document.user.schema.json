@@ -21,14 +21,10 @@
         "type": {
           "$ref": "definitions.schema.json#/definitions/userType"
         },
-        "parentUserId": {
-          "type": "string",
-          "description": "User UID that are parent for this user"
-        },
-        "methods": {
+        "providers": {
           "type": "array",
           "items": {
-            "$ref": "definitions.schema.json#/definitions/paymentMethod"
+            "$ref": "definitions.schema.json#/definitions/paymentProvider"
           }
         },
         "location": {
@@ -40,10 +36,10 @@
             "type": "string"
           }
         },
-        "flags": {
+        "tags": {
           "type": "array",
           "items": {
-            "$ref": "definitions.schema.json#/definitions/userFlags"
+            "$ref": "definitions.schema.json#/definitions/userTags"
           }
         },
         "details": {

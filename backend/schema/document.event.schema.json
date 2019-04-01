@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "log.schema.json",
-  "title": "Log Document 1.0",
-  "description": "Contain records of event, used by payment services",
+  "$id": "event.schema.json",
+  "title": "Event Document 1.0",
+  "description": "Contain records of event from all service in mika backend system for event sourcing",
   "type": "object",
   "allOf": [
     {
@@ -14,9 +14,13 @@
           "description": "Event type",
           "$ref": "definitions.schema.json#/definitions/eventType"
         },
-        "traceId": {
+        "service": {
           "type": "string",
-          "description": "Trace UID is used to group several log document and called by saga orchestrator. For example, trace id is generated when payment saga is started, consisting of several event (create payment, check fraud, external webhook, etc)"
+          "description": "service where event generated from"
+        },
+        "contextId": {
+          "type": "string",
+          "description": "Context UID is used to group several log document and assigned by saga orchestrator. For example, trace id is generated when payment saga is started, consisting of several event (create payment, check fraud, external webhook, etc)"
         },
         "docIds": {
           "type": "array",
@@ -33,6 +37,7 @@
           }
         },
         "content": {
+          "description": "Event data, can be anything",
           "anyOf": [
             {
               "type": "string"

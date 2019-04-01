@@ -1,0 +1,32 @@
+{
+  "apps": [
+    {
+      "name": "backend-p3",
+      "script": "app.js",
+      "watch": false,
+      "ignore_watch": [
+        "node_modules",
+        "*.log",
+        "uploads",
+        ".git",
+        "log"
+      ],
+      "env_production": {
+        "NODE_ENV": "production",
+        "exec_mode": "cluster",
+        "instances": 2
+      },
+      "env_development": {
+        "NODE_ENV": "development",
+        "exec_mode": "fork",
+        "instances": 4,
+        "watch": true
+      },
+      "env_local": {
+        "NODE_ENV": "local",
+        "exec_mode": "fork",
+        "instances": 2
+      }
+    }
+  ]
+}

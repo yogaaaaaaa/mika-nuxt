@@ -30,9 +30,9 @@
         "currency": {
           "$ref": "definitions.schema.json#/definitions/currencyISO"
         },
-        "method": {
-          "description": "Payment method used",
-          "$ref": "definitions.schema.json#/definitions/paymentMethod"
+        "provider": {
+          "description": "Payment provider used",
+          "$ref": "definitions.schema.json#/definitions/paymentProvider"
         },
         "location": {
           "$ref": "definitions.schema.json#/definitions/location"
@@ -42,13 +42,13 @@
         },
         "data": {
           "type": "array",
-          "description": "Contain array of object containing data dependent to Payment Method",
+          "description": "Contain array of object containing data dependent to Payment Provider",
           "items": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string",
-                "description": "Technical name of data, used by payment method services and/or payment provider"
+                "description": "Technical name of data"
               },
               "note": {
                 "type": "string",
@@ -66,14 +66,14 @@
                 "type": "string",
                 "description": "Content of data itself"
               },
-              "flags": {
-                "$ref": "definitions.schema.json#/definitions/dataFlags"
+              "tags": {
+                "$ref": "definitions.schema.json#/definitions/dataTags"
               }
             },
             "required": [
               "name",
               "dataName",
-              "flags",
+              "tags",
               "note"
             ]
           }
@@ -84,7 +84,7 @@
         "configId",
         "terminalId",
         "amount",
-        "method",
+        "provider",
         "location",
         "currency",
         "data"

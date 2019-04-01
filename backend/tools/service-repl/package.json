@@ -1,0 +1,18 @@
+{
+  "name": "service-repl",
+  "version": "1.0.0",
+  "description": "Moleculer REPL to mika backend system",
+  "main": "index.js",
+  "scripts": {
+    "repldev": "NODE_ENV=development node index.js",
+    "repl": "NODE_ENV=production node index.js"
+  },
+  "author": "Andra Bramanta (andra@getmika.id)",
+  "license": "ISC",
+  "dependencies": {
+    "moleculer": "^0.13.7",
+    "moleculer-repl": "^0.5.6",
+    "mqtt": "^2.18.8",
+    "nats": "^1.2.2"
+  }
+}

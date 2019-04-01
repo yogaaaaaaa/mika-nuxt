@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "paymentConfig.schema.json",
   "title": "Payment Config Document 1.0",
-  "description": "Document containing payment method and its configuration",
+  "description": "Document containing configuration used by payment provider",
   "type": "object",
   "allOf": [
     {
@@ -10,9 +10,9 @@
     },
     {
       "properties": {
-        "method": {
-          "description": "Payment method which this config intended to use for",
-          "$ref": "definitions.schema.json#/definitions/paymentMethod"
+        "provider": {
+          "description": "Payment provider which this config intended to use for",
+          "$ref": "definitions.schema.json#/definitions/paymentProvider"
         },
         "content": {
           "type": "object",
@@ -20,7 +20,7 @@
         }
       },
       "required": [
-        "method",
+        "provider",
         "content"
       ]
     }

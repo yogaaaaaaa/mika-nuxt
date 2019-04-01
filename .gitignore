@@ -81,3 +81,9 @@ captures
 .idea
 .vscode
 .nuxt
+
+# development specific
+.archive
+.scratchpad
+.test
+*Config_extra.js

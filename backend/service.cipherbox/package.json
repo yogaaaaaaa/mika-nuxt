@@ -1,0 +1,30 @@
+{
+  "name": "service.cipherbox",
+  "version": "1.0.0",
+  "description": "Moleculer.js service providing cipherbox infrastructure to transparently encrypt and decrypt message on mika backend",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development node .",
+    "test_integration": "mocha --reporter list ./test/integration/*.js"
+  },
+  "author": "Andra Bramanta (andra@getmika.id)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "ioredis": "^4.6.2",
+    "moleculer": "^0.13.7",
+    "mongodb": "^3.1.13",
+    "mqtt": "^2.18.8",
+    "nats": "^1.2.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2",
+    "sinon": "^7.2.7",
+    "standard": "^12.0.1"
+  }
+}

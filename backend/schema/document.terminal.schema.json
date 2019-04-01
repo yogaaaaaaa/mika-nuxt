@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "terminal.schema.json",
+  "title": "Terminal Document 1.0",
+  "description": "Document containing data of physical payment terminal",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "definitions.schema.json#/definitions/documentStandard"
+    },
+    {
+      "properties": {
+        "type":{
+          "type":"string",
+          "description": "Terminal Type"
+        },
+        "identifier":{
+          "type":"object",
+          "properties": {
+            "type":{
+              "type":"string",
+              "description": "Terminal identifier type, such as IMEI"
+            },
+            "id":{
+              "type":"string",
+              "description": "Identifier Value"
+            }
+          }
+        },
+        "purchase":{
+
+        }
+      },
+      "required": [
+        "method",
+        "content"
+      ]
+    }
+  ]
+}

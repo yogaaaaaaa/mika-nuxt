@@ -78,9 +78,9 @@
           "type": "string",
           "description": "Optional note for this document, intended for development and maintenance"
         },
-        "docFlags": {
+        "docTags": {
           "type": "array",
-          "description": "Optional flags describing this document",
+          "description": "Optional tags describing this document",
           "items": {
             "type": "string",
             "enum": [
@@ -97,9 +97,9 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time",
-          "description": "Document last update time. Updated on document every revision"
+          "description": "Document last update time."
         },
-        "friendlyId": {
+        "aliasId": {
           "type": "string",
           "description": "Friendly Identifier of document, dependent of document type"
         },
@@ -112,7 +112,6 @@
         "id",
         "doc",
         "docState",
-        "docRev",
         "createdAt"
       ]
     },
@@ -125,11 +124,11 @@
         "resources",
         "config.payment",
         "auth",
-        "key",
-        "log"
+        "cbkey",
+        "event"
       ]
     },
-    "paymentMethod": {
+    "paymentProvider": {
       "type": "string",
       "enum": [
         "telkomsel.tcash",
@@ -138,7 +137,7 @@
         "alto.alipay",
         "fairpay.bni.debit",
         "fairpay.bni.credit",
-        "dam.mandiri.ecash"
+        "link.linkaja"
       ]
     },
     "paymentStatus": {
@@ -149,7 +148,7 @@
         "CREATED",
         "SUCCESS",
         "FAILED",
-        "ERROR"
+        "INVALID"
       ]
     },
     "currencyISO": {
@@ -166,8 +165,8 @@
       "type": "string",
       "description": "Language Codes of ISO 639",
       "enum": [
-        "id",
-        "us"
+        "ID",
+        "US"
       ]
     },
     "location": {
@@ -181,8 +180,8 @@
         }
       }
     },
-    "dataFlags": {
-      "description": "Flags describing data (mostly used in Payment Document)",
+    "dataTags": {
+      "description": "Tags describing data (mostly used in Payment Document)",
       "type": "string",
       "enum": [
         "USER_TOKEN",
@@ -202,17 +201,17 @@
         "UNKNOWN"
       ]
     },
-    "userType": {
-      "description": "User type enumeration",
+    "userRoles": {
+      "description": "User roles",
       "type": "string",
       "enum": [
         "ADMIN",
-        "MERCHANT",
-        "AGENT"
+        "FIELD_ENGINEER",
+        "FINANCE"
       ]
     },
-    "userFlags": {
-      "description": "User flags, describing capability and user information",
+    "userTags": {
+      "description": "User tags, describing capability and user information",
       "type": "string",
       "enum": [
         "MAKE_PAYMENT",
@@ -221,20 +220,21 @@
       ]
     },
     "eventType": {
-      "description": "Log type enumeration",
+      "description": "Event type enumeration",
       "type": "string",
       "enum": [
-        "PAYMENT_CREATE",
-        "PAYMENT_UPDATE",
-        "PAYMENT_SUCCESS",
-        "PAYMENT_FAILED",
-        "PAYMENT_EXTERNAL_API_CALL",
-        "PAYMENT_EXTERNAL_API_RESPONSE",
-        "USER_CREATE",
-        "USER_UPDATE",
-        "USER_REMOVE",
-        "API_CALL",
-        "API_RESPONSE"
+        "event.payment.created",
+        "event.payment.succeed",
+        "event.payment.failed",
+        "event.payment.invalided",
+        "event.payment.saga.paymentStarted",
+        "event.payment.saga.paymentEnded",
+        "event.payment.provider.telkomsel.tcash.inquiryCalled",
+        "event.payment.provider.telkomsel.tcash.payCalled",
+        "event.gateway.public.httpCalled",
+        "event.cipherbox.keyCreated",
+        "event.cipherbox.boxSealed",
+        "event.cipherbox.boxUnsealed"
       ]
     }
   }
