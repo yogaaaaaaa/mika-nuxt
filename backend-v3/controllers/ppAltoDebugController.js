@@ -1,6 +1,6 @@
 'use strict'
 
-const alto = require('../helpers/pgAlto')
+const alto = require('../helpers/ppAlto')
 
 module.exports.queryTransaction = async (req, res, next) => {
   let response = {}

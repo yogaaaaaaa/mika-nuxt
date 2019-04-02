@@ -1,7 +1,7 @@
 'use strict'
 
-const tcash = require('../helpers/pgTcash')
-const transactionManager = require('../helpers/transactionManager')
+const tcash = require('../helpers/ppTcash')
+const transactionManager = require('../helpers/trxManager')
 
 module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
   try {

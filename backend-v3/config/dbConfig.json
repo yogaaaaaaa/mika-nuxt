@@ -2,7 +2,7 @@
   "local": {
     "username": "root",
     "password": "",
-    "database": "mika_v2",
+    "database": "mika_v3_local",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "timezone": "+07:00",
@@ -18,9 +18,9 @@
     "freezeTableName": "true"
   },
   "production": {
-    "username": "root",
-    "password": "mavenmobile",
-    "database": "mika_v3",
+    "username": "",
+    "password": "",
+    "database": "",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "timezone": "+07:00",

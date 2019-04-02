@@ -1,7 +1,7 @@
 'use strict'
 
-const midtrans = require('../helpers/pgMidtrans')
-const transactionManager = require('../helpers/transactionManager')
+const midtrans = require('../helpers/ppMidtrans')
+const transactionManager = require('../helpers/trxManager')
 
 module.exports.midtransHandleNotification = async function (req, res, next) {
   try {

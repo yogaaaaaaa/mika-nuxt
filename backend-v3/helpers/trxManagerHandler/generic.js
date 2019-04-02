@@ -5,8 +5,8 @@
  * Provided as example and template
 */
 
-module.exports = (transactionManager) => {
-  transactionManager.pgHandlers.push({
+module.exports = (trxManager) => {
+  trxManager.ppHandlers.push({
     // Name to use this handler
     name: 'generic',
 
@@ -16,7 +16,7 @@ module.exports = (transactionManager) => {
 
     // properties contain comma delimited list that define various things like
     // what kind of token this Payment gateway wants or generate
-    properties: 'provideToken,tokenQrCodeContent',
+    properties: ['provideToken', 'tokenQrCodeContent'],
 
     // This handler will be called BEFORE transaction data is created in database
     // Use this for checking of required parameter for this payment gateway
@@ -28,7 +28,7 @@ module.exports = (transactionManager) => {
     // Expected to fill config.transactionToken (or none if this PG does not provide one)
     // return true or error object ( {error: ERROR_CODE} ) if something goes wrong
     async handler (config) {
-      config.tokenType = transactionManager.tokenType.TOKEN_QRCODE_CONTENT
+      config.tokenType = trxManager.tokenType.TOKEN_QRCODE_CONTENT
       config.token = 'QRCODE-GENERIC'
     },
 

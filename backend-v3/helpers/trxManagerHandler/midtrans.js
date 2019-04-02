@@ -6,8 +6,8 @@
 
 const midtrans = require('../ppMidtrans')
 
-module.exports = (transactionManager) => {
-  transactionManager.pgHandlers.push({
+module.exports = (trxManager) => {
+  trxManager.ppHandlers.push({
     name: 'midtrans',
     alias: ['gopay'],
     properties: 'provideToken,tokenQrCodeUrlImage',
@@ -23,17 +23,16 @@ module.exports = (transactionManager) => {
 
       for (let action of response.actions) {
         if (action.name === 'generate-qr-code') {
-          config.transactionToken = {
-            type: transactionManager.tokenType.TOKEN_QRCODE_URL_IMAGE,
-            token: action.url
-          }
+          config.token = action.url
+          config.tokenType = trxManager.tokenType.TOKEN_QRCODE_URL_IMAGE
           break
         }
       }
 
       config.transactionDataUpdated = {
         reference_number: response.transactionId,
-        midtrans_qrcode: config.transactionToken.token
+        token: config.token,
+        tokenType: config.tokenType
       }
     },
     async timeoutHandler (config) {
@@ -51,7 +50,7 @@ module.exports = (transactionManager) => {
       ) {
         if (config.midtransResponse.transaction_status === 'settlement') {
           config.transactionDataUpdated = {
-            transaction_status_id: transactionManager.transactionStatus.SUCCESS.id
+            transaction_status_id: trxManager.transactionStatus.SUCCESS.id
           }
         }
       }
@@ -61,7 +60,7 @@ module.exports = (transactionManager) => {
         return
       }
 
-      if (config.transactionDataUpdated.transaction_status_id === transactionManager.transactionStatus.FAILED.id) {
+      if (config.transactionDataUpdated.transaction_status_id === trxManager.transactionStatus.FAILED.id) {
         await midtrans.expireTransaction({
           order_id: config.transactionData.id
         })

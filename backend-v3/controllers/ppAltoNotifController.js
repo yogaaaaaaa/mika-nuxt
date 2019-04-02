@@ -1,7 +1,7 @@
 'use strict'
 
-const alto = require('../helpers/pgAlto')
-const transactionManager = require('../helpers/transactionManager')
+const alto = require('../helpers/ppAlto')
+const transactionManager = require('../helpers/trxManager')
 
 /**
  * Handle request of Alto pay and  notification
