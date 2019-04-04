@@ -180,7 +180,7 @@ module.exports.checkAuth = async (sessionToken) => {
  * Remove auth by user id
  */
 module.exports.removeAuth = async (userId) => {
-  await exports.deleteSessionToken(userId)
+  return exports.deleteSessionToken(userId)
 }
 
 /**
@@ -196,14 +196,16 @@ module.exports.resetAuth = async (userId, password, oldPassword = null) => {
   if (user) {
     if (oldPassword) {
       if (!hash.compareBcryptHash(user.password, oldPassword)) {
-        return null
+        return false
       }
+
+      let updated = await models.user.update({
+        password: await hash.bcryptHash(password)
+      }, {
+        where: { id: userId }
+      })
       if (
-        await models.agent.update({
-          password: hash.bcryptHash(password)
-        }, {
-          where: { id: userId }
-        })
+        updated
       ) {
         await exports.removeAuth(userId)
         return true

@@ -19,6 +19,7 @@ const transactionController = require('../controllers/transactionController')
 const paymentProviderController = require('../controllers/paymentProviderController')
 const authController = require('../controllers/authController')
 
+const cipherboxMiddleware = require('../middleware/cipherboxMiddleware')
 const authMiddleware = require('../middleware/authMiddleware')
 const errorMiddleware = require('../middleware/errorMiddleware')
 const queryMiddleware = require('../middleware/queryMiddleware')
@@ -39,6 +40,7 @@ router.use([
  * Auth Routes
  */
 router.post('/auth/login',
+  cipherboxMiddleware.cipherbox,
   body('username').exists(),
   body('password').exists(),
   errorMiddleware.validatorErrorHandler,
@@ -112,6 +114,7 @@ router.get([ '/agent/transactions', '/agent/transactions/:id' ],
 router.post('/agent/transaction',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
+  cipherboxMiddleware.cipherbox,
   body('amount').exists(),
   body('paymentProviderId').exists(),
   body('userToken').optional({ default: null }),

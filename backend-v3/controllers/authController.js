@@ -80,7 +80,7 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
  * Change password based on current `req.auth`
  */
 module.exports.changePassword = async (req, res, next) => {
-  if (auth.resetAuth(req.auth.userId, req.body.password, req.body.oldPassword)) {
+  if (await auth.resetAuth(req.auth.userId, req.body.password, req.body.oldPassword)) {
     msgFactory.expressCreateResponseMessage(
       res,
       msgFactory.messageTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
