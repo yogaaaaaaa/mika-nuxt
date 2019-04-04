@@ -6,7 +6,7 @@ let baseConfig = {
   /**
   * Enumeration of transaction status in mika system
   */
-  transactionStatus: {
+  transactionStatuses: {
     SUCCESS: 'success',
     FAILED: 'failed',
     VOIDED: 'voided',
@@ -19,7 +19,7 @@ let baseConfig = {
   /**
   * Enumeration of settlement status in mika backend
   */
-  transactionSettlementStatus: {
+  transactionSettlementStatuses: {
     UNSETTLED: 'unsettled',
     SETTLED_IN: 'settledIn',
     SETTLED: 'settled',
@@ -30,7 +30,7 @@ let baseConfig = {
   * Enumeration of transaction event, mainly used in notification
   * (Public API and notification)
   */
-  transactionEvent: {
+  transactionEvents: {
     CREATED: 'transactionCreated',
     CREATED_WITH_DATA: 'transactionCreatedWithData',
     SUCCESS: 'transactionSuccess',
@@ -44,7 +44,7 @@ let baseConfig = {
   /**
   * Merchant presented/payment provider generated type of token
   */
-  tokenType: {
+  tokenTypes: {
     TOKEN_QRCODE_CONTENT: 'tokenQrCodeContent',
     TOKEN_QRCODE_URL_IMAGE: 'tokenQrCodeUrlImage'
   },
@@ -52,7 +52,7 @@ let baseConfig = {
   /**
   * User presented/user generated type of token
   */
-  userTokenType: {
+  userTokenTypes: {
     USER_TOKEN_QRCODE_CONTENT: 'userTokenQrCodeContent',
     USER_TOKEN_URL_IMAGE: 'userTokenQrCodeUrlImage',
     USER_TOKEN_PIN: 'userTokenPIN',
@@ -62,7 +62,7 @@ let baseConfig = {
   /**
   * Definition of payment flow accepted by payment provider
   */
-  transactionFlow: {
+  transactionFlows: {
     PROVIDE_TOKEN: 'flowProvideToken',
     GET_TOKEN: 'flowGetToken',
     GATEWAY: 'flowGateway'
@@ -71,7 +71,7 @@ let baseConfig = {
   /**
   * Definition of extra flags
   */
-  transactionFlag: {
+  transactionFlags: {
     NO_AMOUNT_CHECK: 'flagsNoAmountCheck'
   },
 
@@ -79,7 +79,7 @@ let baseConfig = {
   * Shared error code used in trxManager function and
   * payment provider handler
   */
-  errorCode: {
+  errorCodes: {
     AMOUNT_TOO_LOW: 'amountATooLow',
     AMOUNT_TOO_HIGH: 'amountATooHigh',
     PAYMENT_PROVIDER_NOT_FOR_YOU: 'invalidPaymentProvider',

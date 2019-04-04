@@ -1,6 +1,6 @@
 'use strict'
 
-const configName = 'pgAltoConfig'
+const configName = 'ppAltoConfig'
 
 const appConfig = require('./appConfig')
 

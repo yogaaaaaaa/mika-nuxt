@@ -2,7 +2,7 @@
 
 const apiObjectFactory = require('../helpers/extApiObjectFactory')
 const apiMsgFactory = require('../helpers/msgFactory')
-const transactionManager = require('../helpers/transactionManager')
+const trxManager = require('../helpers/trxManager')
 const apiTransactionCallback = require('../helpers/extApiTransactionCallback')
 
 module.exports.getRoot = async (req, res, next) => {
@@ -96,10 +96,10 @@ module.exports.getAgentsById = async (req, res, next) => {
 }
 
 module.exports.postTransaction = async (req, res, next) => {
-  let createdTransaction = await transactionManager.createTransaction(req.body.agentId, req.body.paymentGatewayId, req.body.amount)
+  let createdTransaction = await trxManager.createTransaction(req.body.agentId, req.body.paymentGatewayId, req.body.amount)
 
   if (createdTransaction.error) {
-    if (createdTransaction.error === transactionManager.errorCode.AMOUNT_TOO_LOW) {
+    if (createdTransaction.error === trxManager.errorCode.AMOUNT_TOO_LOW) {
       res.status(apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_LOW.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
           apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_LOW
@@ -108,7 +108,7 @@ module.exports.postTransaction = async (req, res, next) => {
       return
     }
 
-    if (createdTransaction.error === transactionManager.errorCode.AMOUNT_TOO_HIGH) {
+    if (createdTransaction.error === trxManager.errorCode.AMOUNT_TOO_HIGH) {
       res.status(apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_HIGH.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
           apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_HIGH
@@ -117,7 +117,7 @@ module.exports.postTransaction = async (req, res, next) => {
       return
     }
 
-    if (createdTransaction.error === transactionManager.errorCode.PAYMENT_GATEWAY_NOT_FOR_YOU) {
+    if (createdTransaction.error === trxManager.errorCode.PAYMENT_GATEWAY_NOT_FOR_YOU) {
       res.status(apiMsgFactory.messageTypes.MSG_ERROR_PG_NOT_FOR_YOU.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
           apiMsgFactory.messageTypes.MSG_ERROR_PG_NOT_FOR_YOU
@@ -150,7 +150,7 @@ module.exports.postTransaction = async (req, res, next) => {
 
 module.exports.debugSetTransactionStatus = async (req, res, next) => {
   if (req.params.transactionId && req.params.transactionStatus) {
-    if (await transactionManager.forceTransactionStatus(req.params.transactionId, req.params.transactionStatus)) {
+    if (await trxManager.forceTransactionStatus(req.params.transactionId, req.params.transactionStatus)) {
       res.status(apiMsgFactory.messageTypes.MSG_OPS_SUCCESS_GENERIC.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
           apiMsgFactory.messageTypes.MSG_OPS_SUCCESS_GENERIC

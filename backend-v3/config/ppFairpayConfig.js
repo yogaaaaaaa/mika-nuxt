@@ -1,6 +1,6 @@
 'use strict'
 
-const configName = 'fairPGConfig'
+const configName = 'ppFairpayConfig'
 
 const appConfig = require('./appConfig')
 

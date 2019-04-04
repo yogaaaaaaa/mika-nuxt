@@ -1,18 +1,18 @@
 'use strict'
 
-const configName = 'intApiAuth'
+const configName = 'authConfig'
 
-const appConfig = require('../config/appConfig')
+const appConfig = require('./appConfig')
 
 /**
  * Default Internal API auth Config
  * config for internal API authentication
  */
 let baseConfig = {
-  redisPrefix: `${appConfig.name}-intApiAuth`,
+  redisPrefix: `${appConfig.name}-auth`,
   authExpiry: 21600 || process.env.MIKA_API_AUTH_EXPIRY, // in seconds
   bcryptSaltRound: 10,
-  secretKey: 'mika_secret_key' || process.env.MIKA_API_AUTH_SECRET_KEY, // in seconds
+  secretKey: 'mika_secret_key' || process.env.MIKA_API_AUTH_SECRET_KEY // in seconds
 }
 
 /**

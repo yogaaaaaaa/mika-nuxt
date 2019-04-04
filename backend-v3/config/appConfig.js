@@ -10,6 +10,7 @@ let baseConfig = {
   name: process.env.MIKA_APP_NAME || (process.env.NODE_ENV === 'development' ? 'mika-v3-dev' : 'mika-v3'),
   baseUrl: process.env.MIKA_APP_BASE_URL || (process.env.NODE_ENV === 'development' ? 'https://stg12api.mikaapp.id' : 'https://api.mikaapp.id'),
   debugHeader: 'x-mika-debug',
+  sessionTokenHeader: 'x-access-token',
   debugKey: process.env.MIKA_APP_DEBUG_KEY || 'debug_mika',
   listenPort: process.env.MIKA_APP_PORT || 12000,
   appPrefixPath: process.env.MIKA_API_PREFIX_PATH || '/'

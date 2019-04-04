@@ -7,9 +7,6 @@ module.exports = (sequelize, DataTypes) => {
 
     companyForm: DataTypes.STRING,
 
-    locationLong: DataTypes.STRING,
-    locationLat: DataTypes.STRING,
-
     email: DataTypes.STRING,
     website: DataTypes.STRING,
     streetAddress: DataTypes.STRING,

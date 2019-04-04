@@ -1,15 +1,15 @@
 'use strict'
 
 const midtrans = require('../helpers/ppMidtrans')
-const transactionManager = require('../helpers/trxManager')
+const trxManager = require('../helpers/trxManager')
 
 module.exports.midtransHandleNotification = async function (req, res, next) {
   try {
     // let config = midtrans.baseConfig
 
-    const transactionData = await transactionManager.getTransactionData(req.body.order_id)
+    const transaction = await trxManager.getTransaction(req.body.order_id)
 
-    if (!transactionData) {
+    if (!transaction) {
       res.status(404).type('text').send('TRANSACTION NOT FOUND')
       return
     }
@@ -19,7 +19,7 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
      * Midtrans is using decimal (real number) in string format to represent gross_amount
      * and MIKA system is using integer
      */
-    if (parseInt(transactionData.amount) !== parseInt(req.body.gross_amount)) {
+    if (parseInt(transaction.amount) !== parseInt(req.body.gross_amount)) {
       res.status(404).type('text').send('TRANSACTION NOT FOUND')
       return
     }
@@ -32,12 +32,13 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
       })
     ) {
       if (req.body.payment_type === 'gopay') {
-        if (transactionData.transaction_status_id === transactionManager.transactionStatus.INQUIRY.id) {
+        if (transaction.transactionStatus === trxManager.transactionStatuses.INQUIRY.id) {
           if (req.body.transaction_status === 'settlement') {
-            transactionManager.updateTransactionData({
-              transaction_status_id: transactionManager.transactionStatus.SUCCESS.id
-            }, transactionData.id)
-            transactionManager.emitTransactionEvent(transactionManager.transactionEvent.SUCCESS, transactionData.id)
+            trxManager.updateTransaction({
+              transactionStatus: trxManager.transactionStatuses.SUCCESS
+            }, transaction.id)
+
+            trxManager.emitTransactionEvent(trxManager.transactionEvents.SUCCESS, transaction.id)
           }
         }
       }

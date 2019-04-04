@@ -17,7 +17,8 @@ let baseConfig = {
   cleanSession: false,
   keepalive: 60,
   qosDefault: 1,
-  passwordHashIter: 100
+  passwordHashIter: 100,
+  waitConnectTimeout: 30 // in seconds
 }
 
 baseConfig.clientId = process.env.MIKA_MQTT_CLIENT_ID || `${appConfig.name}-${baseConfig.superuserName}`

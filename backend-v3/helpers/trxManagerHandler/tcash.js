@@ -9,13 +9,16 @@ const tcash = require('../ppTcash')
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'tcash',
-    alias: ['linkaja', 'tcash'],
-    properties: 'provideToken,tokenQrCodeContent',
+    aliases: ['linkaja', 'tcash'],
+    properties: [
+      trxManager.transactionFlows.PROVIDE_TOKEN,
+      trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
+    ],
     async handler (config) {
-      config.tokenType = trxManager.tokenType.TOKEN_QRCODE_CONTENT
-      config.token = tcash.createQrCode({ transactionId: config.transactionData.id })
+      config.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
+      config.token = tcash.createQrCode({ transactionId: config.transaction.id })
 
-      config.transactionDataUpdated = {
+      config.updatedTransaction = {
         tokenType: config.tokenType,
         token: config.token
       }

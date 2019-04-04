@@ -1,13 +1,13 @@
 'use strict'
 
 const tcash = require('../helpers/ppTcash')
-const transactionManager = require('../helpers/trxManager')
+const trxManager = require('../helpers/trxManager')
 
 module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
   try {
-    const transactionData = await transactionManager.getTransactionData(req.body.acc_no)
+    const transaction = await trxManager.getTransaction(req.body.acc_no)
 
-    if (!transactionData) {
+    if (!transaction) {
       res.status(400)
         .send(tcash.tcashErrorResponse(
           tcash.tcashMessageCode.TCASH_ERROR_TRANSACTION_NOT_FOUND)
@@ -16,15 +16,15 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
     }
 
     let config = {
-      tcashTerminalName: transactionData.payment_gateway.terminal_username,
-      tcashTerminalPassword: transactionData.payment_gateway.terminal_password
+      tcashTerminalName: transaction.paymentProvider.paymentProviderConfig.config.username,
+      tcashTerminalPassword: transaction.paymentProvider.paymentProviderConfig.config.username
     }
 
     if (
       (req.body.terminal.toLowerCase() === config.tcashTerminalName.toLowerCase()) &&
       (req.body.pwd.toLowerCase() === config.tcashTerminalPassword.toLowerCase())
     ) {
-      if (transactionData.transaction_status_id !== transactionManager.transactionStatus.INQUIRY.id) {
+      if (transaction.transactionStatus !== trxManager.transactionStatuses.INQUIRY) {
         res.status(400)
           .send(tcash.tcashErrorResponse(
             tcash.tcashMessageCode.TCASH_ERROR_TRANSACTION_NOT_VALID)
@@ -35,26 +35,28 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       if (req.body.trx_type === tcash.tcashTrxType.TCASH_INQUIRY) {
         res.status(200).send(tcash.tcashInquiryResponse(
           req.body.merchant,
-          transactionData.id,
-          transactionData.amount))
+          transaction.id,
+          transaction.amount))
         return
       } else if (req.body.trx_type === tcash.tcashTrxType.TCASH_PAY) {
-        const transactionUpdate = await transactionManager.updateTransactionData({
-          customer: req.body.msisdn,
-          reference_number: req.body.trx_id,
-          transaction_status_id: transactionManager.transactionStatus.SUCCESS.id
+        const updatedTransaction = await trxManager.updateTransaction({
+          customerReference: req.body.msisdn,
+          customerReferenceType: 'msisdn',
+          referenceNumber: req.body.trx_id,
+          referenceNumberType: 'trx_id',
+          transactionStatus: trxManager.transactionStatuses.SUCCESS
         },
-        transactionData.id)
+        transaction.id)
 
-        if (transactionUpdate) {
-          transactionManager.emitTransactionEvent(
-            transactionManager.transactionEvent.SUCCESS,
-            transactionData.id
+        if (updatedTransaction) {
+          trxManager.emitTransactionEvent(
+            trxManager.transactionEvents.SUCCESS,
+            transaction.id
           )
 
           res.status(200).send(tcash.tcashPayResponse(
             req.body.trx_id,
-            transactionData.id))
+            transaction.id))
 
           return
         }

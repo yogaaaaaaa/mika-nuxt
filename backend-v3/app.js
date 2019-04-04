@@ -6,6 +6,8 @@ console.log('Running NODE_ENV', process.env.NODE_ENV)
 const express = require('express')
 require('express-async-errors')
 
+const ready = require('./helpers/ready')
+
 const path = require('path')
 const logger = require('morgan')
 
@@ -30,15 +32,15 @@ app.set('view engine', 'hbs')
 /**
  * Notification route for payment gateway
  */
-// app.use(require('./routes/notifTcash'))
-// app.use(require('./routes/notifAlto'))
-// app.use(require('./routes/notifMidtrans'))
+app.use(require('./routes/notifTcash'))
+app.use(require('./routes/notifAlto'))
+app.use(require('./routes/notifMidtrans'))
 
 /**
  * Home page
  */
 app.get('/', function (req, res, next) {
-  res.render('index', { title: `Mika Backend V3 ${process.env.NODE_ENV}` })
+  res.render('index', { title: `${appConfig.name}` })
 })
 
 /**
@@ -49,7 +51,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 /**
  * Internal API
  */
-app.use(appConfig.appPrefixPath, require('./routes/intApi'))
+app.use(appConfig.appPrefixPath, require('./routes/api'))
 
 /**
  * External/Public API
@@ -86,8 +88,10 @@ app.use(function (err, req, res, next) {
 /**
  * Start listening
  */
-app.listen(appConfig.listenPort, () => {
-  console.log(`Backend V3 is running on ${appConfig.listenPort}`)
+ready.readyAllOnce(() => {
+  app.listen(appConfig.listenPort, () => {
+    console.log(`${appConfig.name} is running on port ${appConfig.listenPort}`)
+  })
 })
 
 module.exports = app

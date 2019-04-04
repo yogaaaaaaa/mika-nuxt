@@ -4,8 +4,8 @@
  * Handles MQTT based push notification
  */
 
-const transactionManager = require('./transactionManager')
-const apiMsgFactory = require('./apiMsgFactory')
+const trxManager = require('./trxManager')
+const msgFactory = require('./msgFactory')
 
 const mqtt = require('./mqtt')
 
@@ -36,16 +36,16 @@ module.exports.notifToAgent = async (agentId, message) => {
   } catch (err) {}
 }
 
-transactionManager.addListener(transactionManager.transactionEvent.SUCCESS_WITH_DATA, async (eventObject) => {
+trxManager.addListener(trxManager.transactionEvents.SUCCESS_WITH_DATA, async (eventObject) => {
   await exports.notifToAgent(
-    eventObject.transactionData.terminal.id,
-    apiMsgFactory.createNotificationMessage(apiMsgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS, eventObject.transactionData, true, false)
+    eventObject.transaction.agentId,
+    msgFactory.createNotificationMessage(msgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS, eventObject.transactionData, true, false)
   )
 })
 
-transactionManager.addListener(transactionManager.transactionEvent.FAILED_WITH_DATA, async (eventObject) => {
+trxManager.addListener(trxManager.transactionEvents.FAILED_WITH_DATA, async (eventObject) => {
   await exports.notifToAgent(
-    eventObject.transactionData.terminal.id,
-    apiMsgFactory.createNotificationMessage(apiMsgFactory.eventTypes.EVENT_TRANSACTION_FAILED, eventObject.transactionData, true, false)
+    eventObject.transaction.agentId,
+    msgFactory.createNotificationMessage(msgFactory.eventTypes.EVENT_TRANSACTION_FAILED, eventObject.transactionData, true, false)
   )
 })

@@ -8,12 +8,25 @@ const bluebird = require('bluebird')
 const redis = require('redis')
 bluebird.promisifyAll(redis)
 
+const ready = require('./ready')
+let redisClientCount = 0
+
 let config = require('../config/redisConfig')
 
 module.exports.redis = redis
 
 module.exports.defaultCreateClient = () => {
-  return redis.createClient(config)
+  let redisClient = redis.createClient(config)
+
+  let currentCount = redisClientCount
+  redisClientCount++
+
+  ready.addComponent(`redis${currentCount}`)
+  redisClient.on('connect', () => {
+    ready.ready(`redis${currentCount}`)
+  })
+
+  return redisClient
 }
 
 const redisClient = exports.defaultCreateClient()

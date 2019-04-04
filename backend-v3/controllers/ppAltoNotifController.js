@@ -1,7 +1,7 @@
 'use strict'
 
 const alto = require('../helpers/ppAlto')
-const transactionManager = require('../helpers/trxManager')
+const trxManager = require('../helpers/trxManager')
 
 /**
  * Handle request of Alto pay and  notification
@@ -14,34 +14,35 @@ module.exports.altoHandleNotification = async function (req, res, next) {
     let config = alto.baseConfig
 
     if (alto.altoVerifyContainer(config.pemAltoPublicKey, req.body)) {
-      let requestData = JSON.parse(req.body.data)
-      const transactionData = await transactionManager.getTransactionData(requestData.out_trade_no)
+      let request = JSON.parse(req.body.data)
+      const transaction = await trxManager.getTransaction(request.out_trade_no)
 
       if (
-        transactionData &&
-        config.mch_id === requestData.mch_id
+        transaction &&
+        config.mch_id === request.mch_id
       ) {
-        if (parseInt(requestData.trade_status) === 1) {
+        if (parseInt(request.trade_status) === 1) {
           if (
-            transactionData.transaction_status_id === transactionManager.transactionStatus.INQUIRY.id &&
-            parseInt(transactionData.amount) === parseInt(requestData.amount)
+            transaction.transactionStatus === trxManager.transactionStatuses.INQUIRY &&
+            parseInt(transaction.amount) === parseInt(request.amount)
           ) {
-            await transactionManager.updateTransactionData({
-              transaction_status_id: transactionManager.transactionStatus.SUCCESS.id,
-              reference_number: requestData.trade_no
-            }, requestData.out_trade_no)
+            await trxManager.updateTransaction({
+              transactionStatus: trxManager.transactionStatuses.SUCCESS,
+              referenceNumber: request.trade_no,
+              referenceNumberType: 'trade_no'
+            }, request.out_trade_no)
 
-            transactionManager.emitTransactionEvent(transactionManager.transactionEvent.SUCCESS, transactionData.id)
+            trxManager.emitTransactionEvent(trxManager.transactionEvents.SUCCESS, transaction.id)
 
             res.type('text').send('SUCCESS')
             return
-          } else if (transactionData.transaction_status_id === transactionManager.transactionStatus.FAILED.id) {
+          } else if (transaction.transactionStatus === trxManager.transactionStatuses.FAILED) {
             // Invalid transaction, we need to refund
             let altoRefundResponse = await alto.altoRefundPayment(Object.assign({}, config, {
-              out_trade_no: requestData.out_trade_no,
-              out_refund_no: `ref${requestData.out_trade_no}`,
-              refund_amount: parseInt(requestData.amount),
-              amount: parseInt(requestData.amount)
+              out_trade_no: request.out_trade_no,
+              out_refund_no: `ref${request.out_trade_no}`,
+              refund_amount: parseInt(request.amount),
+              amount: parseInt(request.amount)
             }))
 
             if (parseInt(altoRefundResponse.result) === 0) {
@@ -49,12 +50,18 @@ module.exports.altoHandleNotification = async function (req, res, next) {
               return
             }
           }
-        } else if (requestData.refund_status) {
+        } else if (request.refund_status) {
           // TODO: What to handle when refund is failed, try refunding ?
           // Possible solution is to try refunding with different id
-          await transactionManager.updateTransactionData({
-            reference_number: requestData.out_refund_no
-          }, requestData.out_trade_no)
+          await trxManager.updateTransaction({
+            extra: [
+              {
+                name: 'Refund Number',
+                type: 'out_refund_no',
+                value: request.out_refund_no
+              }
+            ]
+          }, request.out_trade_no)
 
           res.type('text').send('SUCCESS')
           return

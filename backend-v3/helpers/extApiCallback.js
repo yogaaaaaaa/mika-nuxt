@@ -2,7 +2,7 @@
 
 /**
  * This module provide webhook/callback and its retry
- * for Public API
+ * for Public/External API
  */
 
 const apiKeyAuth = require('./extApiKeyAuth')

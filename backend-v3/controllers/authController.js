@@ -1,15 +1,18 @@
 'use strict'
 
 const msgFactory = require('../helpers/msgFactory')
-const intApiAuth = require('../helpers/intApiAuth')
+const auth = require('../helpers/auth')
 
 const notif = require('../helpers/notif')
 
+/**
+ * Auth controller
+ */
 module.exports.auth = async (req, res, next) => {
   let options = {}
 
-  if (req.body.userRole) {
-    options.userRole = req.body.userRole
+  if (req.body.userTypes) {
+    options.userTypes = req.body.userTypes
   }
 
   // Supply bounded terminalId from cipherbox middleware
@@ -17,7 +20,7 @@ module.exports.auth = async (req, res, next) => {
     options.terminalId = req.body.cipherbox.terminalId
   }
 
-  let authResult = await intApiAuth.doAuth(req.body.username, req.body.password, options)
+  let authResult = await auth.doAuth(req.body.username, req.body.password, options)
 
   if (authResult) {
     let response = Object.assign({

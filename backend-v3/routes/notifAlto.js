@@ -1,19 +1,19 @@
 'use strict'
 
 /**
- * Route to handle alto payment gateway notification
+ * Route to handle alto payment provider notification
  */
 
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const altoNotifController = require('../controllers/pgAltoNotifController')
+const ppAltoNotifController = require('../controllers/ppAltoNotifController')
 
-const altoPGConfig = require('../config/altoPGConfig')
+const ppAltoConfig = require('../config/ppAltoConfig')
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
 
-router.post(altoPGConfig.notifyEndpoint, altoNotifController.altoHandleNotification)
+router.post(ppAltoConfig.notifyEndpoint, ppAltoNotifController.altoHandleNotification)
 
 module.exports = router

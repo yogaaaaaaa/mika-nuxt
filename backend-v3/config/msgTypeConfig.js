@@ -4,17 +4,15 @@
  * Contain all message type used in mika-api, there are http status code (httpStatus)
  * and message status code (status) that exclusive to mika-api.
  *
- * For mika-api internal code message format, it consist of {{domain}}-{{code}}
+ * mika-api internal code message format is consist of {{domain}}-{{code}}
  * example :
- *  auth-401
- *  sys-500
+ *  auth-401 (authentication domain)
+ *  sys-500 (system domain)
+ *  ent-201 (entity domain)
  * and so on ..
- * While you can define any code as long its not used by other
- * message, it best to make it same as http status code if possible.
  *
  * Remember to use correct or closely related http status code for your message !
  * See : https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
- *
  */
 
 const configName = 'msgTypeConfig'
@@ -24,7 +22,6 @@ const configName = 'msgTypeConfig'
  */
 let baseConfig = {
   MSG_SUCCESS: {
-    isError: true,
     httpStatus: 200,
     status: 'sys-200',
     message: 'Success'
@@ -118,7 +115,7 @@ let baseConfig = {
     isError: true,
     httpStatus: 400,
     status: 'auth-410',
-    message: 'This agent is bounded to terminal(s), please send authentication data inside cipherbox'
+    message: 'This agent is bounded to terminal(s), please send authentication data inside a cipherbox'
   },
   MSG_ERROR_INVALID_CIPHERBOX: {
     isError: true,
@@ -168,7 +165,7 @@ let baseConfig = {
     isError: true,
     httpStatus: 500,
     status: 'trx-500',
-    message: 'Cannot create transaction due to unknown error'
+    message: 'Cannot create transaction due specific error'
   },
   MSG_ERROR_PAYMENT_PROVIDER_NOT_RESPONDING: {
     isError: true,

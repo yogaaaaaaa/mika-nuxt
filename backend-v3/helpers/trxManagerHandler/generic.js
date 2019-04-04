@@ -12,7 +12,7 @@ module.exports = (trxManager) => {
 
     // Alias for this handler. Alias is simple name for **certain** payment provider
     // Used mostly by frontend
-    alias: ['generic', 'supaPaymentProvider'],
+    aliases: ['generic', 'supaPaymentProvider'],
 
     // properties contain comma delimited list that define various things like
     // what kind of token this Payment gateway wants or generate
@@ -28,7 +28,7 @@ module.exports = (trxManager) => {
     // Expected to fill config.transactionToken (or none if this PG does not provide one)
     // return true or error object ( {error: ERROR_CODE} ) if something goes wrong
     async handler (config) {
-      config.tokenType = trxManager.tokenType.TOKEN_QRCODE_CONTENT
+      config.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       config.token = 'QRCODE-GENERIC'
     },
 

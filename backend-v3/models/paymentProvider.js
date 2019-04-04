@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     paymentProvider.belongsTo(models.paymentProviderConfig, { foreignKey: 'paymentProviderConfigId' })
     paymentProvider.belongsTo(models.paymentProviderType, { foreignKey: 'paymentProviderTypeId' })
 
-    paymentProvider.hasMany(models.transaction, { foreignKey: 'transactionId' })
+    paymentProvider.hasMany(models.transaction, { foreignKey: 'paymentProviderId' })
   }
   return paymentProvider
 }

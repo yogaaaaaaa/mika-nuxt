@@ -1,6 +1,6 @@
 'use strict'
 
-const configName = 'pgTcashConfig'
+const configName = 'ppTcashConfig'
 
 /**
  * Default TCASH/LinkAja Config

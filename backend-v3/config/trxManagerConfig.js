@@ -3,7 +3,7 @@
 const configName = 'trxManager'
 
 let baseConfig = {
-  transactionTimeout: process.env.MIKA_TRANSACTION_TIMEOUT || 120000, // in milliseconds
+  transactionTimeout: process.env.MIKA_TRANSACTION_TIMEOUT || 10000, // in milliseconds
   handlerDir: 'trxManagerHandler'
 }
 

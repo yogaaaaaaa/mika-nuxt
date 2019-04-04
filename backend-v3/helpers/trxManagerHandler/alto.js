@@ -8,12 +8,12 @@ const alto = require('../ppAlto')
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'alto',
-    alias: ['wechatpay', 'alipay'],
+    aliases: ['wechatpay', 'alipay'],
     properties: [
-      trxManager.transactionFlow.PROVIDE_TOKEN,
-      trxManager.transactionFlow.GET_TOKEN,
-      trxManager.tokenType.TOKEN_QRCODE_URL_IMAGE,
-      trxManager.userTokenType.USER_TOKEN_QRCODE_CONTENT
+      trxManager.transactionFlows.PROVIDE_TOKEN,
+      trxManager.transactionFlows.GET_TOKEN,
+      trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE,
+      trxManager.userTokenTypes.USER_TOKEN_QRCODE_CONTENT
     ],
     async handler (config) {
       let altoResponse = await alto.altoMakeQrCodePayment({
@@ -27,7 +27,7 @@ module.exports = (trxManager) => {
       }
 
       config.token = altoResponse.uri
-      config.tokenType = trxManager.tokenType.TOKEN_QRCODE_CONTENT
+      config.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
 
       config.updatedTransaction = {
         referenceNumber: altoResponse.out_trade_no,

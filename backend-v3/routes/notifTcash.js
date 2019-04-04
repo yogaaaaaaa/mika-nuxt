@@ -1,14 +1,15 @@
 'use strict'
+
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const tcashNotifController = require('../controllers/pgTcashNotifController')
-const tcashPGConfig = require('../config/pgTcashConfig')
+const ppTcashNotifController = require('../controllers/ppTcashNotifController')
+const ppTcashConfig = require('../config/ppTcashConfig')
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
 
-router.post(tcashPGConfig.inquiryEndpoint, tcashNotifController.tcashHandleInquiryAndPay)
-router.post(tcashPGConfig.payEndpoint, tcashNotifController.tcashHandleInquiryAndPay)
+router.post(ppTcashConfig.inquiryEndpoint, ppTcashNotifController.tcashHandleInquiryAndPay)
+router.post(ppTcashConfig.payEndpoint, ppTcashNotifController.tcashHandleInquiryAndPay)
 
 module.exports = router

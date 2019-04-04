@@ -19,15 +19,15 @@ const type = require('../config/trxManagerTypeConfig')
 module.exports.config = config
 module.exports.type = type
 
-module.exports.transactionStatus = type.transactionStatus
-module.exports.transactionSettlementStatus = type.transactionSettlementStatus
-module.exports.transactionEvent = type.transactionEvent
-module.exports.tokenType = type.tokenType
-module.exports.userTokenType = type.userTokenType
-module.exports.transactionFlag = type.transactionFlag
-module.exports.transactionFlow = type.transactionFlow
+module.exports.transactionStatuses = type.transactionStatus
+module.exports.transactionSettlementStatuses = type.transactionSettlementStatuses
+module.exports.transactionEvents = type.transactionEvents
+module.exports.tokenTypes = type.tokenTypes
+module.exports.userTokenTypes = type.userTokenTypes
+module.exports.transactionFlags = type.transactionFlags
+module.exports.transactionFlows = type.transactionFlows
 
-module.exports.errorCode = type.errorCode
+module.exports.errorCodes = type.errorCodes
 
 /**
  * Array containing payment provider handler
@@ -49,6 +49,17 @@ module.exports.findPpHandler = (name) => {
   return null
 }
 
+module.exports.createTransaction = async (transaction) => {
+  let createdTransaction = await models.transaction.create(transaction)
+
+  if (createdTransaction) {
+    return createdTransaction.toJSON()
+  }
+}
+
+/**
+ * Update single transaction
+ */
 module.exports.updateTransaction = async (updatedTransaction, targetTransactionId, targetTransactionStatus = null) => {
   let setting = {
     where: { id: targetTransactionId }
@@ -81,16 +92,7 @@ module.exports.getTransaction = async (transactionId) => {
       },
       {
         model: models.paymentProvider,
-        include: [
-          {
-            models: models.paymentProviderType
-          },
-          {
-            models: models.paymentProviderConfig,
-            attributes: { exclude: ['config'] }
-          }
-
-        ]
+        include: [ models.paymentProviderType, models.paymentProviderConfig ]
       }
     ]
   })
@@ -115,12 +117,8 @@ module.exports.getTransactionOnly = async (transactionId) => {
   }
 }
 
-module.exports.createTransaction = async (transaction) => {
-  return models.transaction.create(transaction)
-}
-
 /**
- * Get single or many payment provider
+ * Get many payment provider
  */
 module.exports.getPaymentProvidersByAgent = async (agentId, paymentProviderId = null) => {
   let whereCondition = {
@@ -150,6 +148,16 @@ module.exports.getPaymentProvidersByAgent = async (agentId, paymentProviderId = 
   return []
 }
 
+/**
+ * Emit transaction event to all handler (via nodejs event emitter).
+ * It will emit event with object,
+ ```js
+   transactionEvent = {
+    transactionId: 1,
+    transaction: { ... } // complete transaction data
+  }
+ ```
+ */
 module.exports.emitTransactionEvent = (transactionEvent, transactionId, transaction = null) => {
   events.emit(transactionEvent, {
     transactionId: transactionId,
@@ -157,6 +165,9 @@ module.exports.emitTransactionEvent = (transactionEvent, transactionId, transact
   })
 }
 
+/**
+ * Listen to transaction event (via nodejs event emitter)
+ */
 module.exports.addListener = (transactionEvent, callback) => {
   events.addListener(transactionEvent, callback)
 }
@@ -167,11 +178,11 @@ module.exports.forceTransactionStatus = async (transactionId, transactionStatus)
       let eventName = null
 
       if (transactionStatus === exports.transactionStatus.SUCCESS) {
-        eventName = exports.transactionEvent.SUCCESS
+        eventName = exports.transactionEvents.SUCCESS
       }
 
       if (transactionStatus === exports.transactionStatus.FAILED) {
-        eventName = exports.transactionEvent.FAILED
+        eventName = exports.transactionEvents.FAILED
       }
 
       if (eventName) {
@@ -185,113 +196,142 @@ module.exports.forceTransactionStatus = async (transactionId, transactionStatus)
 }
 
 /**
- * Mother of mika system
- * Create transaction with specified agentId and paymentProviderId
+ * Mother of mika system.
+ * Create new transaction with specified agentId and paymentProviderId
  */
-module.exports.createTransaction = async (agentId, paymentProviderId, amount, flags = '', userToken = null) => {
-  try {
-    let config = {
-      agentId,
-      paymentProviderId,
-      amount,
-      flags: flags.split(',').map((flag) => flag.trim()),
-      requirePostAction: false,
-      redirectTo: null,
-      paymentProvider: null,
-      transaction: {},
-      updatedTransaction: null,
-      userToken: userToken,
-      token: null,
-      tokenType: null
-    }
+module.exports.newTransaction = async (
+  amount,
+  paymentProviderId,
+  agentId,
+  options = {}) => {
+  let config = Object.assign({
+    amount,
+    paymentProviderId,
+    agentId,
+    terminalId: null,
+    partnerId: null,
+    flags: [],
+    ipAddress: null,
+    locationLong: null,
+    locationLat: null,
+    requirePostAction: false,
+    postActionMessage: null,
+    redirectTo: null,
+    paymentProvider: null,
+    transaction: {},
+    updatedTransaction: null,
+    userToken: null,
+    userTokenType: null,
+    token: null,
+    tokenType: null
+  },
+  options)
 
-    config.paymentProvider = await exports.getPaymentProvidersByAgent(config.agentId, config.paymentProviderId)
-    if (config.paymentProvider.length === 0) {
-      return { error: exports.errorCode.PAYMENT_PROVIDER_NOT_FOR_YOU }
-    } else {
-      config.paymentProvider = config.paymentProvider[0]
-    }
+  if (!Array.isArray(config.flags)) {
+    config.flags = []
+  }
 
-    if (!config.flags.includes(exports.transactionFlags.NO_AMOUNT_CHECK)) {
-      if (config.paymentProvider.minimumAmount) {
-        if (config.amount < config.paymentProvider.minimumAmount) {
-          return { error: exports.errorCode.AMOUNT_TOO_LOW, errorMinimumAmount: config.paymentProvider.minimumAmount }
+  config.paymentProvider = await exports.getPaymentProvidersByAgent(config.agentId, config.paymentProviderId)
+  if (config.paymentProvider.length === 0) {
+    return { error: exports.errorCode.PAYMENT_PROVIDER_NOT_FOR_YOU }
+  } else {
+    config.paymentProvider = config.paymentProvider[0]
+  }
+
+  if (!config.flags.includes(exports.transactionFlag.NO_AMOUNT_CHECK)) {
+    if (config.paymentProvider.minimumAmount) {
+      if (config.amount < config.paymentProvider.minimumAmount) {
+        return {
+          error: exports.errorCode.AMOUNT_TOO_LOW,
+          errorMinimumAmount: config.paymentProvider.minimumAmount
         }
       }
+    }
 
-      if (config.paymentProvider.maximumAmount) {
-        if (config.amount > config.paymentProvider.maximumAmount) {
-          return { error: exports.errorCode.AMOUNT_TOO_HIGH, errorMaximumAmount: config.paymentProvider.maximumAmount }
+    if (config.paymentProvider.maximumAmount) {
+      if (config.amount > config.paymentProvider.maximumAmount) {
+        return {
+          error: exports.errorCode.AMOUNT_TOO_HIGH,
+          errorMaximumAmount: config.paymentProvider.maximumAmount
         }
       }
     }
+  }
 
-    let ppHandler = exports.findPpHandler(config.paymentProvider.paymentProviderConfig.handler)
+  let ppHandler = exports.findPpHandler(config.paymentProvider.paymentProviderConfig.handler)
 
-    if (typeof ppHandler.preHandler === 'function') {
-      let returnValue = await ppHandler.preHandler(config)
-      if (returnValue) {
-        if (returnValue.error) {
-          return returnValue
-        }
-        return { error: exports.errorCode.JUST_ERROR }
+  if (typeof ppHandler.preHandler === 'function') {
+    let returnValue = await ppHandler.preHandler(config)
+    if (returnValue) {
+      if (returnValue.error) {
+        return returnValue
       }
-    }
-
-    if (!await exports.createTransaction(Object.assign(
-      {
-        transaction_status_id: exports.transactionStatus.INQUIRY.id,
-        terminalId: config.agentId,
-        paymentProviderId: config.paymentProviderId,
-        amount: config.amount
-      },
-      config.transaction
-    ))
-    ) {
       return { error: exports.errorCode.JUST_ERROR }
     }
+  }
 
-    if (typeof ppHandler.handler === 'function') {
-      let returnValue = await ppHandler.handler(config)
-      if (returnValue) {
-        if (returnValue.error) {
-          return returnValue
-        }
-        return { error: exports.errorCode.JUST_ERROR }
-      }
+  if (config.redirectTo && config.paymentProvider.gateway) {
+    return {
+      redirectTo: config.redirectTo
     }
+  }
 
-    if (config.updatedTransaction) {
-      await exports.updateTransaction(config.updatedTransaction, config.transaction.id)
-    }
+  config.transaction = await exports.createTransaction(Object.assign(
+    {
+      transactionStatus: exports.transactionStatus.CREATED,
+      amount: config.amount,
+      agentId: config.agentId,
+      terminalId: config.terminalId,
+      partnerId: config.partnerId,
+      locationLat: config.locationLat,
+      locationLong: config.locationLong,
+      ipAddress: config.ipAddress,
+      paymentProviderId: config.paymentProviderId
+    },
+    config.transaction
+  ))
 
-    config.transaction = await exports.getTransactionOnly(config.transaction.id)
-
-    let createdTransaction = {
-      transactionId: config.transaction.id,
-      transaction: config.transaction
-    }
-
-    if (config.token) {
-      createdTransaction.tokenType = config.token.type
-      createdTransaction.token = config.token.value
-    }
-
-    events.emit(exports.transactionEvent.CREATED, createdTransaction)
-
-    if (config.transaction.transaction_status_id === exports.transactionStatus.INQUIRY.id) {
-      await dTimer.postEvent({
-        event: exports.transactionEvent.GLOBAL_TIMEOUT,
-        transactionId: config.transaction.id,
-        transaction: config.transaction
-      }, exports.config.transactionTimeout)
-    }
-
-    return createdTransaction
-  } catch (err) {
-    console.log(err)
+  if (!config.transaction) {
     return { error: exports.errorCode.JUST_ERROR }
   }
+
+  if (typeof ppHandler.handler === 'function') {
+    let returnValue = await ppHandler.handler(config)
+    if (returnValue) {
+      if (returnValue.error) {
+        return returnValue
+      }
+      return { error: exports.errorCode.JUST_ERROR }
+    }
+  }
+
+  if (config.updatedTransaction) {
+    await exports.updateTransaction(config.updatedTransaction, config.transaction.id)
+  }
+
+  let newTransaction = {
+    transactionId: config.transaction.id,
+    transactionStatus: config.transaction.transactionStatus
+  }
+
+  // TODO: add post action here
+  if (config.requirePostAction) {
+  }
+
+  if (config.token && config.tokenType) {
+    newTransaction.token = config.token
+    newTransaction.tokenType = config.tokenType
+  }
+
+  if (config.transaction.transactionStatus === exports.transactionStatus.CREATED) {
+    await dTimer.postEvent({
+      event: exports.transactionEvents.GLOBAL_TIMEOUT,
+      transactionId: config.transaction.id,
+      transaction: config.transaction
+    }, exports.config.transactionTimeout)
+  }
+
+  return newTransaction
 }
 
 /**
@@ -306,17 +346,18 @@ module.exports.postTransactionAction = async (agentId, paymentProviderId) => {
  */
 dTimer.handleEvent(async (eventObject) => {
   try {
-    if (eventObject.event === exports.transactionEvent.GLOBAL_TIMEOUT) {
+    if (eventObject.event === exports.transactionEvents.GLOBAL_TIMEOUT) {
       let config = {
-        databaseTransaction: null,
-        transaction: await exports.gettransaction(eventObject.transactionId),
+        transaction: await exports.getTransaction(eventObject.transactionId),
         updatedTransaction: null
       }
 
+      console.log('hello')
+
       // transaction is already finished, do nothing
       if (
-        [exports.transactionStatus.SUCCESS.id, exports.transactionStatus.FAILED.id]
-          .includes(config.transaction.transaction_status_id)
+        [exports.transactionStatus.SUCCESS, exports.transactionStatus.FAILED]
+          .includes(config.transaction.transactionStatus)
       ) {
         return true
       }
@@ -338,9 +379,9 @@ dTimer.handleEvent(async (eventObject) => {
       await exports.updateTransaction(config.updatedTransaction, eventObject.transactionId)
 
       if (config.updatedTransaction.transaction_status_id === exports.transactionStatus.FAILED.id) {
-        exports.emitTransactionEvent(exports.transactionEvent.FAILED, eventObject.transactionId)
+        exports.emitTransactionEvent(exports.transactionEvents.FAILED, eventObject.transactionId)
       } else if (config.updatedTransaction.transaction_status_id === exports.transactionStatus.SUCCESS.id) {
-        exports.emitTransactionEvent(exports.transactionEvent.SUCCESS, eventObject.transactionId)
+        exports.emitTransactionEvent(exports.transactionEvents.SUCCESS, eventObject.transactionId)
       }
 
       if (typeof ppHandler.timeoutPostHandler === 'function') {
@@ -350,27 +391,32 @@ dTimer.handleEvent(async (eventObject) => {
       return true
     }
   } catch (err) {
+    console.log(err)
     return false
   }
 })
 
 /**
- * Emitter for *_WITH_DATA event
+ * Emitter for SUCCESS_WITH_DATA event
  * Just listen to ordinary transaction event,
- * then emit *_WITH_DATA event with transaction
+ * then emit SUCCESS_WITH_DATA event with transaction
  */
-
-events.addListener(exports.transactionEvent.SUCCESS, async (eventObject) => {
-  if (events.listenerCount(exports.transactionEvent.SUCCESS_WITH_DATA)) {
-    eventObject.transaction = await exports.gettransaction(eventObject.transactionId)
-    events.emit(exports.transactionEvent.SUCCESS_WITH_DATA, eventObject)
+events.addListener(exports.transactionEvents.SUCCESS, async (eventObject) => {
+  if (events.listenerCount(exports.transactionEvents.SUCCESS_WITH_DATA)) {
+    eventObject.transaction = await exports.getTransaction(eventObject.transactionId)
+    events.emit(exports.transactionEvents.SUCCESS_WITH_DATA, eventObject)
   }
 })
 
-events.addListener(exports.transactionEvent.FAILED, async (eventObject) => {
-  if (events.listenerCount(exports.transactionEvent.FAILED_WITH_DATA)) {
-    eventObject.transaction = await exports.gettransaction(eventObject.transactionId)
-    events.emit(exports.transactionEvent.FAILED_WITH_DATA, eventObject)
+/**
+ * Emitter for FAILED_WITH_DATA event
+ * Just listen to ordinary transaction event,
+ * then emit FAILED_WITH_DATA event with transaction
+ */
+events.addListener(exports.transactionEvents.FAILED, async (eventObject) => {
+  if (events.listenerCount(exports.transactionEvents.FAILED_WITH_DATA)) {
+    eventObject.transaction = await exports.getTransaction(eventObject.transactionId)
+    events.emit(exports.transactionEvents.FAILED_WITH_DATA, eventObject)
   }
 })
 

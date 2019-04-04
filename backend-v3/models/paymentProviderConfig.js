@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         try {
           return JSON.parse(this.getDataValue('config'))
         } catch (error) {}
-        return null
       },
       set (value) {
         if (typeof value === 'object') {

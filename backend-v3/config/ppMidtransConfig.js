@@ -1,6 +1,6 @@
 'use strict'
 
-const configName = 'midtransPGConfig'
+const configName = 'ppMidtransConfig'
 
 /**
  * Default Midtrans Payment Gateway Config

@@ -15,21 +15,65 @@ module.exports.createResponseMessage = (
   messageType,
   data = null,
   meta = null,
-  toJSON = false,
-  underscored = true
+  toJSON = false
 ) => {
-  let apiObject = {
+  let msg = {
     status: messageType.status,
     message: messageType.message,
-    isError: messageType.isError || false,
-    meta: meta,
-    data: data
+    isError: messageType.isError || false
+  }
+
+  if (meta) {
+    msg.meta = meta
+  }
+
+  if (data) {
+    msg.data = data
   }
 
   if (toJSON) {
-    return JSON.stringify(apiObject)
+    return JSON.stringify(msg)
   } else {
-    return apiObject
+    return msg
+  }
+}
+
+/**
+ * Generate Notification message
+ */
+module.exports.createNotificationMessage = (
+  eventType = exports.eventTypes.EVENT_GENERIC,
+  data = null,
+  meta = null,
+  toJSON = false
+) => {
+  let msg = {
+    eventType: eventType
+  }
+
+  if (meta) {
+    msg.meta = meta
+  }
+
+  if (data) {
+    msg.data = data
+  }
+
+  if (toJSON) {
+    return JSON.stringify(msg)
+  } else {
+    return msg
+  }
+}
+
+/**
+ * Generate meta object for pagination
+ */
+module.exports.createPaginationMeta = (page, perPage, totalCount) => {
+  return {
+    page: page,
+    pages: Math.ceil(totalCount / perPage),
+    totalCount: totalCount
   }
 }
 
@@ -45,26 +89,4 @@ module.exports.expressCreateResponseMessage = (
   res
     .status(messageType.httpStatus)
     .send(exports.createResponseMessage(messageType, data, meta))
-}
-
-/**
- * Generate Notification message
- */
-module.exports.createNotificationMessage = (
-  eventType = exports.eventTypes.EVENT_GENERIC,
-  data = null,
-  meta = null,
-  toJSON = false
-) => {
-  let notificationObject = {
-    eventType: eventType,
-    meta: meta,
-    data: data
-  }
-
-  if (toJSON) {
-    return JSON.stringify(notificationObject)
-  } else {
-    return notificationObject
-  }
 }

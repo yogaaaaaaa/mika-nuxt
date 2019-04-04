@@ -8,6 +8,9 @@ const mqtt = require('mqtt')
 const redis = require('./redis')
 const crypto = require('crypto')
 
+const ready = require('./ready')
+ready.addComponent('mqtt')
+
 module.exports.mqtt = mqtt
 
 const config = require('../config/mqttConfig')
@@ -21,6 +24,9 @@ const mqttClient = mqtt.connect(config.url, {
   clean: config.cleanSession
 })
 module.exports.client = mqttClient
+mqttClient.on('connect', () => {
+  ready.ready('mqtt')
+})
 
 module.exports.aclKey = {
   READ_ONLY: 1,
@@ -40,7 +46,7 @@ module.exports.waitUntilMqttClientConnected = (client = mqttClient) => {
       timeoutHandler = setTimeout(() => {
         client.off('connect', _resolve)
         reject(new Error('Timeout waiting MQTT to be connected'))
-      }, 30 * 1000)
+      }, config.waitConnectTimeout * 1000)
 
       client.once('connect', _resolve)
     } else {

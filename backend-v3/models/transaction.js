@@ -39,13 +39,12 @@ module.exports = (sequelize, DataTypes) => {
         try {
           return JSON.parse(this.getDataValue('extra'))
         } catch (error) {}
-        return null
       },
       set (value) {
         if (typeof value === 'object') {
           this.setDataValue('extra', JSON.stringify(value))
         }
-        return this.setDataValue('extra', null)
+        this.setDataValue('extra', null)
       }
     },
 

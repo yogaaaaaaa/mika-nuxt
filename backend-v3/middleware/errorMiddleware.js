@@ -41,7 +41,8 @@ module.exports.validatorErrorHandler = (req, res, next) => {
   if (errors.length > 0) {
     msgFactory.expressCreateResponseMessage(
       res,
-      msgFactory.messageTypes.MSG_ERROR_BAD_REQUEST
+      msgFactory.messageTypes.MSG_ERROR_BAD_REQUEST,
+      errors
     )
     return
   }
