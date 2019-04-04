@@ -4,20 +4,11 @@ const trxManager = require('../helpers/trxManager')
 const msgFactory = require('../helpers/msgFactory')
 const models = require('../models')
 
-const auth = require('../helpers/auth')
-
 /**
- * Get one or many payment provider (dependent with `req.auth.userType`)
+ * Get one or many agent's payment providers (via `req.auth.userType`)
  */
 module.exports.getAgentPaymentProviders = async (req, res, next) => {
-  if (req.params.id) {
-    msgFactory.expressCreateResponseMessage(
-      res,
-      msgFactory.messageTypes.MSG_ERROR_NOT_IMPLEMENTED
-    )
-  }
-
-  let paymentProviders = await models.agentPaymentProvider.findAll({
+  let query = {
     where: {
       agentId: req.auth.agentId
     },
@@ -63,25 +54,43 @@ module.exports.getAgentPaymentProviders = async (req, res, next) => {
         ]
       }
     ]
-  })
+  }
 
-  if (paymentProviders) {
-    msgFactory.expressCreateResponseMessage(
-      res,
-      msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
-      paymentProviders.map((data) => {
-        let paymentProvider = data.paymentProvider.toJSON()
+  if (req.params.id) {
+    query.where.id = req.params.id
+    let paymentProvider = await models.agentPaymentProvider.findOne(query)
+    if (paymentProvider) {
+      msgFactory.expressCreateResponseMessage(
+        res,
+        msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+        paymentProvider
+      )
+    } else {
+      msgFactory.expressCreateResponseMessage(
+        res,
+        msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND
+      )
+    }
+  } else {
+    let paymentProviders = await models.agentPaymentProvider.findAll()
+    if (paymentProviders) {
+      msgFactory.expressCreateResponseMessage(
+        res,
+        msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+        paymentProviders.map((data) => {
+          let paymentProvider = data.paymentProvider.toJSON()
 
-        let ppHandler = trxManager.findPpHandler(data.paymentProvider.paymentProviderConfig.handler)
+          let ppHandler = trxManager.findPpHandler(data.paymentProvider.paymentProviderConfig.handler)
 
-        paymentProvider._handler = {
-          name: ppHandler.name,
-          aliases: ppHandler.aliases,
-          properties: ppHandler.properties
-        }
+          paymentProvider._handler = {
+            name: ppHandler.name,
+            aliases: ppHandler.aliases,
+            properties: ppHandler.properties
+          }
 
-        return paymentProvider
-      })
-    )
+          return paymentProvider
+        })
+      )
+    }
   }
 }

@@ -2,12 +2,11 @@
 
 const msgFactory = require('../helpers/msgFactory')
 const trxManager = require('../helpers/trxManager')
-const auth = require('../helpers/auth')
 
 const models = require('../models')
 
 /**
- * Create new transaction by agent
+ * Create new transaction by agent (via `req.auth.userType`)
  */
 module.exports.newTransaction = async (req, res, next) => {
   const options = {
@@ -79,95 +78,81 @@ module.exports.postTransaction = async (req, res, next) => {
 }
 
 /**
- * Get one or many transactions (dependent with `req.auth.userType`)
+ * Get one or many agent's transactions (via `req.auth.userType`)
  */
-module.exports.getTransactions = async (req, res, next) => {
-  if (req.auth.userType === auth.userTypes.AGENT) {
-    let query = Object.assign({
-      where: {
-        agentId: req.auth.agentId
-      },
-      attributes: { exclude: ['deletedAt'] },
-      include: [
-        {
-          model: models.paymentProvider,
-          attributes: {
-            exclude: [
-              'shareMerchant',
-              'shareMerchantWithPartner',
-              'sharePartner',
-              'directSettlement',
-              'createdAt',
-              'updatedAt',
-              'deletedAt'
-            ]
-          },
-          include: [
-            {
-              model: models.paymentProviderType,
-              attributes: {
-                exclude: [
-                  'createdAt',
-                  'updatedAt',
-                  'deletedAt'
-                ]
-              }
-            },
-            {
-              model: models.paymentProviderConfig,
-              attributes: {
-                exclude: [
-                  'config',
-                  'providerIdReference',
-                  'providerIdType',
-                  'createdAt',
-                  'updatedAt',
-                  'deletedAt'
-                ]
-              }
-            }
+module.exports.getAgentTransactions = async (req, res, next) => {
+  let query = Object.assign({
+    where: {
+      agentId: req.auth.agentId
+    },
+    attributes: { exclude: ['deletedAt'] },
+    include: [
+      {
+        model: models.paymentProvider,
+        attributes: {
+          exclude: [
+            'shareMerchant',
+            'shareMerchantWithPartner',
+            'sharePartner',
+            'directSettlement',
+            'createdAt',
+            'updatedAt',
+            'deletedAt'
           ]
-        }
-      ]
-    })
-
-    if (req.params.id) {
-      query.where.id = req.params.id
-
-      let transaction = await models.transaction.findOne(query)
-      if (transaction) {
-        msgFactory.expressCreateResponseMessage(
-          res,
-          msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
-          transaction
-        )
-      } else {
-        msgFactory.expressCreateResponseMessage(
-          res,
-          msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND,
-          transaction
-        )
+        },
+        include: [
+          {
+            model: models.paymentProviderType,
+            attributes: {
+              exclude: [
+                'createdAt',
+                'updatedAt',
+                'deletedAt'
+              ]
+            }
+          },
+          {
+            model: models.paymentProviderConfig,
+            attributes: {
+              exclude: [
+                'config',
+                'providerIdReference',
+                'providerIdType',
+                'createdAt',
+                'updatedAt',
+                'deletedAt'
+              ]
+            }
+          }
+        ]
       }
-    } else {
-      let transactions = await models.transaction.findAndCountAll(Object.assign(query, req.sequelizePagination))
+    ]
+  })
+
+  if (req.params.id) {
+    query.where.id = req.params.id
+
+    let transaction = await models.transaction.findOne(query)
+    if (transaction) {
       msgFactory.expressCreateResponseMessage(
         res,
         msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
-        transactions.rows,
-        msgFactory.createPaginationMeta(req.page, req.per_page, transactions.count)
+        transaction
+      )
+    } else {
+      msgFactory.expressCreateResponseMessage(
+        res,
+        msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND,
+        transaction
       )
     }
-  } else if (req.auth.userType === auth.userTypes.MERCHANT) {
-    msgFactory.expressCreateResponseMessage(
-      res,
-      msgFactory.messageTypes.MSG_ERROR_NOT_IMPLEMENTED
-    )
-  } else if (req.auth.userType === auth.userTypes.ADMIN) {
-    msgFactory.expressCreateResponseMessage(
-      res,
-      msgFactory.messageTypes.MSG_ERROR_NOT_IMPLEMENTED
-    )
   } else {
-    throw new Error('Cannot get transaction(s) req.auth.userType is not valid')
+    let transactions = await models.transaction.findAndCountAll(Object.assign(query, req.sequelizePagination))
+    msgFactory.expressCreateResponseMessage(
+      res,
+      msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+      transactions.rows,
+      msgFactory.createPaginationMeta(req.page, req.per_page, transactions.count)
+    )
   }
 }

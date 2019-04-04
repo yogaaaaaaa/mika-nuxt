@@ -88,28 +88,49 @@ let baseConfig = {
     message: 'Entity Not found'
   },
 
-  MSG_SUCCESS_AUTH: {
+  MSG_SUCCESS_AUTH_LOGIN: {
     httpStatus: 200,
     status: 'auth-200',
-    message: 'Authentication success'
+    message: 'Login Success'
   },
-  MSG_ERROR_INVALID_AUTH: {
+  MSG_SUCCESS_AUTH_LOGOUT: {
+    httpStatus: 200,
+    status: 'auth-201',
+    message: 'Logout Success'
+  },
+  MSG_SUCCESS_AUTH_TOKEN_CHECK: {
+    httpStatus: 200,
+    status: 'auth-202',
+    message: 'Session token still valid'
+  },
+  MSG_SUCCESS_AUTH_CHANGE_PASSWORD: {
+    httpStatus: 200,
+    status: 'auth-203',
+    message: 'Password Changed Successfully'
+  },
+  MSG_ERROR_AUTH_INVALID_CREDENTIAL: {
     isError: true,
     httpStatus: 400,
     status: 'auth-400',
     message: 'Invalid credential for authentication'
   },
-  MSG_ERROR_NOT_AUTHENTICATED: {
+  MSG_ERROR_AUTH_NO: {
     isError: true,
     httpStatus: 401,
     status: 'auth-401',
     message: 'Not authenticated'
   },
-  MSG_ERROR_FORBIDDEN: {
+  MSG_ERROR_AUTH_FORBIDDEN: {
     isError: true,
     httpStatus: 403,
     status: 'auth-403',
     message: 'Forbidden to access this resource'
+  },
+  MSG_ERROR_AUTH_INVALID_TOKEN: {
+    isError: true,
+    httpStatus: 400,
+    status: 'auth-404',
+    message: 'Invalid session token'
   },
   MSG_ERROR_WHERE_YOUR_TERMINAL_INFO: {
     isError: true,

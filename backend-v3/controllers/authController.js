@@ -6,9 +6,9 @@ const auth = require('../helpers/auth')
 const notif = require('../helpers/notif')
 
 /**
- * Auth controller
+ * Login controller
  */
-module.exports.auth = async (req, res, next) => {
+module.exports.login = async (req, res, next) => {
   let options = {}
 
   if (req.body.userTypes) {
@@ -33,7 +33,7 @@ module.exports.auth = async (req, res, next) => {
 
     msgFactory.expressCreateResponseMessage(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_AUTH,
+      msgFactory.messageTypes.MSG_SUCCESS_AUTH_LOGIN,
       response
     )
     return
@@ -41,6 +41,61 @@ module.exports.auth = async (req, res, next) => {
 
   msgFactory.expressCreateResponseMessage(
     res,
-    msgFactory.messageTypes.MSG_ERROR_INVALID_AUTH
+    msgFactory.messageTypes.MSG_ERROR_AUTH_INVALID_CREDENTIAL
   )
+}
+
+/**
+ * Logout controller
+ */
+module.exports.logout = async (req, res, next) => {
+  if (auth.removeAuth(req.auth.userId)) {
+    msgFactory.expressCreateResponseMessage(
+      res,
+      msgFactory.messageTypes.MSG_SUCCESS_AUTH_LOGOUT
+    )
+  }
+}
+
+/**
+ * Check current session token
+ */
+module.exports.sessionTokenCheck = async (req, res, next) => {
+  let authResult = await auth.checkAuth(req.body.sessionToken)
+  if (authResult) {
+    msgFactory.expressCreateResponseMessage(
+      res,
+      msgFactory.messageTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
+      authResult
+    )
+  } else {
+    msgFactory.expressCreateResponseMessage(
+      res,
+      msgFactory.messageTypes.MSG_ERROR_AUTH_INVALID_TOKEN
+    )
+  }
+}
+
+/**
+ * Change password based on current `req.auth`
+ */
+module.exports.changePassword = async (req, res, next) => {
+  if (auth.resetAuth(req.auth.userId, req.body.password, req.body.oldPassword)) {
+    msgFactory.expressCreateResponseMessage(
+      res,
+      msgFactory.messageTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+    )
+  }
+}
+
+/**
+ * Reset password (all user)
+ */
+module.exports.resetPassword = async (req, res, next) => {
+  if (auth.resetAuth(req.body.userId, req.body.password)) {
+    msgFactory.expressCreateResponseMessage(
+      res,
+      msgFactory.messageTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+    )
+  }
 }

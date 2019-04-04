@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Generate sequelize setting for pagination
+ * Generate sequelize query setting for pagination in `req.sequelizePagination`
  */
 module.exports.sequelizePagination = (req, res, next) => {
   req.query.page = parseInt(req.query.page) || 1

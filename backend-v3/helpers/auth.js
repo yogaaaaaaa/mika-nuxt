@@ -28,6 +28,10 @@ module.exports.getSessionToken = async (userId) => {
   return redis.get(`${authConfig.redisPrefix}:${userId}`)
 }
 
+module.exports.deleteSessionToken = async (userId) => {
+  await redis.del(`${authConfig.redisPrefix}:${userId}`)
+}
+
 /**
  * Do authentication
  */
@@ -160,18 +164,52 @@ module.exports.doAuth = async function (username, password, options = {}) {
  * Check auth session token
  */
 module.exports.checkAuth = async (sessionToken) => {
-  try {
-    let auth = jwt.verify(sessionToken, authConfig.secretKey)
+  let auth = jwt.verify(sessionToken, authConfig.secretKey)
 
-    if (auth) {
-      if (await exports.getSessionToken(auth.userId) === sessionToken) {
-        await exports.setSessionToken(auth.userId, sessionToken)
-        return auth
-      }
+  if (auth) {
+    if (await exports.getSessionToken(auth.userId) === sessionToken) {
+      await exports.setSessionToken(auth.userId, sessionToken)
+      return auth
     }
-  } catch (error) {
-    console.log(error)
   }
 
   return null
+}
+
+/**
+ * Remove auth by user id
+ */
+module.exports.removeAuth = async (userId) => {
+  await exports.deleteSessionToken(userId)
+}
+
+/**
+ * Change/reset current user password
+ */
+module.exports.resetAuth = async (userId, password, oldPassword = null) => {
+  let user = await models.user.findOne({
+    where: {
+      id: userId
+    }
+  })
+
+  if (user) {
+    if (oldPassword) {
+      if (!hash.compareBcryptHash(user.password, oldPassword)) {
+        return null
+      }
+      if (
+        await models.agent.update({
+          password: hash.bcryptHash(password)
+        }, {
+          where: { id: userId }
+        })
+      ) {
+        await exports.removeAuth(userId)
+        return true
+      }
+    }
+  }
+
+  return false
 }

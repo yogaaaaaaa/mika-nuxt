@@ -19,7 +19,7 @@ const type = require('../config/trxManagerTypeConfig')
 module.exports.config = config
 module.exports.type = type
 
-module.exports.transactionStatuses = type.transactionStatus
+module.exports.transactionStatuses = type.transactionStatuses
 module.exports.transactionSettlementStatuses = type.transactionSettlementStatuses
 module.exports.transactionEvents = type.transactionEvents
 module.exports.tokenTypes = type.tokenTypes
@@ -177,11 +177,11 @@ module.exports.forceTransactionStatus = async (transactionId, transactionStatus)
     if (await exports.updateTransaction({ transaction_status: transactionStatus }, transactionId)) {
       let eventName = null
 
-      if (transactionStatus === exports.transactionStatus.SUCCESS) {
+      if (transactionStatus === exports.transactionStatuses.SUCCESS) {
         eventName = exports.transactionEvents.SUCCESS
       }
 
-      if (transactionStatus === exports.transactionStatus.FAILED) {
+      if (transactionStatus === exports.transactionStatuses.FAILED) {
         eventName = exports.transactionEvents.FAILED
       }
 
@@ -238,7 +238,7 @@ module.exports.newTransaction = async (
     config.paymentProvider = config.paymentProvider[0]
   }
 
-  if (!config.flags.includes(exports.transactionFlag.NO_AMOUNT_CHECK)) {
+  if (!config.flags.includes(exports.transactionFlags.NO_AMOUNT_CHECK)) {
     if (config.paymentProvider.minimumAmount) {
       if (config.amount < config.paymentProvider.minimumAmount) {
         return {
@@ -278,7 +278,7 @@ module.exports.newTransaction = async (
 
   config.transaction = await exports.createTransaction(Object.assign(
     {
-      transactionStatus: exports.transactionStatus.CREATED,
+      transactionStatus: exports.transactionStatuses.CREATED,
       amount: config.amount,
       agentId: config.agentId,
       terminalId: config.terminalId,
@@ -323,7 +323,7 @@ module.exports.newTransaction = async (
     newTransaction.tokenType = config.tokenType
   }
 
-  if (config.transaction.transactionStatus === exports.transactionStatus.CREATED) {
+  if (config.transaction.transactionStatus === exports.transactionStatuses.CREATED) {
     await dTimer.postEvent({
       event: exports.transactionEvents.GLOBAL_TIMEOUT,
       transactionId: config.transaction.id,
@@ -356,7 +356,7 @@ dTimer.handleEvent(async (eventObject) => {
 
       // transaction is already finished, do nothing
       if (
-        [exports.transactionStatus.SUCCESS, exports.transactionStatus.FAILED]
+        [exports.transactionStatuses.SUCCESS, exports.transactionStatuses.FAILED]
           .includes(config.transaction.transactionStatus)
       ) {
         return true
@@ -372,15 +372,15 @@ dTimer.handleEvent(async (eventObject) => {
       }
 
       config.updatedTransaction = Object.assign(
-        { transaction_status_id: exports.transactionStatus.FAILED.id },
+        { transaction_status_id: exports.transactionStatuses.FAILED },
         config.updatedTransaction
       )
 
       await exports.updateTransaction(config.updatedTransaction, eventObject.transactionId)
 
-      if (config.updatedTransaction.transaction_status_id === exports.transactionStatus.FAILED.id) {
+      if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.FAILED.id) {
         exports.emitTransactionEvent(exports.transactionEvents.FAILED, eventObject.transactionId)
-      } else if (config.updatedTransaction.transaction_status_id === exports.transactionStatus.SUCCESS.id) {
+      } else if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.SUCCESS.id) {
         exports.emitTransactionEvent(exports.transactionEvents.SUCCESS, eventObject.transactionId)
       }
 

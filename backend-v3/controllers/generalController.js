@@ -2,6 +2,11 @@
 
 const msgFactory = require('../helpers/msgFactory')
 
+/**
+ * Return 'not implemented' status code
+ *
+ * Its ok ...
+ */
 module.exports.notImplemented = (req, res, next) => {
   msgFactory.expressCreateResponseMessage(
     res,
