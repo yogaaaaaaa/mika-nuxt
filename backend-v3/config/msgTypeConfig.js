@@ -114,7 +114,7 @@ let baseConfig = {
     status: 'auth-400',
     message: 'Invalid credential for authentication'
   },
-  MSG_ERROR_AUTH_NO: {
+  MSG_ERROR_AUTH_INVALID: {
     isError: true,
     httpStatus: 401,
     status: 'auth-401',
@@ -131,12 +131,6 @@ let baseConfig = {
     httpStatus: 400,
     status: 'auth-404',
     message: 'Invalid session token'
-  },
-  MSG_ERROR_WHERE_YOUR_TERMINAL_INFO: {
-    isError: true,
-    httpStatus: 400,
-    status: 'auth-410',
-    message: 'This agent is bounded to terminal(s), please send authentication data inside a cipherbox'
   },
   MSG_ERROR_INVALID_CIPHERBOX: {
     isError: true,

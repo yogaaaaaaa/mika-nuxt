@@ -63,9 +63,9 @@ module.exports.getAgent = async (req, res, next) => {
     ]
   }
 
-  msgFactory.expressCreateResponseMessage(
+  msgFactory.expressCreateResponse(
     res,
-    msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+    msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
     await models.agent.findOne(query)
   )
 }

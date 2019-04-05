@@ -6,7 +6,7 @@ const auth = require('../helpers/auth')
 const notif = require('../helpers/notif')
 
 /**
- * Login controller
+ * Login user
  */
 module.exports.login = async (req, res, next) => {
   let options = {}
@@ -31,30 +31,37 @@ module.exports.login = async (req, res, next) => {
       response.brokerDetail = await notif.agentJoin(response.agentId)
     }
 
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_AUTH_LOGIN,
+      msgFactory.msgTypes.MSG_SUCCESS_AUTH_LOGIN,
       response
     )
     return
   }
 
-  msgFactory.expressCreateResponseMessage(
+  msgFactory.expressCreateResponse(
     res,
-    msgFactory.messageTypes.MSG_ERROR_AUTH_INVALID_CREDENTIAL
+    msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID_CREDENTIAL
   )
 }
 
 /**
- * Logout controller
+ * Logout user
  */
 module.exports.logout = async (req, res, next) => {
   if (auth.removeAuth(req.auth.userId)) {
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_AUTH_LOGOUT
+      msgFactory.msgTypes.MSG_SUCCESS_AUTH_LOGOUT
     )
   }
+}
+
+/**
+ * Logout ALL user
+ */
+module.exports.logoutAll = async (req, res, next) => {
+
 }
 
 /**
@@ -63,15 +70,15 @@ module.exports.logout = async (req, res, next) => {
 module.exports.sessionTokenCheck = async (req, res, next) => {
   let authResult = await auth.checkAuth(req.body.sessionToken)
   if (authResult) {
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
+      msgFactory.msgTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
       authResult
     )
   } else {
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_ERROR_AUTH_INVALID_TOKEN
+      msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID_TOKEN
     )
   }
 }
@@ -81,9 +88,9 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
  */
 module.exports.changePassword = async (req, res, next) => {
   if (await auth.resetAuth(req.auth.userId, req.body.password, req.body.oldPassword)) {
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+      msgFactory.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
   }
 }
@@ -93,9 +100,9 @@ module.exports.changePassword = async (req, res, next) => {
  */
 module.exports.resetPassword = async (req, res, next) => {
   if (auth.resetAuth(req.body.userId, req.body.password)) {
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+      msgFactory.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
   }
 }

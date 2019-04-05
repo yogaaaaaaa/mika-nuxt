@@ -8,7 +8,7 @@ const alto = require('../ppAlto')
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'alto',
-    aliases: ['wechatpay', 'alipay'],
+    classes: ['wechatpay', 'alipay'],
     properties: [
       trxManager.transactionFlows.PROVIDE_TOKEN,
       trxManager.transactionFlows.GET_TOKEN,

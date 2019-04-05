@@ -12,40 +12,50 @@ exports.state = {
   NOT_READY: 2
 }
 
-const components = new Map()
+const modules = new Map()
 
-module.exports.addComponent = async (name) => {
-  if (!components.get(name)) {
-    components.set(name, exports.state.NOT_READY)
+module.exports.addModule = async (name) => {
+  if (!modules.get(name)) {
+    modules.set(name, exports.state.NOT_READY)
   }
 }
 
 module.exports.checkReadyAll = () => {
   let component = 0
-  let readyComponent = 0
+  let readyModules = 0
 
-  for (const state of components) {
+  for (const state of modules) {
     if (state[1] === exports.state.READY) {
-      readyComponent++
+      readyModules++
     }
     component++
   }
 
-  if (component === readyComponent) {
+  if (component === readyModules) {
     events.emit('ready')
   }
 }
 
 module.exports.ready = (name) => {
-  components.set(name, exports.state.READY)
-  console.log('Ready', name)
+  modules.set(name, exports.state.READY)
+  console.log('Module Ready :', name)
   exports.checkReadyAll()
 }
 
 module.exports.notReady = (name) => {
-  components.set(name, exports.state.NOT_READY)
+  console.log('Module Not Ready :', name)
+  modules.set(name, exports.state.NOT_READY)
+  events.emit('notReady')
 }
 
 module.exports.readyAllOnce = (handler) => {
   events.once('ready', handler)
+}
+
+module.exports.readyAll = (handler) => {
+  events.on('ready', handler)
+}
+
+module.exports.notReadyAll = (handler) => {
+  events.on('notReady', handler)
 }

@@ -9,7 +9,7 @@ const midtrans = require('../ppMidtrans')
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'midtrans',
-    aliases: ['gopay'],
+    classes: ['gopay'],
     properties: [
       trxManager.transactionFlows.PROVIDE_TOKEN,
       trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE

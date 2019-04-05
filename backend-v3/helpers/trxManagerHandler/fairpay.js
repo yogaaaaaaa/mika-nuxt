@@ -11,7 +11,7 @@ let fpConfig = null
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'fp',
-    aliases: ['emvDebit', 'emvCredit'],
+    classes: ['emvDebit', 'emvCredit'],
     properties: [
       trxManager.transactionFlows.GATEWAY,
       trxManager.transactionFlows.GET_TOKEN,

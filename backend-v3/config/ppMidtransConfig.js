@@ -6,7 +6,7 @@ const configName = 'ppMidtransConfig'
  * Default Midtrans Payment Gateway Config
  */
 let baseConfig = {
-  notifEndpoint: '/transaction/midtrans/notif',
+  notifEndpoint: '/payment/midtrans/notif',
   baseUrl: 'https://api.sandbox.midtrans.com',
   clientKey: 'SB-Mid-client-VsVCzQXfi43aq964',
   serverKey: 'SB-Mid-server-ohKRhnChkUctCWyKvWHubiVF',

@@ -352,8 +352,6 @@ dTimer.handleEvent(async (eventObject) => {
         updatedTransaction: null
       }
 
-      console.log('hello')
-
       // transaction is already finished, do nothing
       if (
         [exports.transactionStatuses.SUCCESS, exports.transactionStatuses.FAILED]
@@ -362,7 +360,7 @@ dTimer.handleEvent(async (eventObject) => {
         return true
       }
 
-      console.log('Receive transactionTimeout event')
+      console.log('Receive transactionTimeout event for', eventObject.transactionId)
 
       let ppHandler = exports.findPpHandler(config.transaction.paymentProvider.paymentProviderConfig.handler)
 
@@ -372,15 +370,17 @@ dTimer.handleEvent(async (eventObject) => {
       }
 
       config.updatedTransaction = Object.assign(
-        { transaction_status_id: exports.transactionStatuses.FAILED },
+        {
+          transactionStatus: exports.transactionStatuses.FAILED
+        },
         config.updatedTransaction
       )
 
       await exports.updateTransaction(config.updatedTransaction, eventObject.transactionId)
 
-      if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.FAILED.id) {
+      if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.FAILED) {
         exports.emitTransactionEvent(exports.transactionEvents.FAILED, eventObject.transactionId)
-      } else if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.SUCCESS.id) {
+      } else if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.SUCCESS) {
         exports.emitTransactionEvent(exports.transactionEvents.SUCCESS, eventObject.transactionId)
       }
 

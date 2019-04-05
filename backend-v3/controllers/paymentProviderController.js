@@ -60,23 +60,23 @@ module.exports.getAgentPaymentProviders = async (req, res, next) => {
     query.where.id = req.params.id
     let paymentProvider = await models.agentPaymentProvider.findOne(query)
     if (paymentProvider) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
         paymentProvider
       )
     } else {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND
+        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
       )
     }
   } else {
-    let paymentProviders = await models.agentPaymentProvider.findAll()
+    let paymentProviders = await models.agentPaymentProvider.findAll(query)
     if (paymentProviders) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
         paymentProviders.map((data) => {
           let paymentProvider = data.paymentProvider.toJSON()
 
@@ -84,7 +84,7 @@ module.exports.getAgentPaymentProviders = async (req, res, next) => {
 
           paymentProvider._handler = {
             name: ppHandler.name,
-            aliases: ppHandler.aliases,
+            classes: ppHandler.classes,
             properties: ppHandler.properties
           }
 

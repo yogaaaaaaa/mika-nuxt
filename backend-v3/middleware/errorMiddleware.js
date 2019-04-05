@@ -4,45 +4,47 @@ const { validationResult } = require('express-validator/check')
 const msgFactory = require('../helpers/msgFactory')
 
 /**
- * General error handler middleware for internal api
+ * Not found handler middleware, place before errorHandler
+ */
+module.exports.notFoundErrorHandler = (req, res, next) => {
+  msgFactory.expressCreateResponse(
+    res,
+    msgFactory.msgTypes.MSG_ERROR_NOT_FOUND
+  )
+}
+
+/**
+ * General error handler middleware
  */
 module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
     console.log(err.stack)
-    if (res.status === 400) { // status assigned by body-parser when encounter parsing error
-      msgFactory.expressCreateResponseMessage(
+    if (err.status === 400) { // status assigned by body-parser when encounter parsing error
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_BAD_REQUEST
+        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST
       )
     } else {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR
+        msgFactory.msgTypes.MSG_ERROR
       )
     }
   }
 }
 
 /**
- * Not found handler middleware, place before errorHandler
- */
-module.exports.notFoundErrorHandler = (req, res, next) => {
-  msgFactory.expressCreateResponseMessage(
-    res,
-    msgFactory.messageTypes.MSG_ERROR_NOT_FOUND
-  )
-}
-
-/**
  * Handle validator error
  */
 module.exports.validatorErrorHandler = (req, res, next) => {
-  const errors = validationResult(req).array()
-  if (errors.length > 0) {
-    msgFactory.expressCreateResponseMessage(
+  const validationErrors = validationResult(req).array()
+  if (validationErrors.length > 0) {
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_ERROR_BAD_REQUEST,
-      errors
+      msgFactory.msgTypes.MSG_BAD_REQUEST_VALIDATION,
+      validationErrors.map((data) => {
+        return `${data.msg} on ${data.location}.${data.param}`
+      })
     )
     return
   }

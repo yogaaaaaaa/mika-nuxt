@@ -27,9 +27,9 @@ module.exports.cipherbox = async function (req, res, next) {
       }
 
       if (!unbox) {
-        msgFactory.expressCreateResponseMessage(
+        msgFactory.expressCreateResponse(
           res,
-          msgFactory.messageTypes.MSG_ERROR_INVALID_CIPHERBOX
+          msgFactory.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
         )
         return
       }

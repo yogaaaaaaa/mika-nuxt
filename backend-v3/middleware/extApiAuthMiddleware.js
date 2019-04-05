@@ -19,7 +19,7 @@ module.exports.apiAuthErrorHandler = async function (req, res, next) {
   if (req.apiAuth === null) {
     res.status(401)
       .send(
-        msgFactory.generateExtApiResponseMessage(msgFactory.messageTypes.MSG_ERROR_AUTH)
+        msgFactory.generateExtApiResponseMessage(msgFactory.msgTypes.MSG_ERROR_AUTH)
       )
   } else {
     next()
@@ -64,7 +64,7 @@ module.exports.invalidTransactionIdHandler = async (req, res, next) => {
   if (!req.validTransactionId) {
     res.status(404).send(
       msgFactory.generateExtApiResponseMessage(
-        msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND
+        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
       )
     )
     return
@@ -121,7 +121,7 @@ module.exports.invalidAgentIdHandler = async (req, res, next) => {
   if (!req.validAgentId) {
     res.status(404).send(
       msgFactory.generateExtApiResponseMessage(
-        msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND
+        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
       )
     )
     return

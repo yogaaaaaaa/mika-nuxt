@@ -17,17 +17,13 @@ const appConfig = require('./config/appConfig')
  * MIKA app
  */
 const app = express()
+app.disable('x-powered-by')
+app.set('etag', false)
 
 /**
  * Logger middleware
  */
 app.use(logger('dev'))
-
-/**
- * View engine
- */
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'hbs')
 
 /**
  * Notification route for payment gateway
@@ -49,11 +45,6 @@ app.get('/', function (req, res, next) {
 app.use(express.static(path.join(__dirname, 'public')))
 
 /**
- * Internal API
- */
-app.use(appConfig.appPrefixPath, require('./routes/api'))
-
-/**
  * External/Public API
  */
 // app.use('/mika', require('./routes/extApi'))
@@ -66,23 +57,36 @@ app.use(appConfig.appPrefixPath, require('./routes/api'))
 // }
 
 /**
- * Global error handler
+ * Internal API
  */
-app.use(function (req, res, next) {
-  // Forward 404 error to global error handler
-  var err = new Error('Not Found')
-  err.status = 404
-  next(err)
+app.use(appConfig.appPrefixPath, require('./routes/api'))
+
+/**
+ * Global 404 handler
+ */
+app.use((req, res, next) => {
+  res
+    .status(404)
+    .type('text')
+    .send('URL Not Found')
 })
 
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message
-  res.locals.error = req.app.get('env') === 'development' ? err : {}
+/**
+ * Global Error handler
+ */
+app.use((err, req, res, next) => {
+  let message = 'Internal Server Error'
 
-  // render the error page
-  res.status(err.status || 500)
-  res.render('error')
+  if (err) {
+    if (req.app.get('env') === 'development') {
+      message = `${message}\n${err.message}`
+    }
+  }
+
+  res
+    .status(500)
+    .type('text')
+    .send(message)
 })
 
 /**
@@ -90,7 +94,7 @@ app.use(function (err, req, res, next) {
  */
 ready.readyAllOnce(() => {
   app.listen(appConfig.listenPort, () => {
-    console.log(`${appConfig.name} is running on port ${appConfig.listenPort}`)
+    console.log(`${appConfig.name} is listening on port ${appConfig.listenPort}`)
   })
 })
 

@@ -8,7 +8,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
-const router = express.Router()
 const { body } = require('express-validator/check')
 
 const auth = require('../helpers/auth')
@@ -24,6 +23,8 @@ const authMiddleware = require('../middleware/authMiddleware')
 const errorMiddleware = require('../middleware/errorMiddleware')
 const queryMiddleware = require('../middleware/queryMiddleware')
 
+const router = express.Router()
+
 router.use([
   cors({
     origin: '*',
@@ -32,7 +33,6 @@ router.use([
     optionsSuccessStatus: 200
   }),
   bodyParser.json(),
-  bodyParser.urlencoded({ extended: false }),
   cookieParser()
 ])
 
@@ -50,6 +50,11 @@ router.post('/auth/logout',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   authController.logout
+)
+router.post('/auth/logout_all',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
 )
 router.post('/auth/check',
   body('sessionToken').exists(),
@@ -70,13 +75,11 @@ router.post('/auth/reset_password',
   body('userId').exists(),
   body('password').exists(),
   errorMiddleware.validatorErrorHandler,
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
   authController.resetPassword
 )
 
 /**
- * Resource related routes
+ * Resource(s) related routes
  */
 router.get('/resources/:resourceId/:filesId',
   authMiddleware.auth(),
@@ -86,7 +89,22 @@ router.get('/resources/:resourceId/:filesId',
 /**
  * General utilities routes
  */
-router.post('/utilities/bin_check',
+router.post('/utilities/emv/bin_check',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get('/utilities/supported_aliases',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get('/utilities/supported_handlers',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get('/utilities/app_version',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
@@ -115,13 +133,13 @@ router.post('/agent/transaction',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   cipherboxMiddleware.cipherbox,
-  body('amount').exists(),
+  body('amount').exists().isNumeric(),
   body('paymentProviderId').exists(),
-  body('userToken').optional({ default: null }),
-  body('userTokenType').optional({ default: null }),
-  body('locationLong').optional({ default: null }),
-  body('locationLat').optional({ default: null }),
-  body('flags').optional({ default: [] }),
+  body('userToken').optional(),
+  body('userTokenType').optional(),
+  body('locationLong').optional().isLatLong(),
+  body('locationLat').optional().isLatLong(),
+  body('flags').optional().isArray(),
   errorMiddleware.validatorErrorHandler,
   transactionController.newTransaction
 )
@@ -161,6 +179,14 @@ router.get([ '/merchants', '/merchants/:id' ],
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
+router.get([ '/merchants/:id/terminals', '/merchants/:merchantId/terminals/:terminalId' ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler
+)
+router.post('/merchants/:id/terminal',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler
+)
 router.get([ '/payment_providers', '/payment_providers/:id' ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
@@ -171,18 +197,30 @@ router.get('/view_groups/:viewGroupId/transactions/:id',
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
-router.post('/merchant',
+router.post('/terminals',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler
 )
+router.post('/merchant',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
 router.post('/terminal',
   authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.post('/terminal/:id/generate_cbkey',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
 )
 router.post('/resources/:resourceId',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented)
+  generalController.notImplemented
+)
 
 router.use(errorMiddleware.notFoundErrorHandler)
 router.use(errorMiddleware.errorHandler)

@@ -6,9 +6,9 @@ const trxManager = require('../helpers/trxManager')
 const apiTransactionCallback = require('../helpers/extApiTransactionCallback')
 
 module.exports.getRoot = async (req, res, next) => {
-  res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC,
+      apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC,
       'Mika Public API'
     )
   )
@@ -26,9 +26,9 @@ module.exports.getTransactions = async (req, res, next) => {
     data = await apiObjectFactory.generateTransactionObjectsByMerchantIds(req.apiAuth.merchantIds, page)
   }
 
-  res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC, data
+      apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC, data
     )
   )
 }
@@ -43,9 +43,9 @@ module.exports.getTransactionsByAgent = async (req, res, next) => {
 
   data = await apiObjectFactory.generateTransactionObjectsByAgentId(req.params.agentId, page)
 
-  res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC, data
+      apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC, data
     )
   )
 }
@@ -54,9 +54,9 @@ module.exports.getTransactionById = async (req, res, next) => {
   if (req.params.transactionId) {
     let transactionObject = await apiObjectFactory.generateTransactionObject(req.params.transactionId, req.apiAuth.merchantIds)
     if (transactionObject) {
-      res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC.code).send(
+      res.status(apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
-          apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC,
+          apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC,
           transactionObject
         )
       )
@@ -64,9 +64,9 @@ module.exports.getTransactionById = async (req, res, next) => {
     }
   }
 
-  res.status(apiMsgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND
+      apimsgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
     )
   )
 }
@@ -78,18 +78,18 @@ module.exports.getAgents = async (req, res, next) => {
     page = req.query.page
   }
 
-  res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC,
+      apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC,
       await apiObjectFactory.generateAgentObjectsByMerchantIds(req.apiAuth.merchantIds, page)
     )
   )
 }
 
 module.exports.getAgentsById = async (req, res, next) => {
-  res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_SUCCESS_GENERIC,
+      apimsgFactory.msgTypes.MSG_SUCCESS_GENERIC,
       await apiObjectFactory.generateAgentObject(req.params.agentId)
     )
   )
@@ -100,35 +100,35 @@ module.exports.postTransaction = async (req, res, next) => {
 
   if (createdTransaction.error) {
     if (createdTransaction.error === trxManager.errorCode.AMOUNT_TOO_LOW) {
-      res.status(apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_LOW.code).send(
+      res.status(apimsgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_LOW.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
-          apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_LOW
+          apimsgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_LOW
         )
       )
       return
     }
 
     if (createdTransaction.error === trxManager.errorCode.AMOUNT_TOO_HIGH) {
-      res.status(apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_HIGH.code).send(
+      res.status(apimsgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_HIGH.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
-          apiMsgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_HIGH
+          apimsgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_HIGH
         )
       )
       return
     }
 
     if (createdTransaction.error === trxManager.errorCode.PAYMENT_GATEWAY_NOT_FOR_YOU) {
-      res.status(apiMsgFactory.messageTypes.MSG_ERROR_PG_NOT_FOR_YOU.code).send(
+      res.status(apimsgFactory.msgTypes.MSG_ERROR_PG_NOT_FOR_YOU.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
-          apiMsgFactory.messageTypes.MSG_ERROR_PG_NOT_FOR_YOU
+          apimsgFactory.msgTypes.MSG_ERROR_PG_NOT_FOR_YOU
         )
       )
       return
     }
 
-    res.status(apiMsgFactory.messageTypes.MSG_ERROR_GENERIC.code).send(
+    res.status(apimsgFactory.msgTypes.MSG_ERROR_GENERIC.code).send(
       apiMsgFactory.generateExtApiResponseMessage(
-        apiMsgFactory.messageTypes.MSG_ERROR_GENERIC
+        apimsgFactory.msgTypes.MSG_ERROR_GENERIC
       )
     )
     return
@@ -140,9 +140,9 @@ module.exports.postTransaction = async (req, res, next) => {
     await apiTransactionCallback.addTransactionCallback(req.apiAuth.keyId, req.body.webhookUrl, createdTransaction.transactionId)
   }
 
-  res.status(apiMsgFactory.messageTypes.MSG_SUCCESS_CREATED.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_SUCCESS_CREATED.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_SUCCESS_CREATED,
+      apimsgFactory.msgTypes.MSG_SUCCESS_CREATED,
       mappedTransactionData
     )
   )
@@ -151,17 +151,17 @@ module.exports.postTransaction = async (req, res, next) => {
 module.exports.debugSetTransactionStatus = async (req, res, next) => {
   if (req.params.transactionId && req.params.transactionStatus) {
     if (await trxManager.forceTransactionStatus(req.params.transactionId, req.params.transactionStatus)) {
-      res.status(apiMsgFactory.messageTypes.MSG_OPS_SUCCESS_GENERIC.code).send(
+      res.status(apimsgFactory.msgTypes.MSG_OPS_SUCCESS_GENERIC.code).send(
         apiMsgFactory.generateExtApiResponseMessage(
-          apiMsgFactory.messageTypes.MSG_OPS_SUCCESS_GENERIC
+          apimsgFactory.msgTypes.MSG_OPS_SUCCESS_GENERIC
         )
       )
       return
     }
   }
-  res.status(apiMsgFactory.messageTypes.MSG_ERROR_BAD_REQUEST.code).send(
+  res.status(apimsgFactory.msgTypes.MSG_ERROR_BAD_REQUEST.code).send(
     apiMsgFactory.generateExtApiResponseMessage(
-      apiMsgFactory.messageTypes.MSG_ERROR_BAD_REQUEST
+      apimsgFactory.msgTypes.MSG_ERROR_BAD_REQUEST
     )
   )
 }

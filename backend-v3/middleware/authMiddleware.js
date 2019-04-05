@@ -52,16 +52,16 @@ module.exports.auth = (authUserTypes = null, roles = null) => async (req, res, n
  */
 module.exports.authErrorHandler = async (req, res, next) => {
   if (req.auth === null) {
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_ERROR_AUTH_NO
+      msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID
     )
     return
   } else {
     if (req.authInvalidUserType) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_AUTH_FORBIDDEN
+        msgFactory.msgTypes.MSG_ERROR_AUTH_FORBIDDEN
       )
       return
     }

@@ -5,30 +5,31 @@
  * to generate message format for Internal API and External/Public API
  */
 
-module.exports.messageTypes = require('../config/msgTypeConfig')
+/**
+ * Event type enumeration
+ */
 module.exports.eventTypes = require('../config/eventTypeConfig')
+
+/**
+ * Response Message type enumeration
+ */
+module.exports.msgTypes = require('../config/msgTypeConfig')
 
 /**
  * Generate API response message
  */
-module.exports.createResponseMessage = (
+module.exports.createResponse = (
   messageType,
-  data = null,
-  meta = null,
+  data = undefined,
+  meta = undefined,
   toJSON = false
 ) => {
   let msg = {
     status: messageType.status,
     message: messageType.message,
-    isError: messageType.isError || false
-  }
-
-  if (meta) {
-    msg.meta = meta
-  }
-
-  if (data) {
-    msg.data = data
+    isError: messageType.isError || false,
+    meta,
+    data
   }
 
   if (toJSON) {
@@ -41,22 +42,16 @@ module.exports.createResponseMessage = (
 /**
  * Generate Notification message
  */
-module.exports.createNotificationMessage = (
+module.exports.createNotification = (
   eventType = exports.eventTypes.EVENT_GENERIC,
-  data = null,
-  meta = null,
+  data = undefined,
+  meta = undefined,
   toJSON = false
 ) => {
   let msg = {
-    eventType: eventType
-  }
-
-  if (meta) {
-    msg.meta = meta
-  }
-
-  if (data) {
-    msg.data = data
+    eventType: eventType,
+    meta,
+    data
   }
 
   if (toJSON) {
@@ -80,13 +75,13 @@ module.exports.createPaginationMeta = (page, perPage, totalCount) => {
 /**
  * Directly send response message via express.js res variable
  */
-module.exports.expressCreateResponseMessage = (
+module.exports.expressCreateResponse = (
   res,
   messageType,
-  data = null,
-  meta = null
+  data = undefined,
+  meta = undefined
 ) => {
   res
     .status(messageType.httpStatus)
-    .send(exports.createResponseMessage(messageType, data, meta))
+    .send(exports.createResponse(messageType, data, meta))
 }

@@ -21,7 +21,7 @@ module.exports.defaultCreateClient = () => {
   let currentCount = redisClientCount
   redisClientCount++
 
-  ready.addComponent(`redis${currentCount}`)
+  ready.addModule(`redis${currentCount}`)
   redisClient.on('connect', () => {
     ready.ready(`redis${currentCount}`)
   })

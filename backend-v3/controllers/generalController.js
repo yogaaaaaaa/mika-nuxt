@@ -8,8 +8,8 @@ const msgFactory = require('../helpers/msgFactory')
  * Its ok ...
  */
 module.exports.notImplemented = (req, res, next) => {
-  msgFactory.expressCreateResponseMessage(
+  msgFactory.expressCreateResponse(
     res,
-    msgFactory.messageTypes.MSG_ERROR_NOT_IMPLEMENTED
+    msgFactory.msgTypes.MSG_ERROR_NOT_IMPLEMENTED
   )
 }

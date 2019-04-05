@@ -13,7 +13,7 @@ let baseConfig = {
   sessionTokenHeader: 'x-access-token',
   debugKey: process.env.MIKA_APP_DEBUG_KEY || 'debug_mika',
   listenPort: process.env.MIKA_APP_PORT || 12000,
-  appPrefixPath: process.env.MIKA_API_PREFIX_PATH || '/'
+  appPrefixPath: process.env.MIKA_API_PREFIX_PATH || '/api'
 }
 
 /**

@@ -36,37 +36,37 @@ module.exports.newTransaction = async (req, res, next) => {
   // translate error message
   if (newTransaction.error) {
     if (newTransaction.error === trxManager.errorCodes.AMOUNT_TOO_LOW) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_LOW
+        msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_LOW
       )
     } else if (newTransaction.error === trxManager.errorCodes.AMOUNT_TOO_HIGH) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_AMOUNT_TOO_HIGH
+        msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_HIGH
       )
     } else if (newTransaction.error === trxManager.errorCodes.NEED_USER_TOKEN) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_NEED_USER_TOKEN
+        msgFactory.msgTypes.MSG_ERROR_NEED_USER_TOKEN
       )
     } else if (newTransaction.error === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_FOR_YOU
+        msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_FOR_YOU
       )
     } else {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_CANNOT_CREATE_TRANSACTION,
+        msgFactory.msgTypes.MSG_ERROR_CANNOT_CREATE_TRANSACTION,
         newTransaction
       )
     }
   }
 
-  msgFactory.expressCreateResponseMessage(
+  msgFactory.expressCreateResponse(
     res,
-    msgFactory.messageTypes.MSG_SUCCESS_TRANSACTION_CREATED,
+    msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
     newTransaction
   )
 }
@@ -134,23 +134,23 @@ module.exports.getAgentTransactions = async (req, res, next) => {
 
     let transaction = await models.transaction.findOne(query)
     if (transaction) {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
         transaction
       )
     } else {
-      msgFactory.expressCreateResponseMessage(
+      msgFactory.expressCreateResponse(
         res,
-        msgFactory.messageTypes.MSG_ERROR_ENTITY_NOT_FOUND,
+        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND,
         transaction
       )
     }
   } else {
     let transactions = await models.transaction.findAndCountAll(Object.assign(query, req.sequelizePagination))
-    msgFactory.expressCreateResponseMessage(
+    msgFactory.expressCreateResponse(
       res,
-      msgFactory.messageTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+      msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
       transactions.rows,
       msgFactory.createPaginationMeta(req.page, req.per_page, transactions.count)
     )

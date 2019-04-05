@@ -12,6 +12,7 @@ const ppMidtransNotifController = require('../controllers/ppMidtransNotifControl
 const ppMidtransConfig = require('../config/ppMidtransConfig')
 
 const router = express.Router()
+
 router.use(bodyParser.json())
 
 router.post(ppMidtransConfig.notifEndpoint, ppMidtransNotifController.midtransHandleNotification)

@@ -24,3 +24,9 @@ sequelize db:migrate --config ./config/dbConfig.json
 sequelize db:seed --config ./config/dbConfig.json
 ```
 New schema MUST be added via migration and make sure any foreign key relation is valid.
+
+## Prerequisites
+Services below is needed to start mika backend app
+  - SQL database (anything supported by sequelize)
+  - Redis
+  - Mosquitto MQTT broker with mosquitto-auth plugin

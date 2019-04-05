@@ -9,7 +9,7 @@ const redis = require('./redis')
 const crypto = require('crypto')
 
 const ready = require('./ready')
-ready.addComponent('mqtt')
+ready.addModule('mqtt')
 
 module.exports.mqtt = mqtt
 

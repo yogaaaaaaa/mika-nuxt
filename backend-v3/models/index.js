@@ -4,6 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const Sequelize = require('sequelize')
 
+const ready = require('../helpers/ready')
+
 const basename = path.basename(__filename)
 
 const config = require(path.join(__dirname, '..', 'config', 'dbConfig.json'))[process.env.NODE_ENV || 'development']
@@ -16,6 +18,17 @@ if (config.use_env_variable) {
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config)
 }
+
+ready.addModule('database')
+sequelize
+  .authenticate()
+  .then(() => {
+    ready.ready('database')
+  })
+  .catch((err) => {
+    console.log(err)
+    process.exit(1)
+  })
 
 fs
   .readdirSync(__dirname)

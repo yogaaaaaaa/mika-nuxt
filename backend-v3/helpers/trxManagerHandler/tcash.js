@@ -9,7 +9,7 @@ const tcash = require('../ppTcash')
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'tcash',
-    aliases: ['linkaja', 'tcash'],
+    classes: ['linkaja', 'tcash'],
     properties: [
       trxManager.transactionFlows.PROVIDE_TOKEN,
       trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
