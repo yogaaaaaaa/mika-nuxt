@@ -72,9 +72,9 @@ module.exports.newTransaction = async (req, res, next) => {
 }
 
 /**
- * Post-action transaction
+ * Transaction follow up
  */
-module.exports.postTransaction = async (req, res, next) => {
+module.exports.transactionFollowUp = async (req, res, next) => {
 }
 
 /**
@@ -129,8 +129,8 @@ module.exports.getAgentTransactions = async (req, res, next) => {
     ]
   })
 
-  if (req.params.id) {
-    query.where.id = req.params.id
+  if (req.params.transactionId) {
+    query.where.id = req.params.transactionId
 
     let transaction = await models.transaction.findOne(query)
     if (transaction) {
@@ -147,12 +147,19 @@ module.exports.getAgentTransactions = async (req, res, next) => {
       )
     }
   } else {
-    let transactions = await models.transaction.findAndCountAll(Object.assign(query, req.sequelizePagination))
+    query.where = Object.assign(query.where, req.filtersWhereSequelize)
+    let transactions = await models.transaction.findAndCountAll(
+      Object.assign(
+        query,
+        req.paginationSequelize
+      )
+    )
+
     msgFactory.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
+      transactions.rows.length > 0 ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND,
       transactions.rows,
-      msgFactory.createPaginationMeta(req.page, req.per_page, transactions.count)
+      msgFactory.createPaginationMeta(req.query.page, req.query.per_page, transactions.count)
     )
   }
 }

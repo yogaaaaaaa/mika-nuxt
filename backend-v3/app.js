@@ -28,7 +28,7 @@ app.use(logger('dev'))
 /**
  * Notification route for payment gateway
  */
-// app.use(require('./routes/notifTcash'))
+app.use(require('./routes/notifTcash'))
 app.use(require('./routes/notifAlto'))
 app.use(require('./routes/notifMidtrans'))
 

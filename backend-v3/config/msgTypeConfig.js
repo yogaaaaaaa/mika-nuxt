@@ -57,30 +57,30 @@ let baseConfig = {
     message: 'URL Not Found'
   },
 
-  MSG_SUCCESS_ENTITY_RETRIEVED: {
+  MSG_SUCCESS_ENTITY_FOUND: {
     httpStatus: 200,
     status: 'ent-200',
-    message: 'Entity retrieved'
+    message: 'Entity(s) found'
   },
   MSG_SUCCESS_ENTITY_CREATED: {
     httpStatus: 201,
     status: 'ent-201',
-    message: 'Entity created'
+    message: 'Entity(s) created'
   },
   MSG_SUCCESS_ENTITY_UPDATED: {
     httpStatus: 201,
     status: 'ent-202',
-    message: 'Entity updated'
+    message: 'Entity(s) updated'
   },
   MSG_SUCCESS_ENTITY_DELETED: {
     httpStatus: 201,
     status: 'ent-203',
-    message: 'Entity deleted'
+    message: 'Entity(s) deleted'
   },
   MSG_SUCCESS_DELETED_SOFT: {
     httpStatus: 201,
     status: 'ent-204',
-    message: 'Entity mark as deleted'
+    message: 'Entity(s) is mark as deleted'
   },
   MSG_ERROR_ENTITY_NOT_FOUND: {
     httpStatus: 404,
@@ -142,7 +142,12 @@ let baseConfig = {
   MSG_SUCCESS_TRANSACTION_CREATED: {
     httpStatus: 200,
     status: 'trx-200',
-    message: 'Transaction created successfully'
+    message: 'Transaction created'
+  },
+  MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP: {
+    httpStatus: 200,
+    status: 'trx-201',
+    message: 'Transaction pending, follow up needed'
   },
   MSG_SUCCESS_TRANSACTION_REDIRECTED: {
     httpStatus: 307,
@@ -157,24 +162,24 @@ let baseConfig = {
   MSG_ERROR_NEED_USER_TOKEN: {
     httpStatus: 400,
     status: 'trx-401',
-    message: 'This payment provider need user token'
+    message: 'User token needed'
   },
   MSG_ERROR_USER_TOKEN_NOT_FOR_ME: {
     httpStatus: 400,
     status: 'trx-401',
-    message: 'User token type is not supported by payment provider'
+    message: 'User token type is not supported'
   },
   MSG_ERROR_AMOUNT_TOO_LOW: {
     isError: true,
     httpStatus: 400,
     status: 'trx-440',
-    message: 'Amount is too LOW for this payment provider'
+    message: 'Transaction amount is too LOW'
   },
   MSG_ERROR_AMOUNT_TOO_HIGH: {
     isError: true,
     httpStatus: 400,
     status: 'trx-441',
-    message: 'Amount is too HIGH for this payment provider'
+    message: 'Transaction amount is too HIGH'
   },
   MSG_ERROR_CANNOT_CREATE_TRANSACTION: {
     isError: true,
@@ -186,7 +191,7 @@ let baseConfig = {
     isError: true,
     httpStatus: 500,
     status: 'trx-501',
-    message: 'Cannot create transaction, remote payment provider is not responding'
+    message: 'Cannot create transaction, remote payment provider not responding'
   }
 }
 

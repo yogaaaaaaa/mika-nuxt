@@ -30,3 +30,5 @@ Services below is needed to start mika backend app
   - SQL database (anything supported by sequelize)
   - Redis
   - Mosquitto MQTT broker with mosquitto-auth plugin
+
+## Configuration

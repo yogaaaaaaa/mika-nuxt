@@ -242,7 +242,7 @@ module.exports.newTransaction = async (
     if (config.paymentProvider.minimumAmount) {
       if (config.amount < config.paymentProvider.minimumAmount) {
         return {
-          error: exports.errorCode.AMOUNT_TOO_LOW,
+          error: exports.errorCodes.AMOUNT_TOO_LOW,
           errorMinimumAmount: config.paymentProvider.minimumAmount
         }
       }
@@ -251,7 +251,7 @@ module.exports.newTransaction = async (
     if (config.paymentProvider.maximumAmount) {
       if (config.amount > config.paymentProvider.maximumAmount) {
         return {
-          error: exports.errorCode.AMOUNT_TOO_HIGH,
+          error: exports.errorCodes.AMOUNT_TOO_HIGH,
           errorMaximumAmount: config.paymentProvider.maximumAmount
         }
       }

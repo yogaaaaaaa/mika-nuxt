@@ -20,8 +20,8 @@ module.exports.msgTypes = require('../config/msgTypeConfig')
  */
 module.exports.createResponse = (
   messageType,
-  data = undefined,
-  meta = undefined,
+  data,
+  meta,
   toJSON = false
 ) => {
   let msg = {
@@ -44,8 +44,8 @@ module.exports.createResponse = (
  */
 module.exports.createNotification = (
   eventType = exports.eventTypes.EVENT_GENERIC,
-  data = undefined,
-  meta = undefined,
+  data,
+  meta,
   toJSON = false
 ) => {
   let msg = {
@@ -62,24 +62,24 @@ module.exports.createNotification = (
 }
 
 /**
- * Generate meta object for pagination
+ * Create meta object for pagination
  */
 module.exports.createPaginationMeta = (page, perPage, totalCount) => {
   return {
     page: page,
-    pages: Math.ceil(totalCount / perPage),
+    ofPages: Math.ceil(totalCount / perPage),
     totalCount: totalCount
   }
 }
 
 /**
- * Directly send response message via express.js res variable
+ * Directly send response message via express.js `res` variable
  */
 module.exports.expressCreateResponse = (
   res,
   messageType,
-  data = undefined,
-  meta = undefined
+  data,
+  meta
 ) => {
   res
     .status(messageType.httpStatus)

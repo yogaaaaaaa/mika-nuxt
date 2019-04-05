@@ -118,15 +118,16 @@ router.get('/agent',
   authMiddleware.authErrorHandler,
   agentController.getAgent
 )
-router.get([ '/agent/payment_providers', '/agent/payment_providers/:id' ],
+router.get([ '/agent/payment_providers', '/agent/payment_providers/:paymentProviderId' ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   paymentProviderController.getAgentPaymentProviders
 )
-router.get([ '/agent/transactions', '/agent/transactions/:id' ],
+router.get([ '/agent/transactions', '/agent/transactions/:transactionId' ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  queryMiddleware.sequelizePagination,
+  queryMiddleware.paginationToSequelize,
+  queryMiddleware.filtersToSequelize,
   transactionController.getAgentTransactions
 )
 router.post('/agent/transaction',
@@ -136,7 +137,7 @@ router.post('/agent/transaction',
   body('amount').exists().isNumeric(),
   body('paymentProviderId').exists(),
   body('userToken').optional(),
-  body('userTokenType').optional(),
+  body('userTokenType').optional().isString(),
   body('locationLong').optional().isLatLong(),
   body('locationLat').optional().isLatLong(),
   body('flags').optional().isArray(),
@@ -174,45 +175,38 @@ router.get('/merchant_pic',
 /**
  * Administration related route
  */
-router.get([ '/merchants', '/merchants/:id' ],
+router.get([ '/merchants', '/merchants/:merchantId' ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
-router.get([ '/merchants/:id/terminals', '/merchants/:merchantId/terminals/:terminalId' ],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler
-)
-router.post('/merchants/:id/terminal',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler
-)
-router.get([ '/payment_providers', '/payment_providers/:id' ],
+router.get([ '/merchants/:merchantId/terminals', '/merchants/:merchantId/terminals/:terminalId' ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
-router.get('/view_groups/:viewGroupId/transactions/:id',
+router.post('/merchants/:merchantId/terminals',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.post([ '/terminals', '/terminals/:terminalId' ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.post('/terminals/:terminalId/generate_cbkey',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get([ '/payment_providers', '/payment_providers/:paymentProviderId' ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get(['/view_groups/:viewGroupId/transactions', '/view_groups/:viewGroupId/transactions/:transactionId'],
   authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post('/terminals',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler
-)
-router.post('/merchant',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post('/terminal',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post('/terminal/:id/generate_cbkey',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
