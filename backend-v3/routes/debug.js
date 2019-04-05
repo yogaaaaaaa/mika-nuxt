@@ -12,6 +12,7 @@ const appConfig = require('../config/appConfig')
 const router = express.Router()
 
 router.use(bodyParser.json())
+
 router.use((req, res, next) => {
   if (req.headers[appConfig.debugHeader] === appConfig.debugKey) {
     next()

@@ -28,26 +28,9 @@ app.use(logger('dev'))
 /**
  * Notification route for payment gateway
  */
-app.use(require('./routes/notifTcash'))
+// app.use(require('./routes/notifTcash'))
 app.use(require('./routes/notifAlto'))
 app.use(require('./routes/notifMidtrans'))
-
-/**
- * Home page
- */
-app.get('/', function (req, res, next) {
-  res.render('index', { title: `${appConfig.name}` })
-})
-
-/**
- * Public resources
- */
-app.use(express.static(path.join(__dirname, 'public')))
-
-/**
- * External/Public API
- */
-// app.use('/mika', require('./routes/extApi'))
 
 /**
  * Debug Route
@@ -57,9 +40,28 @@ app.use(express.static(path.join(__dirname, 'public')))
 // }
 
 /**
+ * External/Public API
+ */
+// app.use('/mika', require('./routes/extApi'))
+
+/**
  * Internal API
  */
-app.use(appConfig.appPrefixPath, require('./routes/api'))
+app.use('/api', require('./routes/api'))
+
+/**
+ * Public resources
+ */
+app.use('/thumbnails', express.static(path.join(__dirname, 'public', 'images')))
+
+/**
+ * Home page
+ */
+app.get('/', function (req, res, next) {
+  res
+    .type('text')
+    .send(`${appConfig.name}`)
+})
 
 /**
  * Global 404 handler

@@ -29,7 +29,6 @@
     "pm2": "^3.1.2",
     "redis": "^2.8.0",
     "sequelize": "^4.41.2",
-    "serve-favicon": "~2.4.5",
     "superagent": "^4.1.0",
     "superagent-retry-delay": "^2.3.0"
   }
