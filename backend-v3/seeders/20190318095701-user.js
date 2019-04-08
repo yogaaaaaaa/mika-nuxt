@@ -40,7 +40,7 @@ module.exports = {
       {
         id: 6,
         username: 'agent3',
-        password: '2a$10$vV96Nwx2YtASyPeXcvPJJexfMEvtde1mZJ95wD1WYJ3Fzb9McS6nW',
+        password: '$2a$10$gqP6Pohq69sK3vRar90pjOVq8VrOz2GYrh2.0LDU3gu4Z0MWaNpeq',
         userType: 'agent'
       },
       {

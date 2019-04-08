@@ -22,6 +22,11 @@ module.exports.newTransaction = async (req, res, next) => {
     options.userTokenType = req.body.userTokenType
   }
 
+  if (req.body.locationLong && req.body.locationLat) {
+    options.locationLat = req.body.locationLat
+    options.locationLong = req.body.locationLong
+  }
+
   if (req.body.flags) {
     options.flags = req.body.flags
   }

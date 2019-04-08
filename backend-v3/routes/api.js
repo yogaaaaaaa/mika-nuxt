@@ -134,13 +134,13 @@ router.post('/agent/transaction',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   cipherboxMiddleware.processCipherbox,
-  body('amount').exists().isNumeric(),
+  body('amount').isNumeric(),
   body('paymentProviderId').exists(),
   body('userToken').optional(),
-  body('userTokenType').optional().isString(),
-  body('locationLong').optional().isLatLong(),
-  body('locationLat').optional().isLatLong(),
-  body('flags').optional().isArray(),
+  body('userTokenType').isString().optional(),
+  body('locationLong').isNumeric().optional(),
+  body('locationLat').isNumeric().optional(),
+  body('flags').isArray().optional(),
   errorMiddleware.validatorErrorHandler,
   transactionController.newTransaction
 )
@@ -190,6 +190,22 @@ router.post('/merchants/:merchantId/terminals',
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
+router.post(['/merchants/:merchantId/terminals'],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.post('/merchants/:merchantId/agents',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+
+router.post([ '/terminals', '/terminals/:terminalId' ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
 router.post([ '/terminals', '/terminals/:terminalId' ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
@@ -200,16 +216,19 @@ router.post('/terminals/:terminalId/generate_cbkey',
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
+
 router.get([ '/payment_providers', '/payment_providers/:paymentProviderId' ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
+
 router.get(['/view_groups/:viewGroupId/transactions', '/view_groups/:viewGroupId/transactions/:transactionId'],
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
+
 router.post('/resources/:resourceId',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,

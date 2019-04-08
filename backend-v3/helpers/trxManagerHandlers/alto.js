@@ -11,12 +11,13 @@ module.exports = (trxManager) => {
     classes: ['wechatpay', 'alipay'],
     properties: {
       flows: [
-        trxManager.transactionFlows.GET_TOKEN
+        trxManager.transactionFlows.GET_TOKEN,
+        trxManager.transactionFlows.PROVIDE_TOKEN
       ],
       tokenTypes: [
-        trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ],
       userTokenTypes: [
+        trxManager.tokenTypes.USER_TOKEN_QRCODE_CONTENT
       ]
     },
     async handler (config) {
