@@ -77,7 +77,8 @@ module.exports.doAuth = async function (username, password, options = {}) {
 
   let authResult = {
     auth: null,
-    sessionToken: null
+    sessionToken: null,
+    authExpirySecond: appConfig.authExpirySecond
   }
 
   if (user) {
@@ -203,10 +204,10 @@ module.exports.checkAuth = async (sessionToken) => {
 /**
  * Remove auth by token
  */
-module.exports.removeAuth = async (userId) => {
-  let auth = exports.verifyToken(exports.getSessionToken(userId))
+module.exports.removeAuth = async (sessionToken) => {
+  let auth = exports.verifyToken(sessionToken)
   if (auth) {
-    await exports.deleteSessionToken(userId)
+    await exports.deleteSessionToken(auth.userId)
     if (auth.userType === exports.userTypes.AGENT) {
       await notif.removeAgent(auth.agentId)
     }

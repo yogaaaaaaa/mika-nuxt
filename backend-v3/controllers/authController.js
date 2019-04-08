@@ -22,7 +22,8 @@ module.exports.login = async (req, res, next) => {
 
   if (authResult) {
     let response = Object.assign({
-      sessionToken: authResult.sessionToken
+      sessionToken: authResult.sessionToken,
+      authExpirySecond: authResult.authExpirySecond
     }, authResult.auth)
 
     if (authResult.brokerDetail) {

@@ -64,17 +64,38 @@ module.exports.newTransaction = async (req, res, next) => {
     }
   }
 
+  if (newTransaction.redirectTo) {
+    msgFactory.expressCreateResponse(
+      res,
+      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_REDIRECTED,
+      newTransaction
+    )
+    return
+  }
+
+  if (newTransaction.followUpType) {
+    msgFactory.expressCreateResponse(
+      res,
+      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP,
+      newTransaction
+    )
+    return
+  }
+
+  if (newTransaction.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+    msgFactory.expressCreateResponse(
+      res,
+      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
+      newTransaction
+    )
+    return
+  }
+
   msgFactory.expressCreateResponse(
     res,
     msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
     newTransaction
   )
-}
-
-/**
- * Transaction follow up
- */
-module.exports.transactionFollowUp = async (req, res, next) => {
 }
 
 /**

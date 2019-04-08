@@ -145,9 +145,14 @@ let baseConfig = {
       status: 'trx-200',
       message: 'Transaction created'
     },
-    MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP: {
+    MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS: {
       httpStatus: 200,
       status: 'trx-201',
+      message: 'Transaction created and processed successfully'
+    },
+    MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP: {
+      httpStatus: 200,
+      status: 'trx-202',
       message: 'Transaction pending, follow up needed'
     },
     MSG_SUCCESS_TRANSACTION_REDIRECTED: {

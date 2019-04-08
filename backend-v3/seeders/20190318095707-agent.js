@@ -8,21 +8,24 @@ module.exports = {
         name: 'Agent Maju Tembak',
         boundedToTerminal: true,
         userId: 4,
-        merchantId: 1
+        merchantId: 1,
+        outletId: 1
       },
 
       {
         id: 2,
         name: 'Agent Super Moe 1',
         userId: 5,
-        merchantId: 2
+        merchantId: 2,
+        outletId: 2
       },
       {
         id: 3,
         name: 'Agent Super Moe 2',
         boundedToTerminal: true,
         userId: 6,
-        merchantId: 2
+        merchantId: 2,
+        outletId: 3
       },
 
       {

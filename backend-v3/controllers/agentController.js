@@ -63,9 +63,11 @@ module.exports.getAgent = async (req, res, next) => {
     ]
   }
 
+  let agent = await models.agent.findOne(query)
+
   msgFactory.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
-    await models.agent.findOne(query)
+    agent ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+    agent
   )
 }

@@ -70,9 +70,11 @@ module.exports.refreshAgent = async (agentId, expirySecond) => {
 module.exports.removeAgent = async (agentId) => {
   const agentBrokerDetail = exports.agentBrokerDetail(agentId)
   await mqtt.removeAuthUser(agentBrokerDetail.user)
-  await mqtt.removeAuthTopic(agentBrokerDetail.user, agentBrokerDetail.clientTopic)
-  await mqtt.removeAuthTopic(agentBrokerDetail.user, agentBrokerDetail.serverTopic)
-  await mqtt.removeAuthTopic(agentBrokerDetail.user, agentBrokerDetail.broadcastTopic)
+  await mqtt.removeAuthTopics(agentBrokerDetail.user, [
+    agentBrokerDetail.clientTopic,
+    agentBrokerDetail.serverTopic,
+    agentBrokerDetail.broadcastTopic
+  ])
 }
 
 module.exports.notifToAgent = async (agentId, message) => {
