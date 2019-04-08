@@ -48,6 +48,14 @@ module.exports = {
         agentId: 2,
         paymentProviderId: 2
       },
+      {
+        agentId: 2,
+        paymentProviderId: 3
+      },
+      {
+        agentId: 2,
+        paymentProviderId: 4
+      },
 
       {
         agentId: 3,
