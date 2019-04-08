@@ -12,19 +12,26 @@ module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'fp',
     classes: ['emvDebit', 'emvCredit'],
-    properties: [
-      trxManager.transactionFlows.GATEWAY,
-      trxManager.transactionFlows.GET_TOKEN,
-      trxManager.userTokenTypes.USER_TOKEN_EMV_MIKA
-    ],
+    properties: {
+      flows: [
+        trxManager.transactionFlows.GET_TOKEN,
+        trxManager.transactionFlows.GATEWAY
+      ],
+      tokenTypes: [],
+      userTokenTypes: [
+        trxManager.userTokenTypes.USER_TOKEN_EMV_MIKA
+      ]
+    },
     preHandler: async (config) => {
-      fpConfig = {}
-
       if (!config.userToken) {
         return trxManager.errorCodes.NEED_USER_TOKEN
       }
-      fpConfig.amount = config.amount
-      fpConfig = fp.mixConfig(Object.assign(fpConfig, config.userToken))
+
+      fpConfig = fp.mixConfig(
+        { amount: config.amount },
+        config.userToken,
+        config.paymentProvider.paymentProviderConfig.config
+      )
 
       if (!fpConfig.token) {
         if (!(await fp.getToken(fpConfig))) {
@@ -51,18 +58,19 @@ module.exports = (trxManager) => {
           }
         } else if (resCode === fp.fpResponseCode.SALE_APPROVED) {
           config.transaction = {
-            reference_number: fpConfig.saleResponse.invoice_num,
-            transaction_status_id: trxManager.transactionStatuses.SUCCESS.id,
-            card_approval_code: fpConfig.saleResponse.approval_code
+            transactionStatus: trxManager.transactionStatuses.SUCCESS,
+            referenceNumber: fpConfig.saleResponse.invoice_num,
+            referenceNumberType: 'invoice_num',
+            cardApprovalCode: fpConfig.saleResponse.approval_code
           }
           if (typeof fpConfig.cardPan === 'string') {
             if (fpConfig.cardPan.length >= 10) {
               // TODO : using regex here is probably good idea
-              config.transaction.card_pan = `${fpConfig.cardPan.substring(0, 6)}${'*'.repeat(fpConfig.cardPan.length - (6 + 4))}${fpConfig.cardPan.slice(-4)}`
+              config.transaction.cardPan = `${fpConfig.cardPan.substring(0, 6)}${'*'.repeat(fpConfig.cardPan.length - (6 + 4))}${fpConfig.cardPan.slice(-4)}`
             }
           }
           if (typeof fpConfig.cardPrinciple === 'string') {
-            config.transaction.card_principle = fpConfig.cardPrinciple
+            config.transaction.cardNetwork = fpConfig.cardPrinciple
           }
           // TODO : rollback need to decided when saving signature fail
           await fp.apiSaveSignature(fpConfig)

@@ -287,9 +287,11 @@ module.exports.openCB3Box = (box, key) => {
   return null
 }
 
-module.exports.generateRSAKeyPair = (length = 2048) => {
-  return crypto.generateKeyPairSync('rsa', {
-    modulusLength: length,
+module.exports.generateCb1Key = async () => {
+  const id = crypto.randomBytes(20).toString('hex')
+
+  const keyPair = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
     publicKeyEncoding: {
       type: 'spki',
       format: 'pem'
@@ -299,8 +301,27 @@ module.exports.generateRSAKeyPair = (length = 2048) => {
       format: 'pem'
     }
   })
+
+  return {
+    cbkeyClient: {
+      id,
+      cbx: 'cb1',
+      keyType: 'private',
+      key: keyPair.privateKey
+    },
+    cbkeyServer: {
+      id,
+      cbx: 'cb1',
+      keyType: 'public',
+      key: keyPair.publicKey
+    }
+  }
 }
 
-module.exports.generateRandomBytes = (length = 32) => {
-  return crypto.randomBytes(length)
+module.exports.generateCb3Key = async () => {
+  return {
+    id: crypto.randomBytes(20).toString('hex'),
+    cbx: 'cb3',
+    key: crypto.randomBytes(64).toString('base64')
+  }
 }

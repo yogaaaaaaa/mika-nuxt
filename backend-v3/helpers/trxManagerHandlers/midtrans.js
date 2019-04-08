@@ -1,7 +1,7 @@
 'use strict'
 
 /**
-* MIDTRANS Gopay Payment gateway handler
+* MIDTRANS Gopay Payment provider handler
 */
 
 const midtrans = require('../ppMidtrans')
@@ -10,19 +10,22 @@ module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'midtrans',
     classes: ['gopay'],
-    properties: [
-      trxManager.transactionFlows.PROVIDE_TOKEN,
-      trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE
-    ],
+    properties: {
+      flows: [
+        trxManager.transactionFlows.PROVIDE_TOKEN
+      ],
+      tokenTypes: [
+        trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE
+      ],
+      userTokenTypes: []
+    },
     async handler (config) {
-      let response = await midtrans.gopayChargeRequest({
+      let response = await midtrans.gopayChargeRequest(Object.assign({
         order_id: config.transaction.id,
         amount: config.transaction.amount
-      })
+      }, config.paymentProvider.paymentProviderConfig.config))
 
-      if (!response) {
-        return true
-      }
+      if (!response) return true
 
       for (let action of response.actions) {
         if (action.name === 'generate-qr-code') {
@@ -33,8 +36,8 @@ module.exports = (trxManager) => {
       }
 
       config.updatedTransaction = {
-        referenceNumber: response.transactionId,
-        referenceNumberType: 'transactionId',
+        referenceNumber: response.transaction_id,
+        referenceNumberType: 'transaction_id',
         token: config.token,
         tokenType: config.tokenType
       }

@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     cardNetwork: DataTypes.STRING,
     cardIssuer: DataTypes.STRING,
     cardAcquirer: DataTypes.STRING,
+    cardPan: DataTypes.STRING,
     cardType: DataTypes.STRING,
 
     aliasThumbnail: DataTypes.STRING,

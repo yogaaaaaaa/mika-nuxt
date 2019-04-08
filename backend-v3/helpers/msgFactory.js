@@ -5,15 +5,17 @@
  * to generate message format for Internal API and External/Public API
  */
 
+const types = require('../configs/msgFactoryTypesConfig')
+
 /**
  * Event type enumeration
  */
-module.exports.eventTypes = require('../config/eventTypeConfig')
+module.exports.eventTypes = types.eventsTypes
 
 /**
  * Response Message type enumeration
  */
-module.exports.msgTypes = require('../config/msgTypeConfig')
+module.exports.msgTypes = types.msgTypes
 
 /**
  * Generate API response message

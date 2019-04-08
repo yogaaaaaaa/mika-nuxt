@@ -20,11 +20,15 @@ module.exports.paginationToSequelize = (req, res, next) => {
       [req.query.order_by, req.query.order]
     ]
   }
+  req.applyPaginationSequelize = (query) => {
+    if (typeof query !== 'object') return
+    Object.assign(query, req.paginationSequelize)
+  }
   next()
 }
 
 /**
- * Generate sequelize setting for simple filter,
+ * Generate sequelize query setting for simple filter,
  * via array in query string (`req.query.filters`)
  *
  * Each element of `filters` is consist of 3 parts
@@ -40,6 +44,14 @@ module.exports.paginationToSequelize = (req, res, next) => {
  *
  */
 module.exports.filtersToSequelize = (req, res, next) => {
+  req.filtersWhereSequelize = {}
+
+  req.applyFiltersWhereSequelize = (query) => {
+    if (typeof query !== 'object') return
+    if (!query.where) query.where = {}
+    Object.assign(query.where, req.filtersWhereSequelize)
+  }
+
   if (Array.isArray(req.query.filters)) {
     let andFilters = []
     for (const filter of req.query.filters) {

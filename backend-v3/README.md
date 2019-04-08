@@ -15,13 +15,13 @@ This project adhere strictly to standard.js style.
 Please run `standard --fix` BEFORE committing any javascript source code.
 
 ## Migrations and Seeder
-Use sequelize cli to migrate database schema, all database configuration is stored in `config/dbConfig.json` file.
+Use sequelize cli to migrate database schema, all database configuration is stored in `configs/dbConfig.json` file.
 ```bash
 # Migrations
-sequelize db:migrate --config ./config/dbConfig.json
+sequelize db:migrate --config ./configs/dbConfig.json
 
 # Seedings
-sequelize db:seed --config ./config/dbConfig.json
+sequelize db:seed --config ./configs/dbConfig.json
 ```
 New schema MUST be added via migration and make sure any foreign key relation is valid.
 

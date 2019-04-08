@@ -10,7 +10,7 @@ const bodyParserJSON = bodyParser.json()
 
 const ppMidtransNotifController = require('../controllers/ppMidtransNotifController')
 
-const ppMidtransConfig = require('../config/ppMidtransConfig')
+const ppMidtransConfig = require('../configs/ppMidtransConfig')
 
 const router = express.Router()
 

@@ -18,10 +18,10 @@ const transactionController = require('../controllers/transactionController')
 const paymentProviderController = require('../controllers/paymentProviderController')
 const authController = require('../controllers/authController')
 
-const cipherboxMiddleware = require('../middleware/cipherboxMiddleware')
-const authMiddleware = require('../middleware/authMiddleware')
-const errorMiddleware = require('../middleware/errorMiddleware')
-const queryMiddleware = require('../middleware/queryMiddleware')
+const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
+const authMiddleware = require('../middlewares/authMiddleware')
+const errorMiddleware = require('../middlewares/errorMiddleware')
+const queryMiddleware = require('../middlewares/queryMiddleware')
 
 const router = express.Router()
 
@@ -40,7 +40,7 @@ router.use([
  * Auth Routes
  */
 router.post('/auth/login',
-  cipherboxMiddleware.cipherbox,
+  cipherboxMiddleware.processCipherbox,
   body('username').exists(),
   body('password').exists(),
   errorMiddleware.validatorErrorHandler,
@@ -133,7 +133,7 @@ router.get([ '/agent/transactions', '/agent/transactions/:transactionId' ],
 router.post('/agent/transaction',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  cipherboxMiddleware.cipherbox,
+  cipherboxMiddleware.processCipherbox,
   body('amount').exists().isNumeric(),
   body('paymentProviderId').exists(),
   body('userToken').optional(),

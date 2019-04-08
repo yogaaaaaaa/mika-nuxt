@@ -4,7 +4,9 @@
  * Provide all functionality to create transaction in mika system.
  * Its also provide constant related transaction object
  */
-
+const debug = {
+  dTimer: require('debug')('trxManager:dTimerHandler')
+}
 const models = require('../models')
 
 const dTimer = require('./dTimer')
@@ -13,21 +15,18 @@ const events = Object.create(require('events').prototype)
 const fs = require('fs')
 const path = require('path')
 
-const config = require('../config/trxManagerConfig')
-const type = require('../config/trxManagerTypeConfig')
+const appConfig = require('../configs/appConfig')
+const types = require('../configs/trxManagerTypesConfig')
 
-module.exports.config = config
-module.exports.type = type
+module.exports.transactionStatuses = types.transactionStatuses
+module.exports.transactionSettlementStatuses = types.transactionSettlementStatuses
+module.exports.transactionEvents = types.transactionEvents
+module.exports.tokenTypes = types.tokenTypes
+module.exports.userTokenTypes = types.userTokenTypes
+module.exports.transactionFlags = types.transactionFlags
+module.exports.transactionFlows = types.transactionFlows
 
-module.exports.transactionStatuses = type.transactionStatuses
-module.exports.transactionSettlementStatuses = type.transactionSettlementStatuses
-module.exports.transactionEvents = type.transactionEvents
-module.exports.tokenTypes = type.tokenTypes
-module.exports.userTokenTypes = type.userTokenTypes
-module.exports.transactionFlags = type.transactionFlags
-module.exports.transactionFlows = type.transactionFlows
-
-module.exports.errorCodes = type.errorCodes
+module.exports.errorCodes = types.errorCodes
 
 /**
  * Array containing payment provider handler
@@ -71,7 +70,7 @@ module.exports.updateTransaction = async (updatedTransaction, targetTransactionI
 }
 
 /**
- * Get transaction data with its related data
+ * Get transaction data its payment provider data
  */
 module.exports.getTransaction = async (transactionId) => {
   const transaction = await models.transaction.findOne({
@@ -79,17 +78,6 @@ module.exports.getTransaction = async (transactionId) => {
       id: transactionId
     },
     include: [
-      {
-        model: models.partner
-      },
-      {
-        model: models.agent,
-        include: [ models.merchant ]
-      },
-      {
-        model: models.terminal,
-        include: [ models.terminalModel ]
-      },
       {
         model: models.paymentProvider,
         include: [ models.paymentProviderType, models.paymentProviderConfig ]
@@ -154,11 +142,11 @@ module.exports.getPaymentProvidersByAgent = async (agentId, paymentProviderId = 
  ```js
    transactionEvent = {
     transactionId: 1,
-    transaction: { ... } // complete transaction data
+    transaction: { ... } // complete transaction data (if any)
   }
  ```
  */
-module.exports.emitTransactionEvent = (transactionEvent, transactionId, transaction = null) => {
+module.exports.emitTransactionEvent = (transactionEvent, transactionId, transaction) => {
   events.emit(transactionEvent, {
     transactionId: transactionId,
     transaction: transaction
@@ -326,25 +314,18 @@ module.exports.newTransaction = async (
   if (config.transaction.transactionStatus === exports.transactionStatuses.CREATED) {
     await dTimer.postEvent({
       event: exports.transactionEvents.GLOBAL_TIMEOUT,
-      transactionId: config.transaction.id,
-      transaction: config.transaction
-    }, exports.config.transactionTimeout)
+      transactionId: config.transaction.id
+    }, appConfig.transactionTimeoutSecond * 1000)
   }
 
   return newTransaction
 }
 
 /**
- * Some payment providers require post-transaction action, this function encapsulate
- * Call to every handler
- */
-module.exports.postTransactionAction = async (agentId, paymentProviderId) => {
-}
-
-/**
  * Handle timeout event from redis timer
  */
 dTimer.handleEvent(async (eventObject) => {
+  debug.dTimer('event', eventObject)
   try {
     if (eventObject.event === exports.transactionEvents.GLOBAL_TIMEOUT) {
       let config = {
@@ -354,13 +335,13 @@ dTimer.handleEvent(async (eventObject) => {
 
       // transaction is already finished, do nothing
       if (
-        [exports.transactionStatuses.SUCCESS, exports.transactionStatuses.FAILED]
-          .includes(config.transaction.transactionStatus)
+        [
+          exports.transactionStatuses.SUCCESS,
+          exports.transactionStatuses.FAILED
+        ].includes(config.transaction.transactionStatus)
       ) {
         return true
       }
-
-      console.log('Receive transactionTimeout event for', eventObject.transactionId)
 
       let ppHandler = exports.findPpHandler(config.transaction.paymentProvider.paymentProviderConfig.handler)
 
@@ -378,10 +359,16 @@ dTimer.handleEvent(async (eventObject) => {
 
       await exports.updateTransaction(config.updatedTransaction, eventObject.transactionId)
 
-      if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.FAILED) {
-        exports.emitTransactionEvent(exports.transactionEvents.FAILED, eventObject.transactionId)
-      } else if (config.updatedTransaction.transaction_status_id === exports.transactionStatuses.SUCCESS) {
-        exports.emitTransactionEvent(exports.transactionEvents.SUCCESS, eventObject.transactionId)
+      if (config.updatedTransaction.transactionStatus === exports.transactionStatuses.FAILED) {
+        exports.emitTransactionEvent(
+          exports.transactionEvents.FAILED,
+          eventObject.transactionId
+        )
+      } else if (config.updatedTransaction.transactionStatus === exports.transactionStatuses.SUCCESS) {
+        exports.emitTransactionEvent(
+          exports.transactionEvents.SUCCESS,
+          eventObject.transactionId
+        )
       }
 
       if (typeof ppHandler.timeoutPostHandler === 'function') {
@@ -421,13 +408,14 @@ events.addListener(exports.transactionEvents.FAILED, async (eventObject) => {
 })
 
 /**
- * Add all payment gateway handler
+ * Add all payment provider handlers
  */
+const handlerDir = 'trxManagerHandlers'
 fs
-  .readdirSync(path.join(__dirname, config.handlerDir))
+  .readdirSync(path.join(__dirname, handlerDir))
   .filter(file => {
     return (file.indexOf('.') !== 0) && (file.slice(-3) === '.js')
   })
   .forEach(file => {
-    require(path.join(__dirname, config.handlerDir, file))(exports)
+    require(path.join(__dirname, handlerDir, file))(exports)
   })

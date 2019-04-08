@@ -81,6 +81,10 @@ module.exports = {
       cardType: {
         type: Sequelize.STRING
       },
+      cardPan: {
+        type: Sequelize.STRING
+      },
+
       aliasThumbnail: {
         type: Sequelize.STRING
       },

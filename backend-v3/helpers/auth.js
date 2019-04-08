@@ -9,9 +9,9 @@ const hash = require('./hash')
 const models = require('../models')
 const jwt = require('jsonwebtoken')
 
-const authConfig = require('../config/authConfig')
+const notif = require('../helpers/notif')
 
-module.exports.config = authConfig
+const appConfig = require('../configs/appConfig')
 
 module.exports.userTypes = {
   ADMIN: 'admin',
@@ -20,16 +20,45 @@ module.exports.userTypes = {
   MERCHANT_PIC: 'merchantPic'
 }
 
-module.exports.setSessionToken = async (userId, sessionKey) => {
-  await redis.set(`${authConfig.redisPrefix}:${userId}`, sessionKey, authConfig.authExpiry * 1000)
+function redisKey (key) {
+  return `auth:${key}`
+}
+
+module.exports.setSessionToken = async (userId, sessionKey, expirySecond) => {
+  return redis.setex(
+    redisKey(userId),
+    expirySecond,
+    sessionKey
+  )
+}
+
+module.exports.refreshSessionToken = async (userId, expirySecond) => {
+  return redis.expire(
+    redisKey(userId),
+    expirySecond)
 }
 
 module.exports.getSessionToken = async (userId) => {
-  return redis.get(`${authConfig.redisPrefix}:${userId}`)
+  return redis.get(redisKey(userId))
 }
 
 module.exports.deleteSessionToken = async (userId) => {
-  await redis.del(`${authConfig.redisPrefix}:${userId}`)
+  await redis.del(redisKey(userId))
+}
+
+module.exports.generateToken = (payload, secretKey = appConfig.authSecretKey) => {
+  return jwt.sign(payload, secretKey)
+}
+
+module.exports.verifyToken = (sessionToken, secretKey = appConfig.authSecretKey) => {
+  try {
+    let payload = jwt.verify(sessionToken, secretKey)
+    if (payload) {
+      return payload
+    }
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 /**
@@ -37,7 +66,7 @@ module.exports.deleteSessionToken = async (userId) => {
  */
 module.exports.doAuth = async function (username, password, options = {}) {
   if (!username || !password) {
-    return null
+    return
   }
 
   let user = await models.user.findOne({
@@ -46,12 +75,15 @@ module.exports.doAuth = async function (username, password, options = {}) {
     }
   })
 
-  let auth = null
+  let authResult = {
+    auth: null,
+    sessionToken: null
+  }
 
   if (user) {
     if (Array.isArray(options.userTypes)) {
       if (!options.userTypes.includes(user.userType)) {
-        return null
+        return
       }
     }
 
@@ -65,7 +97,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
         })
 
         if (admin) {
-          auth = {
+          authResult.auth = {
             userId: user.id,
             username: user.username,
             userType: exports.userTypes.ADMIN,
@@ -84,7 +116,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
         })
 
         if (merchant) {
-          auth = {
+          authResult.auth = {
             userId: user.id,
             username: user.username,
             userType: exports.userTypes.MERCHANT,
@@ -102,32 +134,24 @@ module.exports.doAuth = async function (username, password, options = {}) {
         })
 
         if (agent) {
-          auth = {
+          authResult.auth = {
             userId: user.id,
             username: user.username,
             userType: exports.userTypes.AGENT,
             agentId: agent.id,
             terminalId: null
           }
-
           if (agent.boundedToTerminal) {
-            if (!options.terminalId) {
-              return null
-            }
-
-            if (
-              !await models.agentTerminal.findOne({
-                where: {
-                  terminalId: options.terminalId
-                },
-                attributes: ['id']
-              })
-            ) {
-              return null
-            }
-
-            auth.terminalId = options.terminalId
+            if (!options.terminalId) return
+            let agentTerminal = await models.agentTerminal.findOne({
+              where: {
+                terminalId: options.terminalId
+              }
+            })
+            if (!agentTerminal) return
+            authResult.auth.terminalId = agentTerminal.terminalId
           }
+          authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
         }
       }
 
@@ -140,7 +164,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
         })
 
         if (agent) {
-          auth = {
+          authResult.auth = {
             userId: user.id,
             username: user.username,
             userType: exports.userTypes.MERCHANT_PIC,
@@ -150,12 +174,11 @@ module.exports.doAuth = async function (username, password, options = {}) {
       }
     }
 
-    if (auth) {
-      let sessionToken = jwt.sign(auth, authConfig.secretKey)
-      await exports.setSessionToken(auth.userId, sessionToken)
-      return { sessionToken, auth }
-    } else {
-      return null
+    if (authResult.auth) {
+      let sessionToken = exports.generateToken(authResult.auth)
+      authResult.sessionToken = sessionToken
+      await exports.setSessionToken(authResult.auth.userId, sessionToken, appConfig.authExpirySecond)
+      return authResult
     }
   }
 }
@@ -164,23 +187,31 @@ module.exports.doAuth = async function (username, password, options = {}) {
  * Check auth session token
  */
 module.exports.checkAuth = async (sessionToken) => {
-  let auth = jwt.verify(sessionToken, authConfig.secretKey)
+  let auth = exports.verifyToken(sessionToken)
 
   if (auth) {
     if (await exports.getSessionToken(auth.userId) === sessionToken) {
-      await exports.setSessionToken(auth.userId, sessionToken)
+      await exports.refreshSessionToken(auth.userId, appConfig.authExpirySecond)
+      if (auth.userType === exports.userTypes.AGENT) {
+        await notif.refreshAgent(auth.agentId, appConfig.authExpirySecond)
+      }
       return auth
     }
   }
-
-  return null
 }
 
 /**
- * Remove auth by user id
+ * Remove auth by token
  */
 module.exports.removeAuth = async (userId) => {
-  return exports.deleteSessionToken(userId)
+  let auth = exports.verifyToken(exports.getSessionToken(userId))
+  if (auth) {
+    await exports.deleteSessionToken(userId)
+    if (auth.userType === exports.userTypes.AGENT) {
+      await notif.removeAgent(auth.agentId)
+    }
+    return true
+  }
 }
 
 /**

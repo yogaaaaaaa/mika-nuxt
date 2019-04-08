@@ -12,11 +12,15 @@ module.exports = (trxManager) => {
 
     // Alias for this handler. Alias is simple name for **certain** payment provider
     // Used mostly by frontend
-    classes: ['generic', 'supaPaymentProvider'],
+    classes: ['generic', 'berkumapay'],
 
     // properties contain comma delimited list that define various things like
     // what kind of token this Payment provider wants or generate
-    properties: ['provideToken', 'tokenQrCodeContent'],
+    properties: {
+      flows: [trxManager.transactionFlows.PROVIDE_TOKEN],
+      tokenTypes: [trxManager.tokenTypes.TOKEN_QRCODE_CONTENT],
+      userTokenTypes: []
+    },
 
     // This handler will be called BEFORE transaction data is created in database
     // Use this for checking of required parameter for this payment gateway

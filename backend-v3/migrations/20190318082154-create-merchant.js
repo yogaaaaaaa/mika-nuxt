@@ -54,13 +54,12 @@ module.exports = {
         type: Sequelize.STRING
       },
       scannedTaxCardResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
-
       bankName: {
         type: Sequelize.STRING
       },
@@ -75,35 +74,35 @@ module.exports = {
       },
 
       scannedBankStatementResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSkmenkumhamResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSiupResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedTdpResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSkdpResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
@@ -132,14 +131,14 @@ module.exports = {
         type: Sequelize.STRING
       },
       ownerScannedIdCardResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       ownerScannedTaxCardResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'

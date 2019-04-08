@@ -7,7 +7,7 @@ const debugController = require('../controllers/debug_controller')
 const altoDebugController = require('../controllers/alto_pg_debug_controller')
 const midtransDebugController = require('../controllers/midtrans_pg_debug_controller')
 
-const appConfig = require('../config/appConfig')
+const appConfig = require('../configs/app')
 
 const router = express.Router()
 

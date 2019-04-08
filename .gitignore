@@ -86,4 +86,8 @@ captures
 .archive
 .scratchpad
 .test
-*Config_extra.js
+
+# Runtime specific
+cache
+_config
+_configs

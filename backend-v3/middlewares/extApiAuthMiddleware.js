@@ -1,6 +1,6 @@
 'use strict'
 
-const apiKeyAuth = require('../helpers/extApiKeyAuth')
+const extApiKeyAuth = require('../helpers/extApiKeyAuth')
 const msgFactory = require('../helpers/msgFactory')
 const models = require('../models')
 
@@ -9,7 +9,7 @@ module.exports.apiAuth = async function (req, res, next) {
   try {
     let authComponent = req.headers['authorization'].split(' ')
     if (authComponent[0].toLowerCase() === 'bearer') {
-      req.apiAuth = await apiKeyAuth.verifyClientApiToken(authComponent[1])
+      req.apiAuth = await extApiKeyAuth.verifyClientApiToken(authComponent[1])
     }
   } catch (err) {}
   next()
@@ -64,7 +64,7 @@ module.exports.invalidTransactionIdHandler = async (req, res, next) => {
   if (!req.validTransactionId) {
     res.status(404).send(
       msgFactory.generateExtApiResponseMessage(
-        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
+        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND
       )
     )
     return
@@ -121,7 +121,7 @@ module.exports.invalidAgentIdHandler = async (req, res, next) => {
   if (!req.validAgentId) {
     res.status(404).send(
       msgFactory.generateExtApiResponseMessage(
-        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
+        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND
       )
     )
     return

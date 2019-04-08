@@ -1,8 +1,12 @@
 'use strict'
 
-const configName = 'ppAltoConfig'
+/**
+ * Default Config for alto/wechat payment gateway
+ */
 
 const appConfig = require('./appConfig')
+
+const configName = 'ppAltoConfig'
 
 const pemPrivateKey =
 `-----BEGIN RSA PRIVATE KEY-----
@@ -24,9 +28,6 @@ JEdQ+0cA0gBAWRpb4E6MmCdZa8w9dKbOETBUfv72E1jTkQYtK/lCrQhbAEW9yJIOoqmCg+c/+ma612ud
 Vw/qVE3t7QIDAQAB
 -----END PUBLIC KEY-----`
 
-/**
- * Default Config for alto/wechat payment gateway
- */
 let baseConfig = {
   baseUrl: 'https://pay.altopay.co.id',
   notifyEndpoint: '/payment/alto/notif',
@@ -40,13 +41,12 @@ let baseConfig = {
 baseConfig.notify_url = `${appConfig.apiBaseUrl}${baseConfig.notifyEndpoint}`
 
 /**
- * Load external config file '${configName}_extra.js' as extraConfig, in same directory
- * And create a mixin between baseConfig and extraConfig
+ * Load external config file
  */
 try {
-  let extraBaseConfig = require(`./${configName}_extra`)
-  baseConfig = Object.assign({}, baseConfig, extraBaseConfig)
-  console.log(`config ${configName} is mixed`)
+  let extraConfig = require(`./_configs/${configName}`)
+  baseConfig = Object.assign({}, baseConfig, extraConfig)
+  console.log(`Config ${configName} is mixed`)
 } catch (error) { }
 
 module.exports = baseConfig

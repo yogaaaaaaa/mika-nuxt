@@ -5,9 +5,8 @@ module.exports = {
     return queryInterface.createTable('file', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING(40)
       },
 
       name: {
@@ -41,11 +40,17 @@ module.exports = {
 
       resourceId: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
+      },
+
+      deletedAt: {
+        allowNull: true,
+        type: Sequelize.DATE,
+        defaultValue: null
       },
       createdAt: {
         allowNull: false,

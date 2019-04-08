@@ -12,20 +12,20 @@ const msgFactory = require('./msgFactory')
 const extApiObjectFactory = require('./extApiObjectFactory')
 const transactionManager = require('./transactionManager')
 
-const config = require('../config/extApiTrxCallbackConfig')
+const config = require('../configs/extApiTrxCallbackConfig')
 
 async function getActiveTransaction (transactionId) {
-  return JSON.parse(await redis.get(`${config.redisKeyPrefix}:${transactionId}`))
+  return JSON.parse(await redis.get(`${config.redisPrefix}:${transactionId}`))
 }
 
 async function removeActiveTransaction (transactionId) {
-  return redis.del(`${config.redisKeyPrefix}:${transactionId}`)
+  return redis.del(`${config.redisPrefix}:${transactionId}`)
 }
 
 module.exports.addTransactionCallback = async (keyId, url, transactionId) => {
   await removeActiveTransaction(transactionId)
   await redis.set(
-    `${config.redisKeyPrefix}:${transactionId}`,
+    `${config.redisPrefix}:${transactionId}`,
     JSON.stringify({ keyId, url }),
     Math.floor(
       (transactionManager.config.transactionTimeout * 1.5) +

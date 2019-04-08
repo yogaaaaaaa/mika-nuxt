@@ -8,21 +8,20 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
     const transaction = await trxManager.getTransaction(req.body.acc_no)
 
     if (!transaction) {
-      res.status(400)
+      res
+        .status(400)
         .send(tcash.tcashErrorResponse(
           tcash.tcashMessageCode.TCASH_ERROR_TRANSACTION_NOT_FOUND)
         )
       return
     }
 
-    let config = {
-      tcashTerminalName: transaction.paymentProvider.paymentProviderConfig.config.username,
-      tcashTerminalPassword: transaction.paymentProvider.paymentProviderConfig.config.username
-    }
+    let config = tcash.mixConfig(transaction.paymentProvider.paymentProviderConfig.config)
 
     if (
-      (req.body.terminal.toLowerCase() === config.tcashTerminalName.toLowerCase()) &&
-      (req.body.pwd.toLowerCase() === config.tcashTerminalPassword.toLowerCase())
+      (req.body.terminal === config.terminal) &&
+      (req.body.pwd === config.pwd) &&
+      (req.body.merchant === config.merchant)
     ) {
       if (transaction.transactionStatus !== trxManager.transactionStatuses.INQUIRY) {
         res.status(400)
@@ -54,10 +53,12 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
             transaction.id
           )
 
-          res.status(200).send(tcash.tcashPayResponse(
-            req.body.trx_id,
-            transaction.id))
-
+          res
+            .status(200)
+            .send(tcash.tcashPayResponse(
+              req.body.trx_id,
+              transaction.id)
+            )
           return
         }
       }

@@ -69,14 +69,14 @@ module.exports = {
       },
 
       outletPhotoResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       cashierDeskPhotoResourceId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         references: {
           model: 'resource',
           key: 'id'

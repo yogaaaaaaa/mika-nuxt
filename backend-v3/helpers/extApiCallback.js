@@ -10,7 +10,7 @@ const apiKeyAuth = require('./extApiKeyAuth')
 const request = require('superagent')
 require('superagent-retry-delay')(request)
 
-module.exports.config = require('../config/extApiCallbackConfig')
+const config = require('../configs/extApiCallbackConfig')
 
 module.exports.makeApiCallback = async (keyId, url, objectBody = {}, callback = () => {}) => {
   let bodyString = JSON.stringify(objectBody)
@@ -38,8 +38,8 @@ module.exports.makeApiCallback = async (keyId, url, objectBody = {}, callback = 
     if (retryLeft <= 0) {
       callback(response)
     } else {
-      setTimeout(() => makeRequest(retryLeft - 1), exports.config.callBackDelay)
+      setTimeout(() => makeRequest(retryLeft - 1), config.callBackDelay)
     }
   }
-  makeRequest(exports.config.callBackRetryCount)
+  makeRequest(config.callBackRetryCount)
 }

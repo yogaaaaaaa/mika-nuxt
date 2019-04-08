@@ -48,14 +48,14 @@ module.exports.notReady = (name) => {
   events.emit('notReady')
 }
 
-module.exports.readyAllOnce = (handler) => {
+module.exports.onReadyAllOnce = (handler) => {
   events.once('ready', handler)
 }
 
-module.exports.readyAll = (handler) => {
+module.exports.onReadyAll = (handler) => {
   events.on('ready', handler)
 }
 
-module.exports.notReadyAll = (handler) => {
+module.exports.OnNotReadyAll = (handler) => {
   events.on('notReady', handler)
 }

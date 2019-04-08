@@ -1,12 +1,13 @@
 'use strict'
 
+/**
+ * Default fairpay payment provider config
+ */
+
 const configName = 'ppFairpayConfig'
 
 const appConfig = require('./appConfig')
 
-/**
- * Default fairpay PG Config
- */
 let baseConfig = {
   baseUrl: 'http://autobot.dlinkddns.com:28028',
   username: 'fajar',

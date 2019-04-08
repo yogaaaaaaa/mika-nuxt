@@ -19,7 +19,9 @@ const berTlvAnnotations = require('ber-tlv-annotations')
 let berTlvRegistry = new berTlvAnnotations.AnnotationRegistry()
 berTlvRegistry.registerPackagedProviders()
 
-/** Expose all module */
+/**
+ * Expose all module
+ */
 module.exports.dukpt = dukpt
 module.exports.dukptData = dukptData
 

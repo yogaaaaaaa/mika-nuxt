@@ -9,7 +9,7 @@ module.exports = {
         handler: 'tcash',
         providerIdReference: 'Mika',
         providerIdType: 'merchantName',
-        config: '{"username":"mika","password":"MIKA"}'
+        config: '{"user":"mika","merchant":"Mika","terminal":"MIKA","pwd":"MIKA"}'
       },
       {
         id: 2,

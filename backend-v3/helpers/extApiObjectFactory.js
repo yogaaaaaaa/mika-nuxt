@@ -6,9 +6,7 @@
  */
 
 const models = require('../models')
-const Op = models.sequelize.Op
-
-const transactionManager = require('./transactionManager')
+const Op = require('sequelize').Op
 
 async function agentsIdOfMerchantIds (merchantIds) {
   const agentsData = await models.terminal.findAll({
@@ -43,7 +41,6 @@ module.exports.mapTransactionObject = (transactionData) => {
   transactionObject.paymentGateway.minimumAmount = transactionData.payment_gateway.minimum_transaction
 
   transactionObject.transactionStatus = transactionData.transaction_status.name.toLowerCase()
-  transactionObject.tokenType = (transactionManager.findPgHandlers(transactionData.payment_gateway.name)).tokenType
   transactionObject.token = transactionData.qrcode || transactionData.midtrans_qrcode
   transactionObject.amount = parseInt(transactionData.amount)
 

@@ -7,7 +7,8 @@
 const crypto = require('crypto')
 
 const superagent = require('superagent')
-module.exports.baseConfig = require('../config/ppMidtransConfig')
+
+module.exports.baseConfig = require('../configs/ppMidtransConfig')
 
 function midtransRequestAgent (config) {
   const request = superagent

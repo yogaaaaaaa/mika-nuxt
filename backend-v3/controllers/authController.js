@@ -3,8 +3,6 @@
 const msgFactory = require('../helpers/msgFactory')
 const auth = require('../helpers/auth')
 
-const notif = require('../helpers/notif')
-
 /**
  * Login user
  */
@@ -27,8 +25,8 @@ module.exports.login = async (req, res, next) => {
       sessionToken: authResult.sessionToken
     }, authResult.auth)
 
-    if (response.agentId) {
-      response.brokerDetail = await notif.agentJoin(response.agentId)
+    if (authResult.brokerDetail) {
+      response.brokerDetail = authResult.brokerDetail
     }
 
     msgFactory.expressCreateResponse(
@@ -49,7 +47,7 @@ module.exports.login = async (req, res, next) => {
  * Logout user
  */
 module.exports.logout = async (req, res, next) => {
-  if (auth.removeAuth(req.auth.userId)) {
+  if (await auth.removeAuth(req.sessionToken)) {
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_SUCCESS_AUTH_LOGOUT

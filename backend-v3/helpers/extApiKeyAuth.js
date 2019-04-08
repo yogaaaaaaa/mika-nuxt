@@ -13,11 +13,11 @@ const redis = require('./redis')
 const jwt = require('jsonwebtoken')
 const hash = require('./hash')
 
-const config = require('../config/extApiAuthConfig')
+const config = require('../configs/extApiAuth')
 
 async function getCachedKeyData (keyId) {
   let keyData = null
-  let redisKeyName = `${config.redisKeyPrefix}:${keyId}`
+  let redisKeyName = `${config.redisPrefix}:${keyId}`
 
   try {
     keyData = JSON.parse(await redis.get(redisKeyName))

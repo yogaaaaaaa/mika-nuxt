@@ -3,34 +3,36 @@
 const alto = require('../ppAlto')
 
 /**
-* ALTO Payment gateway handler
+* ALTO Payment provider handler
 */
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'alto',
     classes: ['wechatpay', 'alipay'],
-    properties: [
-      trxManager.transactionFlows.PROVIDE_TOKEN,
-      trxManager.transactionFlows.GET_TOKEN,
-      trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE,
-      trxManager.userTokenTypes.USER_TOKEN_QRCODE_CONTENT
-    ],
+    properties: {
+      flows: [
+        trxManager.transactionFlows.GET_TOKEN
+      ],
+      tokenTypes: [
+        trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
+      ],
+      userTokenTypes: [
+      ]
+    },
     async handler (config) {
-      let altoResponse = await alto.altoMakeQrCodePayment({
+      let response = await alto.altoMakeQrCodePayment(Object.assign({
         out_trade_no: config.transaction.id,
         subject: `MIKA Payment ${config.transaction.id}`,
         amount: config.transaction.amount
-      })
+      }, config.paymentProvider.paymentProviderConfig.config))
 
-      if (!altoResponse) {
-        return true
-      }
+      if (!response) return true
 
-      config.token = altoResponse.uri
+      config.token = response.uri
       config.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
 
       config.updatedTransaction = {
-        referenceNumber: altoResponse.out_trade_no,
+        referenceNumber: response.out_trade_no,
         referenceNumberType: 'out_trade_no',
         token: config.token,
         tokenType: config.tokenType

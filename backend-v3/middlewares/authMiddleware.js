@@ -3,7 +3,7 @@
 const msgFactory = require('../helpers/msgFactory')
 const auth = require('../helpers/auth')
 
-const appConfig = require('../config/appConfig')
+const appConfig = require('../configs/appConfig')
 
 /**
  * Check for authentication as middleware.
@@ -21,20 +21,19 @@ const appConfig = require('../config/appConfig')
 
 module.exports.auth = (authUserTypes = null, roles = null) => async (req, res, next) => {
   req.auth = null
-
-  let sessionToken = null
+  req.sessionToken = null
 
   if (req.headers[appConfig.sessionTokenHeader]) {
-    sessionToken = req.headers[appConfig.sessionTokenHeader]
+    req.sessionToken = req.headers[appConfig.sessionTokenHeader]
   } else if (req.headers['authorization']) {
     let authComponent = req.headers['authorization'].split(' ')
     if (authComponent[0].toLowerCase() === 'bearer') {
-      sessionToken = authComponent[1]
+      req.sessionToken = authComponent[1]
     }
   }
 
-  if (sessionToken) {
-    let checkAuth = await auth.checkAuth(sessionToken)
+  if (req.sessionToken) {
+    let checkAuth = await auth.checkAuth(req.sessionToken)
     if (checkAuth) {
       req.auth = checkAuth
       if (Array.isArray(authUserTypes)) {

@@ -1,10 +1,11 @@
 'use strict'
 
-const configName = 'ppMidtransConfig'
-
 /**
  * Default Midtrans Payment Gateway Config
  */
+
+const configName = 'ppMidtransConfig'
+
 let baseConfig = {
   notifEndpoint: '/payment/midtrans/notif',
   baseUrl: 'https://api.sandbox.midtrans.com',
@@ -15,12 +16,12 @@ let baseConfig = {
 }
 
 /**
- * Load external config file '${configName}_extra.js' as extraConfig, in same directory
- * And create a mixin between baseConfig and extraConfig
+ * Load external config file
  */
 try {
-  let extraBaseConfig = require(`../config/${configName}_extra`)
-  baseConfig = Object.assign({}, baseConfig, extraBaseConfig)
+  let extraConfig = require(`./_configs/${configName}`)
+  baseConfig = Object.assign({}, baseConfig, extraConfig)
+  console.log(`Config ${configName} is mixed`)
 } catch (error) { }
 
 module.exports = baseConfig

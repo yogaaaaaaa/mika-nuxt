@@ -13,7 +13,11 @@ const request = require('superagent')
  * exports.baseConfig object is used in all alto related function.
  * In most function it will mixed with local config object
  */
-module.exports.baseConfig = require('../config/ppAltoConfig')
+module.exports.baseConfig = require('../configs/ppAltoConfig')
+
+module.exports.mixConfig = (config) => {
+  return Object.assign({}, exports.baseConfig, config)
+}
 
 /**
  * Convert object to uriEncoded string, doesn't support nested object
@@ -130,21 +134,21 @@ async function altoRequest (url, requestData, config) {
  * @returns {Object|null} return transaction order object if all is correct, null otherwise
  */
 module.exports.altoMakeQrCodePayment = async function (config) {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  config = exports.mixConfig(config)
 
   let requestData = {}
-  requestData.mch_id = mixedConfig.mch_id
+  requestData.mch_id = config.mch_id
   requestData.trade_type = 'QR_CODE'
-  requestData.currency = mixedConfig.currency
-  requestData.out_trade_no = mixedConfig.out_trade_no
-  requestData.amount = mixedConfig.amount
-  requestData.subject = mixedConfig.subject
-  if (mixedConfig.operator_id) { // Optional parameter
-    requestData.operator_id = mixedConfig.operator_id
+  requestData.currency = config.currency
+  requestData.out_trade_no = config.out_trade_no
+  requestData.amount = config.amount
+  requestData.subject = config.subject
+  if (config.operator_id) { // Optional parameter
+    requestData.operator_id = config.operator_id
   }
-  requestData.notify_url = mixedConfig.notify_url // notify_url is optional parameter, but required for obvious reason
+  requestData.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
 
-  return altoRequest(`${mixedConfig.baseUrl}/mapi/pay/order`, requestData, mixedConfig)
+  return altoRequest(`${config.baseUrl}/mapi/pay/order`, requestData, config)
 }
 
 /**
@@ -175,17 +179,17 @@ module.exports.altoMakeQrCodePayment = async function (config) {
  * @returns {Object|null} return transaction details object if all is correct, null otherwise
  */
 module.exports.altoQueryPayment = async function (config) {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  config = exports.mixConfig(config)
 
   let requestData = {}
-  requestData.mch_id = mixedConfig.mch_id
-  if (mixedConfig.out_trade_no) {
-    requestData.out_trade_no = mixedConfig.out_trade_no
-  } else if (mixedConfig.trade_no) {
-    requestData.trade_no = mixedConfig.trade_no
+  requestData.mch_id = config.mch_id
+  if (config.out_trade_no) {
+    requestData.out_trade_no = config.out_trade_no
+  } else if (config.trade_no) {
+    requestData.trade_no = config.trade_no
   }
 
-  return altoRequest(`${mixedConfig.baseUrl}/mapi/pay/query`, requestData, mixedConfig)
+  return altoRequest(`${config.baseUrl}/mapi/pay/query`, requestData, config)
 }
 
 /**
@@ -215,21 +219,21 @@ module.exports.altoQueryPayment = async function (config) {
  * @returns {Object|null} return refund result object if all is correct, null otherwise
  */
 module.exports.altoRefundPayment = async function (config) {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  config = exports.mixConfig(config)
 
   let requestData = {}
-  requestData.mch_id = mixedConfig.mch_id
-  if (mixedConfig.out_trade_no) {
-    requestData.out_trade_no = mixedConfig.out_trade_no
-  } else if (mixedConfig.trade_no) {
-    requestData.trade_no = mixedConfig.trade_no
+  requestData.mch_id = config.mch_id
+  if (config.out_trade_no) {
+    requestData.out_trade_no = config.out_trade_no
+  } else if (config.trade_no) {
+    requestData.trade_no = config.trade_no
   }
-  requestData.out_refund_no = mixedConfig.out_refund_no
-  requestData.refund_amount = mixedConfig.refund_amount
-  requestData.amount = mixedConfig.amount
-  requestData.notify_url = mixedConfig.notify_url // notify_url is optional parameter, but required for obvious reason
+  requestData.out_refund_no = config.out_refund_no
+  requestData.refund_amount = config.refund_amount
+  requestData.amount = config.amount
+  requestData.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
 
-  return altoRequest(`${mixedConfig.baseUrl}/mapi/pay/refund`, requestData, mixedConfig)
+  return altoRequest(`${config.baseUrl}/mapi/pay/refund`, requestData, config)
 }
 
 /**
@@ -252,18 +256,18 @@ module.exports.altoRefundPayment = async function (config) {
  * @returns {Object|null} return refund details object if all is correct, null otherwise
  */
 module.exports.altoQueryRefundPayment = async function (config) {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  config = exports.mixConfig(config)
 
   let requestData = {}
-  requestData.mch_id = mixedConfig.mch_id
-  if (mixedConfig.out_trade_no) {
-    requestData.out_trade_no = mixedConfig.out_trade_no
-  } else if (mixedConfig.trade_no) {
-    requestData.trade_no = mixedConfig.trade_no
+  requestData.mch_id = config.mch_id
+  if (config.out_trade_no) {
+    requestData.out_trade_no = config.out_trade_no
+  } else if (config.trade_no) {
+    requestData.trade_no = config.trade_no
   }
-  requestData.out_refund_no = mixedConfig.out_refund_no
-  requestData.refund_amount = mixedConfig.refund_amount
-  requestData.amount = mixedConfig.amount
+  requestData.out_refund_no = config.out_refund_no
+  requestData.refund_amount = config.refund_amount
+  requestData.amount = config.amount
 
-  return altoRequest(`${mixedConfig.baseUrl}/mapi/pay/refund_query`, requestData, mixedConfig)
+  return altoRequest(`${config.baseUrl}/mapi/pay/refund_query`, requestData, config)
 }

@@ -5,18 +5,31 @@
  * distributed timer. This module will use existing default redis (via /helpers/redis.js)
  */
 
-const redis = require('./redis')
-
-const config = require('../config/dTimerConfig')
-
-const redisClientSub = redis.defaultCreateClient()
-const redisClientPub = redis.defaultCreateClient()
+const redis = require('redis') // NOTE: dtimer use node-redis library
+require('bluebird').promisifyAll(redis)
 
 const { DTimer } = require('dtimer')
 
-const dtimer = new DTimer(config.nodeName, redisClientPub, redisClientSub, config)
-dtimer.join()
+const ready = require('./ready')
+ready.addModule('dtimer')
 
+const config = require('../configs/dTimerConfig')
+
+const redisClientSub = redis.createClient(config.redisUrl)
+const redisClientPub = redis.createClient(config.redisUrl)
+
+const dtimer = new DTimer(
+  config.nodeName,
+  redisClientPub,
+  redisClientSub,
+  config
+)
+
+dtimer
+  .join()
+  .then(() => {
+    ready.ready('dtimer')
+  })
 module.exports.dtimer = dtimer
 
 module.exports.handleEvent = async (callback) => {

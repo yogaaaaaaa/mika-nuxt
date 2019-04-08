@@ -59,38 +59,30 @@ module.exports.getAgentPaymentProviders = async (req, res, next) => {
   if (req.params.id) {
     query.where.id = req.params.id
     let paymentProvider = await models.agentPaymentProvider.findOne(query)
-    if (paymentProvider) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
-        paymentProvider
-      )
-    } else {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
-      )
-    }
+    msgFactory.expressCreateResponse(
+      res,
+      paymentProvider ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+      paymentProvider
+    )
   } else {
     let paymentProviders = await models.agentPaymentProvider.findAll(query)
-    if (paymentProviders) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_SUCCESS_ENTITY_RETRIEVED,
-        paymentProviders.map((data) => {
-          let paymentProvider = data.paymentProvider.toJSON()
 
-          let ppHandler = trxManager.findPpHandler(data.paymentProvider.paymentProviderConfig.handler)
+    msgFactory.expressCreateResponse(
+      res,
+      paymentProviders ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+      paymentProviders.map((data) => {
+        let paymentProvider = data.paymentProvider.toJSON()
 
-          paymentProvider._handler = {
-            name: ppHandler.name,
-            classes: ppHandler.classes,
-            properties: ppHandler.properties
-          }
+        let ppHandler = trxManager.findPpHandler(data.paymentProvider.paymentProviderConfig.handler)
 
-          return paymentProvider
-        })
-      )
-    }
+        paymentProvider._handler = {
+          name: ppHandler.name,
+          classes: ppHandler.classes,
+          properties: ppHandler.properties
+        }
+
+        return paymentProvider
+      })
+    )
   }
 }

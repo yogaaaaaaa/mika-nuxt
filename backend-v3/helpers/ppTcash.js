@@ -4,7 +4,7 @@
  * Providing various constant and function related to Tcash payment gateway
  */
 
-module.exports.baseConfig = require('../config/ppTcashConfig')
+module.exports.baseConfig = require('../configs/ppTcashConfig')
 
 module.exports.tcashMessageCode = {
   TCASH_INQUIRY_SUCCESS: {
@@ -63,5 +63,5 @@ module.exports.mixConfig = (config) => {
 
 module.exports.createQrCode = (config) => {
   let mixedConfig = exports.mixConfig(config)
-  return `TWALLET|O|${mixedConfig.username}|${mixedConfig.transactionId}`
+  return `TWALLET|O|${mixedConfig.user}|${mixedConfig.transactionId}`
 }

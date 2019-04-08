@@ -5,14 +5,11 @@
  */
 
 const crypto = require('crypto')
-
-const baseConfig = require('../config/ppFairpayConfig')
 const superagent = require('superagent')
 const emv = require('./emv')
-
 const redis = require('./redis')
 
-exports.baseConfig = baseConfig
+exports.baseConfig = require('../configs/ppFairpayConfig')
 
 /**
  * Does exactly what it says on the tin
@@ -61,12 +58,16 @@ module.exports.fairpayResponseCode = {
   AUTH_BAD_TOKEN: '0F10'
 }
 
+function redisKey (key) {
+  return `ppfairpay:${key}`
+}
+
 module.exports.mixConfig = (config) => {
   return Object.assign({}, exports.baseConfig, config)
 }
 
 module.exports.getToken = async (config) => {
-  let token = await redis.get(`${config.redisPrefix}:fp_token`)
+  let token = await redis.get(redisKey('token'))
   if (token) {
     config.token = token
     return true
@@ -75,7 +76,7 @@ module.exports.getToken = async (config) => {
 }
 
 module.exports.setToken = async (config) => {
-  await redis.set(`${config.redisPrefix}:fp_token`, config.token)
+  return redis.set(redisKey(`token`), config.token)
 }
 
 module.exports.createSaleRequest = (config) => {
@@ -259,18 +260,12 @@ module.exports.apiDebitCreditSale = async (config) => {
     }
     return response.body
   }
-
-  return null
 }
 
 module.exports.apiSaveSignature = async (config) => {
-  if (!config.token) {
-    return null
-  }
+  if (!config.token) return
 
-  if (!config.saleResponse || !config.signatureData) {
-    return null
-  }
+  if (!config.saleResponse || !config.signatureData) return
 
   let request = {
     device_timestamp: getUnixTimestamp(),
@@ -285,7 +280,10 @@ module.exports.apiSaveSignature = async (config) => {
     .send(request)
 
   if (response.body) {
-    if (response.body.response_code === exports.fairpayResponseCode.RECEIPT_FIRST_COPY || exports.fairpayResponseCode.RECEIPT_DUPLICATE_COPY) {
+    if (
+      response.body.response_code === exports.fairpayResponseCode.RECEIPT_FIRST_COPY ||
+      response.body.response_code === exports.fairpayResponseCode.RECEIPT_DUPLICATE_COPY
+    ) {
       config.saveSignatureResponse = response.body
     }
     return response.body

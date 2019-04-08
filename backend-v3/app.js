@@ -1,7 +1,7 @@
 'use strict'
 
 process.env.NODE_ENV = 'development' || process.env.NODE_ENV
-console.log('Running NODE_ENV', process.env.NODE_ENV)
+console.log('Running with NODE_ENV', process.env.NODE_ENV)
 
 const express = require('express')
 require('express-async-errors')
@@ -11,7 +11,7 @@ const ready = require('./helpers/ready')
 const path = require('path')
 const logger = require('morgan')
 
-const appConfig = require('./config/appConfig')
+const appConfig = require('./configs/appConfig')
 
 /**
  * MIKA app
@@ -94,9 +94,9 @@ app.use((err, req, res, next) => {
 /**
  * Start listening
  */
-ready.readyAllOnce(() => {
-  app.listen(appConfig.listenPort, () => {
-    console.log(`${appConfig.name} is listening on port ${appConfig.listenPort}`)
+ready.onReadyAllOnce(() => {
+  app.listen(appConfig.httpListenPort, () => {
+    console.log(`${appConfig.name} is listening on port ${appConfig.httpListenPort}`)
   })
 })
 

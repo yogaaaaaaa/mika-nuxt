@@ -9,7 +9,7 @@ const bodyParser = require('body-parser')
 
 const ppAltoNotifController = require('../controllers/ppAltoNotifController')
 
-const ppAltoConfig = require('../config/ppAltoConfig')
+const ppAltoConfig = require('../configs/ppAltoConfig')
 
 const router = express.Router()
 

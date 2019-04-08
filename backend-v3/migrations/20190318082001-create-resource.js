@@ -5,9 +5,8 @@ module.exports = {
     return queryInterface.createTable('resource', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING(40)
       },
 
       name: {

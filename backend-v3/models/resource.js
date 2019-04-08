@@ -2,6 +2,10 @@
 
 module.exports = (sequelize, DataTypes) => {
   let resource = sequelize.define('resource', {
+    id: {
+      type: DataTypes.STRING(40),
+      primaryKey: true
+    },
     name: DataTypes.STRING,
     description: DataTypes.STRING
   }, {

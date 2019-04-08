@@ -18,18 +18,18 @@ module.exports = (sequelize, DataTypes) => {
     phoneNumber: DataTypes.STRING,
 
     idTaxCard: DataTypes.STRING,
-    scannedTaxCardResourceId: DataTypes.INTEGER,
+    scannedTaxCardResourceId: DataTypes.STRING(40),
 
     bankName: DataTypes.STRING,
     bankBranchName: DataTypes.STRING,
     bankAccountName: DataTypes.STRING,
     bankAccountNumber: DataTypes.STRING,
 
-    scannedBankStatementResourceId: DataTypes.INTEGER,
-    scannedSkmenkumhamResourceId: DataTypes.INTEGER,
-    scannedSiupResourceId: DataTypes.INTEGER,
-    scannedTdpResourceId: DataTypes.INTEGER,
-    scannedSkdpResourceId: DataTypes.INTEGER,
+    scannedBankStatementResourceId: DataTypes.STRING(40),
+    scannedSkmenkumhamResourceId: DataTypes.STRING(40),
+    scannedSiupResourceId: DataTypes.STRING(40),
+    scannedTdpResourceId: DataTypes.STRING(40),
+    scannedSkdpResourceId: DataTypes.STRING(40),
 
     ownerName: DataTypes.STRING,
     ownerOccupation: DataTypes.STRING,
@@ -39,8 +39,8 @@ module.exports = (sequelize, DataTypes) => {
     ownerIdCardType: DataTypes.STRING,
     ownerTaxCardNumber: DataTypes.STRING,
 
-    ownerScannedIdCardResourceId: DataTypes.INTEGER,
-    ownerScannedTaxCardResourceId: DataTypes.INTEGER,
+    ownerScannedIdCardResourceId: DataTypes.STRING(40),
+    ownerScannedTaxCardResourceId: DataTypes.STRING(40),
 
     userId: DataTypes.INTEGER,
     partnerId: DataTypes.INTEGER
