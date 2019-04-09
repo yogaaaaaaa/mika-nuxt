@@ -46,7 +46,7 @@ router.all('/',
 )
 
 /**
- * Auth Routes
+ * Auth Endpoints
  */
 router.post('/auth/login',
   cipherboxMiddleware.processCipherbox,
@@ -88,15 +88,19 @@ router.post('/auth/reset_password',
 )
 
 /**
- * Resource(s) related routes
+ * Resource(s) related endpoints
  */
-router.get('/resources/:resourceId/:filesId',
+router.get('/resources/:resourceId',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented)
+router.get('/files/:fileId',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   generalController.notImplemented)
 
 /**
- * General utilities routes
+ * General utilities endpoints
  */
 router.post('/utilities/emv/bin_check',
   authMiddleware.auth(),
@@ -120,7 +124,7 @@ router.get('/utilities/app_version',
 )
 
 /**
- * Agent related routes
+ * Agent related endpoints
  */
 router.get('/agent',
   authMiddleware.auth([auth.userTypes.AGENT]),
@@ -164,7 +168,7 @@ router.post('/agent/post_transaction',
 )
 
 /**
- * Merchant related route
+ * Merchant related endpoints
  */
 router.get('/merchant',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
@@ -190,16 +194,21 @@ router.get('/merchant/transaction_time_series',
 )
 
 /**
- * Merchant PIC related route
+ * Merchant PIC related endpoints
  */
 router.get('/merchant_pic',
-  authMiddleware.auth([auth.userTypes.MERCHANT]),
+  authMiddleware.auth([auth.userTypes.MERCHANT_PIC]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get(['/merchant_pic/view_groups/:viewGroupId/transactions', '/view_groups/:viewGroupId/transactions/:transactionId'],
+  authMiddleware.auth([auth.userTypes.MERCHANT_PIC]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
 
 /**
- * Administration related route
+ * Administration related endpoints
  */
 router.get([ '/merchants', '/merchants/:merchantId' ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
@@ -249,17 +258,14 @@ router.get([ '/payment_providers', '/payment_providers/:paymentProviderId' ],
   generalController.notImplemented
 )
 
-router.get(['/view_groups/:viewGroupId/transactions', '/view_groups/:viewGroupId/transactions/:transactionId'],
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-
-router.post('/resources/:resourceId',
+router.post('/resource',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
+  generalController.notImplemented)
+router.post('/resources/:resourceId/file',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented)
 
 router.use(errorMiddleware.notFoundErrorHandler)
 router.use(errorMiddleware.errorHandler)
