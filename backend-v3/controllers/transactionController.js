@@ -5,6 +5,8 @@ const trxManager = require('../helpers/trxManager')
 
 const models = require('../models')
 
+const script = require('../helpers/script')
+
 /**
  * Helper function to do query to many entities and
  * create appropriate express response
