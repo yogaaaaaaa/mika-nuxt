@@ -133,6 +133,11 @@ let baseConfig = {
       status: 'auth-404',
       message: 'Invalid session token'
     },
+    MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD: {
+      httpStatus: 400,
+      status: 'auth-410',
+      message: 'Cannot change password'
+    },
     MSG_ERROR_INVALID_CIPHERBOX: {
       isError: true,
       httpStatus: 400,

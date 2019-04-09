@@ -13,3 +13,14 @@ module.exports.notImplemented = (req, res, next) => {
     msgFactory.msgTypes.MSG_ERROR_NOT_IMPLEMENTED
   )
 }
+
+/**
+ * Welcome controller
+ */
+module.exports.welcome = (req, res, next) => {
+  msgFactory.expressCreateResponse(
+    res,
+    msgFactory.msgTypes.MSG_SUCCESS,
+    'Welcome to backend-v3'
+  )
+}

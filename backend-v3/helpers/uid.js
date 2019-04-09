@@ -17,8 +17,8 @@ module.exports.uuidv4 = (length) => {
 /**
  * Generate KSUID as fixed string or buffer (`raw === true`)
  */
-module.exports.ksuid = async (raw = true) => {
-  let uid = await ksuid.random()
+module.exports.ksuid = (raw = true) => {
+  let uid = ksuid.randomSync()
   if (raw) {
     return uid.raw
   }

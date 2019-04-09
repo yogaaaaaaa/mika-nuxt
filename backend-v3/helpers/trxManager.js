@@ -222,7 +222,7 @@ module.exports.newTransaction = async (
 
   config.paymentProvider = await exports.getPaymentProvidersByAgent(config.agentId, config.paymentProviderId)
   if (config.paymentProvider.length === 0) {
-    return { error: exports.errorCode.PAYMENT_PROVIDER_NOT_FOR_YOU }
+    return { error: exports.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU }
   } else {
     config.paymentProvider = config.paymentProvider[0]
   }

@@ -67,12 +67,12 @@ module.exports.logoutAll = async (req, res, next) => {
  * Check current session token
  */
 module.exports.sessionTokenCheck = async (req, res, next) => {
-  let authResult = await auth.checkAuth(req.body.sessionToken)
-  if (authResult) {
+  let checkAuth = await auth.checkAuth(req.body.sessionToken)
+  if (checkAuth) {
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
-      authResult
+      checkAuth
     )
   } else {
     msgFactory.expressCreateResponse(
@@ -91,7 +91,13 @@ module.exports.changePassword = async (req, res, next) => {
       res,
       msgFactory.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
+    return
   }
+
+  msgFactory.expressCreateResponse(
+    res,
+    msgFactory.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
+  )
 }
 
 /**

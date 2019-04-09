@@ -6,11 +6,58 @@ const trxManager = require('../helpers/trxManager')
 const models = require('../models')
 
 /**
+ * Helper function to do query to many entities and
+ * create appropriate express response
+ */
+async function transactionsQueryAndResponse (req, res, query) {
+  if (req.params.transactionId) {
+    query.where.id = req.params.transactionId
+    let transaction = await models.transaction.findOne(query)
+
+    msgFactory.expressCreateResponse(
+      res,
+      transaction
+        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+      transaction
+    )
+  } else {
+    req.applyPaginationSequelize(query)
+    req.applyFiltersWhereSequelize(query)
+    let transactions = null
+    if (req.query.get_count) {
+      transactions = await models.transaction.findAndCountAll(query)
+      msgFactory.expressCreateResponse(
+        res,
+        transactions.rows.length > 0
+          ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+          : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+        transactions.rows,
+        msgFactory.createPaginationMeta(req.query.page, req.query.per_page, transactions.count)
+      )
+    } else {
+      transactions = await models.transaction.findAll(query)
+      msgFactory.expressCreateResponse(
+        res,
+        transactions.length > 0
+          ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+          : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+        transactions
+      )
+    }
+  }
+}
+
+/**
  * Create new transaction by agent (via `req.auth.userType`)
  */
 module.exports.newTransaction = async (req, res, next) => {
-  const options = {
-    ipAddress: req.ip
+  const options = {}
+
+  if (req.headers['x-real-ip']) { // pass nginx ip if available
+    options.ipAddress = req.headers['x-real-ip']
+  } else {
+    options.ipAddress = req.ip
   }
 
   if (req.auth.terminalId) {
@@ -67,6 +114,7 @@ module.exports.newTransaction = async (req, res, next) => {
         newTransaction
       )
     }
+    return
   }
 
   if (newTransaction.redirectTo) {
@@ -104,7 +152,7 @@ module.exports.newTransaction = async (req, res, next) => {
 }
 
 /**
- * Get one or many agent's transactions (via `req.auth.userType`)
+ * Get one or many agent transactions of (via `req.auth.agentId`)
  */
 module.exports.getAgentTransactions = async (req, res, next) => {
   let query = {
@@ -154,30 +202,51 @@ module.exports.getAgentTransactions = async (req, res, next) => {
       }
     ]
   }
+  return transactionsQueryAndResponse(req, res, query)
+}
 
-  if (req.params.transactionId) {
-    query.where.id = req.params.transactionId
-    let transaction = await models.transaction.findOne(query)
-
-    msgFactory.expressCreateResponse(
-      res,
-      transaction
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-      transaction
-    )
-  } else {
-    req.applyPaginationSequelize(query)
-    req.applyFiltersWhereSequelize(query)
-    let transactions = await models.transaction.findAndCountAll(query)
-
-    msgFactory.expressCreateResponse(
-      res,
-      transactions.rows.length > 0
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-      transactions.rows,
-      msgFactory.createPaginationMeta(req.query.page, req.query.per_page, transactions.count)
-    )
+/**
+ * Get one or many merchant's transactions (via `req.auth.merchantId`)
+ */
+module.exports.getMerchantTransactions = async (req, res, next) => {
+  let query = {
+    where: {},
+    attributes: { exclude: ['deletedAt'] },
+    include: [
+      {
+        model: models.agent,
+        where: {
+          merchantId: req.auth.merchantId
+        },
+        attributes: { exclude: [ 'createdAt', 'updatedAt', 'deletedAt' ] }
+      },
+      {
+        model: models.paymentProvider,
+        attributes: { exclude: [
+          'shareMerchantWithPartner',
+          'sharePartner',
+          'hidden',
+          'gateway',
+          'createdAt',
+          'updatedAt',
+          'deletedAt'
+        ] },
+        include: [
+          {
+            model: models.paymentProviderType,
+            attributes: { exclude: [ 'createdAt', 'updatedAt', 'deletedAt' ] }
+          },
+          {
+            model: models.paymentProviderConfig,
+            attributes: { exclude: ['config', 'createdAt', 'updatedAt', 'deletedAt'] }
+          }
+        ]
+      }
+    ]
   }
+  return transactionsQueryAndResponse(req, res, query)
+}
+
+module.exports.getMerchantTransactionStatistic = async (req, res, next) => {
+  
 }

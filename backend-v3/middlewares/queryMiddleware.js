@@ -10,6 +10,8 @@ module.exports.paginationToSequelize = (req, res, next) => {
   req.query.page = parseInt(req.query.page) || 1
   req.query.per_page = parseInt(req.query.per_page) || 30
 
+  req.query.get_count = req.query.get_count || 0
+
   req.query.order = ['asc', 'desc'].includes(req.query.order) ? req.query.order : 'desc'
   req.query.order_by = req.query.order_by || 'createdAt'
 

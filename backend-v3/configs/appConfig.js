@@ -7,16 +7,20 @@
 
 const path = require('path')
 const fs = require('fs')
+const childProcess = require('child_process')
 
 const configName = 'appConfig'
 
 let baseConfig = {
   name: process.env.MIKA_NAME || (process.env.NODE_ENV === 'development' ? 'mika-v3-dev' : 'mika-v3'),
+  version: null,
+
+  httpListenPort: process.env.MIKA_PORT || 12000,
+
   baseUrl: process.env.MIKA_BASE_URL || (process.env.NODE_ENV === 'development' ? 'https://stg12api.mikaapp.id' : 'https://api.mikaapp.id'),
   debugHeader: 'x-mika-debug',
   debugKey: process.env.MIKA_DEBUG_KEY || 'debug_mika',
   sessionTokenHeader: 'x-access-token',
-  httpListenPort: process.env.MIKA_PORT || 12000,
 
   workDir: process.env.MIKA_WORK_DIR || path.dirname(require.main.filename),
   uploadDir: null,
@@ -74,6 +78,25 @@ if (redisUrls.length > 1) {
 
 if (!baseConfig.redisPrefix) {
   baseConfig.redisPrefix = `${baseConfig.name}:`
+}
+
+if (!baseConfig.version) {
+  try {
+    let branch = childProcess.execSync('git branch').toString('utf8').replace(/\*/g, '').trim()
+    let revCount = childProcess.execSync(`git rev-list ${branch} --count`).toString('utf8').trim()
+    let shortHash = childProcess.execSync(`git rev-parse --short HEAD`).toString('utf8').trim()
+    let timestamp = childProcess.execSync(`git show -s --format=%ct HEAD`).toString('utf8').trim()
+    let commitDate = new Date(timestamp * 1000).toISOString()
+    if (process.env.NODE_ENV === 'production') {
+      if (branch !== 'master') {
+        baseConfig.version = `${baseConfig.name} ${commitDate}`
+      } else {
+        baseConfig.version = `${baseConfig.name}-${revCount} ${commitDate}`
+      }
+    } else {
+      baseConfig.version = `${branch}-${shortHash}-${revCount} ${process.env.NODE_ENV} ${commitDate}`
+    }
+  } catch (error) {}
 }
 
 /**

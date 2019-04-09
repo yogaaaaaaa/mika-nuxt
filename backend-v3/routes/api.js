@@ -37,6 +37,15 @@ router.use([
 ])
 
 /**
+ * Hello endpoint
+ */
+router.all('/',
+  cipherboxMiddleware.processCipherbox,
+  authMiddleware.auth(),
+  generalController.welcome
+)
+
+/**
  * Auth Routes
  */
 router.post('/auth/login',
@@ -57,15 +66,15 @@ router.post('/auth/logout_all',
   generalController.notImplemented
 )
 router.post('/auth/check',
-  body('sessionToken').exists(),
+  body('sessionToken').isString(),
   errorMiddleware.validatorErrorHandler,
   authController.sessionTokenCheck
 )
 router.post('/auth/change_password',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  body('oldPassword').exists(),
-  body('password').exists(),
+  body('oldPassword').isString(),
+  body('password').isString(),
   errorMiddleware.validatorErrorHandler,
   authController.changePassword
 )
@@ -73,7 +82,7 @@ router.post('/auth/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   body('userId').exists(),
-  body('password').exists(),
+  body('password').isString(),
   errorMiddleware.validatorErrorHandler,
   authController.resetPassword
 )
@@ -158,6 +167,23 @@ router.post('/agent/post_transaction',
  * Merchant related route
  */
 router.get('/merchant',
+  authMiddleware.auth([auth.userTypes.MERCHANT]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get(['/merchant/transactions', '/merchant/transactions/:id'],
+  authMiddleware.auth([auth.userTypes.MERCHANT]),
+  authMiddleware.authErrorHandler,
+  queryMiddleware.paginationToSequelize,
+  queryMiddleware.filtersToSequelize,
+  transactionController.getMerchantTransactions
+)
+router.get('/merchant/transaction_statistic',
+  authMiddleware.auth([auth.userTypes.MERCHANT]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.get('/merchant/transaction_time_series',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented

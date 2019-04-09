@@ -176,9 +176,8 @@ module.exports.doAuth = async function (username, password, options = {}) {
     }
 
     if (authResult.auth) {
-      let sessionToken = exports.generateToken(authResult.auth)
-      authResult.sessionToken = sessionToken
-      await exports.setSessionToken(authResult.auth.userId, sessionToken, appConfig.authExpirySecond)
+      authResult.sessionToken = exports.generateToken(authResult.auth)
+      await exports.setSessionToken(authResult.auth.userId, authResult.sessionToken, authResult.authExpirySecond)
       return authResult
     }
   }
@@ -227,23 +226,19 @@ module.exports.resetAuth = async (userId, password, oldPassword = null) => {
 
   if (user) {
     if (oldPassword) {
-      if (!hash.compareBcryptHash(user.password, oldPassword)) {
+      if (!await hash.compareBcryptHash(user.password, oldPassword)) {
         return false
       }
+    }
 
-      let updated = await models.user.update({
-        password: await hash.bcryptHash(password)
-      }, {
-        where: { id: userId }
-      })
-      if (
-        updated
-      ) {
-        await exports.removeAuth(userId)
-        return true
-      }
+    let updated = await models.user.update(
+      { password: await hash.bcryptHash(password) },
+      { where: { id: userId } }
+    )
+
+    if (updated) {
+      await exports.removeAuth(userId)
+      return true
     }
   }
-
-  return false
 }
