@@ -76,7 +76,7 @@ module.exports.sealBoxWithCB0 = (data, key, id = null) => {
       box: cipherBox
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return null
   }
 }
@@ -127,7 +127,7 @@ module.exports.sealBoxWithCB1 = (data, key, keyType = 'public', id = null) => {
       box: cipherBox
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return null
   }
 }
@@ -175,7 +175,7 @@ module.exports.sealBoxWithCB3 = (data, key, id = null, iter = 100) => {
       box: cipherBox
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return null
   }
 }
@@ -204,7 +204,7 @@ module.exports.openCB0Box = (box, key, tsCheck = true) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
 
   return null
@@ -245,7 +245,7 @@ module.exports.openCB1Box = (box, key, keyType = 'private', tsCheck = true) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
   return null
 }
@@ -282,7 +282,7 @@ module.exports.openCB3Box = (box, key) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
   return null
 }

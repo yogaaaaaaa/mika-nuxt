@@ -3,9 +3,13 @@
 const msgFactory = require('../helpers/msgFactory')
 const trxManager = require('../helpers/trxManager')
 
-const models = require('../models')
+const { body } = require('express-validator/check')
 
-const script = require('../helpers/script')
+const models = require('../models')
+const Sequelize = models.Sequelize
+const Op = Sequelize.Op
+
+// const script = require('../helpers/script')
 
 /**
  * Helper function to do query to many entities and
@@ -51,9 +55,22 @@ async function transactionsQueryAndResponse (req, res, query) {
 }
 
 /**
+ * validator for createTransaction
+ */
+module.exports.createTransactionValidator = [
+  body('amount').isNumeric(),
+  body('paymentProviderId').exists(),
+  body('userToken').optional(),
+  body('userTokenType').isString().optional(),
+  body('locationLong').isNumeric().optional(),
+  body('locationLat').isNumeric().optional(),
+  body('flags').isArray().optional()
+]
+
+/**
  * Create new transaction by agent (via `req.auth.userType`)
  */
-module.exports.newTransaction = async (req, res, next) => {
+module.exports.createTransaction = async (req, res, next) => {
   const options = {}
 
   if (req.headers['x-real-ip']) { // pass nginx ip if available
@@ -249,6 +266,68 @@ module.exports.getMerchantTransactions = async (req, res, next) => {
   return transactionsQueryAndResponse(req, res, query)
 }
 
-module.exports.getMerchantTransactionStatistic = async (req, res, next) => {
-  
+module.exports.getMerchantTransactionsStatistic = async (req, res, next) => {
+  let query = {
+    where: {},
+    attributes: [
+      'paymentProviderId',
+      [Sequelize.literal('SUM(`transaction`.`amount`)'), 'amount'],
+      [Sequelize.literal('SUM(`transaction`.`amount` * `paymentProvider`.`shareMerchant`)'), 'nettAmount'],
+      [Sequelize.fn('COUNT', Sequelize.col('transaction.id')), 'transactionCount']
+    ],
+    group: [
+      'paymentProviderId'
+    ],
+    include: [
+      {
+        model: models.paymentProvider,
+        attributes: [
+          'id',
+          'name',
+          'description',
+          'shareMerchant',
+          'merchantId',
+          'paymentProviderTypeId'
+        ],
+        include: [
+          {
+            model: models.paymentProviderType,
+            attributes: [
+              'id',
+              'class',
+              'name',
+              'description',
+              'thumbnail',
+              'thumbnailGray',
+              'chartColor'
+            ]
+          }
+        ],
+        where: {
+          [Op.or]: [
+            {
+              merchantId: req.auth.merchantId
+            },
+            {
+              merchantId: null
+            }
+          ]
+        }
+      },
+      {
+        model: models.agent,
+        attributes: ['merchantId'],
+        where: {
+          merchantId: req.auth.merchantId
+        }
+      }
+    ]
+  }
+  req.applyFiltersWhereSequelize(query)
+  let transactionsStatistic = await models.transaction.findAll(query)
+  msgFactory.expressCreateResponse(
+    res,
+    msgFactory.msgTypes.MSG_SUCCESS,
+    transactionsStatistic
+  )
 }

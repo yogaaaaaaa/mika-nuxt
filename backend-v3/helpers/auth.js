@@ -57,7 +57,7 @@ module.exports.verifyToken = (sessionToken, secretKey = appConfig.authSecretKey)
       return payload
     }
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }
 
@@ -121,7 +121,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
             userId: user.id,
             username: user.username,
             userType: exports.userTypes.MERCHANT,
-            merchantId: merchant.toJSON()
+            merchantId: merchant.id
           }
         }
       }

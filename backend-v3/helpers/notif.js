@@ -81,7 +81,7 @@ module.exports.notifToAgent = async (agentId, message) => {
   try {
     await mqtt.publish(`${config.topicClientPrefix}/${config.userPrefix}${agentId}`, message)
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }
 

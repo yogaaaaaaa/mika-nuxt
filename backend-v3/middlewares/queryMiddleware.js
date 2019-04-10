@@ -151,3 +151,25 @@ module.exports.filtersToSequelize = (req, res, next) => {
   }
   next()
 }
+
+/**
+ * Generate sequelize group (aggregation) by time
+ */
+module.exports.timeGroupToSequelize = (req, res, next) => {
+  req.query.group_field = req.query.group_field = ['createdAt', 'updatedAt'].includes(req.query.group_field) ? req.query.group_field : 'createdAt'
+  req.query.group_time = req.query.group_time = ['hour', 'day', 'month', 'year'].includes(req.query.group_time) ? req.query.group_time : 'hour'
+  req.query.group_offset = 0
+
+  req.groupBySequelize = {}
+
+  req.applyGroupBySequelize = (query) => {
+    if (typeof query !== 'object') return
+    if (!query.where) query = {}
+
+    req.applyPaginationSequelize = (query) => {
+      if (typeof query !== 'object') return
+      Object.assign(query, req.paginationSequelize)
+    }
+  }
+  next()
+}

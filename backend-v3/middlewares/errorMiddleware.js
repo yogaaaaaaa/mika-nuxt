@@ -18,7 +18,7 @@ module.exports.notFoundErrorHandler = (req, res, next) => {
  */
 module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
-    console.log(err.stack)
+    console.error(err.stack)
     if (err.status === 400) { // status assigned by body-parser when encounter parsing error
       msgFactory.expressCreateResponse(
         res,

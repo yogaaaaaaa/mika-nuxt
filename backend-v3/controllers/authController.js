@@ -3,6 +3,17 @@
 const msgFactory = require('../helpers/msgFactory')
 const auth = require('../helpers/auth')
 
+const { body } = require('express-validator/check')
+
+/**
+ * Validator for login controller
+ */
+module.exports.loginValidator = [
+  body('username').exists(),
+  body('password').exists(),
+  body('userTypes').isArray().optional()
+]
+
 /**
  * Login user
  */
@@ -63,6 +74,10 @@ module.exports.logoutAll = async (req, res, next) => {
 
 }
 
+module.exports.sessionTokenCheckValidator = [
+  body('sessionToken').isString()
+]
+
 /**
  * Check current session token
  */
@@ -83,6 +98,14 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
 }
 
 /**
+ * Validator for changePassword controller
+ */
+module.exports.changePasswordValidator = [
+  body('oldPassword').isString(),
+  body('password').isString()
+]
+
+/**
  * Change password based on current `req.auth`
  */
 module.exports.changePassword = async (req, res, next) => {
@@ -99,6 +122,14 @@ module.exports.changePassword = async (req, res, next) => {
     msgFactory.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
   )
 }
+
+/**
+ * Validator for resetPassword controller
+ */
+module.exports.resetPasswordValidator = [
+  body('userId').exists(),
+  body('password').isString()
+]
 
 /**
  * Reset password (all user)

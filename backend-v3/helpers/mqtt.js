@@ -88,7 +88,7 @@ module.exports.hashPassword = (password, iter = config.passwordHashIter) => {
   let keyPromise = new Promise((resolve, reject) => {
     crypto.pbkdf2(password, salt, iter, keyLength, digest, (err, key) => {
       if (err) {
-        console.log(err)
+        console.error(err)
         reject(err)
       } else {
         resolve('PBKDF2' + '$' + digest + '$' + iter + '$' + salt + '$' + key.toString('base64'))

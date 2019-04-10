@@ -202,7 +202,7 @@ module.exports.newTransaction = async (
     ipAddress: null,
     locationLong: null,
     locationLat: null,
-    requirePostAction: false,
+    requireFollowUp: false,
     followUpType: null,
     followUpData: null,
     redirectTo: null,
@@ -303,8 +303,8 @@ module.exports.newTransaction = async (
     transactionStatus: config.transaction.transactionStatus
   }
 
-  // TODO: add post action here
-  if (config.requirePostAction) {
+  // TODO: add follow up here
+  if (config.requireFollowUp) {
   }
 
   if (config.token && config.tokenType) {
@@ -379,7 +379,7 @@ dTimer.handleEvent(async (eventObject) => {
       return true
     }
   } catch (err) {
-    console.log(err)
+    console.error(err)
     return false
   }
 })

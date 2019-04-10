@@ -50,8 +50,7 @@ router.all('/',
  */
 router.post('/auth/login',
   cipherboxMiddleware.processCipherbox,
-  body('username').exists(),
-  body('password').exists(),
+  authController.loginValidator,
   errorMiddleware.validatorErrorHandler,
   authController.login
 )
@@ -66,23 +65,21 @@ router.post('/auth/logout_all',
   generalController.notImplemented
 )
 router.post('/auth/check',
-  body('sessionToken').isString(),
+  authController.sessionTokenCheckValidator,
   errorMiddleware.validatorErrorHandler,
   authController.sessionTokenCheck
 )
 router.post('/auth/change_password',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  body('oldPassword').isString(),
-  body('password').isString(),
+  authController.changePasswordValidator,
   errorMiddleware.validatorErrorHandler,
   authController.changePassword
 )
 router.post('/auth/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
-  body('userId').exists(),
-  body('password').isString(),
+  authController.resetPasswordValidator,
   errorMiddleware.validatorErrorHandler,
   authController.resetPassword
 )
@@ -147,15 +144,9 @@ router.post('/agent/transaction',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   cipherboxMiddleware.processCipherbox,
-  body('amount').isNumeric(),
-  body('paymentProviderId').exists(),
-  body('userToken').optional(),
-  body('userTokenType').isString().optional(),
-  body('locationLong').isNumeric().optional(),
-  body('locationLat').isNumeric().optional(),
-  body('flags').isArray().optional(),
+  transactionController.createTransactionValidator,
   errorMiddleware.validatorErrorHandler,
-  transactionController.newTransaction
+  transactionController.createTransaction
 )
 router.post('/agent/post_transaction',
   authMiddleware.auth([auth.userTypes.AGENT]),
@@ -182,10 +173,11 @@ router.get(['/merchant/transactions', '/merchant/transactions/:id'],
   queryMiddleware.filtersToSequelize,
   transactionController.getMerchantTransactions
 )
-router.get('/merchant/transaction_statistic',
+router.get('/merchant/transactions_statistic',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  queryMiddleware.filtersToSequelize,
+  transactionController.getMerchantTransactionsStatistic
 )
 router.get('/merchant/transaction_time_series',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
