@@ -17,7 +17,7 @@ module.exports = (trxManager) => {
       tokenTypes: [
       ],
       userTokenTypes: [
-        trxManager.tokenTypes.USER_TOKEN_QRCODE_CONTENT
+        trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ]
     },
     async handler (config) {
