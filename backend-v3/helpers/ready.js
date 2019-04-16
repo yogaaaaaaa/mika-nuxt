@@ -38,12 +38,12 @@ module.exports.checkReadyAll = () => {
 
 module.exports.ready = (name) => {
   modules.set(name, exports.state.READY)
-  console.log('Module Ready :', name)
+  console.log('Module Ready:', name)
   exports.checkReadyAll()
 }
 
 module.exports.notReady = (name) => {
-  console.log('Module Not Ready :', name)
+  console.log('Module Not Ready:', name)
   modules.set(name, exports.state.NOT_READY)
   events.emit('notReady')
 }

@@ -2,8 +2,12 @@
 
 module.exports = (sequelize, DataTypes) => {
   let outlet = sequelize.define('outlet', {
+    idAlias: DataTypes.CHAR(40),
+
     name: DataTypes.STRING,
     description: DataTypes.STRING,
+
+    status: DataTypes.CHAR(32),
 
     email: DataTypes.STRING,
     website: DataTypes.STRING,
@@ -23,8 +27,8 @@ module.exports = (sequelize, DataTypes) => {
 
     otherPaymentSystems: DataTypes.STRING,
 
-    outletPhotoResourceId: DataTypes.INTEGER,
-    cashierDeskPhotoResourceId: DataTypes.INTEGER,
+    outletPhotoResourceId: DataTypes.CHAR(27),
+    cashierDeskPhotoResourceId: DataTypes.CHAR(27),
 
     businessType: DataTypes.STRING,
     businessDurationMonth: DataTypes.INTEGER,

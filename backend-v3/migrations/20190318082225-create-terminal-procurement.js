@@ -1,23 +1,17 @@
 'use strict'
 
 /**
- * TODO: This is a stub migration for terminal
+ * TODO: This is a stub migration for terminalProcurement
  */
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('terminal', {
+    return queryInterface.createTable('terminalProcurement', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
-      },
-
-      idAlias: {
-        // allowNull: false,
-        unique: true,
-        type: Sequelize.CHAR(40)
       },
 
       name: {
@@ -27,15 +21,7 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      serialNumber: {
-        type: Sequelize.STRING,
-        unique: true
-      },
-      imei: {
-        type: Sequelize.STRING,
-        unique: true
-      },
-      terminalStatus: {
+      procurementStatus: {
         allowNull: false,
         type: Sequelize.STRING
       },
@@ -48,18 +34,32 @@ module.exports = {
           key: 'id'
         }
       },
-      terminalBatchId: {
+      terminalCount: {
         allowNull: false,
+        type: Sequelize.INTEGER
+      },
+
+      terminalDistributorId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'terminalDistributor',
+          key: 'id'
+        }
+      },
+
+      terminalBatchId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'terminalBatch',
           key: 'id'
         }
       },
-      merchantId: {
+
+      adminId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'merchant',
+          model: 'admin',
           key: 'id'
         }
       },
@@ -82,6 +82,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('terminal')
+    return queryInterface.dropTable('terminalProcurement')
   }
 }

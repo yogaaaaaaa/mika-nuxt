@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
   merchantPaymentProviderType.associate = (models) => {
-    merchantPaymentProviderType.belongsTo(models.merchant, { foreignKey: 'merchantPicId' })
+    merchantPaymentProviderType.belongsTo(models.merchant, { foreignKey: 'merchantId' })
     merchantPaymentProviderType.belongsTo(models.paymentProviderType, { foreignKey: 'paymentProviderTypeId' })
   }
   return merchantPaymentProviderType

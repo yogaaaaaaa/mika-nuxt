@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
   terminalDistributor.associate = (models) => {
-    terminalDistributor.hasMany(models.terminalBatch, { foreignKey: 'terminalDistributorId' })
+    terminalDistributor.hasMany(models.terminalProcurement, { foreignKey: 'terminalDistributorId' })
   }
   return terminalDistributor
 }

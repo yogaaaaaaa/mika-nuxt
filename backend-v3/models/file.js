@@ -3,19 +3,16 @@
 module.exports = (sequelize, DataTypes) => {
   let file = sequelize.define('file', {
     id: {
-      type: DataTypes.STRING(40),
-      primaryKey: true
+      primaryKey: true,
+      type: DataTypes.CHAR(27)
     },
-    name: DataTypes.STRING,
-    description: DataTypes.STRING,
 
     originalFilename: DataTypes.STRING,
     hash: DataTypes.STRING,
-
     mime: DataTypes.STRING,
     size: DataTypes.INTEGER,
 
-    resourceId: DataTypes.STRING(40)
+    resourceId: DataTypes.CHAR(27)
   }, {
     freezeTableName: true,
     paranoid: true

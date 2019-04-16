@@ -89,6 +89,7 @@ let baseConfig = {
     PAYMENT_PROVIDER_NOT_FOR_YOU: 'invalidPaymentProvider',
     NEED_EXTRA_CONFIG: 'extraConfigNeeded',
     NEED_USER_TOKEN: 'userTokenNeeded',
+    INVALID_USER_TOKEN: 'userTokenInvalid',
     JUST_ERROR: 'unknownError'
   }
 }

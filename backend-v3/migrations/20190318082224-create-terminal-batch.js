@@ -15,7 +15,6 @@ module.exports = {
       },
 
       name: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       description: {
@@ -29,14 +28,6 @@ module.exports = {
       dateArrived: {
         allowNull: false,
         type: 'TIMESTAMP'
-      },
-
-      terminalDistributorId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'terminalDistributor',
-          key: 'id'
-        }
       },
 
       deletedAt: {

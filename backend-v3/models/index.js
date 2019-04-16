@@ -10,6 +10,7 @@ ready.addModule('database')
 const basename = path.basename(__filename)
 
 const config = require('../configs/dbConfig')[process.env.NODE_ENV || 'development']
+console.log('Database:', config.database)
 
 let db = {}
 let sequelize = null

@@ -20,9 +20,7 @@ module.exports.loginValidator = [
 module.exports.login = async (req, res, next) => {
   let options = {}
 
-  if (req.body.userTypes) {
-    options.userTypes = req.body.userTypes
-  }
+  options.userTypes = req.body.userTypes
 
   // Supply bounded terminalId from cipherbox middleware
   if (req.cipherbox) {

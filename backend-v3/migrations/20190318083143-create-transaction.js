@@ -5,9 +5,14 @@ module.exports = {
     return queryInterface.createTable('transaction', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.CHAR(27)
+      },
+
+      idAlias: {
+        allowNull: false,
+        unique: true,
+        type: Sequelize.CHAR(40)
       },
 
       deletedAt: {
@@ -33,13 +38,11 @@ module.exports = {
 
       transactionStatus: {
         allowNull: false,
-        defaultValue: 'created',
-        type: Sequelize.STRING
+        type: Sequelize.CHAR(32)
       },
       transactionSettlementStatus: {
         allowNull: false,
-        defaultValue: 'unsettled',
-        type: Sequelize.STRING
+        type: Sequelize.CHAR(32)
       },
 
       token: {
@@ -48,12 +51,14 @@ module.exports = {
       tokenType: {
         type: Sequelize.STRING
       },
+
       userToken: {
         type: Sequelize.STRING
       },
       userTokenType: {
         type: Sequelize.STRING
       },
+
       customerReference: {
         type: Sequelize.STRING
       },
@@ -66,6 +71,7 @@ module.exports = {
       referenceNumberType: {
         type: Sequelize.STRING
       },
+
       cardApprovalCode: {
         type: Sequelize.STRING
       },
@@ -105,17 +111,11 @@ module.exports = {
       voidReason: {
         type: Sequelize.TEXT
       },
+
       extra: {
         type: Sequelize.TEXT
       },
 
-      partnerId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'partner',
-          key: 'id'
-        }
-      },
       agentId: {
         allowNull: false,
         type: Sequelize.INTEGER,

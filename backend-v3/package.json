@@ -8,6 +8,8 @@
     "staging": "pm2 start ecosystem.json --env staging"
   },
   "dependencies": {
+    "base32-decode": "^1.0.0",
+    "base32-encode": "^1.1.1",
     "bcryptjs": "^2.4.3",
     "ber-tlv": "^0.9.2",
     "ber-tlv-annotations": "^0.9.6",

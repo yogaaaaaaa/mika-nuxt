@@ -18,7 +18,7 @@ module.exports = {
           key: 'id'
         }
       },
-      paymentProviderType: {
+      paymentProviderTypeId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {

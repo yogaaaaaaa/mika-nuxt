@@ -15,9 +15,18 @@ const appConfig = require('../configs/appConfig')
 
 module.exports.userTypes = {
   ADMIN: 'admin',
-  MERCHANT: 'merchant',
   AGENT: 'agent',
-  MERCHANT_PIC: 'merchantPic'
+  MERCHANT_STAFF: 'merchantStaff',
+  PARTNER_STAFF: 'partnerStaff',
+  PAYMENT_PROVIDER_STAFF: 'paymentProviderStaff'
+}
+
+module.exports.userRoles = {
+  ADMIN_FINANCE: 'adminFinance',
+  ADMIN_HR: 'adminHr',
+  ADMIN_MARKETING: 'adminMarketing',
+  ADMIN_SUPPORT: 'adminSupport',
+  ADMIN_LOGISTIC: 'adminLogistic'
 }
 
 function redisKey (key) {
@@ -75,111 +84,102 @@ module.exports.doAuth = async function (username, password, options = {}) {
     }
   })
 
+  if (!user) return
+
+  if (!await hash.compareBcryptHash(user.password, password)) return
+
+  if (Array.isArray(options.userTypes)) {
+    if (!options.userTypes.includes(user.userType)) return
+  }
+
   let authResult = {
-    auth: null,
+    auth: {
+      userId: user.id,
+      username: user.username,
+      userType: null,
+      userRoles: typeof user.userRoles === 'string' ? user.userRoles.split(',') : []
+    },
     sessionToken: null,
     authExpirySecond: appConfig.authExpirySecond
   }
 
-  if (user) {
-    if (Array.isArray(options.userTypes)) {
-      if (!options.userTypes.includes(user.userType)) {
-        return
-      }
+  if (user.userType === exports.userTypes.ADMIN) {
+    let admin = await models.admin.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id']
+    })
+
+    if (admin) {
+      authResult.auth.userType = exports.userTypes.ADMIN
+      authResult.auth.adminId = admin.id
     }
+  }
 
-    if (await hash.compareBcryptHash(user.password, password)) {
-      if (user.userType === exports.userTypes.ADMIN) {
-        let admin = await models.admin.findOne({
-          where: {
-            userId: user.id
-          },
-          attributes: ['id', 'roles']
-        })
+  if (user.userType === exports.userTypes.MERCHANT) {
+    let merchant = await models.merchant.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id']
+    })
 
-        if (admin) {
-          authResult.auth = {
-            userId: user.id,
-            username: user.username,
-            userType: exports.userTypes.ADMIN,
-            adminId: admin.id,
-            roles: admin.roles
-          }
-        }
-      }
-
-      if (user.userType === exports.userTypes.MERCHANT) {
-        let merchant = await models.merchant.findOne({
-          where: {
-            userId: user.id
-          },
-          attributes: ['id']
-        })
-
-        if (merchant) {
-          authResult.auth = {
-            userId: user.id,
-            username: user.username,
-            userType: exports.userTypes.MERCHANT,
-            merchantId: merchant.id
-          }
-        }
-      }
-
-      if (user.userType === exports.userTypes.AGENT) {
-        let agent = await models.agent.findOne({
-          where: {
-            userId: user.id
-          },
-          attributes: ['id', 'boundedToTerminal']
-        })
-
-        if (agent) {
-          authResult.auth = {
-            userId: user.id,
-            username: user.username,
-            userType: exports.userTypes.AGENT,
-            agentId: agent.id,
-            terminalId: null
-          }
-          if (agent.boundedToTerminal) {
-            if (!options.terminalId) return
-            let agentTerminal = await models.agentTerminal.findOne({
-              where: {
-                terminalId: options.terminalId
-              }
-            })
-            if (!agentTerminal) return
-            authResult.auth.terminalId = agentTerminal.terminalId
-          }
-          authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
-        }
-      }
-
-      if (user.userType === exports.userTypes.MERCHANT_PIC) {
-        let agent = await models.merchantPic.findOne({
-          where: {
-            userId: user.id
-          },
-          attributes: ['id']
-        })
-
-        if (agent) {
-          authResult.auth = {
-            userId: user.id,
-            username: user.username,
-            userType: exports.userTypes.MERCHANT_PIC,
-            merchantPic: agent.id
-          }
-        }
-      }
+    if (merchant) {
+      authResult.auth.userType = exports.userTypes.MERCHANT
+      authResult.auth.merchantId = merchant.id
     }
+  }
 
-    if (authResult.auth) {
-      authResult.sessionToken = exports.generateToken(authResult.auth)
-      await exports.setSessionToken(authResult.auth.userId, authResult.sessionToken, authResult.authExpirySecond)
-      return authResult
+  if (user.userType === exports.userTypes.MERCHANT_STAFF) {
+    let merchantStaff = await models.merchantStaff.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id']
+    })
+
+    if (merchantStaff) {
+      authResult.auth.userType = exports.userTypes.MERCHANT_STAFF
+      authResult.auth.merchantStaffId = merchantStaff.id
     }
+  }
+
+  if (user.userType === exports.userTypes.AGENT) {
+    let agent = await models.agent.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id', 'boundedToTerminal']
+    })
+
+    if (agent) {
+      authResult.auth.userType = exports.userTypes.AGENT
+      authResult.auth.agentId = agent.id
+      authResult.auth.terminalId = null
+
+      if (agent.boundedToTerminal) {
+        if (!options.terminalId) return
+        let agentTerminal = await models.agentTerminal.findOne({
+          where: {
+            terminalId: options.terminalId
+          }
+        })
+        if (!agentTerminal) return
+        authResult.auth.terminalId = agentTerminal.terminalId
+      }
+      authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
+    }
+  }
+
+  if (authResult.auth.userType) {
+    authResult.sessionToken = exports.generateToken(authResult.auth)
+    await exports.setSessionToken(
+      authResult.auth.userId,
+      authResult.sessionToken,
+      authResult.authExpirySecond
+    )
+    return authResult
   }
 }
 

@@ -10,6 +10,7 @@ module.exports = {
         phoneNumber: '0213182938',
         merchantId: 1
       },
+
       {
         id: 2,
         name: 'Shop Evil',
@@ -23,6 +24,22 @@ module.exports = {
         streetAddress: 'Jalan Rumah Tetra Testing Nomor 2312',
         phoneNumber: '0213182938',
         merchantId: 2
+      },
+
+      {
+        id: 4,
+        name: 'Koperasi Karya Anak Asing - Pusat',
+        streetAddress: 'Jalan Lempar Juara Testing Nomor 3',
+        phoneNumber: '123871928',
+        merchantId: 3
+      },
+
+      {
+        id: 5,
+        name: 'Pasar Angkasa Jayagiri',
+        streetAddress: 'Jalan Kuat Lemah Testing Nomor 89',
+        phoneNumber: '904587398',
+        merchantId: 4
       }
     ]
     , {})

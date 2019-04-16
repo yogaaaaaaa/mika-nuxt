@@ -5,9 +5,8 @@ module.exports = {
     return queryInterface.createTable('transactionRefund', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.CHAR(27)
       },
 
       amount: {
@@ -15,12 +14,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       reason: {
-        type: Sequelize.TEXT
+        type: Sequelize.STRING
       },
 
       transactionId: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.CHAR(27),
         references: {
           model: 'transaction',
           key: 'id'

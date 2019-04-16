@@ -10,12 +10,24 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
+      idAlias: {
+        // allowNull: false,
+        unique: true,
+        type: Sequelize.CHAR(40)
+      },
+
       name: {
         allowNull: false,
+        unique: true,
         type: Sequelize.STRING
       },
       description: {
         type: Sequelize.STRING
+      },
+
+      status: {
+        // allowNull: false,
+        type: Sequelize.CHAR(32)
       },
 
       email: {
@@ -69,14 +81,14 @@ module.exports = {
       },
 
       outletPhotoResourceId: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.CHAR(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       cashierDeskPhotoResourceId: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.CHAR(27),
         references: {
           model: 'resource',
           key: 'id'

@@ -8,7 +8,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
-const { body } = require('express-validator/check')
 
 const auth = require('../helpers/auth')
 
@@ -136,8 +135,12 @@ router.get([ '/agent/payment_providers', '/agent/payment_providers/:paymentProvi
 router.get([ '/agent/transactions', '/agent/transactions/:transactionId' ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
+  queryMiddleware.paginationToSequelizeValidator('transaction'),
+  queryMiddleware.filtersToSequelizeValidator('transaction'),
+  errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
+  errorMiddleware.validatorErrorHandler,
   transactionController.getAgentTransactions
 )
 router.post('/agent/transaction',
@@ -148,13 +151,9 @@ router.post('/agent/transaction',
   errorMiddleware.validatorErrorHandler,
   transactionController.createTransaction
 )
-router.post('/agent/post_transaction',
+router.post('/agent/transaction_follow_up',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  body('paymentProviderId').exists(),
-  body('transactionId').exists(),
-  body('postActionUserToken').exists(),
-  errorMiddleware.validatorErrorHandler,
   generalController.notImplemented
 )
 
@@ -169,8 +168,12 @@ router.get('/merchant',
 router.get(['/merchant/transactions', '/merchant/transactions/:id'],
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
+  queryMiddleware.paginationToSequelizeValidator('transaction'),
+  queryMiddleware.filtersToSequelizeValidator('transaction'),
+  errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
+  errorMiddleware.validatorErrorHandler,
   transactionController.getMerchantTransactions
 )
 router.get('/merchant/transactions_statistic',
@@ -179,7 +182,7 @@ router.get('/merchant/transactions_statistic',
   queryMiddleware.filtersToSequelize,
   transactionController.getMerchantTransactionsStatistic
 )
-router.get('/merchant/transaction_time_series',
+router.get('/merchant/transactions_time_group',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented

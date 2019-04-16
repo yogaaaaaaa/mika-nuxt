@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
 
     directSettlement: DataTypes.BOOLEAN,
 
-    hidden: DataTypes.BOOLEAN,
     gateway: DataTypes.BOOLEAN,
+    hidden: DataTypes.BOOLEAN,
 
     merchantId: DataTypes.INTEGER,
     paymentProviderConfigId: DataTypes.INTEGER,

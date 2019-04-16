@@ -1,16 +1,16 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let merchantPicViewGroup = sequelize.define('merchantPicViewGroup', {
-    merchantPicId: DataTypes.INTEGER,
+  let merchantStaffViewGroup = sequelize.define('merchantStaffViewGroup', {
+    merchantStaffId: DataTypes.INTEGER,
     viewGroupId: DataTypes.INTEGER
   }, {
     freezeTableName: true,
     paranoid: true
   })
-  merchantPicViewGroup.associate = (models) => {
-    merchantPicViewGroup.belongsTo(models.merchantPic, { foreignKey: 'merchantPicId' })
-    merchantPicViewGroup.belongsTo(models.viewGroup, { foreignKey: 'viewGroupId' })
+  merchantStaffViewGroup.associate = (models) => {
+    merchantStaffViewGroup.belongsTo(models.merchantStaff, { foreignKey: 'merchantStaffId' })
+    merchantStaffViewGroup.belongsTo(models.viewGroup, { foreignKey: 'viewGroupId' })
   }
-  return merchantPicViewGroup
+  return merchantStaffViewGroup
 }

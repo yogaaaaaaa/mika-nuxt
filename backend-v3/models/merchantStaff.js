@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let merchantPic = sequelize.define('merchantPic', {
+  let merchantStaff = sequelize.define('merchantStaff', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -26,9 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
-  merchantPic.associate = function (models) {
-    merchantPic.belongsTo(models.user, { foreignKey: 'userId' })
-    merchantPic.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+  merchantStaff.associate = function (models) {
+    merchantStaff.belongsTo(models.user, { foreignKey: 'userId' })
+    merchantStaff.belongsTo(models.merchant, { foreignKey: 'merchantId' })
   }
-  return merchantPic
+  return merchantStaff
 }

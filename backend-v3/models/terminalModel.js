@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
   })
   terminalModel.associate = (models) => {
     terminalModel.hasMany(models.terminal, { foreignKey: 'terminalModelId' })
+    terminalModel.hasMany(models.terminalProcurement, { foreignKey: 'terminalModelId' })
   }
   return terminalModel
 }

@@ -1,24 +1,17 @@
 'use strict'
 
 module.exports = {
-  local: {
-    username: 'root',
-    password: '',
-    database: 'mika_v3_local',
-    host: '127.0.0.1',
-    dialect: 'mysql',
-    operatorsAliases: false,
-    freezeTableName: true
-  },
   development: {
-    username: 'mikadev',
-    password: 'mikadev',
-    database: 'mika_v3_12',
-    host: '127.0.0.1',
+    username: process.env.MIKA_DB_USERNAME || 'mikadev',
+    password: process.env.MIKA_DB_PASSWORD || 'mikadev',
+    database: process.env.MIKA_DB_NAME || 'mika_v3_12',
+    host: process.env.MIKA_DB_HOST || '127.0.0.1',
     dialect: 'mysql',
+
     operatorsAliases: false,
     freezeTableName: true,
-    logging: false,
+
+    logging: true,
     benchmark: true
   },
   production: {
@@ -26,9 +19,12 @@ module.exports = {
     password: '',
     database: '',
     host: '127.0.0.1',
+
     dialect: 'mysql',
+
     operatorsAliases: false,
     freezeTableName: true,
+
     logging: false
   }
 }

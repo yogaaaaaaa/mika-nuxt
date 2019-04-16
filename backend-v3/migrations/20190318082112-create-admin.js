@@ -22,10 +22,6 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      roles: {
-        type: Sequelize.STRING
-      },
-
       userId: {
         allowNull: false,
         type: Sequelize.INTEGER,
@@ -34,6 +30,7 @@ module.exports = {
           key: 'id'
         }
       },
+
       deletedAt: {
         allowNull: true,
         type: Sequelize.DATE,

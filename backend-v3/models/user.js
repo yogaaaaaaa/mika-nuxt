@@ -4,7 +4,9 @@ module.exports = (sequelize, DataTypes) => {
   let user = sequelize.define('user', {
     username: DataTypes.STRING,
     password: DataTypes.STRING,
-    userType: DataTypes.STRING
+
+    userType: DataTypes.CHAR(32),
+    userRoles: DataTypes.STRING
   }, {
     freezeTableName: true,
     paranoid: true

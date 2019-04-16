@@ -9,6 +9,8 @@ const debug = {
 }
 const models = require('../models')
 
+const uid = require('./uid')
+
 const dTimer = require('./dTimer')
 const events = Object.create(require('events').prototype)
 
@@ -48,14 +50,6 @@ module.exports.findPpHandler = (name) => {
   return null
 }
 
-module.exports.createTransaction = async (transaction) => {
-  let createdTransaction = await models.transaction.create(transaction)
-
-  if (createdTransaction) {
-    return createdTransaction.toJSON()
-  }
-}
-
 /**
  * Update single transaction
  */
@@ -91,22 +85,7 @@ module.exports.getTransaction = async (transactionId) => {
 }
 
 /**
- * Get transaction data only, without its related data
- */
-module.exports.getTransactionOnly = async (transactionId) => {
-  const transaction = await models.transaction.findOne({
-    where: {
-      id: transactionId
-    }
-  })
-
-  if (transaction) {
-    return transaction.toJSON()
-  }
-}
-
-/**
- * Get many payment provider
+ * Get many payment provider(s)
  */
 module.exports.getPaymentProvidersByAgent = async (agentId, paymentProviderId = null) => {
   let whereCondition = {
@@ -162,7 +141,7 @@ module.exports.addListener = (transactionEvent, callback) => {
 
 module.exports.forceTransactionStatus = async (transactionId, transactionStatus) => {
   if (transactionStatus) {
-    if (await exports.updateTransaction({ transaction_status: transactionStatus }, transactionId)) {
+    if (await exports.updateTransaction({ transactionStatus }, transactionId)) {
       let eventName = null
 
       if (transactionStatus === exports.transactionStatuses.SUCCESS) {
@@ -187,151 +166,133 @@ module.exports.forceTransactionStatus = async (transactionId, transactionStatus)
  * Mother of mika system.
  * Create new transaction with specified agentId and paymentProviderId
  */
-module.exports.newTransaction = async (
-  amount,
-  paymentProviderId,
-  agentId,
-  options = {}) => {
-  let config = Object.assign({
-    amount,
-    paymentProviderId,
-    agentId,
-    terminalId: null,
-    partnerId: null,
+module.exports.createTransaction = async (transaction, options = {}) => {
+  let ctx = Object.assign({
     flags: [],
-    ipAddress: null,
-    locationLong: null,
-    locationLat: null,
-    requireFollowUp: false,
-    followUpType: null,
-    followUpData: null,
-    redirectTo: null,
-    paymentProvider: null,
-    transaction: {},
-    updatedTransaction: null,
     userToken: null,
     userTokenType: null,
-    token: null,
-    tokenType: null
+
+    transaction,
+
+    paymentProvider: null,
+    agent: null,
+
+    followUpType: null,
+
+    redirectTo: null
   },
   options)
 
-  if (!Array.isArray(config.flags)) {
-    config.flags = []
-  }
+  if (!Array.isArray(ctx.flags)) ctx.flags = []
 
-  config.paymentProvider = await exports.getPaymentProvidersByAgent(config.agentId, config.paymentProviderId)
-  if (config.paymentProvider.length === 0) {
+  ctx.paymentProvider = await exports.getPaymentProvidersByAgent(
+    ctx.transaction.agentId,
+    ctx.transaction.paymentProviderId
+  )
+  if (ctx.paymentProvider.length === 0) {
     return { error: exports.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU }
   } else {
-    config.paymentProvider = config.paymentProvider[0]
+    ctx.paymentProvider = ctx.paymentProvider[0]
   }
 
-  if (!config.flags.includes(exports.transactionFlags.NO_AMOUNT_CHECK)) {
-    if (config.paymentProvider.minimumAmount) {
-      if (config.amount < config.paymentProvider.minimumAmount) {
+  if (!ctx.flags.includes(exports.transactionFlags.NO_AMOUNT_CHECK)) {
+    if (ctx.paymentProvider.minimumAmount) {
+      if (ctx.amount < ctx.paymentProvider.minimumAmount) {
         return {
           error: exports.errorCodes.AMOUNT_TOO_LOW,
-          errorMinimumAmount: config.paymentProvider.minimumAmount
+          errorMinimumAmount: ctx.paymentProvider.minimumAmount
         }
       }
     }
 
-    if (config.paymentProvider.maximumAmount) {
-      if (config.amount > config.paymentProvider.maximumAmount) {
+    if (ctx.paymentProvider.maximumAmount) {
+      if (ctx.transaction.amount > ctx.paymentProvider.maximumAmount) {
         return {
           error: exports.errorCodes.AMOUNT_TOO_HIGH,
-          errorMaximumAmount: config.paymentProvider.maximumAmount
+          errorMaximumAmount: ctx.paymentProvider.maximumAmount
         }
       }
     }
   }
 
-  let ppHandler = exports.findPpHandler(config.paymentProvider.paymentProviderConfig.handler)
+  ctx.agent = await models.agent.findByPk(ctx.transaction.agentId, {
+    include: [ models.merchant ]
+  })
 
-  if (typeof ppHandler.preHandler === 'function') {
-    let returnValue = await ppHandler.preHandler(config)
+  let ppHandler = exports.findPpHandler(
+    ctx.paymentProvider.paymentProviderConfig.handler
+  )
+
+  if (typeof ppHandler.checkHandler === 'function') {
+    let returnValue = await ppHandler.checkHandler(ctx)
     if (returnValue) {
       if (returnValue.error) {
         return returnValue
+      } else {
+        return { error: exports.errorCode.JUST_ERROR }
       }
-      return { error: exports.errorCode.JUST_ERROR }
     }
   }
 
-  if (config.redirectTo && config.paymentProvider.gateway) {
-    return {
-      redirectTo: config.redirectTo
-    }
+  if (ctx.checkResult) {
+    return ctx.checkResult
   }
 
-  config.transaction = await exports.createTransaction(Object.assign(
-    {
-      transactionStatus: exports.transactionStatuses.CREATED,
-      amount: config.amount,
-      agentId: config.agentId,
-      terminalId: config.terminalId,
-      partnerId: config.partnerId,
-      locationLat: config.locationLat,
-      locationLong: config.locationLong,
-      ipAddress: config.ipAddress,
-      paymentProviderId: config.paymentProviderId
-    },
-    config.transaction
-  ))
+  let genId = uid.generateTransactionId(ctx.agent.merchant.shortName)
+  ctx.transaction.id = genId.id
+  ctx.transaction.idAlias = genId.idAlias
+  ctx.transaction.transactionStatus = exports.transactionStatuses.CREATED
 
-  if (!config.transaction) {
-    return { error: exports.errorCode.JUST_ERROR }
-  }
+  ctx.transaction = models.transaction.build(ctx.transaction)
 
   if (typeof ppHandler.handler === 'function') {
-    let returnValue = await ppHandler.handler(config)
+    let returnValue = await ppHandler.handler(ctx)
     if (returnValue) {
       if (returnValue.error) {
         return returnValue
+      } else {
+        return { error: exports.errorCode.JUST_ERROR }
       }
-      return { error: exports.errorCode.JUST_ERROR }
     }
   }
 
-  if (config.updatedTransaction) {
-    await exports.updateTransaction(config.updatedTransaction, config.transaction.id)
+  if (!await ctx.transaction.save()) return { error: exports.errorCode.JUST_ERROR }
+
+  if (ctx.redirectTo && ctx.paymentProvider.gateway) {
+    return {
+      redirectTo: ctx.redirectTo
+    }
   }
 
-  let newTransaction = {
-    transactionId: config.transaction.id,
-    transactionStatus: config.transaction.transactionStatus
+  let trxResult = {
+    transactionId: ctx.transaction.id,
+    transactionStatus: ctx.transaction.transactionStatus
   }
 
-  // TODO: add follow up here
-  if (config.requireFollowUp) {
+  if (ctx.transaction.token && ctx.transaction.tokenType) {
+    trxResult.token = ctx.transaction.token
+    trxResult.tokenType = ctx.transaction.tokenType
   }
 
-  if (config.token && config.tokenType) {
-    newTransaction.token = config.token
-    newTransaction.tokenType = config.tokenType
-  }
-
-  if (config.transaction.transactionStatus === exports.transactionStatuses.CREATED) {
+  if (ctx.transaction.transactionStatus === exports.transactionStatuses.CREATED) {
     await dTimer.postEvent({
       event: exports.transactionEvents.GLOBAL_TIMEOUT,
-      transactionId: config.transaction.id
+      transactionId: ctx.transaction.id
     }, appConfig.transactionTimeoutSecond * 1000)
   }
 
-  return newTransaction
+  return trxResult
 }
 
 /**
  * Handle timeout event from redis timer
  */
-dTimer.handleEvent(async (eventObject) => {
-  debug.dTimer('event', eventObject)
+dTimer.handleEvent(async (eventCtx) => {
+  debug.dTimer('event', eventCtx)
   try {
-    if (eventObject.event === exports.transactionEvents.GLOBAL_TIMEOUT) {
-      let config = {
-        transaction: await exports.getTransaction(eventObject.transactionId),
-        updatedTransaction: null
+    if (eventCtx.event === exports.transactionEvents.GLOBAL_TIMEOUT) {
+      let ctx = {
+        transaction: await exports.getTransaction(eventCtx.transactionId)
       }
 
       // transaction is already finished, do nothing
@@ -339,41 +300,43 @@ dTimer.handleEvent(async (eventObject) => {
         [
           exports.transactionStatuses.SUCCESS,
           exports.transactionStatuses.FAILED
-        ].includes(config.transaction.transactionStatus)
+        ].includes(ctx.transaction.transactionStatus)
       ) {
-        return true
+        return
       }
 
-      let ppHandler = exports.findPpHandler(config.transaction.paymentProvider.paymentProviderConfig.handler)
+      let ppHandler = exports.findPpHandler(
+        ctx.transaction.paymentProvider.paymentProviderConfig.handler
+      )
 
       // Handle transaction by each payment provider timeout handler
       if (typeof ppHandler.timeoutHandler === 'function') {
-        await ppHandler.timeoutHandler(config)
+        await ppHandler.timeoutHandler(ctx)
       }
 
-      config.updatedTransaction = Object.assign(
+      ctx.updatedTransaction = Object.assign(
         {
           transactionStatus: exports.transactionStatuses.FAILED
         },
-        config.updatedTransaction
+        ctx.updatedTransaction
       )
 
-      await exports.updateTransaction(config.updatedTransaction, eventObject.transactionId)
+      await exports.updateTransaction(ctx.updatedTransaction, eventCtx.transactionId)
 
-      if (config.updatedTransaction.transactionStatus === exports.transactionStatuses.FAILED) {
+      if (ctx.updatedTransaction.transactionStatus === exports.transactionStatuses.FAILED) {
         exports.emitTransactionEvent(
           exports.transactionEvents.FAILED,
-          eventObject.transactionId
+          eventCtx.transactionId
         )
-      } else if (config.updatedTransaction.transactionStatus === exports.transactionStatuses.SUCCESS) {
+      } else if (ctx.updatedTransaction.transactionStatus === exports.transactionStatuses.SUCCESS) {
         exports.emitTransactionEvent(
           exports.transactionEvents.SUCCESS,
-          eventObject.transactionId
+          eventCtx.transactionId
         )
       }
 
       if (typeof ppHandler.timeoutPostHandler === 'function') {
-        await ppHandler.timeoutPostHandler(config)
+        await ppHandler.timeoutPostHandler(ctx)
       }
 
       return true

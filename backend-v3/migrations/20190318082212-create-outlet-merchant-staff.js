@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('viewGroup', {
+    return queryInterface.createTable('outletMerchantStaff', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,23 +10,19 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      name: {
-        type: Sequelize.STRING
-      },
-      description: {
-        type: Sequelize.STRING
-      },
-
-      slug: {
-        type: Sequelize.STRING,
-        unique: true
-      },
-
-      merchantId: {
+      outletId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: 'merchant',
+          model: 'outlet',
+          key: 'id'
+        }
+      },
+      merchantStaffId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'merchantStaff',
           key: 'id'
         }
       },
@@ -49,6 +45,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('viewGroup')
+    return queryInterface.dropTable('outletMerchantStaff')
   }
 }

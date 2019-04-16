@@ -34,10 +34,8 @@ module.exports.dtimer = dtimer
 
 module.exports.handleEvent = async (callback) => {
   dtimer.on('event', async (ev) => {
-    let cbReturnValue = await callback(ev)
-    if (cbReturnValue) {
-      await dtimer.confirm(ev.id)
-    }
+    if (await callback(ev)) return
+    await dtimer.confirm(ev.id)
   })
 }
 

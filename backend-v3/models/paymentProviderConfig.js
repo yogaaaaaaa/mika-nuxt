@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         if (typeof value === 'object') {
           this.setDataValue('config', JSON.stringify(value))
         }
-        return this.setDataValue('config', null)
+        this.setDataValue('config', null)
       }
     },
 

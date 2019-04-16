@@ -3,8 +3,8 @@
 module.exports = (sequelize, DataTypes) => {
   let resource = sequelize.define('resource', {
     id: {
-      type: DataTypes.STRING(40),
-      primaryKey: true
+      primaryKey: true,
+      type: DataTypes.CHAR(27)
     },
     name: DataTypes.STRING,
     description: DataTypes.STRING

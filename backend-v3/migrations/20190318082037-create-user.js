@@ -22,7 +22,9 @@ module.exports = {
 
       userType: {
         allowNull: false,
-        defaultValue: 'nonuser',
+        type: Sequelize.CHAR(32)
+      },
+      userRoles: {
         type: Sequelize.STRING
       },
 

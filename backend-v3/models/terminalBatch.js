@@ -6,16 +6,14 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.STRING,
 
     batchStatus: DataTypes.STRING,
-    dateArrived: DataTypes.DATE,
-
-    terminalDistributorId: DataTypes.INTEGER
+    dateArrived: DataTypes.DATE
   }, {
     freezeTableName: true,
     paranoid: true
   })
   terminalBatch.associate = (models) => {
-    terminalBatch.belongsTo(models.terminalDistributor, { foreignKey: 'terminalDistributorId' })
     terminalBatch.hasMany(models.terminal, { foreignKey: 'terminalBatchId' })
+    terminalBatch.hasMany(models.terminalProcurement, { foreignKey: 'terminalBatchId' })
   }
   return terminalBatch
 }

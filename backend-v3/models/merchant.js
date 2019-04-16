@@ -2,8 +2,13 @@
 
 module.exports = (sequelize, DataTypes) => {
   let merchant = sequelize.define('merchant', {
+    idAlias: DataTypes.CHAR(40),
+
     name: DataTypes.STRING,
+    shortName: DataTypes.CHAR(25),
     description: DataTypes.STRING,
+
+    status: DataTypes.CHAR(32),
 
     companyForm: DataTypes.STRING,
 
@@ -18,18 +23,18 @@ module.exports = (sequelize, DataTypes) => {
     phoneNumber: DataTypes.STRING,
 
     idTaxCard: DataTypes.STRING,
-    scannedTaxCardResourceId: DataTypes.STRING(40),
+    scannedTaxCardResourceId: DataTypes.CHAR(27),
 
     bankName: DataTypes.STRING,
     bankBranchName: DataTypes.STRING,
     bankAccountName: DataTypes.STRING,
     bankAccountNumber: DataTypes.STRING,
 
-    scannedBankStatementResourceId: DataTypes.STRING(40),
-    scannedSkmenkumhamResourceId: DataTypes.STRING(40),
-    scannedSiupResourceId: DataTypes.STRING(40),
-    scannedTdpResourceId: DataTypes.STRING(40),
-    scannedSkdpResourceId: DataTypes.STRING(40),
+    scannedBankStatementResourceId: DataTypes.CHAR(27),
+    scannedSkmenkumhamResourceId: DataTypes.CHAR(27),
+    scannedSiupResourceId: DataTypes.CHAR(27),
+    scannedTdpResourceId: DataTypes.CHAR(27),
+    scannedSkdpResourceId: DataTypes.CHAR(27),
 
     ownerName: DataTypes.STRING,
     ownerOccupation: DataTypes.STRING,
@@ -39,10 +44,9 @@ module.exports = (sequelize, DataTypes) => {
     ownerIdCardType: DataTypes.STRING,
     ownerTaxCardNumber: DataTypes.STRING,
 
-    ownerScannedIdCardResourceId: DataTypes.STRING(40),
-    ownerScannedTaxCardResourceId: DataTypes.STRING(40),
+    ownerScannedIdCardResourceId: DataTypes.CHAR(27),
+    ownerScannedTaxCardResourceId: DataTypes.CHAR(27),
 
-    userId: DataTypes.INTEGER,
     partnerId: DataTypes.INTEGER
   }, {
     freezeTableName: true,
@@ -82,7 +86,6 @@ module.exports = (sequelize, DataTypes) => {
       as: 'ownerScannedTaxCardResource' }
     )
 
-    merchant.belongsTo(models.user, { foreignKey: 'userId' })
     merchant.belongsTo(models.partner, { foreignKey: 'partnerId' })
 
     merchant.belongsToMany(

@@ -2,10 +2,17 @@
 
 module.exports = (sequelize, DataTypes) => {
   let transaction = sequelize.define('transaction', {
+    id: {
+      primaryKey: true,
+      type: DataTypes.CHAR(27)
+    },
+
+    idAlias: DataTypes.CHAR(40),
+
     amount: DataTypes.INTEGER,
 
-    transactionStatus: DataTypes.STRING,
-    transactionSettlementStatus: DataTypes.STRING,
+    transactionStatus: DataTypes.CHAR(32),
+    transactionSettlementStatus: DataTypes.CHAR(32),
 
     token: DataTypes.STRING,
     tokenType: DataTypes.STRING,
@@ -49,7 +56,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
 
-    partnerId: DataTypes.INTEGER,
     agentId: DataTypes.INTEGER,
     terminalId: DataTypes.INTEGER,
     paymentProviderId: DataTypes.INTEGER
@@ -58,7 +64,6 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
   transaction.associate = (models) => {
-    transaction.belongsTo(models.partner, { foreignKey: 'partnerId' })
     transaction.belongsTo(models.agent, { foreignKey: 'agentId' })
     transaction.belongsTo(models.terminal, { foreignKey: 'terminalId' })
     transaction.belongsTo(models.paymentProvider, { foreignKey: 'paymentProviderId' })

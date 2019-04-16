@@ -5,9 +5,18 @@ module.exports = {
     return queryInterface.bulkInsert('admin', [
       {
         id: 1,
-        name: 'Super Admin',
-        roles: null,
+        name: 'Lyndon B Johnson',
         userId: 1
+      },
+      {
+        id: 2,
+        name: 'Ho Chi Minh',
+        userId: 2
+      },
+      {
+        id: 3,
+        name: 'Margaret Thatcher',
+        userId: 3
       }
     ]
     , {})

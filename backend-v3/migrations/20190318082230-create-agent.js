@@ -42,6 +42,7 @@ module.exports = {
         }
       },
       outletId: {
+        allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'outlet',

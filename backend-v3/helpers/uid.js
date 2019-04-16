@@ -4,25 +4,27 @@
  * Encapsulate implementation of encoding, UID, and random generation string
  */
 
-const ksuid = require('ksuid')
-const uuidv4 = require('uuid/v4')
+const base32Encode = require('base32-encode')
+const base32Decode = require('base32-decode')
 
-/**
- * Generate uuidv4
- */
-module.exports.uuidv4 = (length) => {
-  return uuidv4()
+exports.ksuid = require('ksuid')
+exports.uuidv4 = require('uuid/v4')
+
+module.exports.base32CrfEncode = (buffer) => {
+  return base32Encode(buffer, 'Crockford')
 }
 
-/**
- * Generate KSUID as fixed string or buffer (`raw === true`)
- */
-module.exports.ksuid = (raw = true) => {
-  let uid = ksuid.randomSync()
-  if (raw) {
-    return uid.raw
+module.exports.base32CrfDecode = (str) => {
+  return Buffer.from(base32Decode(str, 'Crockford'))
+}
+
+module.exports.generateTransactionId = (name) => {
+  let ksuid = exports.ksuid.randomSync()
+  let part = exports.base32CrfEncode(ksuid.raw).substring(0, 12).match(/.{1,6}/g)
+  return {
+    id: ksuid.string,
+    idAlias: `${name}-${part[0]}-${part[1]}`
   }
-  return uid.string
 }
 
 /**

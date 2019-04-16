@@ -5,6 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
+    idAlias: DataTypes.CHAR(40),
+
     serialNumber: DataTypes.STRING,
     imei: DataTypes.STRING,
 

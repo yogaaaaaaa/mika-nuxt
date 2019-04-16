@@ -6,15 +6,13 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.STRING(40)
+        type: Sequelize.CHAR(27)
       },
 
       name: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       description: {
-        allowNull: false,
         type: Sequelize.STRING
       },
 

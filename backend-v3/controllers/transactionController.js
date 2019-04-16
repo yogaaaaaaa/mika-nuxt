@@ -55,7 +55,7 @@ async function transactionsQueryAndResponse (req, res, query) {
 }
 
 /**
- * validator for createTransaction
+ * Validator for createTransaction
  */
 module.exports.createTransactionValidator = [
   body('amount').isNumeric(),
@@ -71,57 +71,41 @@ module.exports.createTransactionValidator = [
  * Create new transaction by agent (via `req.auth.userType`)
  */
 module.exports.createTransaction = async (req, res, next) => {
-  const options = {}
-
-  if (req.headers['x-real-ip']) { // pass nginx ip if available
-    options.ipAddress = req.headers['x-real-ip']
-  } else {
-    options.ipAddress = req.ip
-  }
-
-  if (req.auth.terminalId) {
-    options.terminalId = req.auth.terminalId
-  }
-
-  if (req.body.userToken && req.body.userTokenType) {
-    options.userToken = req.body.userToken
-    options.userTokenType = req.body.userTokenType
-  }
-
-  if (req.body.locationLong && req.body.locationLat) {
-    options.locationLat = req.body.locationLat
-    options.locationLong = req.body.locationLong
-  }
-
-  if (req.body.flags) {
-    options.flags = req.body.flags
-  }
-
-  const newTransaction = await trxManager.newTransaction(
-    req.body.amount,
-    req.body.paymentProviderId,
-    req.auth.agentId,
-    options
+  const createTrxResult = await trxManager.createTransaction(
+    {
+      amount: req.body.amount,
+      paymentProviderId: req.body.paymentProviderId,
+      agentId: req.auth.agentId,
+      terminalId: req.auth.terminalId,
+      ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
+      locationLat: req.body.locationLat,
+      locationLong: req.body.locationLong
+    },
+    {
+      flags: req.body.flags,
+      userToken: req.body.userToken,
+      userTokenType: req.body.userTokenType
+    }
   )
 
   // translate error message
-  if (newTransaction.error) {
-    if (newTransaction.error === trxManager.errorCodes.AMOUNT_TOO_LOW) {
+  if (createTrxResult.error) {
+    if (createTrxResult.error === trxManager.errorCodes.AMOUNT_TOO_LOW) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_LOW
       )
-    } else if (newTransaction.error === trxManager.errorCodes.AMOUNT_TOO_HIGH) {
+    } else if (createTrxResult.error === trxManager.errorCodes.AMOUNT_TOO_HIGH) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_HIGH
       )
-    } else if (newTransaction.error === trxManager.errorCodes.NEED_USER_TOKEN) {
+    } else if (createTrxResult.error === trxManager.errorCodes.NEED_USER_TOKEN) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_NEED_USER_TOKEN
       )
-    } else if (newTransaction.error === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU) {
+    } else if (createTrxResult.error === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_FOR_YOU
@@ -130,35 +114,35 @@ module.exports.createTransaction = async (req, res, next) => {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_CANNOT_CREATE_TRANSACTION,
-        newTransaction
+        createTrxResult
       )
     }
     return
   }
 
-  if (newTransaction.redirectTo) {
+  if (createTrxResult.redirectTo) {
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_REDIRECTED,
-      newTransaction
+      createTrxResult
     )
     return
   }
 
-  if (newTransaction.followUpType) {
+  if (createTrxResult.followUpType) {
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP,
-      newTransaction
+      createTrxResult
     )
     return
   }
 
-  if (newTransaction.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+  if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
-      newTransaction
+      createTrxResult
     )
     return
   }
@@ -166,7 +150,7 @@ module.exports.createTransaction = async (req, res, next) => {
   msgFactory.expressCreateResponse(
     res,
     msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
-    newTransaction
+    createTrxResult
   )
 }
 
@@ -329,5 +313,32 @@ module.exports.getMerchantTransactionsStatistic = async (req, res, next) => {
     res,
     msgFactory.msgTypes.MSG_SUCCESS,
     transactionsStatistic
+  )
+}
+
+module.exports.getMerchantTransactionTimeGroup = async (req, res, next) => {
+  let query = {
+    where: {},
+    attributes: [
+      req.query.group_field,
+      [Sequelize.fn('COUNT', '*'), 'transactionCount']
+    ],
+    include: [
+      {
+        model: models.agent,
+        attributes: ['merchantId'],
+        where: {
+          merchantId: req.auth.merchantId
+        }
+      }
+    ],
+    group: []
+  }
+  let transactions = models.transaction.findAll(query)
+
+  msgFactory.expressCreateResponse(
+    res,
+    msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND,
+    transactions
   )
 }

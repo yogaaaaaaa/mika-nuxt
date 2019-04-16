@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('merchantPic', [
+    return queryInterface.bulkInsert('merchantStaff', [
       {
         id: 1,
         name: 'John Wick',
@@ -11,9 +11,10 @@ module.exports = {
         idCardType: 'KTP',
         occupation: 'owner',
         streetAddress: 'Jalan Rumah Tetra Testing Nomor 1',
-        userId: 7,
+        userId: 4,
         merchantId: 1
       },
+
       {
         id: 2,
         name: 'Barrack Obama',
@@ -22,7 +23,7 @@ module.exports = {
         idCardType: 'KTP',
         occupation: 'ceo',
         streetAddress: 'Jalan Rumah Tetra Testing Nomor 3',
-        userId: 8,
+        userId: 5,
         merchantId: 2
       },
       {
@@ -33,9 +34,10 @@ module.exports = {
         idCardType: 'SIM',
         occupation: 'manager',
         streetAddress: 'Jalan Rumah Tetra Testing Nomor 4',
-        userId: 9,
+        userId: 6,
         merchantId: 2
       },
+
       {
         id: 4,
         name: 'Carl Johnson .Jr',
@@ -46,6 +48,7 @@ module.exports = {
         streetAddress: 'Jalan Rumah Tetra Testing Nomor 5',
         merchantId: 3
       },
+
       {
         id: 5,
         name: 'Leeloominaï Lekatariba Lamina-Tchaï Ekbat De Sebat',
@@ -61,6 +64,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('merchantPic', null, {})
+    return queryInterface.bulkDelete('merchantStaff', null, {})
   }
 }

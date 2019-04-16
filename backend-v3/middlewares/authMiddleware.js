@@ -9,17 +9,20 @@ const appConfig = require('../configs/appConfig')
  * Check for authentication as middleware.
  * This middleware will store all auth information inside `req.auth`.
  *
- * To enforce user type, add user type to array `authUserTypes`.
+ * To enforce user type, add user type to array `allowedUserTypes`.
  * The result of user type check is stored in `req.authInvalidUserType`
+ *
+ * To enforce user roles, add user roles to array `allowedUserRoles`.
+ * The result of user roles check is stored in `req.authInvalidUserRole`
  *
  * example:
  ```js
- apiAuthMiddleware.auth([auth.userType.ADMIN, auth.userType.AGENT])
+ apiAuthMiddleware.auth([auth.userType.ADMIN, auth.userType.AGENT], [auth.userRoles.ADMIN_HR])
  ```
  *
  */
 
-module.exports.auth = (authUserTypes = null, roles = null) => async (req, res, next) => {
+module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => async (req, res, next) => {
   req.auth = null
   req.sessionToken = null
 
@@ -36,10 +39,11 @@ module.exports.auth = (authUserTypes = null, roles = null) => async (req, res, n
     let checkAuth = await auth.checkAuth(req.sessionToken)
     if (checkAuth) {
       req.auth = checkAuth
-      if (Array.isArray(authUserTypes)) {
-        if (!authUserTypes.includes(req.auth.userType)) {
-          req.authInvalidUserType = true
-        }
+      if (Array.isArray(allowedUserTypes)) {
+        if (!allowedUserTypes.includes(req.auth.userType)) req.authInvalidUserType = true
+      }
+      if (Array.isArray(allowedUserRoles)) {
+        if (!allowedUserRoles.find(userRole => req.auth.userRoles.includes(userRole))) req.authInvalidUserRole = true
       }
     }
   }
@@ -57,7 +61,7 @@ module.exports.authErrorHandler = async (req, res, next) => {
     )
     return
   } else {
-    if (req.authInvalidUserType) {
+    if (req.authInvalidUserType || req.authInvalidUserRole) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_AUTH_FORBIDDEN

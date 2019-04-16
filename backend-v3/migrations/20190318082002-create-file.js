@@ -6,28 +6,18 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.STRING(40)
-      },
-
-      name: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      description: {
-        type: Sequelize.STRING
+        type: Sequelize.CHAR(27)
       },
 
       originalFilename: {
         allowNull: false,
         type: Sequelize.STRING
       },
-
       hash: {
         allowNull: false,
         unique: true,
         type: Sequelize.STRING
       },
-
       mime: {
         allowNull: false,
         defaultValue: 'application/octet-stream',
@@ -40,7 +30,7 @@ module.exports = {
 
       resourceId: {
         allowNull: false,
-        type: Sequelize.STRING(40),
+        type: Sequelize.CHAR(27),
         references: {
           model: 'resource',
           key: 'id'

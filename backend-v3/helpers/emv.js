@@ -196,21 +196,21 @@ module.exports.tlvTagFind = (tag, tlvList, toHexString = true) => {
 }
 
 /**
- * Encode TLV list into TLV String
+ * Encode TLV array list into TLV String
  */
 module.exports.tlvEncode = (tlvList) => {
   return berTlv.TlvFactory.serialize(tlvList)
 }
 
 /**
- * Decode TLV list into TLV String
+ * Decode TLV String into TLV array list
  */
 module.exports.tlvDecode = (hsTlv) => {
   return berTlv.TlvFactory.parse(hsTlv)
 }
 
 /**
- * Annotate current tlv object
+ * Annotate current TLV object
  */
 module.exports.tlvAnnotate = (tlvAnnotate) => {
   return berTlvRegistry.lookupAnnotation(tlvAnnotate)
@@ -229,6 +229,15 @@ module.exports.getRandomHexString = (length = 5) => {
  */
 module.exports.track2RemoveSymbol = (hsTrack2) => {
   return hsTrack2.replace('=', 'D')
+}
+
+/**
+ * Get PAN from track2
+ */
+module.exports.track2GetPAN = (hsTrack2) => {
+  let separatorPos = hsTrack2.indexOf('D')
+  if (separatorPos === -1) separatorPos = hsTrack2.indexOf('=')
+  return hsTrack2.substring(0, separatorPos)
 }
 
 /**
