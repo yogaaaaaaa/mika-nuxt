@@ -35,9 +35,9 @@ app.use(require('./routes/notifMidtrans'))
 /**
  * Debug Route
  */
-// if (process.env.NODE_ENV === 'development') {
-//   app.use('/debug', require('./routes/debug'))
-// }
+if (process.env.NODE_ENV === 'development') {
+  app.use('/debug', require('./routes/debug'))
+}
 
 /**
  * External/Public API

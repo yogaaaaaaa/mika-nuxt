@@ -1,13 +1,17 @@
 'use strict'
 
+/**
+ * Quick and dirty debug route handler
+ */
+
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const debugController = require('../controllers/debug_controller')
-const altoDebugController = require('../controllers/alto_pg_debug_controller')
-const midtransDebugController = require('../controllers/midtrans_pg_debug_controller')
+const debugController = require('../controllers/debugController')
+const altoDebugController = require('../controllers/ppAltoDebugController')
+const midtransDebugController = require('../controllers/ppMidtransDebugController')
 
-const appConfig = require('../configs/app')
+const appConfig = require('../configs/appConfig')
 
 const router = express.Router()
 

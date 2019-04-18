@@ -1,7 +1,6 @@
 'use strict'
 
-const cipherboxMiddleware = require('../middleware/cipherboxMiddleware')
-
+const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const trxManager = require('../helpers/trxManager')
 
 /**
@@ -12,12 +11,13 @@ module.exports.changeTransactionStatus = async (req, res, next) => {
     await trxManager.forceTransactionStatus(req.params.transactionId, req.params.transactionStatus)
     res.status(200).type('text').send('DEBUG:OK')
   } catch (err) {
+    console.error(err)
     res.status(500).type('text').send('DEBUG:ERROR')
   }
 }
 
 module.exports.echoCipherbox = [
-  cipherboxMiddleware.cipherbox,
+  cipherboxMiddleware.processCipherbox,
   (req, res, next) => {
     res.send(req.body)
   }

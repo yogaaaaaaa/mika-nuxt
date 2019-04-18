@@ -49,7 +49,7 @@ module.exports = (trxManager) => {
         ctx.transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
 
         ctx.transaction.referenceNumber = fpCtx.saleResponse.invoice_num
-        ctx.transaction.referenceNumberType = 'invoice_num'
+        ctx.transaction.referenceNumberName = 'invoice_num'
 
         ctx.transaction.cardApprovalCode = fpCtx.saleResponse.approval_code
         ctx.transaction.cardPan = fpCtx.cardPanMasked

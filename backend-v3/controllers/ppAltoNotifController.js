@@ -63,8 +63,8 @@ module.exports.altoHandleNotification = [
         // Possible solution is to try refunding with different id
         transaction.extra = [
           {
-            name: 'refund_no',
-            value: data.refund_no,
+            name: 'out_refund_no',
+            value: data.out_refund_no,
             type: 'extraReferenceNumber',
             description: 'Refund Reference Number'
           }

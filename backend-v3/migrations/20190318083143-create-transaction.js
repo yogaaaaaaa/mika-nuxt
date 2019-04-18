@@ -62,13 +62,13 @@ module.exports = {
       customerReference: {
         type: Sequelize.STRING
       },
-      customerReferenceType: {
+      customerReferenceName: {
         type: Sequelize.STRING
       },
       referenceNumber: {
         type: Sequelize.STRING
       },
-      referenceNumberType: {
+      referenceNumberName: {
         type: Sequelize.STRING
       },
 

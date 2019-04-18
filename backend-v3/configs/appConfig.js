@@ -19,7 +19,7 @@ let baseConfig = {
 
   baseUrl: process.env.MIKA_BASE_URL || (process.env.NODE_ENV === 'development' ? 'https://stg12api.mikaapp.id' : 'https://api.mikaapp.id'),
   debugHeader: 'x-mika-debug',
-  debugKey: process.env.MIKA_DEBUG_KEY || 'debug_mika',
+  debugKey: process.env.MIKA_DEBUG_KEY || '1K24vDZGaGmJGCTTVIRyLxPPiHY',
   sessionTokenHeader: 'x-access-token',
 
   workDir: process.env.MIKA_WORK_DIR || path.dirname(require.main.filename),

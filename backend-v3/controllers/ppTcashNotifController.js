@@ -51,9 +51,9 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       } else if (req.body.trx_type === tcash.tcashTrxType.TCASH_PAY) {
         transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
         transaction.referenceNumber = req.body.trx_id
-        transaction.referenceNumberType = 'trx_id'
+        transaction.referenceNumberName = 'trx_id'
         transaction.customerReference = req.body.msisdn
-        transaction.customerReferenceType = 'msisdn'
+        transaction.customerReferenceName = 'msisdn'
         await transaction.save()
 
         trxManager.emitTransactionEvent(

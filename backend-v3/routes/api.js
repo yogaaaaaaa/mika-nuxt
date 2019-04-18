@@ -16,6 +16,7 @@ const agentController = require('../controllers/agentController')
 const transactionController = require('../controllers/transactionController')
 const paymentProviderController = require('../controllers/paymentProviderController')
 const authController = require('../controllers/authController')
+const utilitiesController = require('../controllers/utilitiesController')
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const authMiddleware = require('../middlewares/authMiddleware')
@@ -103,20 +104,10 @@ router.post('/utilities/emv/bin_check',
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
-router.get('/utilities/supported_aliases',
+router.get('/utilities/types',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.get('/utilities/supported_handlers',
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.get('/utilities/app_version',
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  utilitiesController.listTypes
 )
 
 /**

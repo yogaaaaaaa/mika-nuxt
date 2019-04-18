@@ -6,16 +6,12 @@
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const bodyParserJSON = bodyParser.json()
-
 const ppMidtransNotifController = require('../controllers/ppMidtransNotifController')
-
 const ppMidtransConfig = require('../configs/ppMidtransConfig')
-
 const router = express.Router()
 
 router.post(ppMidtransConfig.notifEndpoint,
-  bodyParserJSON,
+  bodyParser.json(),
   ppMidtransNotifController.midtransHandleNotification
 )
 

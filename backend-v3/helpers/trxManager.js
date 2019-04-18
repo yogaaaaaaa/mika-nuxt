@@ -20,6 +20,7 @@ const path = require('path')
 const appConfig = require('../configs/appConfig')
 const types = require('../configs/trxManagerTypesConfig')
 
+module.exports.types = types
 module.exports.transactionStatuses = types.transactionStatuses
 module.exports.transactionSettlementStatuses = types.transactionSettlementStatuses
 module.exports.transactionEvents = types.transactionEvents
@@ -56,64 +57,12 @@ module.exports.findPpHandler = (name) => {
       return pp
     }
   }
-  return null
 }
 
 /**
- * Emit transaction event to all handler (via nodejs event emitter).
- * It will emit event with object,
- ```js
-   transactionEvent = {
-    transactionId: 1,
-    transaction: { ... } // complete transaction data (if any)
-  }
- ```
+ * Build transaction context data (include agent, merchant, paymentProvider, and its handler)
  */
-module.exports.emitTransactionEvent = (transactionEvent, transactionId, transaction) => {
-  events.emit(transactionEvent, {
-    transactionId: transactionId,
-    transaction: transaction
-  })
-}
-
-/**
- * Listen to transaction event (via nodejs event emitter)
- */
-module.exports.addListener = (transactionEvent, callback) => {
-  events.addListener(transactionEvent, callback)
-}
-
-module.exports.forceTransactionStatus = async (transactionId, transactionStatus) => {
-  if (transactionStatus) {
-    let update = await models.transaction.update({
-      transactionStatus
-    }, {
-      where: {
-        id: transactionId
-      }
-    })
-
-    if (update) {
-      let eventName = null
-
-      if (transactionStatus === exports.transactionStatuses.SUCCESS) {
-        eventName = exports.transactionEvents.SUCCESS
-      }
-
-      if (transactionStatus === exports.transactionStatuses.FAILED) {
-        eventName = exports.transactionEvents.FAILED
-      }
-
-      if (eventName) {
-        exports.emitTransactionEvent(eventName, transactionId)
-      }
-
-      return update
-    }
-  }
-}
-
-async function buildTransactionCtx (transaction, extraCtx) {
+module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
   let ctx = Object.assign({
     transactionId: null,
     transaction,
@@ -174,8 +123,62 @@ async function buildTransactionCtx (transaction, extraCtx) {
   return ctx
 }
 
+/**
+ * Emit transaction event to all handler (via nodejs event emitter).
+ * It will emit event with object,
+ ```js
+   transactionEvent = {
+    transactionId: 1,
+    transaction: { ... } // transaction record (if any)
+  }
+ ```
+ */
+module.exports.emitTransactionEvent = (transactionEvent, transactionId, transaction) => {
+  events.emit(transactionEvent, {
+    transactionId: transactionId,
+    transaction: transaction
+  })
+}
+
+/**
+ * Listen to transaction event (via nodejs event emitter)
+ */
+module.exports.addListener = (transactionEvent, callback) => {
+  events.addListener(transactionEvent, callback)
+}
+
+module.exports.forceTransactionStatus = async (transactionId, transactionStatus) => {
+  if (transactionStatus) {
+    let update = await models.transaction.update({
+      transactionStatus
+    }, {
+      where: {
+        id: transactionId
+      }
+    })
+
+    if (update) {
+      let eventName = null
+
+      if (transactionStatus === exports.transactionStatuses.SUCCESS) {
+        eventName = exports.transactionEvents.SUCCESS
+      }
+
+      if (transactionStatus === exports.transactionStatuses.FAILED) {
+        eventName = exports.transactionEvents.FAILED
+      }
+
+      if (eventName) {
+        exports.emitTransactionEvent(eventName, transactionId)
+      }
+
+      return update
+    }
+  }
+}
+
 module.exports.create = async (transaction, options) => {
-  let ctx = await buildTransactionCtx(transaction, Object.assign(options, {
+  let ctx = await exports.buildTransactionCtx(transaction, Object.assign(options, {
     redirectTo: null,
     flags: []
   }))
@@ -252,7 +255,7 @@ dTimer.handleEvent(async (eventCtx) => {
   debug.dTimer('event', eventCtx)
   try {
     if (eventCtx.event === exports.transactionEvents.GLOBAL_TIMEOUT) {
-      let ctx = await buildTransactionCtx(null, { transactionId: eventCtx.transactionId })
+      let ctx = await exports.buildTransactionCtx(null, { transactionId: eventCtx.transactionId })
 
       if ([
         exports.transactionStatuses.SUCCESS,
@@ -261,7 +264,6 @@ dTimer.handleEvent(async (eventCtx) => {
 
       ctx.transaction.transactionStatus = exports.transactionStatuses.FAILED
 
-      // Handle transaction by each payment provider timeout handler
       if (typeof ctx.ppHandler.timeoutHandler === 'function') {
         await ctx.ppHandler.timeoutHandler(ctx)
       }
@@ -293,10 +295,10 @@ dTimer.handleEvent(async (eventCtx) => {
  * Just listen to ordinary transaction event,
  * then emit SUCCESS_WITH_DATA event with transaction
  */
-events.addListener(exports.transactionEvents.SUCCESS, async (eventObject) => {
+events.addListener(exports.transactionEvents.SUCCESS, async (eventCtx) => {
   if (events.listenerCount(exports.transactionEvents.SUCCESS_WITH_DATA)) {
-    eventObject.transaction = await exports.getTransaction(eventObject.transactionId)
-    events.emit(exports.transactionEvents.SUCCESS_WITH_DATA, eventObject)
+    eventCtx.transaction = await models.transaction.findByPk(eventCtx.transactionId)
+    events.emit(exports.transactionEvents.SUCCESS_WITH_DATA, eventCtx)
   }
 })
 
@@ -305,10 +307,10 @@ events.addListener(exports.transactionEvents.SUCCESS, async (eventObject) => {
  * Just listen to ordinary transaction event,
  * then emit FAILED_WITH_DATA event with transaction
  */
-events.addListener(exports.transactionEvents.FAILED, async (eventObject) => {
+events.addListener(exports.transactionEvents.FAILED, async (eventCtx) => {
   if (events.listenerCount(exports.transactionEvents.FAILED_WITH_DATA)) {
-    eventObject.transaction = await exports.getTransaction(eventObject.transactionId)
-    events.emit(exports.transactionEvents.FAILED_WITH_DATA, eventObject)
+    eventCtx.transaction = await models.transaction.findByPk(eventCtx.transactionId)
+    events.emit(exports.transactionEvents.FAILED_WITH_DATA, eventCtx)
   }
 })
 

@@ -21,9 +21,9 @@ module.exports = (sequelize, DataTypes) => {
     userTokenType: DataTypes.STRING,
 
     customerReference: DataTypes.STRING,
-    customerReferenceType: DataTypes.STRING,
+    customerReferenceName: DataTypes.STRING,
     referenceNumber: DataTypes.STRING,
-    referenceNumberType: DataTypes.STRING,
+    referenceNumberName: DataTypes.STRING,
 
     cardApprovalCode: DataTypes.STRING,
     cardNetwork: DataTypes.STRING,

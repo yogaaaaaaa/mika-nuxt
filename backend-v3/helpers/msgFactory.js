@@ -9,6 +9,8 @@ const types = require('../configs/msgFactoryTypesConfig')
 
 const appConfig = require('../configs/appConfig')
 
+module.exports.types = types
+
 /**
  * Event type enumeration
  */
@@ -26,11 +28,10 @@ module.exports.createResponse = (
   messageType,
   data,
   meta,
-  version,
   toJSON = false
 ) => {
   let msg = {
-    version,
+    version: appConfig.version,
     status: messageType.status,
     message: messageType.message,
     isError: messageType.isError || false,
@@ -49,14 +50,13 @@ module.exports.createResponse = (
  * Generate Notification message
  */
 module.exports.createNotification = (
-  version,
   eventType = exports.eventTypes.EVENT_GENERIC,
   data,
   meta,
   toJSON = false
 ) => {
   let msg = {
-    version,
+    version: appConfig.version,
     eventType: eventType,
     meta,
     data
@@ -91,5 +91,5 @@ module.exports.expressCreateResponse = (
 ) => {
   res
     .status(messageType.httpStatus)
-    .send(exports.createResponse(messageType, data, meta, appConfig.version))
+    .send(exports.createResponse(messageType, data, meta))
 }

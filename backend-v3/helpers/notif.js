@@ -85,21 +85,26 @@ module.exports.notifToAgent = async (agentId, message) => {
   }
 }
 
-trxManager.addListener(trxManager.transactionEvents.SUCCESS, async (eventObject) => {
+trxManager.addListener(trxManager.transactionEvents.SUCCESS_WITH_DATA, async (eventCtx) => {
   await exports.notifToAgent(
-    eventObject.transaction.agentId,
+    eventCtx.transaction.agentId,
     msgFactory.createNotification(
       msgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS,
-      { transactionId: eventObject.transactionId },
+      eventCtx,
+      undefined,
       true
     )
   )
 })
 
-trxManager.addListener(trxManager.transactionEvents.FAILED, async (eventObject) => {
-  msgFactory.createNotification(
-    msgFactory.eventTypes.EVENT_TRANSACTION_FAILED,
-    { transactionId: eventObject.transactionId },
-    true
+trxManager.addListener(trxManager.transactionEvents.FAILED_WITH_DATA, async (eventCtx) => {
+  await exports.notifToAgent(
+    eventCtx.transaction.agentId,
+    msgFactory.createNotification(
+      msgFactory.eventTypes.EVENT_TRANSACTION_FAILED,
+      eventCtx,
+      undefined,
+      true
+    )
   )
 })

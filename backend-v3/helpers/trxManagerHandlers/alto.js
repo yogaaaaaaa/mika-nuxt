@@ -32,7 +32,7 @@ module.exports = (trxManager) => {
       ctx.transaction.token = response.uri
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ctx.transaction.referenceNumber = response.trade_no
-      ctx.transaction.referenceNumberType = 'trade_no'
+      ctx.transaction.referenceNumberName = 'trade_no'
     }
   })
 }

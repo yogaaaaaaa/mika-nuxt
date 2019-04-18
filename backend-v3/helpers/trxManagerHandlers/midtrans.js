@@ -37,7 +37,7 @@ module.exports = (trxManager) => {
         }
       }
       ctx.transaction.referenceNumber = response.transaction_id
-      ctx.transaction.referenceNumberType = 'transaction_id'
+      ctx.transaction.referenceNumberName = 'transaction_id'
     },
     async timeoutHandler (ctx) {
       let response = await midtrans.statusTransaction(Object.assign({
