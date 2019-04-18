@@ -22,9 +22,9 @@ module.exports = (trxManager) => {
       userTokenTypes: []
     },
 
-    // This handler will be called when new transaction created (but before its saved to database).
-    // Expected to fill ctx.transaction.token (or none if this Payment Provider does not provide one)
-    // return true or error object ( {error: ERROR_CODE} ) if something goes wrong
+    // This handler will be called when new transaction instance is filled (but before its saved to database).
+    // Expected to fill ctx.transaction.token and ctx.transaction.tokenType (or none if this Payment Provider does not provide one)
+    // throw Error object (via trxManager.error) when something goes wrong
     async handler (ctx) {
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ctx.transaction.token = 'QRCODE-GENERIC'

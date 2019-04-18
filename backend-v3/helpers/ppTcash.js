@@ -62,6 +62,6 @@ module.exports.mixConfig = (config) => {
 }
 
 module.exports.createQrCode = (config) => {
-  let mixedConfig = exports.mixConfig(config)
-  return `TWALLET|O|${mixedConfig.user}|${mixedConfig.transactionId}`
+  config = exports.mixConfig(config)
+  return `TWALLET|O|${config.user}|${config.acc_no}`
 }

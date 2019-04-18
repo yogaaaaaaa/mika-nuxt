@@ -27,7 +27,7 @@ module.exports = (trxManager) => {
         amount: ctx.transaction.amount
       }, ctx.paymentProvider.paymentProviderConfig.config))
 
-      if (!response) return true
+      if (!response) throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
 
       ctx.transaction.token = response.uri
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT

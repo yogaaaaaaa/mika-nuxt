@@ -19,57 +19,51 @@ module.exports = (trxManager) => {
       ],
       userTokenTypes: []
     },
-    async handler (config) {
+    async handler (ctx) {
       let response = await midtrans.gopayChargeRequest(Object.assign({
-        order_id: config.transaction.id,
-        amount: config.transaction.amount
-      }, config.paymentProvider.paymentProviderConfig.config))
+        order_id: ctx.transaction.id,
+        gross_amount: ctx.transaction.amount
+      }, ctx.paymentProvider.paymentProviderConfig.config))
 
-      if (!response) return true
+      if (!response) {
+        throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
+      }
 
       for (let action of response.actions) {
         if (action.name === 'generate-qr-code') {
-          config.token = action.url
-          config.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE
+          ctx.transaction.token = action.url
+          ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE
           break
         }
       }
-
-      config.updatedTransaction = {
-        referenceNumber: response.transaction_id,
-        referenceNumberType: 'transaction_id',
-        token: config.token,
-        tokenType: config.tokenType
-      }
+      ctx.transaction.referenceNumber = response.transaction_id
+      ctx.transaction.referenceNumberType = 'transaction_id'
     },
-    async timeoutHandler (config) {
-      config.midtransResponse = await midtrans.statusTransaction({
-        order_id: config.transaction.id
-      })
+    async timeoutHandler (ctx) {
+      let response = await midtrans.statusTransaction(Object.assign({
+        order_id: ctx.transaction.id,
+        gross_amount: ctx.transaction.amount
+      }, ctx.paymentProvider.paymentProviderConfig.config))
 
-      if (!config.midtransResponse) {
-        return
+      if (!response) {
+        throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
       }
 
       if (
-        config.midtransResponse.payment_type === 'gopay' &&
-        parseInt(config.transaction.amount) === parseInt(config.midtransResponse.gross_amount)
+        response.transaction_status === 'settlement' &&
+        response.payment_type === 'gopay' &&
+        parseInt(ctx.transaction.amount) === parseInt(ctx.response.gross_amount)
       ) {
-        if (config.midtransResponse.transaction_status === 'settlement') {
-          config.updatedTransaction = {
-            transactionStatus: trxManager.transactionStatuses.SUCCESS
-          }
+        if (response.transaction_status === 'settlement') {
+          ctx.transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
         }
       }
-    },
-    async timeoutPostHandler (config) {
-      if (!config.midtransResponse) {
-        return
-      }
 
-      if (config.updatedTransaction.transactionStatus === trxManager.transactionStatuses.FAILED) {
+      await ctx.transaction.save()
+
+      if (ctx.transaction.transactionStatus === trxManager.transactionStatuses.FAILED) {
         await midtrans.expireTransaction({
-          order_id: config.transaction.id
+          order_id: ctx.transaction.id
         })
       }
     }

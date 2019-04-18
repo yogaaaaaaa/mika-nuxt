@@ -71,7 +71,7 @@ module.exports.createTransactionValidator = [
  * Create new transaction by agent (via `req.auth.userType`)
  */
 module.exports.createTransaction = async (req, res, next) => {
-  const createTrxResult = await trxManager.createTransaction(
+  const createTrxResult = await trxManager.create(
     {
       amount: req.body.amount,
       paymentProviderId: req.body.paymentProviderId,
@@ -79,12 +79,12 @@ module.exports.createTransaction = async (req, res, next) => {
       terminalId: req.auth.terminalId,
       ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
       locationLat: req.body.locationLat,
-      locationLong: req.body.locationLong
-    },
-    {
-      flags: req.body.flags,
+      locationLong: req.body.locationLong,
       userToken: req.body.userToken,
       userTokenType: req.body.userTokenType
+    },
+    {
+      flags: req.body.flags
     }
   )
 

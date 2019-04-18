@@ -6,12 +6,11 @@ module.exports = {
     password: process.env.MIKA_DB_PASSWORD || 'mikadev',
     database: process.env.MIKA_DB_NAME || 'mika_v3_12',
     host: process.env.MIKA_DB_HOST || '127.0.0.1',
-    dialect: 'mysql',
+    dialect: 'mariadb',
 
-    operatorsAliases: false,
     freezeTableName: true,
 
-    logging: true,
+    logging: console.log,
     benchmark: true
   },
   production: {
@@ -19,12 +18,8 @@ module.exports = {
     password: '',
     database: '',
     host: '127.0.0.1',
-
-    dialect: 'mysql',
-
-    operatorsAliases: false,
+    dialect: 'mariadb',
     freezeTableName: true,
-
     logging: false
   }
 }

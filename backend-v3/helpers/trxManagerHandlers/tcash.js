@@ -19,14 +19,11 @@ module.exports = (trxManager) => {
       ],
       userTokenTypes: []
     },
-    async handler (config) {
-      config.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
-      config.token = tcash.createQrCode({ transactionId: config.transaction.id })
-
-      config.updatedTransaction = {
-        tokenType: config.tokenType,
-        token: config.token
-      }
+    async handler (ctx) {
+      ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
+      ctx.transaction.token = tcash.createQrCode(Object.assign({
+        acc_no: ctx.transaction.id
+      }, ctx.paymentProvider.paymentProviderConfig.config))
     }
   })
 }

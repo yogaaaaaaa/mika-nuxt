@@ -84,13 +84,17 @@ let baseConfig = {
   * payment provider handler
   */
   errorCodes: {
-    AMOUNT_TOO_LOW: 'amountATooLow',
-    AMOUNT_TOO_HIGH: 'amountATooHigh',
-    PAYMENT_PROVIDER_NOT_FOR_YOU: 'invalidPaymentProvider',
-    NEED_EXTRA_CONFIG: 'extraConfigNeeded',
-    NEED_USER_TOKEN: 'userTokenNeeded',
-    INVALID_USER_TOKEN: 'userTokenInvalid',
-    JUST_ERROR: 'unknownError'
+    TRANSACTION_NOT_FOUND: 'trxManagerTransactionNotFound',
+    AGENT_NOT_FOUND: 'trxManagerAgentNotFound',
+    PAYMENT_PROVIDER_HANDLER_NOT_FOUND: 'trxManagerPpHandlerNotFound',
+    AMOUNT_TOO_LOW: 'trxManagerAmountATooLow',
+    AMOUNT_TOO_HIGH: 'trxManagerAmountATooHigh',
+    PAYMENT_PROVIDER_NOT_FOR_YOU: 'trxManagerUnregisteredPaymentProvider',
+    PAYMENT_PROVIDER_NOT_RESPONDING: 'trxManagerPaymentProviderNotResponding',
+    NEED_EXTRA_CONFIG: 'trxManagerExtraConfigNeeded',
+    NEED_USER_TOKEN: 'trxManagerUserTokenNeeded',
+    INVALID_USER_TOKEN: 'trxManagerUserTokenInvalid',
+    JUST_ERROR: 'trxManagerUnknownError'
   }
 }
 

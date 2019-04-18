@@ -2,10 +2,21 @@
 
 const tcash = require('../helpers/ppTcash')
 const trxManager = require('../helpers/trxManager')
+const models = require('../models')
 
 module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
   try {
-    const transaction = await trxManager.getTransaction(req.body.acc_no)
+    const transaction = await models.transaction.findOne({
+      where: {
+        id: req.body.acc_no
+      },
+      include: [
+        {
+          model: models.paymentProvider,
+          include: [ models.paymentProviderConfig ]
+        }
+      ]
+    })
 
     if (!transaction) {
       res
@@ -23,7 +34,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       (req.body.pwd === config.pwd) &&
       (req.body.merchant === config.merchant)
     ) {
-      if (transaction.transactionStatus !== trxManager.transactionStatuses.INQUIRY) {
+      if (transaction.transactionStatus !== trxManager.transactionStatuses.CREATED) {
         res.status(400)
           .send(tcash.tcashErrorResponse(
             tcash.tcashMessageCode.TCASH_ERROR_TRANSACTION_NOT_VALID)
@@ -38,29 +49,24 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
           transaction.amount))
         return
       } else if (req.body.trx_type === tcash.tcashTrxType.TCASH_PAY) {
-        const updatedTransaction = await trxManager.updateTransaction({
-          customerReference: req.body.msisdn,
-          customerReferenceType: 'msisdn',
-          referenceNumber: req.body.trx_id,
-          referenceNumberType: 'trx_id',
-          transactionStatus: trxManager.transactionStatuses.SUCCESS
-        },
-        transaction.id)
+        transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
+        transaction.referenceNumber = req.body.trx_id
+        transaction.referenceNumberType = 'trx_id'
+        transaction.customerReference = req.body.msisdn
+        transaction.customerReferenceType = 'msisdn'
+        await transaction.save()
 
-        if (updatedTransaction) {
-          trxManager.emitTransactionEvent(
-            trxManager.transactionEvents.SUCCESS,
-            transaction.id
+        trxManager.emitTransactionEvent(
+          trxManager.transactionEvents.SUCCESS,
+          transaction.id
+        )
+        res
+          .status(200)
+          .send(tcash.tcashPayResponse(
+            req.body.trx_id,
+            transaction.id)
           )
-
-          res
-            .status(200)
-            .send(tcash.tcashPayResponse(
-              req.body.trx_id,
-              transaction.id)
-            )
-          return
-        }
+        return
       }
     }
   } catch (error) {

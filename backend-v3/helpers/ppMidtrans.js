@@ -5,7 +5,6 @@
  */
 
 const crypto = require('crypto')
-
 const superagent = require('superagent')
 
 module.exports.baseConfig = require('../configs/ppMidtransConfig')
@@ -30,8 +29,8 @@ module.exports.gopayChargeRequest = async (config) => {
   let requestBody = {
     payment_type: 'gopay',
     transaction_details: {
-      order_id: config.order_id || config.transactionId,
-      gross_amount: config.gross_amount || config.amount
+      order_id: config.order_id,
+      gross_amount: config.gross_amount
     }
   }
   if (config.email && config.fullname) {
@@ -46,13 +45,9 @@ module.exports.gopayChargeRequest = async (config) => {
       .post(`${config.baseUrl}/v2/charge`)
       .send(requestBody)
 
-    if (response.body) {
-      return response.body
-    } else {
-      return null
-    }
+    if (response.body) return response.body
   } catch (err) {
-    return null
+    console.error(err)
   }
 }
 
@@ -64,13 +59,9 @@ module.exports.expireTransaction = async (config) => {
       .post(`${config.baseUrl}/v2/${config.order_id || config.transactionId}/expire`)
       .send()
 
-    if (response.body) {
-      return response.body
-    } else {
-      return null
-    }
+    if (response.body) return response.body
   } catch (err) {
-    return null
+    console.error(err)
   }
 }
 
@@ -79,16 +70,12 @@ module.exports.statusTransaction = async (config) => {
 
   try {
     let response = await midtransRequestAgent(config)
-      .get(`${config.baseUrl}/v2/${config.order_id || config.transactionId}/status`)
+      .get(`${config.baseUrl}/v2/${config.order_id}/status`)
       .send()
 
-    if (response.body) {
-      return response.body
-    } else {
-      return null
-    }
+    if (response.body) return response.body
   } catch (err) {
-    return null
+    console.error(err)
   }
 }
 
@@ -96,12 +83,10 @@ module.exports.checkNotificationSignature = (signature, config) => {
   config = exports.mixConfig(config)
   let generatedSignature = crypto
     .createHash('sha512')
-    .update(`${config.order_id || config.transactionId}${config.status_code}${config.gross_amount || config.amount}${config.serverKey}`)
+    .update(`${config.order_id}${config.status_code}${config.gross_amount}${config.serverKey}`)
     .digest('hex')
 
   if (generatedSignature.toLowerCase() === signature.toLowerCase()) {
     return generatedSignature
-  } else {
-    return null
   }
 }

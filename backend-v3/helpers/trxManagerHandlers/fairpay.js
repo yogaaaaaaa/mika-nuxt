@@ -21,15 +21,17 @@ module.exports = (trxManager) => {
       ]
     },
     handler: async (ctx) => {
-      if (!ctx.userToken) return { error: trxManager.errorCodes.NEED_USER_TOKEN }
+      if (!ctx.transaction.userToken) throw trxManager.error(trxManager.errorCodes.NEED_USER_TOKEN)
 
       let fpCtx = fairpay.mixConfig(Object.assign(
         {
           amount: ctx.transaction.amount
         },
-        ctx.userToken,
+        ctx.transaction.userToken,
         ctx.paymentProvider.paymentProviderConfig.config
       ))
+
+      ctx.transaction.userToken = undefined
 
       if (!await fairpay.getToken(fpCtx)) await fairpay.apiLogin(fpCtx)
 
@@ -38,7 +40,7 @@ module.exports = (trxManager) => {
       if (fpCtx.cardTypesOnly) {
         await fairpay.processAuthAndApi(fairpay.apiDebitCreditCheck, fpCtx)
         if (!fpCtx.cardTypesOnly.includes(fpCtx.cardType)) {
-          return { error: trxManager.errorCodes.INVALID_USER_TOKEN }
+          throw trxManager.error(trxManager.errorCodes.INVALID_USER_TOKEN)
         }
       }
 
@@ -53,10 +55,11 @@ module.exports = (trxManager) => {
         ctx.transaction.cardPan = fpCtx.cardPanMasked
         ctx.transaction.cardNetwork = fpCtx.cardNetwork
 
-        // TODO : rollback need to decided when saving signature fail
+        // TODO: rollback need to decided when saving signature fail
         await fairpay.apiSaveSignature(fpCtx)
+      } else {
+        throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
       }
-      return true
     }
   })
 }

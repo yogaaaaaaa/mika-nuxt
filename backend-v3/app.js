@@ -52,7 +52,7 @@ app.use('/api', require('./routes/api'))
 /**
  * Public resources
  */
-app.use('/thumbnails', express.static(path.join(__dirname, 'public', 'images')))
+app.use('/thumbnails', express.static(path.join(__dirname, 'assets', 'images')))
 
 /**
  * Home page
