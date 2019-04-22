@@ -35,10 +35,6 @@ module.exports.ksuidTo64Int = (ksuid) => {
   return exports.bufferBn.toBigIntBE(Buffer.concat([ksuid.raw.slice(0, 4), ksuid.raw.slice(ksuid.raw.length - 4, ksuid.raw.length)]))
 }
 
-module.exports.ksuidTo64Int = (ksuid) => {
-  return exports.bufferBn.toBigIntBE(Buffer.concat([ksuid.raw.slice(0, 4), ksuid.raw.slice(ksuid.raw.length - 4, ksuid.raw.length)]))
-}
-
 module.exports.ksuidToBigInt = (ksuid) => {
   return exports.bufferBn.toBigIntBE(ksuid.raw)
 }

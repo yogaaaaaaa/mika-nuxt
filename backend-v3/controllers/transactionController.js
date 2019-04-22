@@ -142,7 +142,13 @@ module.exports.createTransaction = async (req, res, next) => {
         res,
         msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_FOR_YOU
       )
+    } else if (err.errorCode === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING) {
+      msgFactory.expressCreateResponse(
+        res,
+        msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_RESPONDING
+      )
     } else {
+      console.error(err)
       throw Error('Cannot handle trxManager error')
     }
   }

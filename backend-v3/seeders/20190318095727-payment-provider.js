@@ -16,7 +16,7 @@ module.exports = {
       {
         id: 2,
         name: 'Gopay Default',
-        minimumAmount: 100,
+        minimumAmount: 1,
         shareMerchant: 0.9900,
         shareMerchantWithPartner: 0.9800,
         sharePartner: 0.01,
@@ -26,7 +26,7 @@ module.exports = {
       {
         id: 3,
         name: 'Alipay Default',
-        minimumAmount: 100,
+        minimumAmount: 1000,
         shareMerchant: 0.9900,
         shareMerchantWithPartner: 0.9800,
         sharePartner: 0.01,
@@ -36,7 +36,7 @@ module.exports = {
       {
         id: 4,
         name: 'WeChat Pay Default',
-        minimumAmount: 100,
+        minimumAmount: 1000,
         shareMerchant: 0.9900,
         shareMerchantWithPartner: 0.9800,
         sharePartner: 0.01,

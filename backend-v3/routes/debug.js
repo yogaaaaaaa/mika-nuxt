@@ -25,8 +25,8 @@ router.use((req, res, next) => {
   }
 })
 
-router.get('/midtrans/transaction', midtransDebugController.queryTransaction)
-router.get('/alto/transaction', altoDebugController.queryTransaction)
+router.post('/midtrans/transaction', midtransDebugController.queryTransaction)
+router.post('/alto/transaction', altoDebugController.queryTransaction)
 router.post('/transaction/:transactionId/status/:transactionStatus', debugController.changeTransactionStatus)
 
 router.all('/echo', debugController.echoCipherbox)

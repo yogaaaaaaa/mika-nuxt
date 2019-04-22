@@ -23,7 +23,7 @@ module.exports = (trxManager) => {
     async handler (ctx) {
       let response = await alto.altoMakeQrCodePayment(Object.assign({
         out_trade_no: ctx.transaction.id,
-        subject: `MIKA Payment ${ctx.transaction.id}`,
+        subject: 'MIKA Payment',
         amount: ctx.transaction.amount
       }, ctx.paymentProvider.paymentProviderConfig.config))
 

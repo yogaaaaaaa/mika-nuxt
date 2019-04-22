@@ -16,7 +16,7 @@ module.exports.altoHandleNotification = [
         where: {
           id: data.out_trade_no,
           referenceNumber: data.trade_no,
-          amount: parseInt(data.amount)
+          amount: data.amount
         },
         include: [
           {
