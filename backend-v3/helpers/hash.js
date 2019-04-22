@@ -11,8 +11,8 @@ module.exports.hash = (data) => {
   return crypto.createHash('sha256').update(data).digest('hex')
 }
 
-module.exports.bcryptHash = async (data) => {
-  return bcrypt.hash(data, bcrypt.genSaltSync(10))
+module.exports.bcryptHash = async (data, salt = 10) => {
+  return bcrypt.hash(data, bcrypt.genSaltSync(salt))
 }
 
 module.exports.compareBcryptHash = async (dataHashed, data) => {

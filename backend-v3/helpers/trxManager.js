@@ -4,6 +4,7 @@
  * Provide all functionality to create transaction in mika system.
  * Its also provide constant related transaction object
  */
+
 const debug = {
   dTimer: require('debug')('trxManager:dTimerHandler')
 }
@@ -186,7 +187,7 @@ module.exports.create = async (transaction, options) => {
 
   if (!ctx.flags.includes(exports.transactionFlags.NO_AMOUNT_CHECK)) {
     if (ctx.paymentProvider.minimumAmount) {
-      if (ctx.amount < ctx.paymentProvider.minimumAmount) {
+      if (ctx.transaction.amount < ctx.paymentProvider.minimumAmount) {
         throw exports.error(exports.errorCodes.AMOUNT_TOO_LOW)
       }
     }

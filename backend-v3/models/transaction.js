@@ -52,7 +52,6 @@ module.exports = (sequelize, DataTypes) => {
         if (typeof value === 'object') {
           this.setDataValue('extra', JSON.stringify(value))
         }
-        this.setDataValue('extra', null)
       }
     },
 
@@ -69,6 +68,8 @@ module.exports = (sequelize, DataTypes) => {
     transaction.belongsTo(models.paymentProvider, { foreignKey: 'paymentProviderId' })
 
     transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
+
+    // transaction.addScope()
   }
   return transaction
 }

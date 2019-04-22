@@ -71,87 +71,81 @@ module.exports.createTransactionValidator = [
  * Create new transaction by agent (via `req.auth.userType`)
  */
 module.exports.createTransaction = async (req, res, next) => {
-  const createTrxResult = await trxManager.create(
-    {
-      amount: req.body.amount,
-      paymentProviderId: req.body.paymentProviderId,
-      agentId: req.auth.agentId,
-      terminalId: req.auth.terminalId,
-      ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
-      locationLat: req.body.locationLat,
-      locationLong: req.body.locationLong,
-      userToken: req.body.userToken,
-      userTokenType: req.body.userTokenType
-    },
-    {
-      flags: req.body.flags
-    }
-  )
+  try {
+    const createTrxResult = await trxManager.create(
+      {
+        amount: req.body.amount,
+        paymentProviderId: req.body.paymentProviderId,
+        agentId: req.auth.agentId,
+        terminalId: req.auth.terminalId,
+        ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
+        locationLat: req.body.locationLat,
+        locationLong: req.body.locationLong,
+        userToken: req.body.userToken,
+        userTokenType: req.body.userTokenType
+      },
+      {
+        flags: req.body.flags
+      }
+    )
 
-  // translate error message
-  if (createTrxResult.error) {
-    if (createTrxResult.error === trxManager.errorCodes.AMOUNT_TOO_LOW) {
+    if (createTrxResult.redirectTo) {
+      msgFactory.expressCreateResponse(
+        res,
+        msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_REDIRECTED,
+        createTrxResult
+      )
+      return
+    }
+
+    if (createTrxResult.followUpType) {
+      msgFactory.expressCreateResponse(
+        res,
+        msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP,
+        createTrxResult
+      )
+      return
+    }
+
+    if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+      msgFactory.expressCreateResponse(
+        res,
+        msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
+        createTrxResult
+      )
+      return
+    }
+
+    msgFactory.expressCreateResponse(
+      res,
+      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
+      createTrxResult
+    )
+  } catch (err) {
+    if (err.errorCode === trxManager.errorCodes.AMOUNT_TOO_LOW) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_LOW
       )
-    } else if (createTrxResult.error === trxManager.errorCodes.AMOUNT_TOO_HIGH) {
+    } else if (err.errorCode === trxManager.errorCodes.AMOUNT_TOO_HIGH) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_HIGH
       )
-    } else if (createTrxResult.error === trxManager.errorCodes.NEED_USER_TOKEN) {
+    } else if (err.errorCode === trxManager.errorCodes.NEED_USER_TOKEN) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_NEED_USER_TOKEN
       )
-    } else if (createTrxResult.error === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU) {
+    } else if (err.errorCode === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU) {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_FOR_YOU
       )
     } else {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_CANNOT_CREATE_TRANSACTION,
-        createTrxResult
-      )
+      throw Error('Cannot handle trxManager error')
     }
-    return
   }
-
-  if (createTrxResult.redirectTo) {
-    msgFactory.expressCreateResponse(
-      res,
-      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_REDIRECTED,
-      createTrxResult
-    )
-    return
-  }
-
-  if (createTrxResult.followUpType) {
-    msgFactory.expressCreateResponse(
-      res,
-      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP,
-      createTrxResult
-    )
-    return
-  }
-
-  if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
-    msgFactory.expressCreateResponse(
-      res,
-      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
-      createTrxResult
-    )
-    return
-  }
-
-  msgFactory.expressCreateResponse(
-    res,
-    msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
-    createTrxResult
-  )
 }
 
 /**

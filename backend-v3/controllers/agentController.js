@@ -48,7 +48,7 @@ module.exports.getAgent = async (req, res, next) => {
         attributes: {
           exclude: [
             'ownershipType',
-            'restStartDate',
+            'rentStartDate',
             'restDurationMonth',
             'otherPaymentSystems',
             'outletPhotoResourceId',

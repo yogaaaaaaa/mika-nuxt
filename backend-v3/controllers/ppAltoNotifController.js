@@ -28,7 +28,6 @@ module.exports.altoHandleNotification = [
       if (!transaction) next()
 
       let config = alto.mixConfig(transaction.paymentProvider.paymentProviderConfig)
-
       if (!alto.altoVerifyContainer(config.pemAltoPublicKey, req.body)) next()
       if (config.mch_id !== data.mch_id) next()
 
@@ -51,7 +50,7 @@ module.exports.altoHandleNotification = [
             out_refund_no: `refund-${data.out_trade_no}`,
             refund_amount: parseInt(data.amount),
             amount: parseInt(data.amount)
-          }, config))
+          }, transaction.paymentProvider.paymentProviderConfig))
 
           if (parseInt(response.result) === 0) {
             res.status(200).type('text').send('SUCCESS')

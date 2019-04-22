@@ -14,6 +14,7 @@
     "bcryptjs": "^2.4.3",
     "ber-tlv": "^0.9.2",
     "ber-tlv-annotations": "^0.9.6",
+    "bigint-buffer": "^1.1.2",
     "bluebird": "^3.5.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",

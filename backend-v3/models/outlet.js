@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     phoneNumber: DataTypes.STRING,
 
     ownershipType: DataTypes.STRING,
-    restStartDate: DataTypes.DATE,
-    restDurationMonth: DataTypes.INTEGER,
+    rentStartDate: DataTypes.DATE,
+    rentDurationMonth: DataTypes.INTEGER,
 
     otherPaymentSystems: DataTypes.STRING,
 

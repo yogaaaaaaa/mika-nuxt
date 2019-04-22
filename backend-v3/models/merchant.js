@@ -52,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   merchant.associate = (models) => {
     merchant.belongsTo(models.resource, {
       foreignKey: 'scannedTaxCardResourceId',
