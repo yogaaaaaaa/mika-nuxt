@@ -23,8 +23,8 @@ module.exports = {
         id: 3,
         class: 'wechatpay',
         name: 'WeChat Pay',
-        thumbnail: 'wechat-pay.png',
-        thumbnailGray: 'wechat-pay-gray.png',
+        thumbnail: 'wechatpay.png',
+        thumbnailGray: 'wechatpay-gray.png',
         chartColor: '#2CC200'
       },
       {

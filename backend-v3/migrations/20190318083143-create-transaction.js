@@ -36,11 +36,11 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      transactionStatus: {
+      status: {
         allowNull: false,
         type: Sequelize.CHAR(32)
       },
-      transactionSettlementStatus: {
+      settlementStatus: {
         allowNull: false,
         type: Sequelize.CHAR(32)
       },

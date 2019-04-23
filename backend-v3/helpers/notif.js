@@ -9,6 +9,7 @@ const crypto = require('crypto')
 const trxManager = require('./trxManager')
 const msgFactory = require('./msgFactory')
 const mqtt = require('./mqtt')
+const models = require('../models')
 
 const config = require('../configs/notifConfig')
 
@@ -85,26 +86,33 @@ module.exports.notifToAgent = async (agentId, message) => {
   }
 }
 
-trxManager.addListener(trxManager.transactionEvents.SUCCESS_WITH_DATA, async (eventCtx) => {
-  await exports.notifToAgent(
-    eventCtx.transaction.agentId,
-    msgFactory.createNotification(
-      msgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS,
-      eventCtx,
-      undefined,
-      true
-    )
-  )
-})
+module.exports.agentExist = async (agentId) => {
+  return mqtt.getAuthUser(`${config.userPrefix}${agentId}`)
+}
 
-trxManager.addListener(trxManager.transactionEvents.FAILED_WITH_DATA, async (eventCtx) => {
-  await exports.notifToAgent(
-    eventCtx.transaction.agentId,
-    msgFactory.createNotification(
-      msgFactory.eventTypes.EVENT_TRANSACTION_FAILED,
-      eventCtx,
-      undefined,
-      true
-    )
-  )
+trxManager.listenStatusChange(async (event) => {
+  if (await exports.agentExist(event.agentId)) {
+    let eventType = null
+
+    if (event.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+      eventType = msgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS
+    }
+
+    if (event.transactionStatus === trxManager.transactionStatuses.FAILED) {
+      eventType = msgFactory.eventTypes.EVENT_TRANSACTION_FAILED
+    }
+
+    if (eventType) {
+      let transaction = await models.transaction.scope('agent').findByPk(event.transactionId)
+      await exports.notifToAgent(
+        event.agentId,
+        msgFactory.createNotification(
+          eventType,
+          transaction,
+          undefined,
+          true
+        )
+      )
+    }
+  }
 })

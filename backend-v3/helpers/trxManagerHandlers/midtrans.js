@@ -55,13 +55,13 @@ module.exports = (trxManager) => {
         parseInt(ctx.transaction.amount) === parseInt(ctx.response.gross_amount)
       ) {
         if (response.transaction_status === 'settlement') {
-          ctx.transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
+          ctx.transaction.status = trxManager.transactionStatuses.SUCCESS
         }
       }
 
       await ctx.transaction.save()
 
-      if (ctx.transaction.transactionStatus === trxManager.transactionStatuses.FAILED) {
+      if (ctx.transaction.status === trxManager.transactionStatuses.FAILED) {
         await midtrans.expireTransaction({
           order_id: ctx.transaction.id
         })

@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
 
     amount: DataTypes.INTEGER,
 
-    transactionStatus: DataTypes.CHAR(32),
-    transactionSettlementStatus: DataTypes.CHAR(32),
+    status: DataTypes.CHAR(32),
+    settlementStatus: DataTypes.CHAR(32),
 
     token: DataTypes.STRING,
     tokenType: DataTypes.STRING,
@@ -69,7 +69,41 @@ module.exports = (sequelize, DataTypes) => {
 
     transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
 
-    // transaction.addScope()
+    transaction.addScope('agent', {
+      attributes: { exclude: ['deletedAt'] },
+      include: [
+        {
+          model: models.paymentProvider.scope(
+            'excludeShare',
+            'excludeTimestamp'
+          ),
+          include: [
+            models.paymentProviderType.scope('excludeTimestamp'),
+            models.paymentProviderConfig.scope(
+              'excludeTimestamp',
+              'excludeConfig'
+            )
+          ]
+        }
+      ]
+    })
+
+    transaction.addScope('agentNotification', {
+      attributes: { exclude: ['deletedAt'] },
+      include: [
+        {
+          model: models.paymentProvider.scope(
+            'excludeShare',
+            'excludeExtra',
+            'excludeTimestamp'
+          ),
+          include: [
+            models.paymentProviderType.scope('excludeTimestamp')
+          ]
+        }
+      ]
+    })
   }
+
   return transaction
 }

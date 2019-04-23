@@ -8,6 +8,15 @@ const configName = 'trxManagerType'
 
 let baseConfig = {
   /**
+   * Internal events enumeration used by event emitter
+   * and dtimer
+   */
+  eventTypes: {
+    TRANSACTION_STATUS_CHANGE: 'transactionStatusChange',
+    TRANSACTION_EXPIRY: 'transactionExpiry'
+  },
+
+  /**
   * Enumeration of transaction status in mika system
   */
   transactionStatuses: {
@@ -28,21 +37,6 @@ let baseConfig = {
     SETTLED_IN: 'settledIn',
     SETTLED: 'settled',
     ERROR: 'error'
-  },
-
-  /**
-  * Enumeration of transaction event, mainly used in notification
-  * (Public API and notification)
-  */
-  transactionEvents: {
-    CREATED: 'transactionCreated',
-    CREATED_WITH_DATA: 'transactionCreatedWithData',
-    SUCCESS: 'transactionSuccess',
-    SUCCESS_WITH_DATA: 'transactionSuccessWithData',
-    FAILED: 'transactionFailed',
-    FAILED_WITH_DATA: 'transactionFailedWithData',
-    EXPIRED: 'transactionExpired',
-    GLOBAL_TIMEOUT: 'transactionGlobalTimeout'
   },
 
   /**

@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   agent.associate = (models) => {
     agent.belongsTo(models.user, { foreignKey: 'userId' })
     agent.belongsTo(models.outlet, { foreignKey: 'outletId' })

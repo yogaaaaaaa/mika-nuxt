@@ -1,5 +1,7 @@
 'use strict'
 
+const hash = require('../helpers/hash')
+
 module.exports = (sequelize, DataTypes) => {
   let user = sequelize.define('user', {
     username: DataTypes.STRING,
@@ -11,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
-  user.associate = (models) => {}
+
+  user.associate = (models) => {
+    user.addScope('noPassword', {
+      attributes: { exclude: ['password'] }
+    })
+  }
+
   return user
 }

@@ -36,6 +36,21 @@ fs
 Object.keys(models).forEach(modelName => {
   if (models[modelName].associate) {
     models[modelName].associate(models)
+    models[modelName].addScope('defaultScope', {
+      attributes: { exclude: ['deletedAt'] }
+    })
+    models[modelName].addScope('excludeTimestamp', {
+      attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }
+    })
+    models[modelName].addScope('onlyTimestamp', {
+      attributes: ['createdAt', 'updatedAt']
+    })
+    models[modelName].addScope('excludeId', {
+      attributes: { exclude: ['id'] }
+    })
+    models[modelName].addScope('onlyId', {
+      attributes: ['id']
+    })
   }
 })
 

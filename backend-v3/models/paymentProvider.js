@@ -30,6 +30,28 @@ module.exports = (sequelize, DataTypes) => {
     paymentProvider.belongsTo(models.paymentProviderType, { foreignKey: 'paymentProviderTypeId' })
 
     paymentProvider.hasMany(models.transaction, { foreignKey: 'paymentProviderId' })
+
+    paymentProvider.addScope('excludeShare', {
+      attributes: {
+        exclude: [
+          'shareMerchant',
+          'shareMerchantWithPartner',
+          'sharePartner',
+          'directSettlement'
+        ]
+      }
+    })
+
+    paymentProvider.addScope('excludeExtra', {
+      attributes: {
+        exclude: [
+          'minimumAmount',
+          'maximumAmount',
+          'gateway',
+          'hidden'
+        ]
+      }
+    })
   }
   return paymentProvider
 }

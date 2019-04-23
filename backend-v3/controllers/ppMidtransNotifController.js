@@ -21,7 +21,7 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
         id: req.body.order_id,
         amount: parseInt(req.body.gross_amount),
         referenceNumber: req.body.transaction_id,
-        transactionStatus: trxManager.transactionStatuses.CREATED
+        status: trxManager.transactionStatuses.CREATED
       },
       include: [
         {
@@ -50,12 +50,9 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
       return
     }
 
-    transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
+    transaction.status = trxManager.transactionStatuses.SUCCESS
     await transaction.save()
-    trxManager.emitTransactionEvent(
-      trxManager.transactionEvents.SUCCESS,
-      transaction.id
-    )
+    trxManager.emitStatusChange(transaction)
     res.status(200).type('text').send('OK')
   } catch (error) {
     console.error(error)

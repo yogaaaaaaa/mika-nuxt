@@ -114,6 +114,12 @@ module.exports.addAuthUser = async (username, password, expirySecond) => {
     await exports.hashPassword(password))
 }
 
+module.exports.getAuthUser = async (username) => {
+  return redis.get(
+    exports.getAuthKey(username)
+  )
+}
+
 module.exports.refreshAuthUser = async (username, expirySecond) => {
   return redis.expire(exports.getAuthKey(username), expirySecond)
 }

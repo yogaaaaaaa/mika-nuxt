@@ -17,6 +17,7 @@ const transactionController = require('../controllers/transactionController')
 const paymentProviderController = require('../controllers/paymentProviderController')
 const authController = require('../controllers/authController')
 const utilitiesController = require('../controllers/utilitiesController')
+const terminalController = require('../controllers/terminalController')
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const authMiddleware = require('../middlewares/authMiddleware')
@@ -76,25 +77,6 @@ router.post('/auth/change_password',
   errorMiddleware.validatorErrorHandler,
   authController.changePassword
 )
-router.post('/auth/reset_password',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  authController.resetPasswordValidator,
-  errorMiddleware.validatorErrorHandler,
-  authController.resetPassword
-)
-
-/**
- * Resource(s) related endpoints
- */
-router.get('/resources/:resourceId',
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented)
-router.get('/files/:fileId',
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented)
 
 /**
  * General utilities endpoints
@@ -109,6 +91,26 @@ router.get('/utilities/types',
   authMiddleware.authErrorHandler,
   utilitiesController.listTypes
 )
+
+/**
+ * Resource(s) related endpoints
+ */
+router.get('/resources/:resourceId',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented)
+router.get('/files/:fileId',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented)
+router.post('/resource',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented)
+router.post('/resources/:resourceId/file',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented)
 
 /**
  * Agent related endpoints
@@ -149,14 +151,14 @@ router.post('/agent/transaction_follow_up',
 )
 
 /**
- * Merchant related endpoints
+ * Merchant Staff related endpoints
  */
-router.get('/merchant',
+router.get('/merchant_staff',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
-router.get(['/merchant/transactions', '/merchant/transactions/:id'],
+router.get(['/merchant_staff/transactions', '/merchant/transactions/:id'],
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
   queryMiddleware.paginationToSequelizeValidator('transaction'),
@@ -165,93 +167,41 @@ router.get(['/merchant/transactions', '/merchant/transactions/:id'],
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
   errorMiddleware.validatorErrorHandler,
-  transactionController.getMerchantTransactions
+  transactionController.getMerchantStaffTransactions
 )
-router.get('/merchant/transactions_statistic',
+router.get('/merchant_staff/transactions_statistic',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
   queryMiddleware.filtersToSequelize,
-  transactionController.getMerchantTransactionsStatistic
+  transactionController.getMerchantStaffTransactionsStatistic
 )
-router.get('/merchant/transactions_time_group',
+router.get('/merchant_staff/transactions_time_group',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
 )
 
 /**
- * Merchant PIC related endpoints
+ * Logistic Administration related endpoints
  */
-router.get('/merchant_pic',
-  authMiddleware.auth([auth.userTypes.MERCHANT_PIC]),
+router.get('/logistic/terminals/:terminalId/generate_cbkey',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_LOGISTIC]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.get(['/merchant_pic/view_groups/:viewGroupId/transactions', '/view_groups/:viewGroupId/transactions/:transactionId'],
-  authMiddleware.auth([auth.userTypes.MERCHANT_PIC]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  terminalController.generateTerminalCbKeyValidator,
+  errorMiddleware.validatorErrorHandler,
+  terminalController.generateTerminalCbKey
 )
 
 /**
- * Administration related endpoints
+ * Human Resource Administration related endpoints
  */
-router.get([ '/merchants', '/merchants/:merchantId' ],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
+router.post('/hr/reset_password',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  authController.resetPasswordValidator,
+  errorMiddleware.validatorErrorHandler,
+  authController.resetPassword
 )
-router.get([ '/merchants/:merchantId/terminals', '/merchants/:merchantId/terminals/:terminalId' ],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post('/merchants/:merchantId/terminals',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post(['/merchants/:merchantId/terminals'],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post('/merchants/:merchantId/agents',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-
-router.post([ '/terminals', '/terminals/:terminalId' ],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post([ '/terminals', '/terminals/:terminalId' ],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-router.post('/terminals/:terminalId/generate_cbkey',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-
-router.get([ '/payment_providers', '/payment_providers/:paymentProviderId' ],
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
-
-router.post('/resource',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented)
-router.post('/resources/:resourceId/file',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented)
 
 router.use(errorMiddleware.notFoundErrorHandler)
 router.use(errorMiddleware.errorHandler)

@@ -11,24 +11,21 @@ const debugController = require('../controllers/debugController')
 const altoDebugController = require('../controllers/ppAltoDebugController')
 const midtransDebugController = require('../controllers/ppMidtransDebugController')
 
-const appConfig = require('../configs/appConfig')
+const authMiddleware = require('../middlewares/authMiddleware')
+const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const router = express.Router()
 
 router.use(bodyParser.json())
-
-router.use((req, res, next) => {
-  if (req.headers[appConfig.debugHeader] === appConfig.debugKey) {
-    next()
-  } else {
-    res.status(401).type('text').send('Not Authorized')
-  }
-})
+router.use(authMiddleware.debugAuth)
+router.use(authMiddleware.authErrorHandler)
 
 router.post('/midtrans/transaction', midtransDebugController.queryTransaction)
 router.post('/alto/transaction', altoDebugController.queryTransaction)
 router.post('/transaction/:transactionId/status/:transactionStatus', debugController.changeTransactionStatus)
-
 router.all('/echo', debugController.echoCipherbox)
+
+router.use(errorMiddleware.notFoundErrorHandler)
+router.use(errorMiddleware.errorHandler)
 
 module.exports = router

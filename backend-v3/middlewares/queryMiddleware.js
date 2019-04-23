@@ -53,7 +53,7 @@ module.exports.filtersToSequelizeValidator = (model) => [
   query('filters').custom((filters) => {
     if (!Array.isArray(filters)) return false
     for (const filter of filters) {
-      if (!models[model].rawAttributes.hasOwnProperty(filter.split(',')[0])) return
+      if (!models[model].rawAttributes.hasOwnProperty(filter.split(',')[0])) return false
     }
     return true
   }).optional()
@@ -196,7 +196,7 @@ module.exports.timeGroupSequelize = (model) => [
 ]
 
 /**
- * Generate sequelize group (aggregation) by time
+ * Generate sequelize group (aggregation) by time query setting
  */
 module.exports.timeGroupToSequelize = (req, res, next) => {
   req.query.group_field = req.query.group_field || 'createdAt'

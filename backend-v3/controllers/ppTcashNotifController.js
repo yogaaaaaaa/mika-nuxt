@@ -34,7 +34,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       (req.body.pwd === config.pwd) &&
       (req.body.merchant === config.merchant)
     ) {
-      if (transaction.transactionStatus !== trxManager.transactionStatuses.CREATED) {
+      if (transaction.status !== trxManager.transactionStatuses.CREATED) {
         res.status(400)
           .send(tcash.tcashErrorResponse(
             tcash.tcashMessageCode.TCASH_ERROR_TRANSACTION_NOT_VALID)
@@ -49,17 +49,15 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
           transaction.amount))
         return
       } else if (req.body.trx_type === tcash.tcashTrxType.TCASH_PAY) {
-        transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
+        transaction.status = trxManager.transactionStatuses.SUCCESS
         transaction.referenceNumber = req.body.trx_id
         transaction.referenceNumberName = 'trx_id'
         transaction.customerReference = req.body.msisdn
         transaction.customerReferenceName = 'msisdn'
         await transaction.save()
 
-        trxManager.emitTransactionEvent(
-          trxManager.transactionEvents.SUCCESS,
-          transaction.id
-        )
+        trxManager.emitStatusChange(transaction)
+
         res
           .status(200)
           .send(tcash.tcashPayResponse(

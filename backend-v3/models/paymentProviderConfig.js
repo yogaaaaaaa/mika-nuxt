@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
   paymentProviderConfig.associate = (models) => {
     paymentProviderConfig.belongsTo(models.merchant, { foreignKey: 'merchantId' })
     paymentProviderConfig.hasMany(models.paymentProvider, { foreignKey: 'paymentProviderConfigId' })
+
+    paymentProviderConfig.addScope('excludeConfig', {
+      attributes: { exclude: ['config', 'providerIdReference', 'providerIdType'] }
+    })
   }
   return paymentProviderConfig
 }

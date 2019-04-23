@@ -46,7 +46,7 @@ module.exports = (trxManager) => {
 
       await fairpay.processAuthAndApi(fairpay.apiDebitCreditSale, fpCtx)
       if (fpCtx.saleResponse) {
-        ctx.transaction.transactionStatus = trxManager.transactionStatuses.SUCCESS
+        ctx.transaction.status = trxManager.transactionStatuses.SUCCESS
 
         ctx.transaction.referenceNumber = fpCtx.saleResponse.invoice_num
         ctx.transaction.referenceNumberName = 'invoice_num'

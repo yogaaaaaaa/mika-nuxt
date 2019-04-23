@@ -5,18 +5,16 @@
  * Its also provide constant related transaction object
  */
 
+const fs = require('fs')
+const path = require('path')
+
 const debug = {
   dTimer: require('debug')('trxManager:dTimerHandler')
 }
 const models = require('../models')
-
 const uid = require('./uid')
-
 const dTimer = require('./dTimer')
 const events = Object.create(require('events').prototype)
-
-const fs = require('fs')
-const path = require('path')
 
 const appConfig = require('../configs/appConfig')
 const types = require('../configs/trxManagerTypesConfig')
@@ -24,11 +22,11 @@ const types = require('../configs/trxManagerTypesConfig')
 module.exports.types = types
 module.exports.transactionStatuses = types.transactionStatuses
 module.exports.transactionSettlementStatuses = types.transactionSettlementStatuses
-module.exports.transactionEvents = types.transactionEvents
 module.exports.tokenTypes = types.tokenTypes
 module.exports.userTokenTypes = types.userTokenTypes
 module.exports.transactionFlags = types.transactionFlags
 module.exports.transactionFlows = types.transactionFlows
+module.exports.eventTypes = types.eventTypes
 
 module.exports.errorCodes = types.errorCodes
 
@@ -125,55 +123,36 @@ module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
 }
 
 /**
- * Emit transaction event to all handler (via nodejs event emitter).
- * It will emit event with object,
- ```js
-   transactionEvent = {
-    transactionId: 1,
-    transaction: { ... } // transaction record (if any)
-  }
- ```
+ * Emit transaction status change (via nodejs event emitter).
  */
-module.exports.emitTransactionEvent = (transactionEvent, transactionId, transaction) => {
-  events.emit(transactionEvent, {
-    transactionId: transactionId,
-    transaction: transaction
+module.exports.emitStatusChange = (transaction) => {
+  events.emit(exports.eventTypes.TRANSACTION_STATUS_CHANGE, {
+    transactionId: transaction.id,
+    transactionStatus: transaction.status,
+    transactionSettlementStatus: transaction.settlementStatus,
+    agentId: transaction.agentId,
+    paymentProviderId: transaction.paymentProviderId
   })
 }
 
 /**
- * Listen to transaction event (via nodejs event emitter)
+ * Listen to transaction status change (via nodejs event emitter)
  */
-module.exports.addListener = (transactionEvent, callback) => {
-  events.addListener(transactionEvent, callback)
+module.exports.listenStatusChange = (handler) => {
+  events.addListener(exports.eventTypes.TRANSACTION_STATUS_CHANGE, handler)
 }
 
-module.exports.forceTransactionStatus = async (transactionId, transactionStatus) => {
+module.exports.forceStatus = async (transactionId, transactionStatus) => {
   if (transactionStatus) {
-    let update = await models.transaction.update({
-      transactionStatus
-    }, {
-      where: {
-        id: transactionId
-      }
-    })
+    let transaction = await models.transaction.findByPk(transactionId)
 
-    if (update) {
-      let eventName = null
+    if (transaction) {
+      transaction.status = transactionStatus
+      await transaction.save()
 
-      if (transactionStatus === exports.transactionStatuses.SUCCESS) {
-        eventName = exports.transactionEvents.SUCCESS
-      }
+      exports.emitStatusChange(transaction)
 
-      if (transactionStatus === exports.transactionStatuses.FAILED) {
-        eventName = exports.transactionEvents.FAILED
-      }
-
-      if (eventName) {
-        exports.emitTransactionEvent(eventName, transactionId)
-      }
-
-      return update
+      return transaction
     }
   }
 }
@@ -201,7 +180,7 @@ module.exports.create = async (transaction, options) => {
   let genId = uid.generateTransactionId(ctx.agent.merchant.shortName)
   ctx.transaction.id = genId.id
   ctx.transaction.idAlias = genId.idAlias
-  ctx.transaction.transactionStatus = exports.transactionStatuses.CREATED
+  ctx.transaction.status = exports.transactionStatuses.CREATED
 
   ctx.transaction = models.transaction.build(ctx.transaction)
 
@@ -221,9 +200,9 @@ module.exports.create = async (transaction, options) => {
   }
   await ctx.transaction.save()
 
-  if (ctx.transaction.transactionStatus === exports.transactionStatuses.CREATED) {
+  if (ctx.transaction.status === exports.transactionStatuses.CREATED) {
     await dTimer.postEvent({
-      event: exports.transactionEvents.GLOBAL_TIMEOUT,
+      event: exports.eventTypes.TRANSACTION_EXPIRY,
       transactionId: ctx.transaction.id
     }, appConfig.transactionTimeoutSecond * 1000)
   }
@@ -231,7 +210,7 @@ module.exports.create = async (transaction, options) => {
   if (!trxCreateResult) {
     trxCreateResult = {
       transactionId: ctx.transaction.id,
-      transactionStatus: ctx.transaction.transactionStatus
+      transactionStatus: ctx.transaction.status
     }
     if (ctx.transaction.token && ctx.transaction.tokenType) {
       trxCreateResult.token = ctx.transaction.token
@@ -252,18 +231,18 @@ module.exports.followUp = async (transaction, options = {}) => {
 /**
  * Handle timeout event from redis timer
  */
-dTimer.handleEvent(async (eventCtx) => {
-  debug.dTimer('event', eventCtx)
+dTimer.handleEvent(async (event) => {
+  debug.dTimer('event', event)
   try {
-    if (eventCtx.event === exports.transactionEvents.GLOBAL_TIMEOUT) {
-      let ctx = await exports.buildTransactionCtx(null, { transactionId: eventCtx.transactionId })
+    if (event.event === exports.eventTypes.TRANSACTION_EXPIRY) {
+      let ctx = await exports.buildTransactionCtx(null, { transactionId: event.transactionId })
 
       if ([
         exports.transactionStatuses.SUCCESS,
         exports.transactionStatuses.FAILED
-      ].includes(ctx.transaction.transactionStatus)) return
+      ].includes(ctx.transaction.status)) return
 
-      ctx.transaction.transactionStatus = exports.transactionStatuses.FAILED
+      ctx.transaction.status = exports.transactionStatuses.FAILED
 
       if (typeof ctx.ppHandler.timeoutHandler === 'function') {
         await ctx.ppHandler.timeoutHandler(ctx)
@@ -271,47 +250,13 @@ dTimer.handleEvent(async (eventCtx) => {
 
       await ctx.transaction.save()
 
-      if (ctx.transaction.transactionStatus === exports.transactionStatuses.SUCCESS) {
-        exports.emitTransactionEvent(
-          exports.transactionEvents.SUCCESS,
-          ctx.transaction.id
-        )
-      } else if (ctx.transaction.transactionStatus === exports.transactionStatuses.FAILED) {
-        exports.emitTransactionEvent(
-          exports.transactionEvents.FAILED,
-          ctx.transaction.id
-        )
-      }
+      exports.emitStatusChange(ctx.transaction)
 
       return true
     }
   } catch (err) {
     console.error(err)
     return false
-  }
-})
-
-/**
- * Emitter for SUCCESS_WITH_DATA event
- * Just listen to ordinary transaction event,
- * then emit SUCCESS_WITH_DATA event with transaction
- */
-events.addListener(exports.transactionEvents.SUCCESS, async (eventCtx) => {
-  if (events.listenerCount(exports.transactionEvents.SUCCESS_WITH_DATA)) {
-    eventCtx.transaction = await models.transaction.findByPk(eventCtx.transactionId)
-    events.emit(exports.transactionEvents.SUCCESS_WITH_DATA, eventCtx)
-  }
-})
-
-/**
- * Emitter for FAILED_WITH_DATA event
- * Just listen to ordinary transaction event,
- * then emit FAILED_WITH_DATA event with transaction
- */
-events.addListener(exports.transactionEvents.FAILED, async (eventCtx) => {
-  if (events.listenerCount(exports.transactionEvents.FAILED_WITH_DATA)) {
-    eventCtx.transaction = await models.transaction.findByPk(eventCtx.transactionId)
-    events.emit(exports.transactionEvents.FAILED_WITH_DATA, eventCtx)
   }
 })
 

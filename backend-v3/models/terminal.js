@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   terminal.associate = (models) => {
     terminal.belongsTo(models.terminalModel, { foreignKey: 'terminalModelId' })
     terminal.belongsTo(models.terminalBatch, { foreignKey: 'terminalBatchId' })
@@ -35,5 +36,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     )
   }
+
   return terminal
 }

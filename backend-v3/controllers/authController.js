@@ -130,7 +130,7 @@ module.exports.resetPasswordValidator = [
 ]
 
 /**
- * Reset password (all user)
+ * Reset password (all user) admin only
  */
 module.exports.resetPassword = async (req, res, next) => {
   if (auth.resetAuth(req.body.userId, req.body.password)) {

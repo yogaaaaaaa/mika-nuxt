@@ -12,13 +12,13 @@ const Op = Sequelize.Op
 // const script = require('../helpers/script')
 
 /**
- * Helper function to do query to many entities and
+ * Helper function to do query to many transaction instance and
  * create appropriate express response
  */
 async function transactionsQueryAndResponse (req, res, query) {
   if (req.params.transactionId) {
     query.where.id = req.params.transactionId
-    let transaction = await models.transaction.findOne(query)
+    let transaction = await models.transaction.scope('agent').findOne(query)
 
     msgFactory.expressCreateResponse(
       res,
@@ -42,7 +42,7 @@ async function transactionsQueryAndResponse (req, res, query) {
         msgFactory.createPaginationMeta(req.query.page, req.query.per_page, transactions.count)
       )
     } else {
-      transactions = await models.transaction.findAll(query)
+      transactions = await models.transaction.scope('agent').findAll(query)
       msgFactory.expressCreateResponse(
         res,
         transactions.length > 0
@@ -158,60 +158,17 @@ module.exports.createTransaction = async (req, res, next) => {
  * Get one or many agent transactions of (via `req.auth.agentId`)
  */
 module.exports.getAgentTransactions = async (req, res, next) => {
-  let query = {
+  return transactionsQueryAndResponse(req, res, {
     where: {
       agentId: req.auth.agentId
-    },
-    attributes: { exclude: ['deletedAt'] },
-    include: [
-      {
-        model: models.paymentProvider,
-        attributes: {
-          exclude: [
-            'shareMerchant',
-            'shareMerchantWithPartner',
-            'sharePartner',
-            'directSettlement',
-            'createdAt',
-            'updatedAt',
-            'deletedAt'
-          ]
-        },
-        include: [
-          {
-            model: models.paymentProviderType,
-            attributes: {
-              exclude: [
-                'createdAt',
-                'updatedAt',
-                'deletedAt'
-              ]
-            }
-          },
-          {
-            model: models.paymentProviderConfig,
-            attributes: {
-              exclude: [
-                'config',
-                'providerIdReference',
-                'providerIdType',
-                'createdAt',
-                'updatedAt',
-                'deletedAt'
-              ]
-            }
-          }
-        ]
-      }
-    ]
-  }
-  return transactionsQueryAndResponse(req, res, query)
+    }
+  })
 }
 
 /**
  * Get one or many merchant's transactions (via `req.auth.merchantId`)
  */
-module.exports.getMerchantTransactions = async (req, res, next) => {
+module.exports.getMerchantStaffTransactions = async (req, res, next) => {
   let query = {
     where: {},
     attributes: { exclude: ['deletedAt'] },
@@ -250,7 +207,7 @@ module.exports.getMerchantTransactions = async (req, res, next) => {
   return transactionsQueryAndResponse(req, res, query)
 }
 
-module.exports.getMerchantTransactionsStatistic = async (req, res, next) => {
+module.exports.getMerchantStaffTransactionsStatistic = async (req, res, next) => {
   let query = {
     where: {},
     attributes: [
@@ -316,7 +273,7 @@ module.exports.getMerchantTransactionsStatistic = async (req, res, next) => {
   )
 }
 
-module.exports.getMerchantTransactionTimeGroup = async (req, res, next) => {
+module.exports.getMerchantStaffTransactionTimeGroup = async (req, res, next) => {
   let query = {
     where: {},
     attributes: [

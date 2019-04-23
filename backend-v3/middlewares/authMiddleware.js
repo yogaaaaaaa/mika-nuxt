@@ -60,14 +60,23 @@ module.exports.authErrorHandler = async (req, res, next) => {
       msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID
     )
     return
-  } else {
-    if (req.authInvalidUserType || req.authInvalidUserRole) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_AUTH_FORBIDDEN
-      )
-      return
-    }
   }
+
+  if (req.authInvalidUserType || req.authInvalidUserRole) {
+    msgFactory.expressCreateResponse(
+      res,
+      msgFactory.msgTypes.MSG_ERROR_AUTH_FORBIDDEN
+    )
+    return
+  }
+
   next()
+}
+
+module.exports.debugAuth = async (req, res, next) => {
+  req.auth = null
+  if (req.headers[appConfig.debugHeader] === appConfig.debugKey) {
+    req.auth = 'debug'
+    next()
+  }
 }

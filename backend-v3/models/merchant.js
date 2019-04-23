@@ -97,6 +97,28 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'paymentProviderTypeId'
       }
     )
+
+    merchant.addScope('excludeScanned', {
+      attributes: { exclude: [
+        'idTaxCard',
+        'scannedTaxCardResourceId',
+        'scannedBankStatementResourceId',
+        'scannedSkmenkumhamResourceId',
+        'scannedSiupResourceId',
+        'scannedTdpResourceId',
+        'scannedSkdpResourceId',
+        'ownerScannedIdCardResourceId',
+        'ownerScannedTaxCardResourceId'
+      ] }
+    })
+    merchant.addScope('excludeBankInfo', {
+      attributes: { exclude: [
+        'bankName',
+        'bankBranchName',
+        'bankAccountName',
+        'bankAccountNumber'
+      ] }
+    })
   }
   return merchant
 }
