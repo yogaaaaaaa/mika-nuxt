@@ -38,7 +38,9 @@ fs
 
 Object.keys(models).forEach(modelName => {
   if (models[modelName].associate) {
-    // Add many default scopes to all models
+    /**
+     * Add default scopes to all models
+     */
     models[modelName].addScope('defaultScope', {
       attributes: { exclude: ['deletedAt'] }
     })

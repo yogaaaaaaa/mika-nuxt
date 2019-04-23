@@ -32,7 +32,7 @@ async function transactionsQueryAndResponse (req, res, query) {
     req.applyFiltersWhereSequelize(query)
     let transactions = null
     if (req.query.get_count) {
-      transactions = await models.transaction.findAndCountAll(query)
+      transactions = await models.transaction.scope('agent').findAndCountAll(query)
       msgFactory.expressCreateResponse(
         res,
         transactions.rows.length > 0

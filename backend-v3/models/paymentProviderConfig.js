@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   paymentProviderConfig.associate = (models) => {
     paymentProviderConfig.belongsTo(models.merchant, { foreignKey: 'merchantId' })
     paymentProviderConfig.hasMany(models.paymentProvider, { foreignKey: 'paymentProviderConfigId' })
@@ -45,5 +46,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     })
   }
+
   return paymentProviderConfig
 }

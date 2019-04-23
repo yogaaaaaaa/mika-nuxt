@@ -17,11 +17,13 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   terminalProcurement.associate = (models) => {
     terminalProcurement.belongsTo(models.terminalModel, { foreignKey: 'terminalModelId' })
     terminalProcurement.belongsTo(models.terminalDistributor, { foreignKey: 'terminalDistributorId' })
     terminalProcurement.belongsTo(models.terminalBatch, { foreignKey: 'terminalBatchId' })
     terminalProcurement.belongsTo(models.admin, { foreignKey: 'adminId' })
   }
+
   return terminalProcurement
 }

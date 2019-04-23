@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   agentPaymentProvider.associate = (models) => {
     agentPaymentProvider.belongsTo(models.agent, { foreignKey: 'agentId' })
     agentPaymentProvider.belongsTo(models.paymentProvider, { foreignKey: 'paymentProviderId' })
@@ -25,5 +26,6 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }))
   }
+
   return agentPaymentProvider
 }

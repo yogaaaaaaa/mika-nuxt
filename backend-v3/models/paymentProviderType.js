@@ -14,8 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   paymentProviderType.associate = (models) => {
     paymentProviderType.hasMany(models.paymentProvider, { foreignKey: 'paymentProviderTypeId' })
   }
+
   return paymentProviderType
 }

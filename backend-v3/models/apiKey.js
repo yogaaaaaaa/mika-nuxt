@@ -11,8 +11,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   apiKey.associate = function (models) {
     apiKey.belongsTo(models.partner, { foreignKey: 'partnerId' })
   }
+
   return apiKey
 }

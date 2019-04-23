@@ -8,9 +8,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   merchantPaymentProviderType.associate = (models) => {
     merchantPaymentProviderType.belongsTo(models.merchant, { foreignKey: 'merchantId' })
     merchantPaymentProviderType.belongsTo(models.paymentProviderType, { foreignKey: 'paymentProviderTypeId' })
   }
+
   return merchantPaymentProviderType
 }

@@ -10,8 +10,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   cipherboxKey.associate = function (models) {
     cipherboxKey.belongsTo(models.terminal, { foreignKey: 'terminalId' })
   }
+
   return cipherboxKey
 }

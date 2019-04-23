@@ -23,9 +23,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   partner.associate = (models) => {
     partner.hasMany(models.apiKey, { foreignKey: 'partnerId' })
     partner.hasMany(models.merchant, { foreignKey: 'partnerId' })
   }
+
   return partner
 }

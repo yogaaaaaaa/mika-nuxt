@@ -12,8 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   terminalDistributor.associate = (models) => {
     terminalDistributor.hasMany(models.terminalProcurement, { foreignKey: 'terminalDistributorId' })
   }
+
   return terminalDistributor
 }

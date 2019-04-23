@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   outlet.associate = function (models) {
     outlet.belongsTo(models.resource, {
       foreignKey: 'outletPhotoResourceId',
@@ -69,5 +70,6 @@ module.exports = (sequelize, DataTypes) => {
       ] }
     })
   }
+
   return outlet
 }

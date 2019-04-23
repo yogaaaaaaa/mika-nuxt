@@ -8,9 +8,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   agentTerminal.associate = (models) => {
     agentTerminal.belongsTo(models.agent, { foreignKey: 'agentId' })
     agentTerminal.belongsTo(models.terminal, { foreignKey: 'terminalId' })
   }
+
   return agentTerminal
 }

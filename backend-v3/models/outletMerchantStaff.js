@@ -8,9 +8,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   outletMerchantStaff.associate = (models) => {
     outletMerchantStaff.belongsTo(models.outlet, { foreignKey: 'outletId' })
     outletMerchantStaff.belongsTo(models.merchantStaff, { foreignKey: 'merchantStaffId' })
   }
+
   return outletMerchantStaff
 }

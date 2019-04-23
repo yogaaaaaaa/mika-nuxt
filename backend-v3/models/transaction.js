@@ -62,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   transaction.associate = (models) => {
     transaction.belongsTo(models.agent, { foreignKey: 'agentId' })
     transaction.belongsTo(models.terminal, { foreignKey: 'terminalId' })

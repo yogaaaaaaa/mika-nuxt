@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   terminalBatch.associate = (models) => {
     terminalBatch.hasMany(models.terminal, { foreignKey: 'terminalBatchId' })
     terminalBatch.hasMany(models.terminalProcurement, { foreignKey: 'terminalBatchId' })
   }
+
   return terminalBatch
 }

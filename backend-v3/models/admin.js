@@ -12,8 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   admin.associate = (models) => {
     admin.belongsTo(models.user, { foreignKey: 'userId' })
   }
+
   return admin
 }

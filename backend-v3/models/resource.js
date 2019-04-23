@@ -12,8 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   resource.associate = (models) => {
     resource.hasMany(models.file, { foreignKey: 'resourceId' })
   }
+
   return resource
 }

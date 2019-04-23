@@ -26,9 +26,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   merchantStaff.associate = function (models) {
     merchantStaff.belongsTo(models.user, { foreignKey: 'userId' })
     merchantStaff.belongsTo(models.merchant, { foreignKey: 'merchantId' })
   }
+
   return merchantStaff
 }

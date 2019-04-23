@@ -14,8 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   transactionRefund.associate = (models) => {
     transactionRefund.belongsTo(models.transaction, { foreignKey: 'transactionId' })
   }
+
   return transactionRefund
 }

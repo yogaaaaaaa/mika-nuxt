@@ -17,8 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: true
   })
+
   file.associate = (models) => {
     file.belongsTo(models.resource, { foreignKey: 'resourceId' })
   }
+
   return file
 }
