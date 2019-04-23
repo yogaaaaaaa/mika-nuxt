@@ -2,19 +2,19 @@
 
 /**
  * This module provide webhook/callback and its retry
- * for Public/External API
+ * for external API
  */
-
-const apiKeyAuth = require('./extApiKeyAuth')
 
 const request = require('superagent')
 require('superagent-retry-delay')(request)
 
-const config = require('../configs/extApiCallbackConfig')
+const extAuth = require('./extApiAuth')
 
-module.exports.makeApiCallback = async (keyId, url, objectBody = {}, callback = () => {}) => {
-  let bodyString = JSON.stringify(objectBody)
-  let serverToken = await apiKeyAuth.createServerApiToken(keyId, bodyString)
+const extApiConfig = require('../configs/extApiConfig')
+
+module.exports.createCallback = async (idKey, url, body, callback = () => {}) => {
+  let bodyString = JSON.stringify(body)
+  let serverToken = await extAuth.createServerToken(idKey, bodyString)
 
   const makeRequest = async (retryLeft) => {
     let response = null
@@ -26,7 +26,9 @@ module.exports.makeApiCallback = async (keyId, url, objectBody = {}, callback = 
         .set('User-Agent', 'MIKA API Callback')
         .retry(1, 1000)
         .send(bodyString)
-    } catch (error) {}
+    } catch (err) {
+      console.error(err)
+    }
 
     if (response) {
       if (response.status === 200) {
@@ -37,9 +39,10 @@ module.exports.makeApiCallback = async (keyId, url, objectBody = {}, callback = 
 
     if (retryLeft <= 0) {
       callback(response)
-    } else {
-      setTimeout(() => makeRequest(retryLeft - 1), config.callBackDelay)
+      return
     }
+
+    setTimeout(() => makeRequest(retryLeft - 1), extApiConfig.callBackDelaySecond)
   }
-  makeRequest(config.callBackRetryCount)
+  makeRequest(extApiConfig.callBackRetryCount)
 }

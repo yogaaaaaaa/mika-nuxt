@@ -1,7 +1,5 @@
 'use strict'
 
-const hash = require('../helpers/hash')
-
 module.exports = (sequelize, DataTypes) => {
   let user = sequelize.define('user', {
     username: DataTypes.STRING,

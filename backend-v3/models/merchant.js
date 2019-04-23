@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     postalCode: DataTypes.STRING,
     phoneNumber: DataTypes.STRING,
 
-    idTaxCard: DataTypes.STRING,
+    taxCardNumber: DataTypes.STRING,
     scannedTaxCardResourceId: DataTypes.CHAR(27),
 
     bankName: DataTypes.STRING,
@@ -98,20 +98,23 @@ module.exports = (sequelize, DataTypes) => {
       }
     )
 
-    merchant.addScope('excludeScanned', {
+    merchant.addScope('excludeLegal', {
       attributes: { exclude: [
-        'idTaxCard',
+        'taxCardNumber',
         'scannedTaxCardResourceId',
         'scannedBankStatementResourceId',
         'scannedSkmenkumhamResourceId',
         'scannedSiupResourceId',
         'scannedTdpResourceId',
         'scannedSkdpResourceId',
+        'ownerIdCardNumber',
+        'ownerIdCardType',
+        'ownerTaxCardNumber',
         'ownerScannedIdCardResourceId',
         'ownerScannedTaxCardResourceId'
       ] }
     })
-    merchant.addScope('excludeBankInfo', {
+    merchant.addScope('excludeBank', {
       attributes: { exclude: [
         'bankName',
         'bankBranchName',
@@ -119,6 +122,12 @@ module.exports = (sequelize, DataTypes) => {
         'bankAccountNumber'
       ] }
     })
+    merchant.addScope('excludePartner', {
+      attributes: { exclude: [
+        'partnerId'
+      ] }
+    })
   }
+
   return merchant
 }

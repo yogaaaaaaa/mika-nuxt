@@ -67,7 +67,7 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      idTaxCard: {
+      taxCardNumber: {
         type: Sequelize.STRING
       },
       scannedTaxCardResourceId: {

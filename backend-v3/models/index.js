@@ -25,6 +25,9 @@ sequelize
     ready.ready('database')
   })
 
+models.sequelize = sequelize
+models.Sequelize = Sequelize
+
 fs
   .readdirSync(__dirname)
   .filter(file => (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js'))
@@ -35,7 +38,7 @@ fs
 
 Object.keys(models).forEach(modelName => {
   if (models[modelName].associate) {
-    models[modelName].associate(models)
+    // Add many default scopes to all models
     models[modelName].addScope('defaultScope', {
       attributes: { exclude: ['deletedAt'] }
     })
@@ -51,10 +54,9 @@ Object.keys(models).forEach(modelName => {
     models[modelName].addScope('onlyId', {
       attributes: ['id']
     })
+
+    models[modelName].associate(models)
   }
 })
-
-models.sequelize = sequelize
-models.Sequelize = Sequelize
 
 module.exports = models

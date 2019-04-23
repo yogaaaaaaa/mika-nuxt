@@ -1,30 +1,7 @@
 'use strict'
 
-const extApiKeyAuth = require('../helpers/extApiKeyAuth')
 const msgFactory = require('../helpers/msgFactory')
 const models = require('../models')
-
-module.exports.apiAuth = async function (req, res, next) {
-  req.apiAuth = null
-  try {
-    let authComponent = req.headers['authorization'].split(' ')
-    if (authComponent[0].toLowerCase() === 'bearer') {
-      req.apiAuth = await extApiKeyAuth.verifyClientApiToken(authComponent[1])
-    }
-  } catch (err) {}
-  next()
-}
-
-module.exports.apiAuthErrorHandler = async function (req, res, next) {
-  if (req.apiAuth === null) {
-    res.status(401)
-      .send(
-        msgFactory.generateExtApiResponseMessage(msgFactory.msgTypes.MSG_ERROR_AUTH)
-      )
-  } else {
-    next()
-  }
-}
 
 async function checkIfAgentIdValid (agentId, validMerchantIds) {
   try {

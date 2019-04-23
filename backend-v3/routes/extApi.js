@@ -40,10 +40,6 @@ router.get('/agents',
   extApiController.getAgents
 )
 
-router.get('/merchants',
-  extApiController.getAgents
-)
-
 router.get('/transactions',
   generalController.notImplemented
 )

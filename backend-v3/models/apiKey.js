@@ -2,9 +2,9 @@
 
 module.exports = (sequelize, DataTypes) => {
   let apiKey = sequelize.define('apiKey', {
-    apiIdKey: DataTypes.STRING,
-    apiSecretKey: DataTypes.STRING,
-    apiSharedKey: DataTypes.STRING,
+    idKey: DataTypes.STRING,
+    secretKey: DataTypes.STRING,
+    sharedKey: DataTypes.STRING,
 
     partnerId: DataTypes.INTEGER
   }, {

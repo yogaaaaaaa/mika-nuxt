@@ -50,6 +50,24 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     outlet.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+
+    outlet.addScope('excludeBusiness', {
+      attributes: { exclude: [
+        'ownershipType',
+        'rentStartDate',
+        'rentDurationMonth',
+        'otherPaymentSystems',
+        'outletPhotoResourceId',
+        'cashierDeskPhotoResourceId',
+        'businessDurationMonth',
+        'businessMonthlyTurnover'
+      ] }
+    })
+    outlet.addScope('excludeMerchant', {
+      attributes: { exclude: [
+        'merchantId'
+      ] }
+    })
   }
   return outlet
 }

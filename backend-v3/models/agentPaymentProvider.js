@@ -1,16 +1,29 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let agentPaymentGateway = sequelize.define('agentPaymentProvider', {
+  let agentPaymentProvider = sequelize.define('agentPaymentProvider', {
     agentId: DataTypes.INTEGER,
     paymentProviderId: DataTypes.INTEGER
   }, {
     freezeTableName: true,
     paranoid: true
   })
-  agentPaymentGateway.associate = (models) => {
-    agentPaymentGateway.belongsTo(models.agent, { foreignKey: 'agentId' })
-    agentPaymentGateway.belongsTo(models.paymentProvider, { foreignKey: 'paymentProviderId' })
+  agentPaymentProvider.associate = (models) => {
+    agentPaymentProvider.belongsTo(models.agent, { foreignKey: 'agentId' })
+    agentPaymentProvider.belongsTo(models.paymentProvider, { foreignKey: 'paymentProviderId' })
+
+    agentPaymentProvider.addScope('agent', () => ({
+      attributes: ['id'],
+      include: [
+        {
+          model: models.paymentProvider.scope('excludeTimestamp', 'excludeShare'),
+          include: [
+            models.paymentProviderType.scope('excludeTimestamp'),
+            models.paymentProviderConfig.scope('excludeTimestamp', 'excludeConfig')
+          ]
+        }
+      ]
+    }))
   }
-  return agentPaymentGateway
+  return agentPaymentProvider
 }

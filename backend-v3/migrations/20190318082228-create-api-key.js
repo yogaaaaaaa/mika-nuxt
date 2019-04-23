@@ -10,19 +10,20 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      apiIdKey: {
+      idKey: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      apiSecretKey: {
+      secretKey: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      apiSharedKey: {
+      sharedKey: {
         allowNull: false,
         type: Sequelize.STRING
       },
       partnerId: {
+        allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'partner',

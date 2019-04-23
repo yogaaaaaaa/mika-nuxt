@@ -69,7 +69,7 @@ module.exports = (sequelize, DataTypes) => {
 
     transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
 
-    transaction.addScope('agent', {
+    transaction.addScope('agent', () => ({
       attributes: { exclude: ['deletedAt'] },
       include: [
         {
@@ -86,9 +86,9 @@ module.exports = (sequelize, DataTypes) => {
           ]
         }
       ]
-    })
+    }))
 
-    transaction.addScope('agentNotification', {
+    transaction.addScope('agentNotification', () => ({
       attributes: { exclude: ['deletedAt'] },
       include: [
         {
@@ -98,11 +98,13 @@ module.exports = (sequelize, DataTypes) => {
             'excludeTimestamp'
           ),
           include: [
-            models.paymentProviderType.scope('excludeTimestamp')
+            models.paymentProviderType.scope(
+              'excludeTimestamp'
+            )
           ]
         }
       ]
-    })
+    }))
   }
 
   return transaction

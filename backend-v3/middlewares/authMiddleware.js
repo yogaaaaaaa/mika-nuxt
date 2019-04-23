@@ -2,11 +2,12 @@
 
 const msgFactory = require('../helpers/msgFactory')
 const auth = require('../helpers/auth')
+const extApiAuth = require('../helpers/extApiAuth')
 
 const appConfig = require('../configs/appConfig')
 
 /**
- * Check for authentication as middleware.
+ * Authentication check as middleware.
  * This middleware will store all auth information inside `req.auth`.
  *
  * To enforce user type, add user type to array `allowedUserTypes`.
@@ -21,7 +22,6 @@ const appConfig = require('../configs/appConfig')
  ```
  *
  */
-
 module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => async (req, res, next) => {
   req.auth = null
   req.sessionToken = null
@@ -73,10 +73,29 @@ module.exports.authErrorHandler = async (req, res, next) => {
   next()
 }
 
+/**
+ * Debug auth handler
+ */
 module.exports.debugAuth = async (req, res, next) => {
   req.auth = null
   if (req.headers[appConfig.debugHeader] === appConfig.debugKey) {
     req.auth = 'debug'
     next()
   }
+}
+
+/**
+ * External api auth handler
+ */
+module.exports.extApiAuth = async function (req, res, next) {
+  req.auth = null
+  try {
+    let authComponent = req.headers['authorization'].split(' ')
+    if (authComponent[0].toLowerCase() === 'bearer') {
+      req.apiAuth = await extApiAuth.verifyClientToken(authComponent[1])
+    }
+  } catch (err) {
+    console.error(err)
+  }
+  next()
 }

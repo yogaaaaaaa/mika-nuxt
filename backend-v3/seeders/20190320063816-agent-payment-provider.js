@@ -71,10 +71,6 @@ module.exports = {
       },
       {
         agentId: 3,
-        paymentProviderId: 3
-      },
-      {
-        agentId: 3,
         paymentProviderId: 4
       },
 

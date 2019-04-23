@@ -35,6 +35,14 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'paymentProviderId'
       }
     )
+
+    agent.addScope('agent', () => ({
+      attributes: { exclude: ['deletedAt'] },
+      include: [
+        models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner'),
+        models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant')
+      ]
+    }))
   }
   return agent
 }

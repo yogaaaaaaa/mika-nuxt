@@ -36,7 +36,13 @@ module.exports = (sequelize, DataTypes) => {
     paymentProviderConfig.hasMany(models.paymentProvider, { foreignKey: 'paymentProviderConfigId' })
 
     paymentProviderConfig.addScope('excludeConfig', {
-      attributes: { exclude: ['config', 'providerIdReference', 'providerIdType'] }
+      attributes: {
+        exclude: [
+          'config',
+          'providerIdReference',
+          'providerIdType'
+        ]
+      }
     })
   }
   return paymentProviderConfig
