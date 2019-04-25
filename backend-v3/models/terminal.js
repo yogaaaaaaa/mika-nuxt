@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     serialNumber: DataTypes.STRING,
     imei: DataTypes.STRING,
 
-    terminalStatus: DataTypes.STRING,
+    status: DataTypes.CHAR(32),
 
     terminalModelId: DataTypes.INTEGER,
     terminalBatchId: DataTypes.INTEGER,
@@ -35,6 +35,23 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'agentId'
       }
     )
+
+    terminal.addScope('excludeMerchant', {
+      attributes: { exclude: [
+        'merchantId'
+      ] }
+    })
+    terminal.addScope('excludeBatch', {
+      attributes: { exclude: [
+        'terminalBatchId'
+      ] }
+    })
+    terminal.addScope('agent', () => ({
+      attributes: { exclude: ['deletedAt'] },
+      include: [
+        models.terminalModel.scope('excludeTimestamp')
+      ]
+    }))
   }
 
   return terminal

@@ -31,11 +31,19 @@ async function getApiKey (idKey) {
       }
     })
     if (!apiKey) return
+    apiKey = apiKey.toJSON()
+    apiKey.apiKeyId = apiKey.id
+    delete apiKey.id
   }
 
-  await redis.setex(redisKeyName, extApiConfig.tokenTimeout, JSON.stringify(apiKey))
+  await redis.set(
+    redisKeyName,
+    JSON.stringify(apiKey),
+    'px',
+    extApiConfig.tokenTimeout
+  )
 
-  return apiKey.toJSON()
+  return apiKey
 }
 
 module.exports.createKey = async (partnerId) => {
@@ -44,22 +52,11 @@ module.exports.createKey = async (partnerId) => {
   const secretKeyHashed = hash.hash(secretKey)
   const sharedKey = crypto.randomBytes(extApiConfig.sharedKeyLength).toString(extApiConfig.sharedKeyEncoding)
 
-  let apiKey = models.apiKey.build()
-
-  apiKey.idKey = idKey
-  apiKey.secretKey = secretKeyHashed
-  apiKey.sharedKey = sharedKey
-  apiKey.partnerId = partnerId
-
-  await apiKey.save()
-
   return {
-    id: apiKey.id,
     idKey: idKey,
     secretKey: secretKey,
     secretKeyHashed: secretKeyHashed,
-    sharedKey: sharedKey,
-    partnerId: partnerId
+    sharedKey: sharedKey
   }
 }
 

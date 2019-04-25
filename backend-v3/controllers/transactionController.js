@@ -5,6 +5,10 @@ const trxManager = require('../helpers/trxManager')
 
 const { body } = require('express-validator/check')
 
+const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
+const errorMiddleware = require('../middlewares/errorMiddleware')
+const queryMiddleware = require('../middlewares/queryMiddleware')
+
 const models = require('../models')
 const Sequelize = models.Sequelize
 const Op = Sequelize.Op
@@ -12,50 +16,7 @@ const Op = Sequelize.Op
 // const script = require('../helpers/script')
 
 /**
- * Helper function to do query to many transaction instance and
- * create appropriate express response
- */
-async function transactionsQueryAndResponse (req, res, query) {
-  if (req.params.transactionId) {
-    query.where.id = req.params.transactionId
-    let transaction = await models.transaction.scope('agent').findOne(query)
-
-    msgFactory.expressCreateResponse(
-      res,
-      transaction
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-      transaction
-    )
-  } else {
-    req.applyPaginationSequelize(query)
-    req.applyFiltersWhereSequelize(query)
-    let transactions = null
-    if (req.query.get_count) {
-      transactions = await models.transaction.scope('agent').findAndCountAll(query)
-      msgFactory.expressCreateResponse(
-        res,
-        transactions.rows.length > 0
-          ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-          : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-        transactions.rows,
-        msgFactory.createPaginationMeta(req.query.page, req.query.per_page, transactions.count)
-      )
-    } else {
-      transactions = await models.transaction.scope('agent').findAll(query)
-      msgFactory.expressCreateResponse(
-        res,
-        transactions.length > 0
-          ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-          : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-        transactions
-      )
-    }
-  }
-}
-
-/**
- * Validator for createTransaction
+ * Validator middleware(s) for createTransaction
  */
 module.exports.createTransactionValidator = [
   body('amount').isNumeric(),
@@ -74,10 +35,10 @@ module.exports.createTransaction = async (req, res, next) => {
   try {
     const createTrxResult = await trxManager.create(
       {
-        amount: req.body.amount,
-        paymentProviderId: req.body.paymentProviderId,
         agentId: req.auth.agentId,
         terminalId: req.auth.terminalId,
+        amount: req.body.amount,
+        paymentProviderId: req.body.paymentProviderId,
         ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
         locationLat: req.body.locationLat,
         locationLong: req.body.locationLong,
@@ -122,90 +83,91 @@ module.exports.createTransaction = async (req, res, next) => {
       createTrxResult
     )
   } catch (err) {
-    if (err.errorCode === trxManager.errorCodes.AMOUNT_TOO_LOW) {
+    let msgType = trxManager.errorToMsgTypes(err)
+    if (msgType) {
       msgFactory.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_LOW
-      )
-    } else if (err.errorCode === trxManager.errorCodes.AMOUNT_TOO_HIGH) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_AMOUNT_TOO_HIGH
-      )
-    } else if (err.errorCode === trxManager.errorCodes.NEED_USER_TOKEN) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_NEED_USER_TOKEN
-      )
-    } else if (err.errorCode === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_FOR_YOU) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_FOR_YOU
-      )
-    } else if (err.errorCode === trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING) {
-      msgFactory.expressCreateResponse(
-        res,
-        msgFactory.msgTypes.MSG_ERROR_PAYMENT_PROVIDER_NOT_RESPONDING
+        msgType
       )
     } else {
       console.error(err)
-      throw Error('Cannot handle trxManager error')
+      throw Error('Cannot handle createTransaction error')
     }
   }
 }
+
+/**
+ * All Middlewares for createTransaction
+ */
+module.exports.createTransactionMiddlewares = [
+  cipherboxMiddleware.processCipherbox,
+  module.exports.createTransactionValidator,
+  errorMiddleware.validatorErrorHandler,
+  module.exports.createTransaction
+]
 
 /**
  * Get one or many agent transactions of (via `req.auth.agentId`)
  */
 module.exports.getAgentTransactions = async (req, res, next) => {
-  return transactionsQueryAndResponse(req, res, {
+  let query = {
     where: {
       agentId: req.auth.agentId
     }
-  })
+  }
+
+  if (Object.keys(req.params).length) {
+    if (req.params.transactionId) {
+      query.where.id = req.params.transactionId
+    }
+    if (req.params.idAlias) {
+      query.where.idAlias = req.params.idAlias
+    }
+    let transaction = await models.transaction.scope('agent').findOne(query)
+    msgFactory.expressCreateResponse(
+      res,
+      transaction
+        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msgFactory.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+      transaction || undefined
+    )
+  } else {
+    req.applyPaginationSequelize(query)
+    req.applyFiltersWhereSequelize(query)
+    if (req.query.get_count) {
+      let transactions = await models.transaction.scope('agent').findAndCountAll(query)
+      msgFactory.expressCreateResponse(
+        res,
+        transactions.rows.length > 0
+          ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+          : msgFactory.msgTypes.MSG_SUCCESS_NO_ENTITY,
+        transactions.rows,
+        msgFactory.createPaginationMeta(req.query.page, req.query.per_page, transactions.count)
+      )
+    } else {
+      let transactions = await models.transaction.scope('agent').findAll(query)
+      msgFactory.expressCreateResponse(
+        res,
+        transactions.length > 0
+          ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+          : msgFactory.msgTypes.MSG_SUCCESS_NO_ENTITY,
+        transactions
+      )
+    }
+  }
 }
 
 /**
- * Get one or many merchant's transactions (via `req.auth.merchantId`)
+ * All Middlewares for getAgentTransactions
  */
-module.exports.getMerchantStaffTransactions = async (req, res, next) => {
-  let query = {
-    where: {},
-    attributes: { exclude: ['deletedAt'] },
-    include: [
-      {
-        model: models.agent,
-        where: {
-          merchantId: req.auth.merchantId
-        },
-        attributes: { exclude: [ 'createdAt', 'updatedAt', 'deletedAt' ] }
-      },
-      {
-        model: models.paymentProvider,
-        attributes: { exclude: [
-          'shareMerchantWithPartner',
-          'sharePartner',
-          'hidden',
-          'gateway',
-          'createdAt',
-          'updatedAt',
-          'deletedAt'
-        ] },
-        include: [
-          {
-            model: models.paymentProviderType,
-            attributes: { exclude: [ 'createdAt', 'updatedAt', 'deletedAt' ] }
-          },
-          {
-            model: models.paymentProviderConfig,
-            attributes: { exclude: ['config', 'createdAt', 'updatedAt', 'deletedAt'] }
-          }
-        ]
-      }
-    ]
-  }
-  return transactionsQueryAndResponse(req, res, query)
-}
+module.exports.getAgentTransactionsMiddlewares = [
+  queryMiddleware.paginationToSequelizeValidator('transaction'),
+  queryMiddleware.filtersToSequelizeValidator('transaction'),
+  errorMiddleware.validatorErrorHandler,
+  queryMiddleware.paginationToSequelize,
+  queryMiddleware.filtersToSequelize,
+  module.exports.getAgentTransactions
+]
 
 module.exports.getMerchantStaffTransactionsStatistic = async (req, res, next) => {
   let query = {

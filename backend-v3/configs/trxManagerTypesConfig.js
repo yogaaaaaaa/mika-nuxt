@@ -70,20 +70,19 @@ let baseConfig = {
   * Definition of extra flags
   */
   transactionFlags: {
-    NO_AMOUNT_CHECK: 'flagsNoAmountCheck'
   },
 
   /**
   * Shared error code used in trxManager function and
   * payment provider handler
   */
-  errorCodes: {
-    TRANSACTION_NOT_FOUND: 'trxManagerTransactionNotFound',
-    AGENT_NOT_FOUND: 'trxManagerAgentNotFound',
-    PAYMENT_PROVIDER_HANDLER_NOT_FOUND: 'trxManagerPpHandlerNotFound',
+  errorTypes: {
+    INVALID_TRANSACTION: 'trxManagerTransactionNotFound',
+    INVALID_AGENT: 'trxManagerAgentNotFound',
     AMOUNT_TOO_LOW: 'trxManagerAmountATooLow',
     AMOUNT_TOO_HIGH: 'trxManagerAmountATooHigh',
-    PAYMENT_PROVIDER_NOT_FOR_YOU: 'trxManagerUnregisteredPaymentProvider',
+    INVALID_PAYMENT_PROVIDER: 'trxManagerInvalidPaymentProvider',
+    INVALID_PAYMENT_PROVIDER_HANDLER: 'trxManagerPpHandlerNotFound',
     PAYMENT_PROVIDER_NOT_RESPONDING: 'trxManagerPaymentProviderNotResponding',
     NEED_EXTRA_CONFIG: 'trxManagerExtraConfigNeeded',
     NEED_USER_TOKEN: 'trxManagerUserTokenNeeded',

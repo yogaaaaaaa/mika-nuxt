@@ -22,7 +22,7 @@ module.exports.processCipherbox = async function (req, res, next) {
       }
     })
     if (cipherboxKey) {
-      debug.processCipherbox(`key id ${cipherboxKey.idKey}, unsealing`)
+      debug.processCipherbox(`key id ${cipherboxKey.idKey}, unboxing`)
       let keys = JSON.parse(cipherboxKey.keys)
       let unbox = null
 
@@ -38,7 +38,7 @@ module.exports.processCipherbox = async function (req, res, next) {
       }
 
       if (!unbox) {
-        debug.processCipherbox('unsealing failed')
+        debug.processCipherbox('unbox failed')
         msgFactory.expressCreateResponse(
           res,
           msgFactory.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
@@ -59,19 +59,19 @@ module.exports.processCipherbox = async function (req, res, next) {
         req.body = unbox.data.toString()
       }
 
-      debug.processCipherbox('unseal done')
+      debug.processCipherbox('unbox done')
 
       // Hijack send function
       let send = res.send
       res.send = (body) => {
-        debug.processCipherbox('sealing reply')
+        debug.processCipherbox('boxing reply')
         if (typeof body === 'object') {
           body = cipherbox.sealBoxWithCB0(JSON.stringify(body), unbox.key).box
         } else {
           body = cipherbox.sealBoxWithCB0(String(body), unbox.key).box
         }
 
-        debug.processCipherbox('sealing reply done')
+        debug.processCipherbox('box reply done')
 
         res.send = send
         return res.send(body)

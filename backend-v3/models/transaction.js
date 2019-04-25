@@ -88,20 +88,60 @@ module.exports = (sequelize, DataTypes) => {
         }
       ]
     }))
-
-    transaction.addScope('agentNotification', () => ({
-      attributes: { exclude: ['deletedAt'] },
+    transaction.addScope('partner', (partnerId, merchantId) => {
+      let whereMerchant = {}
+      if (partnerId) {
+        whereMerchant.partnerId = partnerId
+      }
+      if (merchantId) {
+        whereMerchant.id = merchantId
+      }
+      return {
+        attributes: { exclude: ['deletedAt'] },
+        include: [
+          {
+            model: models.paymentProvider,
+            include: [
+              models.paymentProviderType
+            ]
+          },
+          {
+            model: models.agent,
+            required: true,
+            include: [
+              {
+                model: models.merchant,
+                where: whereMerchant
+              }
+            ]
+          }
+        ]
+      }
+    })
+    transaction.addScope('validPartner', (partnerId) => ({
       include: [
         {
-          model: models.paymentProvider.scope(
-            'excludeShare',
-            'excludeExtra',
-            'excludeTimestamp'
-          ),
+          model: models.agent.scope('onlyId'),
           include: [
-            models.paymentProviderType.scope(
-              'excludeTimestamp'
-            )
+            {
+              model: models.merchant.scope('onlyId'),
+              where: { partnerId }
+            }
+          ]
+        }
+      ]
+    }))
+    transaction.addScope('trxManager', () => ({
+      include: [
+        {
+          model: models.agent,
+          include: [ models.merchant ]
+        },
+        {
+          model: models.paymentProvider,
+          include: [
+            models.paymentProviderType,
+            models.paymentProviderConfig
           ]
         }
       ]

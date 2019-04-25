@@ -42,7 +42,7 @@ module.exports.createCallback = async (idKey, url, body, callback = () => {}) =>
       return
     }
 
-    setTimeout(() => makeRequest(retryLeft - 1), extApiConfig.callBackDelaySecond)
+    setTimeout(() => makeRequest(retryLeft - 1), extApiConfig.callBackDelay)
   }
   makeRequest(extApiConfig.callBackRetryCount)
 }

@@ -26,7 +26,7 @@ module.exports = (trxManager) => {
       }, ctx.paymentProvider.paymentProviderConfig.config))
 
       if (!response) {
-        throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
       }
 
       for (let action of response.actions) {
@@ -46,7 +46,7 @@ module.exports = (trxManager) => {
       }, ctx.paymentProvider.paymentProviderConfig.config))
 
       if (!response) {
-        throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
       }
 
       if (

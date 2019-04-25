@@ -18,11 +18,11 @@ const paymentProviderController = require('../controllers/paymentProviderControl
 const authController = require('../controllers/authController')
 const utilitiesController = require('../controllers/utilitiesController')
 const terminalController = require('../controllers/terminalController')
+const partnerController = require('../controllers/partnerController')
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
-const queryMiddleware = require('../middlewares/queryMiddleware')
 
 const router = express.Router()
 
@@ -50,32 +50,20 @@ router.all('/',
  * Auth Endpoints
  */
 router.post('/auth/login',
-  cipherboxMiddleware.processCipherbox,
-  authController.loginValidator,
-  errorMiddleware.validatorErrorHandler,
-  authController.login
+  authController.loginMiddlewares
 )
 router.post('/auth/logout',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   authController.logout
 )
-router.post('/auth/logout_all',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
 router.post('/auth/check',
-  authController.sessionTokenCheckValidator,
-  errorMiddleware.validatorErrorHandler,
-  authController.sessionTokenCheck
+  authController.sessionTokenCheckMiddlewares
 )
 router.post('/auth/change_password',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  authController.changePasswordValidator,
-  errorMiddleware.validatorErrorHandler,
-  authController.changePassword
+  authController.changePasswordMiddlewares
 )
 
 /**
@@ -103,7 +91,7 @@ router.get('/files/:fileId',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   generalController.notImplemented)
-router.post('/resource',
+router.post('/resources',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   generalController.notImplemented)
@@ -125,29 +113,15 @@ router.get([ '/agent/payment_providers', '/agent/payment_providers/:paymentProvi
   authMiddleware.authErrorHandler,
   paymentProviderController.getAgentPaymentProviders
 )
-router.get([ '/agent/transactions', '/agent/transactions/:transactionId' ],
+router.get([ '/agent/transactions', '/agent/transactions/:transactionId', '/agent/transactions/by_alias/:idAlias' ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  queryMiddleware.paginationToSequelizeValidator('transaction'),
-  queryMiddleware.filtersToSequelizeValidator('transaction'),
-  errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
-  queryMiddleware.filtersToSequelize,
-  errorMiddleware.validatorErrorHandler,
-  transactionController.getAgentTransactions
+  transactionController.getAgentTransactionsMiddlewares
 )
-router.post('/agent/transaction',
+router.post(['/agent/transactions', '/agent/transaction'],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  cipherboxMiddleware.processCipherbox,
-  transactionController.createTransactionValidator,
-  errorMiddleware.validatorErrorHandler,
-  transactionController.createTransaction
-)
-router.post('/agent/transaction_follow_up',
-  authMiddleware.auth([auth.userTypes.AGENT]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  transactionController.createTransactionMiddlewares
 )
 
 /**
@@ -161,19 +135,12 @@ router.get('/merchant_staff',
 router.get(['/merchant_staff/transactions', '/merchant/transactions/:id'],
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
-  queryMiddleware.paginationToSequelizeValidator('transaction'),
-  queryMiddleware.filtersToSequelizeValidator('transaction'),
-  errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
-  queryMiddleware.filtersToSequelize,
-  errorMiddleware.validatorErrorHandler,
-  transactionController.getMerchantStaffTransactions
+  generalController.notImplemented
 )
 router.get('/merchant_staff/transactions_statistic',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
   authMiddleware.authErrorHandler,
-  queryMiddleware.filtersToSequelize,
-  transactionController.getMerchantStaffTransactionsStatistic
+  generalController.notImplemented
 )
 router.get('/merchant_staff/transactions_time_group',
   authMiddleware.auth([auth.userTypes.MERCHANT]),
@@ -184,12 +151,19 @@ router.get('/merchant_staff/transactions_time_group',
 /**
  * Logistic Administration related endpoints
  */
-router.get('/logistic/terminals/:terminalId/generate_cbkey',
+router.post('/logistic/terminals/:terminalId/generate_key',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_LOGISTIC]),
   authMiddleware.authErrorHandler,
-  terminalController.generateTerminalCbKeyValidator,
-  errorMiddleware.validatorErrorHandler,
-  terminalController.generateTerminalCbKey
+  terminalController.generateTerminalCbKeyMiddlewares
+)
+
+/**
+ * Marketing Administration related endpoints
+ */
+router.post('/marketing/partners/:partnerId/generate_apikey',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
+  authMiddleware.authErrorHandler,
+  partnerController.generatePartnerApiKeyMiddlewares
 )
 
 /**
@@ -198,9 +172,7 @@ router.get('/logistic/terminals/:terminalId/generate_cbkey',
 router.post('/hr/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
   authMiddleware.authErrorHandler,
-  authController.resetPasswordValidator,
-  errorMiddleware.validatorErrorHandler,
-  authController.resetPassword
+  authController.resetPasswordMiddlewares
 )
 
 router.use(errorMiddleware.notFoundErrorHandler)

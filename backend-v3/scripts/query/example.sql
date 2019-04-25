@@ -2,5 +2,5 @@ SELECT *
 FROM 
   `transaction`
 WHERE 
-  `transaction`.`transactionStatus` = ?
+  `transaction`.`status` = ?
 ORDER BY ?;

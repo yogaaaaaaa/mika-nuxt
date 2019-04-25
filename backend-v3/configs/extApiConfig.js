@@ -14,11 +14,11 @@ let baseConfig = {
   secretKeyLength: 12, // in bytes
   secretKeyEncoding: 'base64',
 
-  sharedKeyLength: '12', // in bytes
+  sharedKeyLength: 12, // in bytes
   sharedKeyEncoding: 'base64',
 
   callBackRetryCount: 10,
-  callBackDelaySecond: 5000
+  callBackDelay: 5000
 }
 
 /**

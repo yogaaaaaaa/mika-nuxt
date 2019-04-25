@@ -127,6 +127,14 @@ module.exports = (sequelize, DataTypes) => {
         'partnerId'
       ] }
     })
+    merchant.addScope('partner', (partnerId) => {
+      return {
+        attributes: { exclude: ['deletedAt'] },
+        where: {
+          partnerId
+        }
+      }
+    })
   }
 
   return merchant

@@ -14,7 +14,8 @@ let baseConfig = {
   ns: `${appConfig.redisPrefix}dtimer`,
   nodeName: null,
   confTimeout: 5,
-  maxEvents: 8
+  maxEvents: 8,
+  disabled: false
 }
 
 if (!baseConfig.nodename) {
@@ -36,5 +37,9 @@ try {
   baseConfig = Object.assign({}, baseConfig, extraConfig)
   console.log(`Config ${configName} is mixed`)
 } catch (error) { }
+
+if (baseConfig.disabled) {
+  console.log('dtimer is disabled')
+}
 
 module.exports = baseConfig

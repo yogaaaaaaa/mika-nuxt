@@ -2,7 +2,6 @@
 
 const msgFactory = require('../helpers/msgFactory')
 const auth = require('../helpers/auth')
-const extApiAuth = require('../helpers/extApiAuth')
 
 const appConfig = require('../configs/appConfig')
 
@@ -54,7 +53,7 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
  * Handle error when no authentication or incorrect user type
  */
 module.exports.authErrorHandler = async (req, res, next) => {
-  if (req.auth === null) {
+  if (!req.auth) {
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID
@@ -74,7 +73,7 @@ module.exports.authErrorHandler = async (req, res, next) => {
 }
 
 /**
- * Debug auth handler
+ * Debug authentication check
  */
 module.exports.debugAuth = async (req, res, next) => {
   req.auth = null
@@ -82,20 +81,4 @@ module.exports.debugAuth = async (req, res, next) => {
     req.auth = 'debug'
     next()
   }
-}
-
-/**
- * External api auth handler
- */
-module.exports.extApiAuth = async function (req, res, next) {
-  req.auth = null
-  try {
-    let authComponent = req.headers['authorization'].split(' ')
-    if (authComponent[0].toLowerCase() === 'bearer') {
-      req.apiAuth = await extApiAuth.verifyClientToken(authComponent[1])
-    }
-  } catch (err) {
-    console.error(err)
-  }
-  next()
 }

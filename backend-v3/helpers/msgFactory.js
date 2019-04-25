@@ -70,7 +70,7 @@ module.exports.createNotification = (
 }
 
 /**
- * Create meta object for pagination
+ * Create pagination meta object
  */
 module.exports.createPaginationMeta = (page, perPage, totalCount) => {
   return {

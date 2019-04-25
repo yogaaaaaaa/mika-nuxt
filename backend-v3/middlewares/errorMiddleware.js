@@ -41,12 +41,33 @@ module.exports.validatorErrorHandler = (req, res, next) => {
   if (validationErrors.length > 0) {
     msgFactory.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_BAD_REQUEST_VALIDATION,
+      msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION,
       validationErrors.map((data) => {
-        return `${data.msg} on ${data.location}.${data.param}`
+        if (data.msg === 'Invalid value') {
+          return `${data.msg} on ${data.location}.${data.param}`
+        } else {
+          return data.msg
+        }
       })
     )
     return
   }
   next()
+}
+
+/**
+ * Handle sequelize error, like `foreignKeyConstraint`
+ */
+module.exports.sequelizeErrorHandler = (err, req, res, next) => {
+  if (err.name === 'SequelizeForeignKeyConstraintError') {
+    if (Array.isArray(err.fields)) {
+      msgFactory.expressCreateResponse(
+        res,
+        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
+        err.fields.map((field) => `Invalid identifier ${field}`)
+      )
+    }
+  } else {
+    throw err
+  }
 }

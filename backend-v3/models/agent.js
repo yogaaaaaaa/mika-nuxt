@@ -43,6 +43,62 @@ module.exports = (sequelize, DataTypes) => {
         models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant')
       ]
     }))
+
+    agent.addScope('trxManager', (paymentProviderId) => ({
+      attributes: { exclude: ['deletedAt'] },
+      include: [
+        {
+          model: models.merchant
+        },
+        {
+          model: models.paymentProvider,
+          where: paymentProviderId ? { id: paymentProviderId } : undefined,
+          include: [
+            models.paymentProviderType,
+            models.paymentProviderConfig
+          ]
+        }
+      ]
+    }))
+
+    agent.addScope('partner', (partnerId, merchantId) => {
+      let whereMerchant = {}
+
+      if (partnerId) {
+        whereMerchant.partnerId = partnerId
+      }
+
+      if (merchantId) {
+        whereMerchant.id = merchantId
+      }
+
+      return {
+        attributes: { exclude: ['deletedAt'] },
+        include: [
+          {
+            model: models.paymentProvider,
+            include: [
+              models.paymentProviderType
+            ]
+          },
+          {
+            model: models.merchant,
+            where: whereMerchant
+          }
+        ]
+      }
+    })
+
+    agent.addScope('validPartner', (partnerId) => ({
+      include: [
+        {
+          model: models.merchant.scope('onlyId'),
+          where: {
+            partnerId
+          }
+        }
+      ]
+    }))
   }
 
   return agent

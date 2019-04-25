@@ -20,10 +20,10 @@ router.use(bodyParser.json())
 router.use(authMiddleware.debugAuth)
 router.use(authMiddleware.authErrorHandler)
 
+router.all('/echo', debugController.echo)
+router.post('/transaction/:transactionId/status/:transactionStatus', debugController.changeTransactionStatus)
 router.post('/midtrans/transaction', midtransDebugController.queryTransaction)
 router.post('/alto/transaction', altoDebugController.queryTransaction)
-router.post('/transaction/:transactionId/status/:transactionStatus', debugController.changeTransactionStatus)
-router.all('/echo', debugController.echoCipherbox)
 
 router.use(errorMiddleware.notFoundErrorHandler)
 router.use(errorMiddleware.errorHandler)

@@ -1,5 +1,8 @@
 'use strict'
 
+const errorMiddleware = require('../middlewares/errorMiddleware')
+const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
+
 const msgFactory = require('../helpers/msgFactory')
 const auth = require('../helpers/auth')
 
@@ -54,6 +57,16 @@ module.exports.login = async (req, res, next) => {
 }
 
 /**
+ * All Middlewares for createTransaction
+ */
+module.exports.loginMiddlewares = [
+  cipherboxMiddleware.processCipherbox,
+  exports.loginValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.login
+]
+
+/**
  * Logout user
  */
 module.exports.logout = async (req, res, next) => {
@@ -63,13 +76,6 @@ module.exports.logout = async (req, res, next) => {
       msgFactory.msgTypes.MSG_SUCCESS_AUTH_LOGOUT
     )
   }
-}
-
-/**
- * Logout ALL user
- */
-module.exports.logoutAll = async (req, res, next) => {
-
 }
 
 module.exports.sessionTokenCheckValidator = [
@@ -94,6 +100,15 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
     )
   }
 }
+
+/**
+ * All Middlewares for createTransaction
+ */
+module.exports.sessionTokenCheckMiddlewares = [
+  exports.sessionTokenCheckValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.sessionTokenCheck
+]
 
 /**
  * Validator for changePassword controller
@@ -122,6 +137,15 @@ module.exports.changePassword = async (req, res, next) => {
 }
 
 /**
+ * All Middlewares for changePassword
+ */
+module.exports.changePasswordMiddlewares = [
+  exports.changePasswordValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.changePassword
+]
+
+/**
  * Validator for resetPassword controller
  */
 module.exports.resetPasswordValidator = [
@@ -140,3 +164,9 @@ module.exports.resetPassword = async (req, res, next) => {
     )
   }
 }
+
+module.exports.resetPasswordMiddlewares = [
+  exports.resetPasswordValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.resetPassword
+]

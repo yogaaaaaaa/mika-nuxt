@@ -7,54 +7,52 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const { body } = require('express-validator/check')
 const router = express.Router()
 
 const extApiAuthMiddleware = require('../middlewares/extApiAuthMiddleware')
+const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const extApiController = require('../controllers/extApiController')
-const generalController = require('../controllers/generalController')
 
 router.use(bodyParser.json())
 
-router.use(extApiAuthMiddleware.apiAuth)
-router.use(extApiAuthMiddleware.apiAuthErrorHandler)
+router.use(extApiAuthMiddleware.extApiAuth)
+router.use(authMiddleware.authErrorHandler)
 
 router.get('/',
   extApiController.getRoot
 )
-
-router.get('/transactions/:transactionId',
-  extApiController.getTransactionById
+router.post(
+  [
+    '/transactions',
+    '/transaction'
+  ],
+  extApiController.createTransactionMiddlewares
 )
-router.get('/agents/:agentId/transactions',
-  extApiController.getTransactionsByAgent
+router.get(
+  [
+    '/transactions',
+    '/transactions/:transactionId',
+    '/agents/:agentId/transactions',
+    '/merchants/:merchantId/transactions'
+  ],
+  extApiController.getTransactionsMiddlewares
 )
-router.get('/agents/:agentId',
-  extApiAuthMiddleware.checkIfAgentIdValidInParams,
-  extApiAuthMiddleware.invalidAgentIdHandler,
-  extApiController.getAgentsById
+router.get(
+  [
+    '/agents',
+    '/agents/:agentId',
+    '/merchants/:merchantId/agents'
+  ],
+  extApiController.getAgentsMiddlewares
 )
-router.get('/agents',
-  extApiController.getAgents
-)
-
-router.get('/transactions',
-  generalController.notImplemented
-)
-router.post('/transaction',
-  extApiAuthMiddleware.checkIfAgentIdValidInBody,
-  extApiAuthMiddleware.invalidAgentIdHandler,
-  body('agentId').exists(),
-  body('paymentGatewayId').exists(),
-  body('amount').isNumeric(),
-  body('webhookUrl').optional().isURL({
-    protocols: ['https', 'http'],
-    require_tld: false
-  }),
-  errorMiddleware.validatorErrorHandler,
-  extApiController.postTransaction
+router.get(
+  [
+    '/merchants',
+    '/merchants/:merchantId'
+  ],
+  extApiController.getMerchantsMiddlewares
 )
 
 /**
@@ -62,8 +60,6 @@ router.post('/transaction',
  */
 if (process.env.NODE_ENV === 'development') {
   router.post('/debug/transaction/:transactionId/status/:transactionStatus',
-    extApiAuthMiddleware.checkIfTransactionIdValidInParams,
-    extApiAuthMiddleware.invalidTransactionIdHandler,
     extApiController.debugSetTransactionStatus
   )
 }

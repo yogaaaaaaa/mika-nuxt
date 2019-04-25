@@ -33,6 +33,7 @@ dtimer
 module.exports.dtimer = dtimer
 
 module.exports.handleEvent = async (callback) => {
+  if (config.disabled) return
   dtimer.on('event', async (ev) => {
     if (await callback(ev)) return
     await dtimer.confirm(ev.id)
@@ -40,6 +41,7 @@ module.exports.handleEvent = async (callback) => {
 }
 
 module.exports.postEvent = async (eventObject = {}, delay = 0, maxRetries = 3) => {
+  if (config.disabled) return
   eventObject.maxRetries = maxRetries
   await dtimer.post(eventObject, delay)
 }

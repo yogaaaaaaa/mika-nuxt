@@ -42,7 +42,7 @@ if (process.env.NODE_ENV === 'development') {
 /**
  * External/Public API
  */
-// app.use('/mika', require('./routes/extApi'))
+app.use('/mika', require('./routes/extApi'))
 
 /**
  * Internal API

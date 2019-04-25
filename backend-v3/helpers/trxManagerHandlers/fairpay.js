@@ -21,7 +21,7 @@ module.exports = (trxManager) => {
       ]
     },
     handler: async (ctx) => {
-      if (!ctx.transaction.userToken) throw trxManager.error(trxManager.errorCodes.NEED_USER_TOKEN)
+      if (!ctx.transaction.userToken) throw trxManager.error(trxManager.errorTypes.NEED_USER_TOKEN)
 
       let fpCtx = fairpay.mixConfig(Object.assign(
         {
@@ -40,7 +40,7 @@ module.exports = (trxManager) => {
       if (fpCtx.cardTypesOnly) {
         await fairpay.processAuthAndApi(fairpay.apiDebitCreditCheck, fpCtx)
         if (!fpCtx.cardTypesOnly.includes(fpCtx.cardType)) {
-          throw trxManager.error(trxManager.errorCodes.INVALID_USER_TOKEN)
+          throw trxManager.error(trxManager.errorTypes.INVALID_USER_TOKEN)
         }
       }
 
@@ -58,7 +58,7 @@ module.exports = (trxManager) => {
         // TODO: rollback need to decided when saving signature fail
         await fairpay.apiSaveSignature(fpCtx)
       } else {
-        throw trxManager.error(trxManager.errorCodes.PAYMENT_PROVIDER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
       }
     }
   })

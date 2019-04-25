@@ -35,9 +35,9 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true
       },
-      terminalStatus: {
+      status: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.CHAR(32)
       },
 
       terminalModelId: {

@@ -1,237 +1,87 @@
 'use strict'
 
-/**
- * Providing various constant and function
- * to generate and map Public API Object, e.g transaction, agent, etc
- */
+module.exports.mapTransaction = (transaction) => {
+  if (!transaction) return
 
-const models = require('../models')
-const Op = require('sequelize').Op
+  let mappedTransaction = {}
 
-async function agentsIdOfMerchantIds (merchantIds) {
-  const agentsData = await models.terminal.findAll({
-    raw: true,
-    where: { userId: { [Op.or]: merchantIds } },
-    attributes: ['id']
-  })
+  mappedTransaction.transactionId = transaction.id
 
-  if (agentsData) {
-    let agentsId = []
-    for (let agentData of agentsData) {
-      agentsId.push(agentData.id)
-    }
-    return agentsId
-  } else {
-    return []
-  }
+  mappedTransaction.agent = {}
+  mappedTransaction.agent.agentId = String(transaction.agentId)
+  mappedTransaction.agent.agentName = transaction.agent.name
+
+  mappedTransaction.merchant = {}
+  mappedTransaction.merchant.merchantId = String(transaction.agent.merchantId)
+  mappedTransaction.merchant.merchantName = transaction.agent.merchant.name
+
+  mappedTransaction.paymentProvider = {}
+  mappedTransaction.paymentProvider.paymentProviderId = String(transaction.paymentProviderId)
+  mappedTransaction.paymentProvider.paymentProviderName = transaction.paymentProvider.paymentProviderType.name
+  mappedTransaction.paymentProvider.minimumAmount = transaction.paymentProvider.minimumAmount
+
+  mappedTransaction.transactionStatus = transaction.status
+  mappedTransaction.token = transaction.token
+  mappedTransaction.tokenType = transaction.tokenType
+  mappedTransaction.amount = transaction.amount
+
+  mappedTransaction.createdAt = transaction.createdAt
+  mappedTransaction.updatedAt = transaction.updatedAt
+
+  return mappedTransaction
 }
 
-module.exports.mapTransactionObject = (transactionData) => {
-  let transactionObject = {}
+module.exports.mapCreatedTransaction = (trxCreateResult) => {
+  if (!trxCreateResult) return
 
-  transactionObject.transactionId = String(transactionData.id)
+  let mappedTrxCreateResult = {}
 
-  transactionObject.agent = {}
-  transactionObject.agent.agentId = String(transactionData.terminal.id)
-  transactionObject.agent.agentName = transactionData.terminal.fullname
+  mappedTrxCreateResult.transactionId = trxCreateResult.transactionId
+  mappedTrxCreateResult.agentId = String(trxCreateResult.agentId)
+  mappedTrxCreateResult.transactionStatus = trxCreateResult.transactionStatus
 
-  transactionObject.paymentGateway = {}
-  transactionObject.paymentGateway.paymentGatewayId = String(transactionData.payment_gateway.id)
-  transactionObject.paymentGateway.paymentGatewayName = transactionData.payment_gateway.name
-  transactionObject.paymentGateway.minimumAmount = transactionData.payment_gateway.minimum_transaction
-
-  transactionObject.transactionStatus = transactionData.transaction_status.name.toLowerCase()
-  transactionObject.token = transactionData.qrcode || transactionData.midtrans_qrcode
-  transactionObject.amount = parseInt(transactionData.amount)
-
-  transactionObject.createdAt = transactionData.created_at
-
-  if (transactionData.updated_at) {
-    transactionObject.updatedAt = transactionData.updated_at
+  if (trxCreateResult.tokenType && trxCreateResult.token) {
+    mappedTrxCreateResult.tokenType = trxCreateResult.tokenType
+    mappedTrxCreateResult.token = trxCreateResult.token
   }
 
-  return transactionObject
+  mappedTrxCreateResult.amount = trxCreateResult.amount
+  mappedTrxCreateResult.createdAt = trxCreateResult.createdAt
+
+  return mappedTrxCreateResult
 }
 
-module.exports.mapCreatedTransactionObject = (createdTransaction) => {
-  let createdTransactionObject = {}
+module.exports.mapAgent = (agent) => {
+  if (!agent) return
 
-  createdTransactionObject.transactionId = String(createdTransaction.transactionData.id)
+  let mappedAgent = {}
 
-  createdTransactionObject.agentId = String(createdTransaction.transactionData.terminalId)
+  mappedAgent.agentId = String(agent.id)
+  mappedAgent.agentName = agent.name
 
-  createdTransactionObject.tokenType = createdTransaction.type
-  createdTransactionObject.token = createdTransaction.token
-  createdTransactionObject.amount = parseInt(createdTransaction.transactionData.amount)
+  mappedAgent.merchant = {}
+  mappedAgent.merchant.merchantId = String(agent.merchantId)
+  mappedAgent.merchant.merchantName = agent.merchant.name
 
-  createdTransactionObject.createdAt = createdTransaction.transactionData.created_at
-
-  return createdTransactionObject
-}
-
-module.exports.mapAgentObject = (terminalData) => {
-  let agentObject = {}
-
-  agentObject.agentId = String(terminalData.id)
-  agentObject.agentName = terminalData.fullname
-  agentObject.merchantId = terminalData.user.id
-
-  agentObject.paymentGateways = []
-  for (let pg of terminalData.user.merchant_payment_gateways) {
-    agentObject.paymentGateways.push({
-      paymentGatewayId: String(pg.payment_gateway.id),
-      paymentGatewayName: pg.payment_gateway.name.toLowerCase(),
-      minimumAmount: pg.payment_gateway.minimum_transaction
+  mappedAgent.paymentProviders = []
+  for (let paymentProvider of agent.paymentProviders) {
+    mappedAgent.paymentProviders.push({
+      paymentProviderId: String(paymentProvider.id),
+      paymentProviderName: paymentProvider.paymentProviderType.name,
+      minimumAmount: paymentProvider.minimumAmount,
+      maximumAmount: paymentProvider.maximumAmount
     })
   }
 
-  return agentObject
+  return mappedAgent
 }
 
-module.exports.generateTransactionObject = async (transactionId, validMerchantsIds = null) => {
-  const transactionData = await models.transaction.findOne({
-    where: {
-      id: transactionId
-    },
-    include: [
-      models.terminal, models.payment_gateway, models.transaction_status
-    ]
-  })
+module.exports.mapMerchant = (merchant) => {
+  if (!merchant) return
+  let mappedMerchant = {}
 
-  if (transactionData) {
-    if (Array.isArray(validMerchantsIds)) {
-      if (!(validMerchantsIds.includes(transactionData.terminal.userId) && validMerchantsIds.length > 0)) {
-        return null
-      }
-    }
+  mappedMerchant.merchantId = merchant.id
+  mappedMerchant.merchantName = merchant.name
 
-    return exports.mapTransactionObject(transactionData)
-  } else {
-    return null
-  }
-}
-
-module.exports.generateTransactionObjectsByAgentId = async (agentId, page = 1, limit = 100) => {
-  const transactionsData = await models.transaction.findAll({
-    where: { terminalId: agentId },
-    include: [
-      models.terminal, models.payment_gateway, models.transaction_status
-    ],
-    offset: (page - 1) * limit,
-    limit: limit
-  })
-
-  if (transactionsData) {
-    let transactionsObject = []
-
-    for (let transactionData of transactionsData) {
-      transactionsObject.push(exports.mapTransactionObject(transactionData))
-    }
-
-    return transactionsObject
-  } else {
-    return null
-  }
-}
-
-module.exports.generateTransactionObjectsByMerchantIds = async (merchantIds, page = 1, limit = 100) => {
-  let agentIds = null
-
-  if (Array.isArray(merchantIds)) {
-    if (merchantIds.length === 0) {
-      agentIds = [-1]
-    } else {
-      agentIds = await agentsIdOfMerchantIds(merchantIds)
-    }
-  }
-
-  const transactionsData = await models.transaction.findAll({
-    where: { terminalId: { [Op.or]: agentIds } },
-    include: [
-      models.terminal, models.payment_gateway, models.transaction_status
-    ],
-    offset: (page - 1) * limit,
-    limit: limit
-  })
-
-  if (transactionsData) {
-    let transactionsObject = []
-
-    for (let transactionData of transactionsData) {
-      transactionsObject.push(exports.mapTransactionObject(transactionData))
-    }
-
-    return transactionsObject
-  } else {
-    return null
-  }
-}
-
-module.exports.generateAgentObject = async (agentId, validMerchantsIds = null) => {
-  const terminalData = await models.terminal.findOne({
-    where: { id: agentId },
-    include: [ {
-      model: models.user,
-      include: [
-        {
-          model: models.merchant_payment_gateway,
-          include: [
-            {
-              model: models.payment_gateway
-            }
-          ]
-        }
-      ]
-    }]
-  })
-
-  if (terminalData) {
-    if (Array.isArray(validMerchantsIds)) {
-      if (!(validMerchantsIds.includes(terminalData.user.id) && validMerchantsIds.length > 0)) {
-        return null
-      }
-    }
-
-    return exports.mapAgentObject(terminalData)
-  } else {
-    return null
-  }
-}
-
-module.exports.generateAgentObjectsByMerchantIds = async (merchantIds, page = 1, limit = 100) => {
-  if (Array.isArray(merchantIds)) {
-    if (merchantIds.length === 0) {
-      merchantIds = [-1]
-    }
-  }
-
-  const terminalsData = await models.terminal.findAll({
-    where: { userId: { [Op.or]: merchantIds } },
-    include: [ {
-      model: models.user,
-      include: [
-        {
-          model: models.merchant_payment_gateway,
-          include: [
-            {
-              model: models.payment_gateway
-            }
-          ]
-        }
-      ]
-    }],
-    offset: (page - 1) * limit,
-    limit: limit
-  })
-
-  if (terminalsData) {
-    let terminalsObject = []
-
-    for (let terminalData of terminalsData) {
-      terminalsObject.push(exports.mapAgentObject(terminalData))
-    }
-    return terminalsObject
-  } else {
-    return []
-  }
+  return mappedMerchant
 }
