@@ -5,7 +5,6 @@
  */
 
 const redis = require('./redis')
-const hash = require('./hash')
 const models = require('../models')
 const jwt = require('jsonwebtoken')
 
@@ -29,15 +28,15 @@ module.exports.userRoles = {
   ADMIN_LOGISTIC: 'adminLogistic'
 }
 
-function redisKey (key) {
-  return `auth:${key}`
+function redisKey (...keys) {
+  return `auth:${keys.reduce((acc, key) => `${acc}:${key}`)}`
 }
 
-module.exports.setSessionToken = async (userId, sessionKey, expirySecond) => {
+module.exports.setSessionToken = async (userId, sessionToken, expirySecond) => {
   return redis.setex(
     redisKey(userId),
     expirySecond,
-    sessionKey
+    sessionToken
   )
 }
 
@@ -79,14 +78,12 @@ module.exports.doAuth = async function (username, password, options = {}) {
   }
 
   let user = await models.user.findOne({
-    where: {
-      username: username
-    }
+    where: { username: username }
   })
 
   if (!user) return
 
-  if (!await hash.compareBcryptHash(user.password, password)) return
+  if (!await user.checkPassword(password)) return
 
   if (Array.isArray(options.userTypes)) {
     if (!options.userTypes.includes(user.userType)) return
@@ -97,52 +94,10 @@ module.exports.doAuth = async function (username, password, options = {}) {
       userId: user.id,
       username: user.username,
       userType: null,
-      userRoles: typeof user.userRoles === 'string' ? user.userRoles.split(',') : []
+      userRoles: user.userRoles
     },
     sessionToken: null,
     authExpirySecond: appConfig.authExpirySecond
-  }
-
-  if (user.userType === exports.userTypes.ADMIN) {
-    let admin = await models.admin.findOne({
-      where: {
-        userId: user.id
-      },
-      attributes: ['id']
-    })
-
-    if (admin) {
-      authResult.auth.userType = exports.userTypes.ADMIN
-      authResult.auth.adminId = admin.id
-    }
-  }
-
-  if (user.userType === exports.userTypes.MERCHANT) {
-    let merchant = await models.merchant.findOne({
-      where: {
-        userId: user.id
-      },
-      attributes: ['id']
-    })
-
-    if (merchant) {
-      authResult.auth.userType = exports.userTypes.MERCHANT
-      authResult.auth.merchantId = merchant.id
-    }
-  }
-
-  if (user.userType === exports.userTypes.MERCHANT_STAFF) {
-    let merchantStaff = await models.merchantStaff.findOne({
-      where: {
-        userId: user.id
-      },
-      attributes: ['id']
-    })
-
-    if (merchantStaff) {
-      authResult.auth.userType = exports.userTypes.MERCHANT_STAFF
-      authResult.auth.merchantStaffId = merchantStaff.id
-    }
   }
 
   if (user.userType === exports.userTypes.AGENT) {
@@ -169,6 +124,34 @@ module.exports.doAuth = async function (username, password, options = {}) {
         authResult.auth.terminalId = agentTerminal.terminalId
       }
       authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
+    }
+  }
+
+  if (user.userType === exports.userTypes.ADMIN) {
+    let admin = await models.admin.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id']
+    })
+
+    if (admin) {
+      authResult.auth.userType = exports.userTypes.ADMIN
+      authResult.auth.adminId = admin.id
+    }
+  }
+
+  if (user.userType === exports.userTypes.MERCHANT_STAFF) {
+    let merchantStaff = await models.merchantStaff.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id']
+    })
+
+    if (merchantStaff) {
+      authResult.auth.userType = exports.userTypes.MERCHANT_STAFF
+      authResult.auth.merchantStaffId = merchantStaff.id
     }
   }
 
@@ -217,28 +200,15 @@ module.exports.removeAuth = async (sessionToken) => {
 /**
  * Change/reset current user password
  */
-module.exports.resetAuth = async (userId, password, oldPassword = null) => {
-  let user = await models.user.findOne({
-    where: {
-      id: userId
-    }
-  })
+module.exports.changePassword = async (userId, password, oldPassword = null) => {
+  let user = await models.user.findByPk(userId)
 
   if (user) {
     if (oldPassword) {
-      if (!await hash.compareBcryptHash(user.password, oldPassword)) {
-        return false
-      }
+      if (!await user.checkPassword(oldPassword)) return
     }
-
-    let updated = await models.user.update(
-      { password: await hash.bcryptHash(password) },
-      { where: { id: userId } }
-    )
-
-    if (updated) {
-      await exports.removeAuth(userId)
-      return true
-    }
+    user.password = password
+    await user.save()
+    return user
   }
 }

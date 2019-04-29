@@ -25,8 +25,8 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
   req.auth = null
   req.sessionToken = null
 
-  if (req.headers[appConfig.sessionTokenHeader]) {
-    req.sessionToken = req.headers[appConfig.sessionTokenHeader]
+  if (req.headers[appConfig.authSessionTokenHeader]) {
+    req.sessionToken = req.headers[appConfig.authSessionTokenHeader]
   } else if (req.headers['authorization']) {
     let authComponent = req.headers['authorization'].split(' ')
     if (authComponent[0].toLowerCase() === 'bearer') {
@@ -77,7 +77,7 @@ module.exports.authErrorHandler = async (req, res, next) => {
  */
 module.exports.debugAuth = async (req, res, next) => {
   req.auth = null
-  if (req.headers[appConfig.debugHeader] === appConfig.debugKey) {
+  if (req.headers[appConfig.debugKeyHeader] === appConfig.debugKey) {
     req.auth = 'debug'
     next()
   }

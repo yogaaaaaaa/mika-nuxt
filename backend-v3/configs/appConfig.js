@@ -18,9 +18,8 @@ let baseConfig = {
   httpListenPort: process.env.MIKA_PORT || 12000,
 
   baseUrl: process.env.MIKA_BASE_URL || (process.env.NODE_ENV === 'development' ? 'https://stg12api.mikaapp.id' : 'https://api.mikaapp.id'),
-  debugHeader: 'x-mika-debug',
+  debugKeyHeader: 'x-mika-debug',
   debugKey: process.env.MIKA_DEBUG_KEY || '1K24vDZGaGmJGCTTVIRyLxPPiHY',
-  sessionTokenHeader: 'x-access-token',
 
   workDir: process.env.MIKA_WORK_DIR || path.dirname(require.main.filename),
   uploadDir: null,
@@ -30,8 +29,10 @@ let baseConfig = {
 
   transactionTimeoutSecond: 200,
 
-  authExpirySecond: process.env.MIKA_API_AUTH_EXPIRY || 21600,
+  authSessionTokenHeader: 'x-access-token',
   authSecretKey: process.env.MIKA_AUTH_SECRET_KEY || 'mika_secret_key',
+  authExpirySecond: process.env.MIKA_API_AUTH_EXPIRY || 21600,
+  authSessionLimit: 5,
 
   redisUrls: process.env.MIKA_REDIS_URLS || 'redis://localhost',
   redisPrefix: process.env.MIKA_REDIS_PREFIX || null,

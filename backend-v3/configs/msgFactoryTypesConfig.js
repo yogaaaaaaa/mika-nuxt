@@ -92,10 +92,10 @@ let baseConfig = {
       status: 'ent-203',
       message: 'Entity(s) deleted'
     },
-    MSG_SUCCESS_DELETED_SOFT: {
+    MSG_SUCCESS_ENTITY_RESTORED: {
       httpStatus: 201,
       status: 'ent-204',
-      message: 'Entity(s) is mark as deleted'
+      message: 'Entity(s) restored'
     },
     // NOTE: Created to be compatible with HTTP REST Style when single resource not found
     MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND: {
@@ -188,7 +188,7 @@ let baseConfig = {
     MSG_ERROR_TRANSACTION_INVALID_PAYMENT_PROVIDER: {
       httpStatus: 400,
       status: 'trx-400',
-      message: 'Cannot use this payment provider'
+      message: 'Invalid payment provider'
     },
     MSG_ERROR_TRANSACTION_NEED_USER_TOKEN: {
       httpStatus: 400,

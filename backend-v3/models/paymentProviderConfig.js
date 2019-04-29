@@ -19,9 +19,9 @@ module.exports = (sequelize, DataTypes) => {
           return JSON.parse(this.getDataValue('config'))
         } catch (error) {}
       },
-      set (value) {
-        if (typeof value === 'object') {
-          this.setDataValue('config', JSON.stringify(value))
+      set (val) {
+        if (typeof val === 'object') {
+          this.setDataValue('config', JSON.stringify(val))
         }
       }
     },

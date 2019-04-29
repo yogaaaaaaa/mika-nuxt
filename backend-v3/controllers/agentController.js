@@ -11,11 +11,13 @@ module.exports.getAgent = async (req, res, next) => {
     .scope('agent')
     .findByPk(req.auth.agentId)
 
-  msgFactory.expressCreateResponse(
-    res,
-    agent
-      ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-      : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-    agent
-  )
+  if (agent) {
+    msgFactory.expressCreateResponse(
+      res,
+      msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND,
+      agent
+    )
+  } else {
+    throw Error('Agent should be exist')
+  }
 }

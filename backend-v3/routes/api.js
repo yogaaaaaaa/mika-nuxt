@@ -69,11 +69,6 @@ router.post('/auth/change_password',
 /**
  * General utilities endpoints
  */
-router.post('/utilities/emv/bin_check',
-  authMiddleware.auth(),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented
-)
 router.get('/utilities/types',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,

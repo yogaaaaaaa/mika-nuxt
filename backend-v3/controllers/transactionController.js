@@ -116,7 +116,7 @@ module.exports.getAgentTransactions = async (req, res, next) => {
     }
   }
 
-  if (Object.keys(req.params).length) {
+  if (Object.keys(req.params).some(key => req.params[key])) {
     if (req.params.transactionId) {
       query.where.id = req.params.transactionId
     }

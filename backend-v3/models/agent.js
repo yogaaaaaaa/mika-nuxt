@@ -52,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
           model: models.paymentProvider,
+          required: false,
           where: paymentProviderId ? { id: paymentProviderId } : undefined,
           include: [
             models.paymentProviderType,

@@ -5,7 +5,7 @@
  */
 
 const crypto = require('crypto')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 
 module.exports.hash = (data) => {
   return crypto.createHash('sha256').update(data).digest('hex')

@@ -122,7 +122,8 @@ module.exports.changePasswordValidator = [
  * Change password based on current `req.auth`
  */
 module.exports.changePassword = async (req, res, next) => {
-  if (await auth.resetAuth(req.auth.userId, req.body.password, req.body.oldPassword)) {
+  if (await auth.changePassword(req.auth.userId, req.body.password, req.body.oldPassword)) {
+    await auth.removeAuth(req.sessionToken)
     msgFactory.expressCreateResponse(
       res,
       msgFactory.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
