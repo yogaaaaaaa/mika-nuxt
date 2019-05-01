@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   user.associate = (models) => {
-    user.addScope('noPassword', {
+    user.addScope('excludePassword', {
       attributes: { exclude: ['password'] }
     })
   }

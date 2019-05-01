@@ -34,7 +34,6 @@ module.exports.createTransactionValidator = [
 
 module.exports.createTransaction = async (req, res, next) => {
   if (!await models.agent.scope(
-    'onlyId',
     { method: ['validPartner', req.auth.partnerId] }
   ).findByPk(req.body.agentId)) {
     msgFactory.expressCreateResponse(

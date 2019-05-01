@@ -56,6 +56,14 @@ module.exports = {
           key: 'id'
         }
       },
+      outletId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'outlet',
+          key: 'id'
+        }
+      },
       merchantId: {
         type: Sequelize.INTEGER,
         references: {

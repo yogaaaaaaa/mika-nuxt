@@ -45,7 +45,6 @@ module.exports = (sequelize, DataTypes) => {
     }))
 
     agent.addScope('trxManager', (paymentProviderId) => ({
-      attributes: { exclude: ['deletedAt'] },
       include: [
         {
           model: models.merchant
@@ -74,7 +73,6 @@ module.exports = (sequelize, DataTypes) => {
       }
 
       return {
-        attributes: { exclude: ['deletedAt'] },
         include: [
           {
             model: models.paymentProvider,
@@ -91,6 +89,7 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     agent.addScope('validPartner', (partnerId) => ({
+      attributes: ['id'],
       include: [
         {
           model: models.merchant.scope('onlyId'),

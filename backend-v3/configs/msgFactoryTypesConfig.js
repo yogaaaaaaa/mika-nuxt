@@ -60,6 +60,12 @@ let baseConfig = {
       status: 'sys-402',
       message: 'Bad request, invalid identifier error'
     },
+    MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT: {
+      isError: true,
+      httpStatus: 409,
+      status: 'sys-403',
+      message: 'Bad request, unique constraint error'
+    },
     MSG_ERROR_NOT_FOUND: {
       isError: true,
       httpStatus: 404,

@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
 
   admin.associate = (models) => {
     admin.belongsTo(models.user, { foreignKey: 'userId' })
+
+    admin.addScope('admin', () => ({
+      include: [ models.user.scope('excludePassword') ]
+    }))
   }
 
   return admin

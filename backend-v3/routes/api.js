@@ -19,6 +19,7 @@ const authController = require('../controllers/authController')
 const utilitiesController = require('../controllers/utilitiesController')
 const terminalController = require('../controllers/terminalController')
 const partnerController = require('../controllers/partnerController')
+const adminController = require('../controllers/adminController')
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const authMiddleware = require('../middlewares/authMiddleware')
@@ -164,10 +165,20 @@ router.post('/marketing/partners/:partnerId/generate_apikey',
 /**
  * Human Resource Administration related endpoints
  */
-router.post('/hr/reset_password',
+router.post('/hr/admins',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
   authMiddleware.authErrorHandler,
-  authController.resetPasswordMiddlewares
+  adminController.createAdminMiddlewares
+)
+router.get(['/hr/admins', '/hr/admins/:adminId'],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
+  authMiddleware.authErrorHandler,
+  adminController.getAdminsMiddlewares
+)
+router.put(['/hr/admins/:adminId'],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
+  authMiddleware.authErrorHandler,
+  adminController.updateAdminMiddlewares
 )
 
 router.use(errorMiddleware.notFoundErrorHandler)

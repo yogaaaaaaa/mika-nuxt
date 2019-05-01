@@ -41,14 +41,11 @@ Object.keys(models).forEach(modelName => {
     /**
      * Add default scopes to all models
      */
-    models[modelName].addScope('defaultScope', {
-      attributes: { exclude: ['deletedAt'] }
+    models[modelName].addScope('excludeDeletedAt', {
+      attributes: ['createdAt', 'updatedAt']
     })
     models[modelName].addScope('excludeTimestamp', {
       attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }
-    })
-    models[modelName].addScope('onlyTimestamp', {
-      attributes: ['createdAt', 'updatedAt']
     })
     models[modelName].addScope('excludeId', {
       attributes: { exclude: ['id'] }

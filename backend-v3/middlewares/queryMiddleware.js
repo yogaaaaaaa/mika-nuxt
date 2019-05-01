@@ -1,6 +1,6 @@
 'use strict'
 
-const moment = require('moment')
+const _ = require('lodash')
 const { query } = require('express-validator/check')
 
 const models = require('../models')
@@ -54,14 +54,33 @@ module.exports.paginationToSequelize = (req, res, next) => {
 
 /**
  * Validator for filtersToSequelize middleware,
- * `model` is included as parameter to check whether field name in `filters` is valid
+ * `validModels` is included as parameter to check whether field name in `filters` is valid
+ * NOTE: first index of `validModels` must be the top model
  */
-module.exports.filtersToSequelizeValidator = (model) => [
+module.exports.filtersToSequelizeValidator = (validModels) => [
   query('filters')
     .custom((filters) => {
-      if (!Array.isArray(filters)) return false
-      for (const filter of filters) {
-        if (!models[model].rawAttributes.hasOwnProperty(filter.split(',')[0])) return false
+      for (const filter of _.flatten(_.values(filters))) {
+        let field = filter.split(',')[0]
+        let fieldComponents = field.split('.')
+
+        if (fieldComponents.length > 1) {
+          if (
+            !validModels[0] === fieldComponents[0] || // correct top model
+            !models[validModels[0]].associations[fieldComponents[0]] || // correct association with top model
+            !models[fieldComponents[0]] // included in valid models
+          ) return false
+          for (let i = 1; i < fieldComponents.length; i++) {
+            if (i === fieldComponents.length - 1) {
+              if (!models[fieldComponents[i - 1]].rawAttributes.hasOwnProperty(fieldComponents[i])) return false // correct property of previous model
+            } else {
+              if (!validModels.includes(fieldComponents[i])) return false
+              if (!models[fieldComponents[i - 1]].associations[fieldComponents[i]]) return false // correct association of top model
+            }
+          }
+        } else {
+          if (!models[validModels[0]].rawAttributes.hasOwnProperty(field)) return false
+        }
       }
       return true
     })
@@ -78,13 +97,24 @@ module.exports.filtersToSequelizeValidator = (model) => [
  *
  * Each element of `filters[]` is consist of 3 parts, delimited by comma :
  *
- * `(field name in selected model),(operator),(value)`
+ * `(field name in selected model and its association),(operator),(value)`
  *
  * To filter for field with `status` equal to `success` its translate
  * to `filters[]=status,eq,success` of query string.
  *
- * Another example of query string :
- * `filters[]=status,eq,success&filters[]=createdAt,lastday,1`
+ * Example of query string :
+ * `filters[]=status,eq,success&filters[]=name,like,%name%`
+ *
+ * When query param of filter is included with name e.g `filter[a]` it will group with logical or operation.
+ * In sense, `filters` parameter is in form minterm.
+ *
+ * Another example :
+ *
+ * `filters[a]=status,eq,success&filters[a]=name,like,%name%&filters[]=amount,gt,2000&filters[]=paymentProvider.paymentProviderType.class,eq,tcash`
+ *
+ * It translate to :
+ *
+ * `((status = success) or (name like %name%)) and (amount > 2000) and (paymentProvider.paymentProviderType.class = tcash)`
  */
 module.exports.filtersToSequelize = (req, res, next) => {
   req.filtersWhereSequelize = {}
@@ -94,97 +124,65 @@ module.exports.filtersToSequelize = (req, res, next) => {
     Object.assign(query.where, req.filtersWhereSequelize)
   }
 
-  if (!Array.isArray(req.query.filters)) return next()
-
-  let andFilters = []
-  for (const filter of req.query.filters) {
+  const parseFilter = (filter) => {
     let filterSplit = filter.split(',')
     if (filterSplit.length >= 2) {
-      let field = filterSplit[0]
+      let field = filterSplit[0].indexOf('.') ? `$${filterSplit[0]}$` : filterSplit[0]
       let op = filterSplit[1]
-
-      let value = ''
-
-      if (filterSplit.length > 2) {
-        value = filterSplit.slice(2, filterSplit.length).join(',')
-      }
-
+      let value = filterSplit.length > 2 ? filterSplit.slice(2, filterSplit.length).join(',') : ''
       switch (op) {
         case 'eq':
-          andFilters.push({
+          return {
             [field]: value
-          })
-          break
+          }
+        case 'eqnull':
+          return {
+            [field]: null
+          }
         case 'ne':
-          andFilters.push({
+          return {
             [field]: { [Op.ne]: value }
-          })
-          break
+          }
         case 'gt':
-          andFilters.push({
+          return {
             [field]: { [Op.gt]: value }
-          })
-          break
+          }
         case 'gte':
-          andFilters.push({
+          return {
             [field]: { [Op.gte]: value }
-          })
-          break
+          }
         case 'lt':
-          andFilters.push({
+          return {
             [field]: { [Op.lt]: value }
-          })
-          break
+          }
         case 'lte':
-          andFilters.push({
+          return {
             [field]: { [Op.lte]: value }
-          })
-          break
+          }
         case 'like':
-          andFilters.push({
+          return {
             [field]: { [Op.like]: value }
-          })
-          break
-        case 'lasthour':
-          value = parseInt(value) || 0
-          andFilters.push({
-            [field]: {
-              [Op.gte]: moment().utc().subtract(value, 'hour').startOf('hour').toDate(),
-              [Op.lte]: moment().utc().toDate()
-            }
-          })
-          break
-        case 'lastday':
-          value = parseInt(value) || 0
-          andFilters.push({
-            [field]: {
-              [Op.gte]: moment().utc().subtract(value, 'day').startOf('day').toDate(),
-              [Op.lte]: moment().utc().toDate()
-            }
-          })
-          break
-        case 'lastweek':
-          value = parseInt(value) || 0
-          andFilters.push({
-            [field]: {
-              [Op.gte]: moment().utc().subtract(value, 'week').startOf('week').toDate(),
-              [Op.lte]: moment().utc().toDate()
-            }
-          })
-          break
-        case 'lastmonth':
-          value = parseInt(value) || 0
-          andFilters.push({
-            [field]: {
-              [Op.gte]: moment().utc().subtract(value, 'month').startOf('month').toDate(),
-              [Op.lte]: moment().utc().toDate()
-            }
-          })
-          break
+          }
       }
     }
   }
 
+  let andFilters = []
+  for (const filter of _.values(req.query.filters)) {
+    if (Array.isArray(filter)) {
+      let orFilter = []
+      for (const subFilter of filter) {
+        orFilter.push(parseFilter(subFilter))
+      }
+      if (orFilter.length) {
+        andFilters.push({
+          [Op.or]: orFilter
+        })
+      }
+    } else {
+      andFilters.push(parseFilter(filter))
+    }
+  }
   if (andFilters.length) {
     req.filtersWhereSequelize = {
       [Op.and]: andFilters
@@ -199,10 +197,15 @@ module.exports.filtersToSequelize = (req, res, next) => {
  * to check if `req.query.group_field` is valid in model and with correct data type
  */
 module.exports.timeGroupSequelize = (model) => [
-  query('group_offset').custom((val) => val.match(/[+-][0-2]\d:?[0-5]\d/)).optional(),
-  query('group_time').isIn(['minute', 'hour', 'day', 'month', 'year']).optional(),
+  query('group_tz_offset')
+    .custom((val) => val.match(/[+-][0-2]\d:?[0-5]\d/))
+    .optional(),
+  query('group_time')
+    .isIn(['minute', 'hour', 'day', 'month', 'year'])
+    .optional(),
   query('group_field')
     .custom(val => models[model].rawAttributes[val].type.constructor.name === Sequelize.DATE.name)
+    .optional()
 ]
 
 /**

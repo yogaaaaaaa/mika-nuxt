@@ -79,7 +79,9 @@ module.exports = (sequelize, DataTypes) => {
             'excludeTimestamp'
           ),
           include: [
-            models.paymentProviderType.scope('excludeTimestamp'),
+            models.paymentProviderType.scope(
+              'excludeTimestamp'
+            ),
             models.paymentProviderConfig.scope(
               'excludeTimestamp',
               'excludeConfig'
@@ -97,7 +99,6 @@ module.exports = (sequelize, DataTypes) => {
         whereMerchant.id = merchantId
       }
       return {
-        attributes: { exclude: ['deletedAt'] },
         include: [
           {
             model: models.paymentProvider,
@@ -119,6 +120,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     })
     transaction.addScope('validPartner', (partnerId) => ({
+      attributes: ['id'],
       include: [
         {
           model: models.agent.scope('onlyId'),

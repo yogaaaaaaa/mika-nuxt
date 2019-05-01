@@ -67,6 +67,14 @@ module.exports.sequelizeErrorHandler = (err, req, res, next) => {
         err.fields.map((field) => `Invalid identifier ${field}`)
       )
     }
+  } else if (err.name === 'SequelizeUniqueConstraintError') {
+    if (Array.isArray(err.fields)) {
+      msgFactory.expressCreateResponse(
+        res,
+        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
+        err.fields.map((field) => `Unique constraint ${field}`)
+      )
+    }
   } else {
     throw err
   }

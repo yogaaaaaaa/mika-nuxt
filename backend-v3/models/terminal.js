@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
 
     terminalModelId: DataTypes.INTEGER,
     terminalBatchId: DataTypes.INTEGER,
+    outletId: DataTypes.INTEGER,
     merchantId: DataTypes.INTEGER
   }, {
     freezeTableName: true,
@@ -23,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
   terminal.associate = (models) => {
     terminal.belongsTo(models.terminalModel, { foreignKey: 'terminalModelId' })
     terminal.belongsTo(models.terminalBatch, { foreignKey: 'terminalBatchId' })
+    terminal.belongsTo(models.outlet, { foreignKey: 'outletId' })
     terminal.belongsTo(models.merchant, { foreignKey: 'merchantId' })
 
     terminal.hasMany(models.cipherboxKey, { foreignKey: 'terminalId' })
