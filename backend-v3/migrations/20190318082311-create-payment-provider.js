@@ -23,6 +23,10 @@ module.exports = {
       maximumAmount: {
         type: Sequelize.INTEGER
       },
+
+      sharePaymentProvider: {
+        type: Sequelize.FLOAT
+      },
       shareMerchant: {
         type: Sequelize.FLOAT
       },

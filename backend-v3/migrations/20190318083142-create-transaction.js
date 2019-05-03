@@ -112,10 +112,6 @@ module.exports = {
         type: Sequelize.TEXT
       },
 
-      extra: {
-        type: Sequelize.TEXT
-      },
-
       agentId: {
         allowNull: false,
         type: Sequelize.INTEGER,

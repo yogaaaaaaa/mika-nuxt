@@ -24,11 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     freezeTableName: true,
-    paranoid: true
-  })
-
-  user.addHook('beforeSave', async (user) => {
-    user.password = await hash.bcryptHash(user.password)
+    paranoid: true,
+    hooks: {
+      async beforeSave (user) {
+        user.password = await hash.bcryptHash(user.password)
+      }
+    }
   })
 
   user.prototype.checkPassword = async function (password) {

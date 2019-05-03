@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     generalLocationLat: DataTypes.STRING,
     generalLocationRadiusMeter: DataTypes.FLOAT,
 
-    boundedToTerminal: DataTypes.BOOLEAN,
+    secureAgent: DataTypes.BOOLEAN,
 
     userId: DataTypes.INTEGER,
     outletId: DataTypes.INTEGER,
@@ -25,16 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     agent.belongsTo(models.merchant, { foreignKey: 'merchantId' })
 
     agent.hasMany(models.transaction, { foreignKey: 'agentId' })
-
-    // agent.hasMany(models.agentPaymentProvider, { foreignKey: 'agentId' })
-    agent.belongsToMany(
-      models.paymentProvider,
-      {
-        through: 'agentPaymentProvider',
-        foreignKey: 'agentId',
-        otherKey: 'paymentProviderId'
-      }
-    )
 
     agent.addScope('agent', () => ({
       attributes: { exclude: ['deletedAt'] },

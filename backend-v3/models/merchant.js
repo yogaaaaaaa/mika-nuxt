@@ -88,6 +88,7 @@ module.exports = (sequelize, DataTypes) => {
     )
 
     merchant.belongsTo(models.partner, { foreignKey: 'partnerId' })
+    merchant.hasMany(models.paymentProvider, { foreignKey: 'merchantId' })
 
     merchant.belongsToMany(
       models.paymentProviderType,

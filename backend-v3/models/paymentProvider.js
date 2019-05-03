@@ -42,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
         ]
       }
     })
-
     paymentProvider.addScope('excludeExtra', {
       attributes: {
         exclude: [
@@ -53,6 +52,19 @@ module.exports = (sequelize, DataTypes) => {
         ]
       }
     })
+    paymentProvider.addScope('agent', (merchantId) => ({
+      where: merchantId ? { merchantId } : undefined,
+      exclude: [
+        'shareMerchant',
+        'shareMerchantWithPartner',
+        'sharePartner',
+        'directSettlement'
+      ],
+      include: [
+        models.paymentProviderType.scope('excludeTimestamp'),
+        models.paymentProviderConfig.scope('excludeTimestamp', 'excludeConfig')
+      ]
+    }))
   }
 
   return paymentProvider

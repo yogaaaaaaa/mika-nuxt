@@ -17,24 +17,15 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      providerIdReference: {
-        type: Sequelize.STRING
-      },
-      providerIdType: {
-        type: Sequelize.STRING
-      },
-
       handler: {
+        allowNull: false,
         type: Sequelize.STRING
       },
 
-      sandBoxConfig: {
+      sandbox: {
+        allowNull: false,
         defaultValue: true,
         type: Sequelize.BOOLEAN
-      },
-
-      config: {
-        type: Sequelize.TEXT
       },
 
       merchantId: {

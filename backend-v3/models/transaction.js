@@ -40,27 +40,20 @@ module.exports = (sequelize, DataTypes) => {
     ipAddress: DataTypes.STRING,
 
     voidReason: DataTypes.TEXT,
-
-    extra: {
-      type: DataTypes.TEXT,
-      get () {
-        try {
-          return JSON.parse(this.getDataValue('extra'))
-        } catch (error) {}
-      },
-      set (val) {
-        if (typeof val === 'object') {
-          this.setDataValue('extra', JSON.stringify(val))
-        }
-      }
-    },
-
     agentId: DataTypes.INTEGER,
     terminalId: DataTypes.INTEGER,
     paymentProviderId: DataTypes.INTEGER
   }, {
     freezeTableName: true,
-    paranoid: true
+    paranoid: true,
+    getterMethods: {
+      config () {
+      }
+    },
+    setterMethods: {
+      config () {
+      }
+    }
   })
 
   transaction.associate = (models) => {
