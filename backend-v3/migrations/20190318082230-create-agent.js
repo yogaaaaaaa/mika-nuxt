@@ -28,7 +28,7 @@ module.exports = {
         type: Sequelize.FLOAT
       },
 
-      secureAgent: {
+      secure: {
         allowNull: false,
         defaultValue: false,
         type: Sequelize.BOOLEAN

@@ -13,7 +13,7 @@ module.exports = {
       idAlias: {
         allowNull: false,
         unique: true,
-        type: Sequelize.CHAR(40)
+        type: Sequelize.CHAR(40, true)
       },
 
       name: {
@@ -24,7 +24,7 @@ module.exports = {
       shortName: {
         allowNull: false,
         unique: true,
-        type: Sequelize.CHAR(25)
+        type: Sequelize.CHAR(25, true)
       },
       description: {
         type: Sequelize.STRING
@@ -71,7 +71,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       scannedTaxCardResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
@@ -91,35 +91,35 @@ module.exports = {
       },
 
       scannedBankStatementResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSkmenkumhamResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSiupResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedTdpResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSkdpResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
@@ -148,14 +148,14 @@ module.exports = {
         type: Sequelize.STRING
       },
       ownerScannedIdCardResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       ownerScannedTaxCardResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'

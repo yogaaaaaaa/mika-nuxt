@@ -6,13 +6,13 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.CHAR(27)
+        type: Sequelize.CHAR(27, true)
       },
 
       idAlias: {
         allowNull: false,
         unique: true,
-        type: Sequelize.CHAR(40)
+        type: Sequelize.CHAR(40, true)
       },
 
       deletedAt: {

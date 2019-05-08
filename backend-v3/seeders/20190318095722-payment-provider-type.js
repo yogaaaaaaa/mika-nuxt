@@ -37,19 +37,19 @@ module.exports = {
       },
       {
         id: 5,
-        class: 'emvCredit',
-        name: 'Kartu Kredit',
-        thumbnail: 'card-credit.png',
-        thumbnailGray: 'card-credit-gray.png',
-        chartColor: '#192061'
-      },
-      {
-        id: 6,
         class: 'emvDebit',
         name: 'Kartu Debit',
         thumbnail: 'card.png',
         thumbnailGray: 'card-debit-gray.png',
         chartColor: '#4A90D9'
+      },
+      {
+        id: 6,
+        class: 'emvCredit',
+        name: 'Kartu Kredit',
+        thumbnail: 'card-credit.png',
+        thumbnailGray: 'card-credit-gray.png',
+        chartColor: '#192061'
       }
     ]
     , {})

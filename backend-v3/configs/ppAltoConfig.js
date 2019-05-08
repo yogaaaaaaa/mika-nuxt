@@ -31,12 +31,12 @@ Vw/qVE3t7QIDAQAB
 let baseConfig = {
   baseUrl: 'https://pay.altopay.co.id',
   notifyEndpoint: '/payment/alto/notif',
-  pemPrivateKey: pemPrivateKey,
-  pemAltoPublicKey: pemAltoPublicKey,
-  mch_id: '101876',
   notify_url: null,
   currency: 'IDR',
-  trade_type: 'QR_CODE'
+
+  altoPemPrivateKey: pemPrivateKey,
+  altoPemAltoPublicKey: pemAltoPublicKey,
+  altoMchId: '101876'
 }
 baseConfig.notify_url = `${appConfig.apiBaseUrl}${baseConfig.notifyEndpoint}`
 

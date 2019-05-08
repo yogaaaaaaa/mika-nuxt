@@ -26,7 +26,7 @@ app.set('etag', false)
 app.use(logger('dev'))
 
 /**
- * Notification route for payment gateway
+ * Notification route for payment provider
  */
 app.use(require('./routes/notifTcash'))
 app.use(require('./routes/notifAlto'))

@@ -138,8 +138,8 @@ module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
 
     if (!ctx.agent) throw exports.error(exports.errorTypes.INVALID_AGENT)
 
-    if (!ctx.agent.paymentProviders.length) throw exports.error(exports.errorTypes.INVALID_PAYMENT_PROVIDER)
-    ctx.paymentProvider = ctx.agent.paymentProviders[0]
+    if (!ctx.agent.merchant.paymentProviders.length) throw exports.error(exports.errorTypes.INVALID_PAYMENT_PROVIDER)
+    ctx.paymentProvider = ctx.agent.merchant.paymentProviders[0]
   }
 
   ctx.ppHandler = exports.findPpHandler(ctx.paymentProvider.paymentProviderConfig.handler)

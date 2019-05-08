@@ -23,12 +23,7 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
         referenceNumber: req.body.transaction_id,
         status: trxManager.transactionStatuses.CREATED
       },
-      include: [
-        {
-          model: models.paymentProvider,
-          include: [ models.paymentProviderConfig ]
-        }
-      ]
+      include: [ models.paymentProvider.scope('paymentProviderConfig') ]
     })
 
     if (!transaction) {
@@ -36,16 +31,9 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
       return
     }
 
-    if (
-      !midtrans.checkNotificationSignature(
-        req.body.signature_key,
-        Object.assign({
-          status_code: req.body.status_code,
-          order_id: req.body.order_id,
-          gross_amount: req.body.gross_amount
-        }, transaction.paymentProvider.paymentProviderConfig)
-      )
-    ) {
+    let midtransConfig = midtrans.mixConfig(transaction.paymentProvider.paymentProviderConfig.config)
+
+    if (!midtrans.checkNotificationSignature(Object.assign(req.body, midtransConfig))) {
       res.status(401).type('text').send('UNAUTHORIZED')
       return
     }

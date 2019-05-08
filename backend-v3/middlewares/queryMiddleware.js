@@ -73,19 +73,20 @@ module.exports.filtersToSequelizeValidator = (validModels) => [
           for (let i = 1; i < fieldComponents.length; i++) {
             if (i === fieldComponents.length - 1) {
               if (!models[fieldComponents[i - 1]].rawAttributes.hasOwnProperty(fieldComponents[i])) return false // correct property of previous model
+              if (models[fieldComponents[i - 1]].rawAttributes[fieldComponents[i]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
             } else {
-              if (!validModels.includes(fieldComponents[i])) return false
-              if (!models[fieldComponents[i - 1]].associations[fieldComponents[i]]) return false // correct association of top model
+              if (!validModels.includes(fieldComponents[i])) return false // included in valid models
+              if (!models[fieldComponents[i - 1]].associations[fieldComponents[i]]) return false // correct association of previous model
             }
           }
         } else {
-          if (!models[validModels[0]].rawAttributes.hasOwnProperty(field)) return false
+          if (!models[validModels[0]].rawAttributes.hasOwnProperty(field)) return false // correct property of top model
+          if (models[fieldComponents[0]].rawAttributes[fieldComponents[0]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
         }
       }
       return true
     })
     .optional()
-    .withMessage('Invalid field name in filters[]')
 ]
 
 /**

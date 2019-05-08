@@ -10,6 +10,8 @@ module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'alto',
     classes: ['wechatpay', 'alipay'],
+    defaultMinimumAmount: 1000,
+    defaultMaximumAmount: 20000000,
     properties: {
       flows: [
         trxManager.transactionFlows.GET_TOKEN
@@ -21,11 +23,13 @@ module.exports = (trxManager) => {
       ]
     },
     async handler (ctx) {
+      let altoConfig = alto.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)
+
       let response = await alto.altoMakeQrCodePayment(Object.assign({
         out_trade_no: ctx.transaction.id,
         subject: 'MIKA Payment',
         amount: ctx.transaction.amount
-      }, ctx.paymentProvider.paymentProviderConfig.config))
+      }, altoConfig))
 
       if (!response) throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
 

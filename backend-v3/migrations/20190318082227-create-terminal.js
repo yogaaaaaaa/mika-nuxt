@@ -18,7 +18,7 @@ module.exports = {
         idAlias: {
           // allowNull: false,
           unique: true,
-          type: Sequelize.CHAR(40)
+          type: Sequelize.CHAR(40, true)
         },
 
         name: {
@@ -57,7 +57,6 @@ module.exports = {
           }
         },
         outletId: {
-          allowNull: false,
           type: Sequelize.INTEGER,
           references: {
             model: 'outlet',

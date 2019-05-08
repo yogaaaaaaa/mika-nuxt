@@ -6,7 +6,7 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.CHAR(27)
+        type: Sequelize.CHAR(27, true)
       },
 
       amount: {
@@ -19,7 +19,7 @@ module.exports = {
 
       transactionId: {
         allowNull: false,
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'transaction',
           key: 'id'

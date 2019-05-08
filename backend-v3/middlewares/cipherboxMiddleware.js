@@ -13,16 +13,25 @@ const debug = {
  *
  * Warning: This middleware hijack `res.send` function
 */
-module.exports.processCipherbox = async function (req, res, next) {
+module.exports.processCipherbox = (mandatory = false) => async function (req, res, next) {
   if (req.body.cbx && req.body.id) {
     debug.processCipherbox('detected')
-    let cipherboxKey = await models.cipherboxKey.findOne({
-      where: {
-        idKey: req.body.id
+
+    let whereCipherbox = {
+      id: req.body.id
+    }
+    if (req.auth) {
+      if (req.auth.terminalId) {
+        whereCipherbox.terminalId = req.auth.terminalId
       }
+    }
+
+    let cipherboxKey = await models.cipherboxKey.scope('active').findOne({
+      where: whereCipherbox
     })
+
     if (cipherboxKey) {
-      debug.processCipherbox(`key id ${cipherboxKey.idKey}, unboxing`)
+      debug.processCipherbox(`key id ${cipherboxKey.id}, unboxing`)
       let keys = JSON.parse(cipherboxKey.keys)
       let unbox = null
 
@@ -77,7 +86,17 @@ module.exports.processCipherbox = async function (req, res, next) {
         return res.send(body)
       }
     }
+    next()
+  } else if (mandatory) {
+    if (req.auth) {
+      if (req.auth.terminalId) {
+        msgFactory.expressCreateResponse(
+          res,
+          msgFactory.msgTypes.MSG_ERROR_AUTH_CIPHERBOX_MANDATORY
+        )
+        return
+      }
+    }
   }
-
   next()
 }

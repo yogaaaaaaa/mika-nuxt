@@ -24,21 +24,11 @@ module.exports = {
           type: Sequelize.STRING
         },
         value: {
-          type: Sequelize.STRING
-        },
-
-        createdAt: {
-          allowNull: false,
-          type: Sequelize.DATE,
-          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-        },
-        updatedAt: {
-          allowNull: false,
-          type: Sequelize.DATE,
-          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+          type: Sequelize.STRING(2048)
         }
       }, { transaction: t })
-      await queryInterface.addIndex('paymentProviderConfigKv', ['paymentProviderConfigId', 'name'], { unique: true, transaction: t })
+      await queryInterface.addIndex('paymentProviderConfigKv', { fields: ['paymentProviderConfigId', 'name'], unique: true, transaction: t })
+      await queryInterface.addIndex('paymentProviderConfigKv', { fields: ['value'], transaction: t })
     })
   },
   down: (queryInterface, Sequelize) => {

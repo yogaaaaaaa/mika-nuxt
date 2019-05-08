@@ -25,7 +25,7 @@ module.exports.changeTransactionStatus = async (req, res, next) => {
 }
 
 module.exports.echo = [
-  cipherboxMiddleware.processCipherbox,
+  cipherboxMiddleware.processCipherbox(),
   (req, res, next) => {
     res.send(req.body)
   }

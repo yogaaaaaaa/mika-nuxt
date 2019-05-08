@@ -40,6 +40,24 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
+  outlet.addScope('excludeBusiness', {
+    attributes: { exclude: [
+      'ownershipType',
+      'rentStartDate',
+      'rentDurationMonth',
+      'otherPaymentSystems',
+      'outletPhotoResourceId',
+      'cashierDeskPhotoResourceId',
+      'businessDurationMonth',
+      'businessMonthlyTurnover'
+    ] }
+  })
+  outlet.addScope('excludeMerchant', {
+    attributes: { exclude: [
+      'merchantId'
+    ] }
+  })
+
   outlet.associate = function (models) {
     outlet.belongsTo(models.resource, {
       foreignKey: 'outletPhotoResourceId',
@@ -49,26 +67,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'cashierDeskPhotoResourceId',
       as: 'cashierDeskPhotoResource'
     })
-
     outlet.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-
-    outlet.addScope('excludeBusiness', {
-      attributes: { exclude: [
-        'ownershipType',
-        'rentStartDate',
-        'rentDurationMonth',
-        'otherPaymentSystems',
-        'outletPhotoResourceId',
-        'cashierDeskPhotoResourceId',
-        'businessDurationMonth',
-        'businessMonthlyTurnover'
-      ] }
-    })
-    outlet.addScope('excludeMerchant', {
-      attributes: { exclude: [
-        'merchantId'
-      ] }
-    })
+    outlet.hasMany(models.terminal, { foreignKey: 'outletId' })
   }
 
   return outlet

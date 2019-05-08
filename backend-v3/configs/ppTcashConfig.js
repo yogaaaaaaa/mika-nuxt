@@ -9,10 +9,11 @@ const configName = 'ppTcashConfig'
 let baseConfig = {
   inquiryEndpoint: '/payment/tcash/inquiry',
   payEndpoint: '/payment/tcash/pay',
-  user: 'mika',
-  merchant: 'Mika',
-  terminal: 'MIKA',
-  pwd: 'MIKA'
+
+  tcashUser: 'mika',
+  tcashMerchant: 'Mika',
+  tcashTerminal: 'MIKA',
+  tcashPwd: 'MIKA'
 }
 
 /**

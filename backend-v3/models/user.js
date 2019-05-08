@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       set (val) {
         if (Array.isArray(val)) {
           this.setDataValue('userRoles', val.join(','))
-        } else {
+        } else if (typeof val === 'string') {
           this.setDataValue('userRoles', '')
         }
       }

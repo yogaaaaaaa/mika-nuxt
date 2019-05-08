@@ -225,7 +225,7 @@ module.exports.getRandomHexString = (length = 5) => {
 }
 
 /**
- * remove symbol from Track2, to be compatible with EMV tags
+ * Remove '=' symbol from Track2, to be compatible with EMV tags
  */
 module.exports.track2RemoveSymbol = (hsTrack2) => {
   return hsTrack2.replace('=', 'D')

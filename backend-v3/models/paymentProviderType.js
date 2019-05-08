@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  var paymentProviderType = sequelize.define('paymentProviderType', {
+  let paymentProviderType = sequelize.define('paymentProviderType', {
     class: DataTypes.STRING,
 
     name: DataTypes.STRING,

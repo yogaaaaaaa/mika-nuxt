@@ -25,9 +25,6 @@ sequelize
     ready.ready('database')
   })
 
-models.sequelize = sequelize
-models.Sequelize = Sequelize
-
 fs
   .readdirSync(__dirname)
   .filter(file => (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js'))
@@ -36,26 +33,26 @@ fs
     models[model.name] = model
   })
 
-Object.keys(models).forEach(modelName => {
-  if (models[modelName].associate) {
-    /**
-     * Add default scopes to all models
-     */
-    models[modelName].addScope('excludeDeletedAt', {
-      attributes: ['createdAt', 'updatedAt']
-    })
-    models[modelName].addScope('excludeTimestamp', {
-      attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }
-    })
-    models[modelName].addScope('excludeId', {
-      attributes: { exclude: ['id'] }
-    })
-    models[modelName].addScope('onlyId', {
-      attributes: ['id']
-    })
+for (const modelName of Object.keys(models)) {
+  models[modelName].addScope('excludeTimestamp', {
+    attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }
+  })
+  models[modelName].addScope('excludeDeletedAt', {
+    attributes: { exclude: ['deletedAt'] }
+  })
+  models[modelName].addScope('excludeId', {
+    attributes: { exclude: ['id'] }
+  })
+  models[modelName].addScope('id', {
+    attributes: ['id']
+  })
 
+  if (models[modelName].associate) {
     models[modelName].associate(models)
   }
-})
+}
+
+models.sequelize = sequelize
+models.Sequelize = Sequelize
 
 module.exports = models

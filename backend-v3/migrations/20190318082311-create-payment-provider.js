@@ -53,6 +53,7 @@ module.exports = {
       },
 
       merchantId: {
+        allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'merchant',

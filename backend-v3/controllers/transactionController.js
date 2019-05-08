@@ -100,7 +100,7 @@ module.exports.createTransaction = async (req, res, next) => {
  * All Middlewares for createTransaction
  */
 module.exports.createTransactionMiddlewares = [
-  cipherboxMiddleware.processCipherbox,
+  cipherboxMiddleware.processCipherbox(true),
   module.exports.createTransactionValidator,
   errorMiddleware.validatorErrorHandler,
   module.exports.createTransaction

@@ -105,7 +105,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
       where: {
         userId: user.id
       },
-      attributes: ['id', 'boundedToTerminal']
+      attributes: ['id', 'secure', 'merchantId']
     })
 
     if (agent) {
@@ -113,15 +113,16 @@ module.exports.doAuth = async function (username, password, options = {}) {
       authResult.auth.agentId = agent.id
       authResult.auth.terminalId = null
 
-      if (agent.boundedToTerminal) {
+      if (agent.secure || options.terminalId) {
         if (!options.terminalId) return
-        let agentTerminal = await models.agentTerminal.findOne({
+        let terminal = await models.terminal.scope('id').findOne({
           where: {
-            terminalId: options.terminalId
+            id: options.terminalId,
+            merchantId: agent.merchantId
           }
         })
-        if (!agentTerminal) return
-        authResult.auth.terminalId = agentTerminal.terminalId
+        if (!terminal) return
+        authResult.auth.terminalId = options.terminalId
       }
       authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
     }

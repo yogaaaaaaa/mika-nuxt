@@ -13,28 +13,18 @@ module.exports = {
 
         transactionId: {
           allowNull: false,
-          type: Sequelize.CHAR(27),
+          type: Sequelize.CHAR(27, true),
           references: {
             model: 'transaction',
             key: 'id'
           }
         },
         name: {
+          allowNull: false,
           type: Sequelize.STRING
         },
         value: {
           type: Sequelize.STRING
-        },
-
-        createdAt: {
-          allowNull: false,
-          type: Sequelize.DATE,
-          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-        },
-        updatedAt: {
-          allowNull: false,
-          type: Sequelize.DATE,
-          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
         }
       }, { transaction: t })
       await queryInterface.addIndex('transactionExtraKv', ['transactionId', 'name'], { unique: true, transaction: t })

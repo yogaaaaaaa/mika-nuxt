@@ -19,18 +19,22 @@ function getPpHandler (handler) {
 module.exports.getAgentPaymentProviders = async (req, res, next) => {
   let query = {
     where: {
-      agentId: req.auth.agentId
+      id: req.auth.agentId
     }
   }
 
   if (req.params.paymentProviderId) {
-    query.where.paymentProviderId = req.params.paymentProviderId
-    let agentPaymentProvider = await models.agentPaymentProvider.scope('agent').findOne(query)
     let paymentProvider = null
 
-    if (agentPaymentProvider) {
-      paymentProvider = agentPaymentProvider.paymentProvider
-      paymentProvider._handler = getPpHandler(paymentProvider.paymentProviderConfig.handler)
+    let agent = await models.agent.scope(
+      { method: ['agentPaymentProvider', req.params.paymentProviderId] }
+    ).findOne(query)
+
+    if (agent) {
+      if (agent.merchant.paymentProviders.length) {
+        paymentProvider = agent.merchant.paymentProviders[0]
+        paymentProvider._handler = getPpHandler(paymentProvider.paymentProviderConfig.handler)
+      }
     }
     msgFactory.expressCreateResponse(
       res,
@@ -38,13 +42,24 @@ module.exports.getAgentPaymentProviders = async (req, res, next) => {
       paymentProvider
     )
   } else {
-    let agentPaymentProviders = await models.agentPaymentProvider.scope('agent').findAll(query)
+    let paymentProviders = null
+
+    let agent = await models.agent.scope(
+      'agentPaymentProvider'
+    ).findOne(query)
+
+    if (agent) {
+      if (agent.merchant.paymentProviders.length) {
+        paymentProviders = agent.merchant.paymentProviders
+      }
+    }
+
     msgFactory.expressCreateResponse(
       res,
-      agentPaymentProviders ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
-      agentPaymentProviders.map((data) => {
-        let paymentProvider = data.paymentProvider.toJSON()
-        paymentProvider._handler = getPpHandler(data.paymentProvider.paymentProviderConfig.handler)
+      paymentProviders ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
+      paymentProviders.map((paymentProvider) => {
+        paymentProvider = paymentProvider.toJSON()
+        paymentProvider._handler = getPpHandler(paymentProvider.paymentProviderConfig.handler)
         return paymentProvider
       })
     )

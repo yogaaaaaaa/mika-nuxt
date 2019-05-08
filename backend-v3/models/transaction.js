@@ -1,5 +1,7 @@
 'use strict'
 
+const kv = require('./helpers/kv')
+
 module.exports = (sequelize, DataTypes) => {
   let transaction = sequelize.define('transaction', {
     id: {
@@ -42,105 +44,111 @@ module.exports = (sequelize, DataTypes) => {
     voidReason: DataTypes.TEXT,
     agentId: DataTypes.INTEGER,
     terminalId: DataTypes.INTEGER,
-    paymentProviderId: DataTypes.INTEGER
+    paymentProviderId: DataTypes.INTEGER,
+
+    extra: {
+      type: DataTypes.VIRTUAL,
+      get: kv.selfKvGetter('transactionExtraKvs')
+    }
   }, {
     freezeTableName: true,
-    paranoid: true,
-    getterMethods: {
-      config () {
+    paranoid: true
+  })
+
+  transaction.addScope('transactionExtraKv', () => ({
+    include: [
+      sequelize.models.transactionExtraKv.scope('excludeEntity')
+    ]
+  }))
+  transaction.addScope('agent', () => ({
+    attributes: { exclude: ['deletedAt'] },
+    include: [
+      sequelize.models.transactionExtraKv.scope('excludeEntity'),
+      {
+        model: sequelize.models.paymentProvider.scope(
+          'excludeShare',
+          'excludeTimestamp'
+        ),
+        include: [
+          sequelize.models.paymentProviderType.scope(
+            'excludeTimestamp'
+          ),
+          sequelize.models.paymentProviderConfig.scope(
+            'excludeTimestamp',
+            'excludeConfig'
+          )
+        ]
       }
-    },
-    setterMethods: {
-      config () {
-      }
+    ]
+  }))
+  transaction.addScope('partner', (partnerId, merchantId) => {
+    let whereMerchant = {}
+    if (partnerId) {
+      whereMerchant.partnerId = partnerId
+    }
+    if (merchantId) {
+      whereMerchant.id = merchantId
+    }
+    return {
+      include: [
+        {
+          model: sequelize.models.paymentProvider,
+          include: [
+            sequelize.sequelize.models.paymentProviderType
+          ]
+        },
+        {
+          model: sequelize.models.agent,
+          required: true,
+          include: [
+            {
+              model: sequelize.models.merchant,
+              where: whereMerchant
+            }
+          ]
+        }
+      ]
     }
   })
+  transaction.addScope('validPartner', (partnerId) => ({
+    attributes: ['id'],
+    include: [
+      {
+        model: sequelize.models.agent.scope('id'),
+        include: [
+          {
+            model: sequelize.models.merchant.scope('id'),
+            where: { partnerId }
+          }
+        ]
+      }
+    ]
+  }))
+  transaction.addScope('trxManager', () => ({
+    include: [
+      {
+        model: sequelize.models.agent,
+        include: [ sequelize.models.merchant ]
+      },
+      {
+        model: sequelize.models.paymentProvider.scope(
+          'paymentProviderType',
+          'paymentProviderConfig'
+        )
+      }
+    ]
+  }))
+
+  transaction.setKv = kv.setKvMethod('transactionId')
+  transaction.getKv = kv.getKvMethod('transactionId')
 
   transaction.associate = (models) => {
     transaction.belongsTo(models.agent, { foreignKey: 'agentId' })
     transaction.belongsTo(models.terminal, { foreignKey: 'terminalId' })
     transaction.belongsTo(models.paymentProvider, { foreignKey: 'paymentProviderId' })
+    transaction.hasMany(models.transactionExtraKv, { foreignKey: 'transactionId' })
 
     transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
-
-    transaction.addScope('agent', () => ({
-      attributes: { exclude: ['deletedAt'] },
-      include: [
-        {
-          model: models.paymentProvider.scope(
-            'excludeShare',
-            'excludeTimestamp'
-          ),
-          include: [
-            models.paymentProviderType.scope(
-              'excludeTimestamp'
-            ),
-            models.paymentProviderConfig.scope(
-              'excludeTimestamp',
-              'excludeConfig'
-            )
-          ]
-        }
-      ]
-    }))
-    transaction.addScope('partner', (partnerId, merchantId) => {
-      let whereMerchant = {}
-      if (partnerId) {
-        whereMerchant.partnerId = partnerId
-      }
-      if (merchantId) {
-        whereMerchant.id = merchantId
-      }
-      return {
-        include: [
-          {
-            model: models.paymentProvider,
-            include: [
-              models.paymentProviderType
-            ]
-          },
-          {
-            model: models.agent,
-            required: true,
-            include: [
-              {
-                model: models.merchant,
-                where: whereMerchant
-              }
-            ]
-          }
-        ]
-      }
-    })
-    transaction.addScope('validPartner', (partnerId) => ({
-      attributes: ['id'],
-      include: [
-        {
-          model: models.agent.scope('onlyId'),
-          include: [
-            {
-              model: models.merchant.scope('onlyId'),
-              where: { partnerId }
-            }
-          ]
-        }
-      ]
-    }))
-    transaction.addScope('trxManager', () => ({
-      include: [
-        {
-          model: models.agent,
-          include: [ models.merchant ]
-        },
-        {
-          model: models.paymentProvider,
-          include: [
-            models.paymentProviderType,
-            models.paymentProviderConfig
-          ]
-        }
-      ]
-    }))
   }
 
   return transaction

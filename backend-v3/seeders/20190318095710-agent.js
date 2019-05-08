@@ -6,7 +6,7 @@ module.exports = {
       {
         id: 1,
         name: 'Agent Maju Tembak',
-        boundedToTerminal: true,
+        secure: true,
         userId: 7,
         merchantId: 1,
         outletId: 1

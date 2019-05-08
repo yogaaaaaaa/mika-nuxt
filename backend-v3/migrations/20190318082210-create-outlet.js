@@ -13,7 +13,7 @@ module.exports = {
       idAlias: {
         // allowNull: false,
         unique: true,
-        type: Sequelize.CHAR(40)
+        type: Sequelize.CHAR(40, true)
       },
 
       name: {
@@ -81,14 +81,14 @@ module.exports = {
       },
 
       outletPhotoResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       cashierDeskPhotoResourceId: {
-        type: Sequelize.CHAR(27),
+        type: Sequelize.CHAR(27, true),
         references: {
           model: 'resource',
           key: 'id'

@@ -31,6 +31,7 @@
  */
 
 const crypto = require('crypto')
+const ksuid = require('ksuid')
 
 function getUnixTimestamp () {
   return String(Math.floor(Date.now() / 1000))
@@ -43,6 +44,11 @@ module.exports.cbType = {
   cb1: 'cb1',
   cb2: 'cb2',
   cb3: 'cb3'
+}
+
+module.exports.keyStatuses = {
+  CREATED: 'created',
+  ACTIVATED: 'activated'
 }
 
 /**
@@ -288,7 +294,7 @@ module.exports.openCB3Box = (box, key) => {
 }
 
 module.exports.generateCb1Key = async () => {
-  const id = crypto.randomBytes(20).toString('hex')
+  const id = await (ksuid.random()).string
 
   const keyPair = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
@@ -320,7 +326,7 @@ module.exports.generateCb1Key = async () => {
 
 module.exports.generateCb3Key = async () => {
   return {
-    id: crypto.randomBytes(20).toString('hex'),
+    id: await (ksuid.random()).string,
     cbx: 'cb3',
     key: crypto.randomBytes(64).toString('base64')
   }

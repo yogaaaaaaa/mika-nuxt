@@ -25,7 +25,7 @@ module.exports.login = async (req, res, next) => {
 
   options.userTypes = req.body.userTypes
 
-  // Supply bounded terminalId from cipherbox middleware
+  // Supply terminalId from cipherbox middleware
   if (req.cipherbox) {
     options.terminalId = req.body.cipherbox.terminalId
   }
@@ -60,7 +60,7 @@ module.exports.login = async (req, res, next) => {
  * All Middlewares for createTransaction
  */
 module.exports.loginMiddlewares = [
-  cipherboxMiddleware.processCipherbox,
+  cipherboxMiddleware.processCipherbox(),
   exports.loginValidator,
   errorMiddleware.validatorErrorHandler,
   exports.login
@@ -102,7 +102,7 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
 }
 
 /**
- * All Middlewares for createTransaction
+ * All Middlewares for checking session token
  */
 module.exports.sessionTokenCheckMiddlewares = [
   exports.sessionTokenCheckValidator,

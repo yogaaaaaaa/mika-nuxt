@@ -44,7 +44,7 @@ module.exports.validatorErrorHandler = (req, res, next) => {
       msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION,
       validationErrors.map((data) => {
         if (data.msg === 'Invalid value') {
-          return `${data.msg} on ${data.location}.${data.param}`
+          return `${data.location}.${data.param}`
         } else {
           return data.msg
         }
@@ -64,15 +64,15 @@ module.exports.sequelizeErrorHandler = (err, req, res, next) => {
       msgFactory.expressCreateResponse(
         res,
         msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
-        err.fields.map((field) => `Invalid identifier ${field}`)
+        err.fields.map((field) => `${field}`)
       )
     }
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     if (Array.isArray(err.fields)) {
       msgFactory.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
-        err.fields.map((field) => `Unique constraint ${field}`)
+        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT,
+        err.fields.map((field) => `${field}`)
       )
     }
   } else {

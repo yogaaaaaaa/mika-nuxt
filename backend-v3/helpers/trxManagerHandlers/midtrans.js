@@ -10,6 +10,7 @@ module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
     name: 'midtrans',
     classes: ['gopay'],
+    defaultMinimum: 1,
     properties: {
       flows: [
         trxManager.transactionFlows.PROVIDE_TOKEN
@@ -20,10 +21,12 @@ module.exports = (trxManager) => {
       userTokenTypes: []
     },
     async handler (ctx) {
+      let midtransConfig = midtrans.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)
+
       let response = await midtrans.gopayChargeRequest(Object.assign({
         order_id: ctx.transaction.id,
         gross_amount: ctx.transaction.amount
-      }, ctx.paymentProvider.paymentProviderConfig.config))
+      }, midtransConfig))
 
       if (!response) {
         throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
@@ -40,10 +43,12 @@ module.exports = (trxManager) => {
       ctx.transaction.referenceNumberName = 'transaction_id'
     },
     async timeoutHandler (ctx) {
+      let midtransConfig = midtrans.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)
+
       let response = await midtrans.statusTransaction(Object.assign({
         order_id: ctx.transaction.id,
         gross_amount: ctx.transaction.amount
-      }, ctx.paymentProvider.paymentProviderConfig.config))
+      }, midtransConfig))
 
       if (!response) {
         throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
@@ -62,9 +67,9 @@ module.exports = (trxManager) => {
       await ctx.transaction.save()
 
       if (ctx.transaction.status === trxManager.transactionStatuses.FAILED) {
-        await midtrans.expireTransaction({
+        await midtrans.expireTransaction(Object.assign({
           order_id: ctx.transaction.id
-        })
+        }, midtransConfig))
       }
     }
   })

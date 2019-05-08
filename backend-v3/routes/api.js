@@ -11,6 +11,8 @@ const cookieParser = require('cookie-parser')
 
 const auth = require('../helpers/auth')
 
+const appConfig = require('../configs/appConfig')
+
 const generalController = require('../controllers/generalController')
 const agentController = require('../controllers/agentController')
 const transactionController = require('../controllers/transactionController')
@@ -29,9 +31,7 @@ const router = express.Router()
 
 router.use([
   cors({
-    origin: '*',
-    allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'Accept'],
-    methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+    origin: appConfig.allowedOrigin,
     optionsSuccessStatus: 200
   }),
   bodyParser.json(),
@@ -42,7 +42,7 @@ router.use([
  * Hello endpoint
  */
 router.all('/',
-  cipherboxMiddleware.processCipherbox,
+  cipherboxMiddleware.processCipherbox(),
   authMiddleware.auth(),
   generalController.welcome
 )

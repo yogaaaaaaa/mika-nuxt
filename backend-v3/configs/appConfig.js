@@ -25,13 +25,13 @@ let baseConfig = {
   uploadDir: null,
   cacheDir: null,
 
-  allowedOrigin: process.env.MIKA_ALLOWED_ORIGIN || '*',
+  allowedOrigin: process.env.MIKA_ALLOWED_ORIGIN || (process.env.NODE_ENV === 'development' ? '*' : 'https://api.mikaapp.id'),
 
   transactionTimeoutSecond: 200,
 
   authSessionTokenHeader: 'x-access-token',
   authSecretKey: process.env.MIKA_AUTH_SECRET_KEY || 'mika_secret_key',
-  authExpirySecond: process.env.MIKA_API_AUTH_EXPIRY || 21600,
+  authExpirySecond: process.env.MIKA_AUTH_EXPIRY || 21600,
   authSessionLimit: 5,
 
   redisUrls: process.env.MIKA_REDIS_URLS || 'redis://localhost',

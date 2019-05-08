@@ -6,7 +6,6 @@
  */
 
 const request = require('superagent')
-require('superagent-retry-delay')(request)
 
 const extAuth = require('./extApiAuth')
 
@@ -24,7 +23,7 @@ module.exports.createCallback = async (idKey, url, body, callback = () => {}) =>
         .set('Authentication', `Bearer ${serverToken}`)
         .set('Content-type', 'application/json')
         .set('User-Agent', 'MIKA API Callback')
-        .retry(1, 1000)
+        .retry(1)
         .send(bodyString)
     } catch (err) {
       console.error(err)

@@ -10,6 +10,12 @@ module.exports = (trxManager) => {
     // Name to use this handler
     name: 'generic',
 
+    // Default minimum of this payment provider
+    defaultMinimumAmount: 1,
+
+    // Default maximum of this payment provider
+    defaultMaximumAmount: 1000000,
+
     // Classes for this handler. Classes is simple name for **certain** payment provider
     // Used mostly by frontend
     classes: ['generic', 'berkumapay'],

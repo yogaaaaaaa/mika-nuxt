@@ -10,12 +10,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       where: {
         id: req.body.acc_no
       },
-      include: [
-        {
-          model: models.paymentProvider,
-          include: [ models.paymentProviderConfig ]
-        }
-      ]
+      include: [ models.paymentProvider.scope('paymentProviderConfig') ]
     })
 
     if (!transaction) {
@@ -30,9 +25,9 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
     let config = tcash.mixConfig(transaction.paymentProvider.paymentProviderConfig.config)
 
     if (
-      (req.body.terminal === config.terminal) &&
-      (req.body.pwd === config.pwd) &&
-      (req.body.merchant === config.merchant)
+      (req.body.terminal === config.tcashTerminal) &&
+      (req.body.pwd === config.tcashPwd) &&
+      (req.body.merchant === config.tcashMerchant)
     ) {
       if (transaction.status !== trxManager.transactionStatuses.CREATED) {
         res.status(400)

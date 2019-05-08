@@ -15,17 +15,19 @@ function midtransRequestAgent (config) {
     .set('Content-type', 'application/json')
     .set('Accept', 'application/json')
     .set('User-Agent', 'MIKA API')
-    .set('Authorization', config.serverAuth)
+    .set('Authorization', config.midtransServerAuth)
   return request
 }
 
 module.exports.mixConfig = (config) => {
-  return Object.assign({}, exports.baseConfig, config)
+  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  if (!mixedConfig.midtransServerAuth) {
+    mixedConfig.midtransServerAuth = `Basic ${Buffer.from(`${mixedConfig.midtransServerKey}:`)}`
+  }
+  return mixedConfig
 }
 
 module.exports.gopayChargeRequest = async (config) => {
-  config = exports.mixConfig(config)
-
   let requestBody = {
     payment_type: 'gopay',
     transaction_details: {
@@ -52,8 +54,6 @@ module.exports.gopayChargeRequest = async (config) => {
 }
 
 module.exports.expireTransaction = async (config) => {
-  config = exports.mixConfig(config)
-
   try {
     let response = await midtransRequestAgent(config)
       .post(`${config.baseUrl}/v2/${config.order_id || config.transactionId}/expire`)
@@ -66,8 +66,6 @@ module.exports.expireTransaction = async (config) => {
 }
 
 module.exports.statusTransaction = async (config) => {
-  config = exports.mixConfig(config)
-
   try {
     let response = await midtransRequestAgent(config)
       .get(`${config.baseUrl}/v2/${config.order_id}/status`)
@@ -79,14 +77,13 @@ module.exports.statusTransaction = async (config) => {
   }
 }
 
-module.exports.checkNotificationSignature = (signature, config) => {
-  config = exports.mixConfig(config)
+module.exports.checkNotificationSignature = (config) => {
   let generatedSignature = crypto
     .createHash('sha512')
-    .update(`${config.order_id}${config.status_code}${config.gross_amount}${config.serverKey}`)
+    .update(`${config.order_id}${config.status_code}${config.gross_amount}${config.midtransServerKey}`)
     .digest('hex')
 
-  if (generatedSignature.toLowerCase() === signature.toLowerCase()) {
+  if (generatedSignature.toLowerCase() === config.signature_key.toLowerCase()) {
     return generatedSignature
   }
 }

@@ -6,7 +6,7 @@ module.exports = {
     password: process.env.MIKA_DB_PASSWORD || 'mikadev',
     database: process.env.MIKA_DB_NAME || 'mika_v3_12',
     host: process.env.MIKA_DB_HOST || '127.0.0.1',
-    dialect: 'mariadb',
+    dialect: 'mysql',
     freezeTableName: true,
     logging: console.log,
     benchmark: true

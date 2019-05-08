@@ -9,10 +9,10 @@ module.exports = {
         name: 'Terminal 1',
         serialNumber: 'V111178552449',
         imei: '861299031757376',
-        terminalStatus: 'ready',
+        status: 'ready',
         terminalModelId: 2,
-        merchantId: 1,
-        terminalBatchId: 1
+        terminalBatchId: 1,
+        merchantId: 1
       },
 
       {
@@ -21,10 +21,10 @@ module.exports = {
         name: 'Terminal 2',
         serialNumber: 'V111178552500',
         imei: '861299031757380',
-        terminalStatus: 'ready',
+        status: 'ready',
+        terminalBatchId: 1,
         terminalModelId: 1,
-        merchantId: 2,
-        terminalBatchId: 1
+        merchantId: 2
       },
       {
         id: 3,
@@ -32,10 +32,10 @@ module.exports = {
         name: 'Terminal 3',
         serialNumber: 'P111178552501',
         imei: '861299031757480',
-        terminalStatus: 'ready',
+        status: 'ready',
         terminalModelId: 2,
-        merchantId: 2,
-        terminalBatchId: 1
+        terminalBatchId: 1,
+        merchantId: 2
       },
 
       {
@@ -43,7 +43,7 @@ module.exports = {
         name: 'Terminal 4',
         serialNumber: 'V111178552520',
         imei: '861299031757590',
-        terminalStatus: 'arrived',
+        status: 'arrived',
         terminalModelId: 1,
         terminalBatchId: 1
       },
@@ -52,7 +52,7 @@ module.exports = {
         name: 'Terminal 5',
         serialNumber: 'P111178552700',
         imei: '861299031757510',
-        terminalStatus: 'arrived',
+        status: 'arrived',
         terminalModelId: 2,
         terminalBatchId: 1
       }

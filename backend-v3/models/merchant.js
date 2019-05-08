@@ -1,5 +1,8 @@
 'use strict'
 
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
+
 module.exports = (sequelize, DataTypes) => {
   let merchant = sequelize.define('merchant', {
     idAlias: DataTypes.CHAR(40),
@@ -53,6 +56,55 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
+  merchant.addScope('excludeLegal', {
+    attributes: { exclude: [
+      'taxCardNumber',
+      'scannedTaxCardResourceId',
+      'scannedBankStatementResourceId',
+      'scannedSkmenkumhamResourceId',
+      'scannedSiupResourceId',
+      'scannedTdpResourceId',
+      'scannedSkdpResourceId',
+      'ownerIdCardNumber',
+      'ownerIdCardType',
+      'ownerTaxCardNumber',
+      'ownerScannedIdCardResourceId',
+      'ownerScannedTaxCardResourceId'
+    ] }
+  })
+  merchant.addScope('excludeBank', {
+    attributes: { exclude: [
+      'bankName',
+      'bankBranchName',
+      'bankAccountName',
+      'bankAccountNumber'
+    ] }
+  })
+  merchant.addScope('excludePartner', {
+    attributes: { exclude: [
+      'partnerId'
+    ] }
+  })
+  merchant.addScope('paymentProviderConfig', {
+    include: [
+      {
+        model: sequelize.models.paymentProviderConfig,
+        on: {
+          [Op.or]: [
+            { merchantId: null },
+            { merchantId: { [Op.eq]: sequelize.col('merchant.id') } }
+          ]
+        }
+      }
+    ]
+  })
+
+  merchant.addScope('partner', (partnerId) => ({
+    where: {
+      partnerId
+    }
+  }))
+
   merchant.associate = (models) => {
     merchant.belongsTo(models.resource, {
       foreignKey: 'scannedTaxCardResourceId',
@@ -68,8 +120,8 @@ module.exports = (sequelize, DataTypes) => {
     })
     merchant.belongsTo(models.resource, {
       foreignKey: 'scannedSiupResourceId',
-      as: 'scannedSiupResource' }
-    )
+      as: 'scannedSiupResource'
+    })
     merchant.belongsTo(models.resource, {
       foreignKey: 'scannedTdpResourceId',
       as: 'scannedTdpResource'
@@ -84,11 +136,14 @@ module.exports = (sequelize, DataTypes) => {
     })
     merchant.belongsTo(models.resource, {
       foreignKey: 'ownerScannedTaxCardResourceId',
-      as: 'ownerScannedTaxCardResource' }
-    )
+      as: 'ownerScannedTaxCardResource'
+    })
 
     merchant.belongsTo(models.partner, { foreignKey: 'partnerId' })
     merchant.hasMany(models.paymentProvider, { foreignKey: 'merchantId' })
+    merchant.hasMany(models.paymentProviderConfig, { foreignKey: 'merchantId' })
+    merchant.hasMany(models.agent, { foreignKey: 'merchantId' })
+    merchant.hasMany(models.terminal, { foreignKey: 'merchantId' })
 
     merchant.belongsToMany(
       models.paymentProviderType,
@@ -98,44 +153,6 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'paymentProviderTypeId'
       }
     )
-
-    merchant.addScope('excludeLegal', {
-      attributes: { exclude: [
-        'taxCardNumber',
-        'scannedTaxCardResourceId',
-        'scannedBankStatementResourceId',
-        'scannedSkmenkumhamResourceId',
-        'scannedSiupResourceId',
-        'scannedTdpResourceId',
-        'scannedSkdpResourceId',
-        'ownerIdCardNumber',
-        'ownerIdCardType',
-        'ownerTaxCardNumber',
-        'ownerScannedIdCardResourceId',
-        'ownerScannedTaxCardResourceId'
-      ] }
-    })
-    merchant.addScope('excludeBank', {
-      attributes: { exclude: [
-        'bankName',
-        'bankBranchName',
-        'bankAccountName',
-        'bankAccountNumber'
-      ] }
-    })
-    merchant.addScope('excludePartner', {
-      attributes: { exclude: [
-        'partnerId'
-      ] }
-    })
-    merchant.addScope('partner', (partnerId) => {
-      return {
-        attributes: { exclude: ['deletedAt'] },
-        where: {
-          partnerId
-        }
-      }
-    })
   }
 
   return merchant

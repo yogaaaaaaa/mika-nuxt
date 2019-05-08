@@ -19,9 +19,10 @@ module.exports.generateTerminalCbKey = async (req, res, next) => {
       }
     })
     await models.cipherboxKey.create({
-      terminalId: req.params.terminalId,
-      idKey: cb3Key.id,
-      keys: JSON.stringify(cb3Key)
+      id: cb3Key.id,
+      keys: JSON.stringify(cb3Key),
+      status: cipherbox.keyStatus.ACTIVATED,
+      terminalId: req.params.terminalId
     })
   })
 

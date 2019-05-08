@@ -5,24 +5,19 @@
  */
 
 const crypto = require('crypto')
-const request = require('superagent')
+const superagent = require('superagent')
 
-/**
- * Get Default base config object for altoPay/weChatPay
-
- * exports.baseConfig object is used in all alto related function.
- * In most function it will mixed with local config object
- */
 module.exports.baseConfig = require('../configs/ppAltoConfig')
 
 module.exports.mixConfig = (config) => {
-  return Object.assign({}, exports.baseConfig, config)
+  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  if (mixedConfig.altoMchId) {
+    mixedConfig.mch_id = mixedConfig.altoMchId
+  }
 }
 
 /**
  * Convert object to uriEncoded string, doesn't support nested object
- * @param {Object} object
- * @return {String} uri encoded (query string encoded) string of object
  */
 function objectToUriEncoded (object) {
   let component = []
@@ -32,19 +27,11 @@ function objectToUriEncoded (object) {
   return component.join('&')
 }
 
-/**
- * Create Object container used in every AltoPay API request, for more information
- * read AltoPay documentation
- * @param {Buffer} pemPrivateKey in PEM format
- * @param {String} data
- * @param {Boolean} encode when true, return data as urlEncoded string
- * @return {Object|String} return container as Object or uri encoded string
- */
-function altoCreateContainer (pemPrivateKey, data, encode = false) {
+function altoCreateContainer (altoPemPrivateKey, data, encode = false) {
   const signType = 'RSA'
   let sign = crypto.createSign('md5WithRSAEncryption')
     .update(Buffer.from(data, 'utf8'))
-    .sign(pemPrivateKey)
+    .sign(altoPemPrivateKey)
     .toString('base64')
 
   let container = {
@@ -63,16 +50,13 @@ module.exports.altoCreateContainer = altoCreateContainer
 
 /**
  * Verify AltoPay container Object
- * @param {Buffer} pemPublicKey
- * @param {Object} container
- * @returns {Boolean} Return true when container is valid with specified public key
  */
-function altoVerifyContainer (pemPublicKey, container) {
+function altoVerifyContainer (altoPemAltoPublicKey, container) {
   if (container.sign) {
     if (container.data) {
       return crypto.createVerify('md5WithRSAEncryption')
         .update(Buffer.from(container.data, 'utf8'))
-        .verify(pemPublicKey, Buffer.from(container.sign, 'base64'))
+        .verify(altoPemAltoPublicKey, Buffer.from(container.sign, 'base64'))
     }
   }
 }
@@ -89,21 +73,17 @@ function altoResponseCodeCorrect (code) {
 
 /**
  * Make common alto request, used in all alto API request
- * @param {Object} config config object, contain pemPrivateKey and pemPublicKey
- * @returns {Object|null} When all is correct, it will return response data, else is null
  */
-async function altoRequest (url, requestData, config) {
-  let altoResponse = await request.post(url)
+async function altoRequest (url, request, config) {
+  let response = await superagent.post(url)
     .type('application/x-www-form-urlencoded')
-    .send(altoCreateContainer(config.pemPrivateKey, JSON.stringify(requestData)))
+    .send(altoCreateContainer(config.altoPemPrivateKey, JSON.stringify(request)))
 
   if (
-    altoResponseCodeCorrect(altoResponse.body.code) &&
-    altoVerifyContainer(config.pemAltoPublicKey, altoResponse.body)
+    altoResponseCodeCorrect(response.body.code) &&
+    altoVerifyContainer(config.altoPemAltoPublicKey, response.body)
   ) {
-    return JSON.parse(altoResponse.body.data)
-  } else {
-    return null
+    return JSON.parse(response.body.data)
   }
 }
 
@@ -130,25 +110,21 @@ async function altoRequest (url, requestData, config) {
    uri:'https://altopay-app.halodigit.com/qr/pay?tt=mgEBKwABAB4zMjAzMTgxMTI3MTcwNTI5MDAwMHwxMDAwMDE2NjgAAAFnVGqPxAERABA4WISn_QJp03olh9QIYA'
  }
  ```
- * @param {Object} config config object, It will be mixed with exports.baseConfig. Overwrite as necessary
- * @returns {Object|null} return transaction order object if all is correct, null otherwise
  */
 module.exports.altoMakeQrCodePayment = async function (config) {
-  config = exports.mixConfig(config)
-
-  let requestData = {}
-  requestData.mch_id = config.mch_id
-  requestData.trade_type = 'QR_CODE'
-  requestData.currency = config.currency
-  requestData.out_trade_no = config.out_trade_no
-  requestData.amount = config.amount
-  requestData.subject = config.subject
+  let request = {}
+  request.mch_id = config.mch_id
+  request.trade_type = 'QR_CODE'
+  request.currency = config.currency
+  request.out_trade_no = config.out_trade_no
+  request.amount = config.amount
+  request.subject = config.subject
   if (config.operator_id) { // Optional parameter
-    requestData.operator_id = config.operator_id
+    request.operator_id = config.operator_id
   }
-  requestData.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
+  request.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
 
-  return altoRequest(`${config.baseUrl}/mapi/pay/order`, requestData, config)
+  return altoRequest(`${config.baseUrl}/mapi/pay/order`, request, config)
 }
 
 /**
@@ -175,25 +151,21 @@ module.exports.altoMakeQrCodePayment = async function (config) {
   finish_time: 0
  }
  ```
- * @param {Object} config config object, at least include out_trade_no, It will be mixed with exports.baseConfig. Overwrite as necessary
- * @returns {Object|null} return transaction details object if all is correct, null otherwise
  */
 module.exports.altoQueryPayment = async function (config) {
-  config = exports.mixConfig(config)
-
-  let requestData = {}
-  requestData.mch_id = config.mch_id
+  let request = {}
+  request.mch_id = config.mch_id
   if (config.out_trade_no) {
-    requestData.out_trade_no = config.out_trade_no
+    request.out_trade_no = config.out_trade_no
   } else if (config.trade_no) {
-    requestData.trade_no = config.trade_no
+    request.trade_no = config.trade_no
   }
 
-  return altoRequest(`${config.baseUrl}/mapi/pay/query`, requestData, config)
+  return altoRequest(`${config.baseUrl}/mapi/pay/query`, request, config)
 }
 
 /**
- * Refund payment (/mapi/pay/refund) to Alto config, i.e
+ * Refund payment (/mapi/pay/refund) to Alto, i.e
  ```js
  config = {
    out_trade_no: mika_transactionId
@@ -215,25 +187,21 @@ module.exports.altoQueryPayment = async function (config) {
    err_code: '707'
  }
  ```
- * @param {Object} config config object, It will be mixed with exports.baseConfig. Overwrite as necessary
- * @returns {Object|null} return refund result object if all is correct, null otherwise
  */
 module.exports.altoRefundPayment = async function (config) {
-  config = exports.mixConfig(config)
-
-  let requestData = {}
-  requestData.mch_id = config.mch_id
+  let request = {}
+  request.mch_id = config.mch_id
   if (config.out_trade_no) {
-    requestData.out_trade_no = config.out_trade_no
+    request.out_trade_no = config.out_trade_no
   } else if (config.trade_no) {
-    requestData.trade_no = config.trade_no
+    request.trade_no = config.trade_no
   }
-  requestData.out_refund_no = config.out_refund_no
-  requestData.refund_amount = config.refund_amount
-  requestData.amount = config.amount
-  requestData.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
+  request.out_refund_no = config.out_refund_no
+  request.refund_amount = config.refund_amount
+  request.amount = config.amount
+  request.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
 
-  return altoRequest(`${config.baseUrl}/mapi/pay/refund`, requestData, config)
+  return altoRequest(`${config.baseUrl}/mapi/pay/refund`, request, config)
 }
 
 /**
@@ -252,22 +220,18 @@ module.exports.altoRefundPayment = async function (config) {
     refund_status: 1
   }
  ```
- * @param {Object} config config object, It will be mixed with exports.baseConfig. Overwrite as necessary
- * @returns {Object|null} return refund details object if all is correct, null otherwise
  */
 module.exports.altoQueryRefundPayment = async function (config) {
-  config = exports.mixConfig(config)
-
-  let requestData = {}
-  requestData.mch_id = config.mch_id
+  let request = {}
+  request.mch_id = config.mch_id
   if (config.out_trade_no) {
-    requestData.out_trade_no = config.out_trade_no
+    request.out_trade_no = config.out_trade_no
   } else if (config.trade_no) {
-    requestData.trade_no = config.trade_no
+    request.trade_no = config.trade_no
   }
-  requestData.out_refund_no = config.out_refund_no
-  requestData.refund_amount = config.refund_amount
-  requestData.amount = config.amount
+  request.out_refund_no = config.out_refund_no
+  request.refund_amount = config.refund_amount
+  request.amount = config.amount
 
-  return altoRequest(`${config.baseUrl}/mapi/pay/refund_query`, requestData, config)
+  return altoRequest(`${config.baseUrl}/mapi/pay/refund_query`, request, config)
 }

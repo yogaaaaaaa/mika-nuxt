@@ -1,5 +1,10 @@
 'use strict'
 
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
+
+const script = require('../helpers/script')
+
 module.exports = (sequelize, DataTypes) => {
   let paymentProvider = sequelize.define('paymentProvider', {
     name: DataTypes.STRING,
@@ -25,46 +30,53 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
+  paymentProvider.addScope('excludeShare', {
+    attributes: {
+      exclude: [
+        'shareMerchant',
+        'shareMerchantWithPartner',
+        'sharePartner',
+        'directSettlement'
+      ]
+    }
+  })
+  paymentProvider.addScope('excludeExtra', {
+    attributes: {
+      exclude: [
+        'minimumAmount',
+        'maximumAmount',
+        'gateway',
+        'hidden'
+      ]
+    }
+  })
+
+  paymentProvider.addScope('paymentProviderType', () => ({
+    include: [
+      sequelize.models.paymentProviderType
+    ]
+  }))
+  paymentProvider.addScope('paymentProviderConfig', () => ({
+    include: [
+      sequelize.models.paymentProviderConfig.scope('paymentProviderConfigKv')
+    ]
+  }))
+  paymentProvider.addScope('agentExclusion', (agentId) => ({
+    where: {
+      id: {
+        [Op.notIn]: Sequelize.literal(
+          `(${script.get('query/getAgentPaymentProviderExclusion.sql', [agentId])})`
+        )
+      }
+    }
+  }))
+
   paymentProvider.associate = (models) => {
     paymentProvider.belongsTo(models.merchant, { foreignKey: 'merchantId' })
     paymentProvider.belongsTo(models.paymentProviderConfig, { foreignKey: 'paymentProviderConfigId' })
     paymentProvider.belongsTo(models.paymentProviderType, { foreignKey: 'paymentProviderTypeId' })
 
     paymentProvider.hasMany(models.transaction, { foreignKey: 'paymentProviderId' })
-
-    paymentProvider.addScope('excludeShare', {
-      attributes: {
-        exclude: [
-          'shareMerchant',
-          'shareMerchantWithPartner',
-          'sharePartner',
-          'directSettlement'
-        ]
-      }
-    })
-    paymentProvider.addScope('excludeExtra', {
-      attributes: {
-        exclude: [
-          'minimumAmount',
-          'maximumAmount',
-          'gateway',
-          'hidden'
-        ]
-      }
-    })
-    paymentProvider.addScope('agent', (merchantId) => ({
-      where: merchantId ? { merchantId } : undefined,
-      exclude: [
-        'shareMerchant',
-        'shareMerchantWithPartner',
-        'sharePartner',
-        'directSettlement'
-      ],
-      include: [
-        models.paymentProviderType.scope('excludeTimestamp'),
-        models.paymentProviderConfig.scope('excludeTimestamp', 'excludeConfig')
-      ]
-    }))
   }
 
   return paymentProvider

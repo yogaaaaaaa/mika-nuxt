@@ -164,11 +164,17 @@ let baseConfig = {
       status: 'auth-410',
       message: 'Cannot change password'
     },
-    MSG_ERROR_INVALID_CIPHERBOX: {
+    MSG_ERROR_AUTH_CIPHERBOX_INVALID: {
       isError: true,
       httpStatus: 400,
       status: 'auth-420',
       message: 'Cannot open cipherbox'
+    },
+    MSG_ERROR_AUTH_CIPHERBOX_MANDATORY: {
+      isError: true,
+      httpStatus: 403,
+      status: 'auth-421',
+      message: 'Cipherbox needed for this endpoint'
     },
 
     MSG_SUCCESS_TRANSACTION_CREATED: {
