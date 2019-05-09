@@ -17,6 +17,7 @@ module.exports.mixConfig = (config) => {
   if (mixedConfig.altoMchId) {
     mixedConfig.mch_id = mixedConfig.altoMchId
   }
+  return mixedConfig
 }
 
 /**
