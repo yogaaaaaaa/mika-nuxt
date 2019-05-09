@@ -81,7 +81,7 @@ module.exports.filtersToSequelizeValidator = (validModels) => [
           }
         } else {
           if (!models[validModels[0]].rawAttributes.hasOwnProperty(field)) return false // correct property of top model
-          if (models[fieldComponents[0]].rawAttributes[fieldComponents[0]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
+          if (models[validModels[0]].rawAttributes[fieldComponents[0]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
         }
       }
       return true

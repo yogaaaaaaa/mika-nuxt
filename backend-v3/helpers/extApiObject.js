@@ -64,7 +64,7 @@ module.exports.mapAgent = (agent) => {
   mappedAgent.merchant.merchantName = agent.merchant.name
 
   mappedAgent.paymentProviders = []
-  for (let paymentProvider of agent.paymentProviders) {
+  for (let paymentProvider of agent.merchant.paymentProviders) {
     mappedAgent.paymentProviders.push({
       paymentProviderId: String(paymentProvider.id),
       paymentProviderName: paymentProvider.paymentProviderType.name,

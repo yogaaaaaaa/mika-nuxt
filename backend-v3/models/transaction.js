@@ -94,7 +94,7 @@ module.exports = (sequelize, DataTypes) => {
         {
           model: sequelize.models.paymentProvider,
           include: [
-            sequelize.sequelize.models.paymentProviderType
+            sequelize.models.paymentProviderType
           ]
         },
         {

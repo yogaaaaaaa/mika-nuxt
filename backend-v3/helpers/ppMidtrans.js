@@ -7,6 +7,9 @@
 const crypto = require('crypto')
 const superagent = require('superagent')
 
+module.exports.handlerName = 'midtrans'
+module.exports.handlerClasses = ['gopay']
+
 module.exports.baseConfig = require('../configs/ppMidtransConfig')
 
 function midtransRequestAgent (config) {
@@ -43,7 +46,12 @@ module.exports.gopayChargeRequest = async (config) => {
   }
 
   try {
-    let response = await midtransRequestAgent(config)
+    let request = midtransRequestAgent(config)
+    if (config.notifUrl) {
+      request.set('X-Override-Notification', config.notifUrl)
+    }
+
+    let response = await request
       .post(`${config.baseUrl}/v2/charge`)
       .send(requestBody)
 

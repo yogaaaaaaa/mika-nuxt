@@ -64,6 +64,17 @@ module.exports.errorToMsgTypes = (err) => {
  */
 module.exports.ppHandlers = []
 
+module.exports.getPpInformation = (handler) => {
+  let ppHandler = exports.findPpHandler(handler)
+  return {
+    name: ppHandler.name,
+    classes: ppHandler.classes,
+    defaultMaximumAmount: ppHandler.defaultMaximumAmount ? ppHandler.defaultMaximumAmount : null,
+    defaultMinimumAmount: ppHandler.defaultMinimumAmount ? ppHandler.defaultMinimumAmount : null,
+    properties: ppHandler.properties
+  }
+}
+
 /**
  * Find payment provider handler
  * based on name
@@ -160,9 +171,18 @@ module.exports.create = async (transaction, options) => {
     if (ctx.transaction.amount < ctx.paymentProvider.minimumAmount) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_LOW)
     }
+  } else if (ctx.ppHandler.defaultMinimumAmount) {
+    if (ctx.transaction.amount < ctx.ppHandler.defaultMinimumAmount) {
+      throw exports.error(exports.errorTypes.AMOUNT_TOO_LOW)
+    }
   }
-  if (ctx.paymentProvider.maximumAmount) {
-    if (ctx.transaction.amount > ctx.paymentProvider.maximumAmount) {
+
+  if (ctx.paymentProvider.defaultMaximumAmount) {
+    if (ctx.transaction.amount > ctx.paymentProvider.defaultMaximumAmount) {
+      throw exports.error(exports.errorTypes.AMOUNT_TOO_HIGH)
+    }
+  } else if (ctx.ppHandler.defaultMaximum) {
+    if (ctx.transaction.amount > ctx.ppHandler.defaultMaximum) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_HIGH)
     }
   }

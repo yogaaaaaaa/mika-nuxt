@@ -55,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
         include: [
           {
             where: paymentProviderId ? { id: paymentProviderId } : undefined,
+            required: false,
             model: sequelize.models.paymentProvider.scope(
               'paymentProviderType',
               'paymentProviderConfig',
@@ -86,6 +87,7 @@ module.exports = (sequelize, DataTypes) => {
               model: sequelize.models.paymentProvider.scope(
                 { method: ['agentExclusion', '`agent`.`id`'] }
               ),
+              required: false,
               include: [
                 sequelize.models.paymentProviderType
               ]

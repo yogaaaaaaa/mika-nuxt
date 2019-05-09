@@ -162,15 +162,7 @@ module.exports.getAgentTransactions = async (req, res, next) => {
  */
 module.exports.getAgentTransactionsMiddlewares = [
   queryMiddleware.paginationToSequelizeValidator('transaction'),
-  queryMiddleware
-    .filtersToSequelizeValidator(
-      [
-        'transaction',
-        'agent',
-        'paymentProvider',
-        'paymentProviderType',
-        'paymentProviderConfig'
-      ]),
+  queryMiddleware.filtersToSequelizeValidator(['transaction']),
   errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,

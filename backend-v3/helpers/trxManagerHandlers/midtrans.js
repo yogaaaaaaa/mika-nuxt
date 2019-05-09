@@ -8,9 +8,10 @@ const midtrans = require('../ppMidtrans')
 
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
-    name: 'midtrans',
-    classes: ['gopay'],
-    defaultMinimum: 1,
+    name: midtrans.handlerName,
+    classes: midtrans.handlerClasses,
+    defaultMinimumAmount: 1,
+    defaultMaximumAmount: null,
     properties: {
       flows: [
         trxManager.transactionFlows.PROVIDE_TOKEN

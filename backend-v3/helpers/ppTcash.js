@@ -4,6 +4,9 @@
  * Providing various constant and function related to Tcash payment gateway
  */
 
+module.exports.handlerName = 'tcash'
+module.exports.handlerClasses = ['linkaja', 'tcash']
+
 module.exports.baseConfig = require('../configs/ppTcashConfig')
 
 module.exports.tcashMessageCode = {

@@ -7,6 +7,9 @@
 const crypto = require('crypto')
 const superagent = require('superagent')
 
+module.exports.handlerName = 'alto'
+module.exports.handlerClasses = ['wechatpay', 'alipay']
+
 module.exports.baseConfig = require('../configs/ppAltoConfig')
 
 module.exports.mixConfig = (config) => {

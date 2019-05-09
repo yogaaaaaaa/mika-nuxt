@@ -10,7 +10,16 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       where: {
         id: req.body.acc_no
       },
-      include: [ models.paymentProvider.scope('paymentProviderConfig') ]
+      include: [{
+        required: true,
+        model: models.paymentProvider.scope('id'),
+        include: [
+          {
+            model: models.paymentProviderConfig.scope('paymentProviderConfigKv'),
+            where: { handler: tcash.handlerName }
+          }
+        ]
+      }]
     })
 
     if (!transaction) {

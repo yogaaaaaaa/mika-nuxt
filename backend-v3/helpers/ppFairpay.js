@@ -9,6 +9,9 @@ const superagent = require('superagent')
 const emv = require('./emv')
 const redis = require('./redis')
 
+module.exports.handlerName = 'fairpay'
+module.exports.handlerClasses = ['emvDebit', 'emvCredit']
+
 exports.baseConfig = require('../configs/ppFairpayConfig')
 
 /**
@@ -183,7 +186,7 @@ module.exports.createSaleRequest = (config) => {
   config.saleRequest.track_ksn_index = emv.ksnCounterGet(config.track_ksn)
   config.saleRequest.track_2_len = String(config.track2Data.length)
   config.saleRequest.track_2_hash = hashSHA512(config.track2Data)
-  config.saleRequest.track_2_enc = emv.encrypt3DESDataWithIPEK(config.track_ipek, config.track_ksn, emv.evenAndPadHexstring(track2Data))
+  config.saleRequest.track_2_enc = emv.encrypt3DESDataWithIPEK(config.track_ipek, config.track_ksn, emv.evenAndPadHexstring(config.track2Data))
   return config.saleRequest
 }
 

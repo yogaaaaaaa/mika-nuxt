@@ -8,8 +8,8 @@ const alto = require('../ppAlto')
 
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
-    name: 'alto',
-    classes: ['wechatpay', 'alipay'],
+    name: alto.handlerName,
+    classes: alto.handlerClasses,
     defaultMinimumAmount: 1000,
     defaultMaximumAmount: 20000000,
     properties: {

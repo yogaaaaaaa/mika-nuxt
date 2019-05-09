@@ -30,7 +30,7 @@ Vw/qVE3t7QIDAQAB
 
 let baseConfig = {
   baseUrl: 'https://pay.altopay.co.id',
-  notifyEndpoint: '/payment/alto/notif',
+  notifEndpoint: '/payment/alto/notif',
   notify_url: null,
   currency: 'IDR',
 
@@ -38,7 +38,7 @@ let baseConfig = {
   altoPemAltoPublicKey: pemAltoPublicKey,
   altoMchId: '101876'
 }
-baseConfig.notify_url = `${appConfig.apiBaseUrl}${baseConfig.notifyEndpoint}`
+baseConfig.notify_url = `${appConfig.baseUrl}${baseConfig.notifEndpoint}`
 
 /**
  * Load external config file

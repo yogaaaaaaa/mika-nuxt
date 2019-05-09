@@ -6,6 +6,8 @@
 
 const configName = 'ppMidtransConfig'
 
+const appConfig = require('./appConfig')
+
 let baseConfig = {
   notifEndpoint: '/payment/midtrans/notif',
   baseUrl: 'https://api.sandbox.midtrans.com',
@@ -14,6 +16,8 @@ let baseConfig = {
   midtransServerKey: 'SB-Mid-server-ohKRhnChkUctCWyKvWHubiVF',
   midtransMerchantId: 'G242671487'
 }
+
+baseConfig.notifUrl = `${appConfig.baseUrl}${baseConfig.notifEndpoint}`
 
 /**
  * Load external config file

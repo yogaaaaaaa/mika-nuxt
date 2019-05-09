@@ -8,8 +8,10 @@ const fairpay = require('../ppFairpay')
 
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
-    name: 'fairpay',
-    classes: ['emvDebit', 'emvCredit'],
+    name: fairpay.handlerName,
+    classes: fairpay.handlerClasses,
+    defaultMinimumAmount: null,
+    defaultMaximumAmount: null,
     properties: {
       flows: [
         trxManager.transactionFlows.GET_TOKEN,

@@ -9,8 +9,8 @@ const queryMiddleware = require('../middlewares/queryMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const models = require('../models')
-const Sequelize = models.Sequelize
-const Op = Sequelize.Op
+// const Sequelize = models.Sequelize
+// const Op = Sequelize.Op
 
 module.exports.createAdminValidator = [
   body('name').isString(),
@@ -53,7 +53,7 @@ module.exports.getAdmins = async (req, res, next) => {
 
 module.exports.getAdminsMiddlewares = [
   queryMiddleware.paginationToSequelizeValidator('admin'),
-  queryMiddleware.filtersToSequelizeValidator(['admin', 'user']),
+  queryMiddleware.filtersToSequelizeValidator(['admin']),
   errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,

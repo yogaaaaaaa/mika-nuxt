@@ -11,7 +11,7 @@ const ppAltoConfig = require('../configs/ppAltoConfig')
 
 const router = express.Router()
 router.post(
-  ppAltoConfig.notifyEndpoint,
+  ppAltoConfig.notifEndpoint,
   bodyParser.urlencoded({ extended: false }),
   ppAltoNotifController.altoHandleNotification
 )

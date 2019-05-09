@@ -4,15 +4,6 @@ const trxManager = require('../helpers/trxManager')
 const msgFactory = require('../helpers/msgFactory')
 const models = require('../models')
 
-function getPpHandler (handler) {
-  let ppHandler = trxManager.findPpHandler(handler)
-  return {
-    name: ppHandler.name,
-    classes: ppHandler.classes,
-    properties: ppHandler.properties
-  }
-}
-
 /**
  * Get one or many agent's payment providers (via `req.auth.userType`)
  */
@@ -59,7 +50,7 @@ module.exports.getAgentPaymentProviders = async (req, res, next) => {
       paymentProviders ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msgFactory.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
       paymentProviders.map((paymentProvider) => {
         paymentProvider = paymentProvider.toJSON()
-        paymentProvider._handler = getPpHandler(paymentProvider.paymentProviderConfig.handler)
+        paymentProvider._handler = trxManager.getPpInformation(paymentProvider.paymentProviderConfig.handler)
         return paymentProvider
       })
     )

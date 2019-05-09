@@ -8,9 +8,10 @@ const tcash = require('../ppTcash')
 
 module.exports = (trxManager) => {
   trxManager.ppHandlers.push({
-    name: 'tcash',
-    classes: ['linkaja', 'tcash'],
-    defaultMinimum: 100,
+    name: tcash.handlerName,
+    classes: tcash.handlerClasses,
+    defaultMinimumAmount: 100,
+    defaultMaximumAmount: null,
     properties: {
       flows: [
         trxManager.transactionFlows.PROVIDE_TOKEN

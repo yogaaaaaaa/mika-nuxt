@@ -155,7 +155,7 @@ module.exports = {
         sharePartner: 0.01,
         paymentProviderTypeId: 1,
         paymentProviderConfigId: 1,
-        merchantId: 3
+        merchantId: 4
       },
       {
         name: 'Gopay Sayur Jayagiri',
@@ -166,7 +166,7 @@ module.exports = {
         sharePartner: 0.01,
         paymentProviderTypeId: 2,
         paymentProviderConfigId: 2,
-        merchantId: 3
+        merchantId: 4
       },
 
       {
