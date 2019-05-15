@@ -1,7 +1,7 @@
 'use strict'
 
 const multer = require('multer')
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 
 const models = require('../models')
 

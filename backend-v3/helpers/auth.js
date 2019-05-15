@@ -17,7 +17,7 @@ module.exports.userTypes = {
   AGENT: 'agent',
   MERCHANT_STAFF: 'merchantStaff',
   PARTNER_STAFF: 'partnerStaff',
-  PAYMENT_PROVIDER_STAFF: 'paymentProviderStaff'
+  ACQUIRER_STAFF: 'acquirerStaff'
 }
 
 module.exports.userRoles = {
@@ -107,38 +107,11 @@ module.exports.doAuth = async function (username, password, options = {}) {
       },
       attributes: ['id', 'secure', 'merchantId']
     })
-
     if (agent) {
       authResult.auth.userType = exports.userTypes.AGENT
       authResult.auth.agentId = agent.id
-      authResult.auth.terminalId = null
-
-      if (agent.secure || options.terminalId) {
-        if (!options.terminalId) return
-        let terminal = await models.terminal.scope('id').findOne({
-          where: {
-            id: options.terminalId,
-            merchantId: agent.merchantId
-          }
-        })
-        if (!terminal) return
-        authResult.auth.terminalId = options.terminalId
-      }
+      authResult.auth.merchantId = agent.merchantId
       authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
-    }
-  }
-
-  if (user.userType === exports.userTypes.ADMIN) {
-    let admin = await models.admin.findOne({
-      where: {
-        userId: user.id
-      },
-      attributes: ['id']
-    })
-
-    if (admin) {
-      authResult.auth.userType = exports.userTypes.ADMIN
-      authResult.auth.adminId = admin.id
     }
   }
 
@@ -149,11 +122,37 @@ module.exports.doAuth = async function (username, password, options = {}) {
       },
       attributes: ['id']
     })
-
     if (merchantStaff) {
       authResult.auth.userType = exports.userTypes.MERCHANT_STAFF
+      authResult.auth.merchantId = merchantStaff.merchantId
       authResult.auth.merchantStaffId = merchantStaff.id
     }
+  }
+
+  if (user.userType === exports.userTypes.ADMIN) {
+    let admin = await models.admin.findOne({
+      where: {
+        userId: user.id
+      },
+      attributes: ['id']
+    })
+    if (admin) {
+      authResult.auth.userType = exports.userTypes.ADMIN
+      authResult.auth.adminId = admin.id
+    }
+  }
+
+  if ((user.secure || options.terminalId) && authResult.auth.merchantId && authResult.auth.userType) {
+    if (!options.terminalId) return
+    authResult.auth.terminalId = null
+    let terminal = await models.terminal.scope('id').findOne({
+      where: {
+        id: options.terminalId,
+        merchantId: authResult.auth.merchantId
+      }
+    })
+    if (!terminal) return
+    authResult.auth.terminalId = options.terminalId
   }
 
   if (authResult.auth.userType) {

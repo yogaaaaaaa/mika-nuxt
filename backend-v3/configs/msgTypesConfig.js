@@ -4,7 +4,7 @@
  * Default message factory type
  */
 
-const configName = 'msgFactoryTypesConfig'
+const configName = 'msgTypesConfig'
 
 let baseConfig = {
   /**
@@ -174,7 +174,7 @@ let baseConfig = {
       isError: true,
       httpStatus: 403,
       status: 'auth-421',
-      message: 'Cipherbox needed for this endpoint'
+      message: 'Cipherbox is mandatory for this endpoint'
     },
 
     MSG_SUCCESS_TRANSACTION_CREATED: {
@@ -195,12 +195,12 @@ let baseConfig = {
     MSG_SUCCESS_TRANSACTION_REDIRECTED: {
       httpStatus: 303,
       status: 'trx-303',
-      message: 'Redirect transaction to another payment provider'
+      message: 'Redirect transaction to another acquirer'
     },
-    MSG_ERROR_TRANSACTION_INVALID_PAYMENT_PROVIDER: {
+    MSG_ERROR_TRANSACTION_INVALID_ACQUIRER: {
       httpStatus: 400,
       status: 'trx-400',
-      message: 'Invalid payment provider'
+      message: 'Invalid acquirer'
     },
     MSG_ERROR_TRANSACTION_NEED_USER_TOKEN: {
       httpStatus: 400,
@@ -234,23 +234,23 @@ let baseConfig = {
       status: 'trx-441',
       message: 'Transaction amount is too high'
     },
-    MSG_ERROR_TRANSACTION_UNSUPPORTED_PAYMENT_PROVIDER: {
+    MSG_ERROR_TRANSACTION_UNSUPPORTED_ACQUIRER: {
       isError: true,
       httpStatus: 500,
       status: 'trx-500',
-      message: 'This payment provider is not currently supported'
+      message: 'This acquirer is not currently supported'
     },
-    MSG_ERROR_TRANSACTION_PAYMENT_PROVIDER_NOT_RESPONDING: {
+    MSG_ERROR_TRANSACTION_ACQUIRER_NOT_RESPONDING: {
       isError: true,
       httpStatus: 500,
       status: 'trx-501',
-      message: 'Cannot create transaction, payment provider is not responding'
+      message: 'Cannot create transaction, acquirer is not responding'
     },
-    MSG_ERROR_TRANSACTION_PAYMENT_PROVIDER_ERROR: {
+    MSG_ERROR_TRANSACTION_ACQUIRER_HANDLER_ERROR: {
       isError: true,
       httpStatus: 500,
       status: 'trx-502',
-      message: 'Cannot create transaction, error occurred with payment provider'
+      message: 'Cannot create transaction, error occurred with acquirer handler'
     }
   },
 

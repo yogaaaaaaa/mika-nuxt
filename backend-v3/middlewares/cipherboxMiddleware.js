@@ -1,6 +1,6 @@
 'use strict'
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const cipherbox = require('../helpers/cipherbox')
 const models = require('../models')
 
@@ -48,9 +48,9 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
 
       if (!unbox) {
         debug.processCipherbox('unbox failed')
-        msgFactory.expressCreateResponse(
+        msg.expressCreateResponse(
           res,
-          msgFactory.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
+          msg.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
         )
         return
       }
@@ -87,16 +87,18 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
       }
     }
     next()
-  } else if (mandatory) {
-    if (req.auth) {
-      if (req.auth.terminalId) {
-        msgFactory.expressCreateResponse(
-          res,
-          msgFactory.msgTypes.MSG_ERROR_AUTH_CIPHERBOX_MANDATORY
-        )
-        return
-      }
+    return
+  }
+
+  if (mandatory && req.auth) {
+    if (req.auth.terminalId) {
+      msg.expressCreateResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_AUTH_CIPHERBOX_MANDATORY
+      )
+      return
     }
   }
+
   next()
 }

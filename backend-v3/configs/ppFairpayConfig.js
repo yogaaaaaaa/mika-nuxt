@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Default fairpay payment provider config
+ * Default fairpay acquirer config
  */
 
 const configName = 'ppFairpayConfig'

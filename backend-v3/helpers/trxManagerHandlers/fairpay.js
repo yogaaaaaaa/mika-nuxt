@@ -1,13 +1,13 @@
 'use strict'
 
 /**
- * Fairpay middleware payment provider handler
+ * Fairpay middleware acquirer handler
  */
 
-const fairpay = require('../ppFairpay')
+const fairpay = require('../aqFairpay')
 
 module.exports = (trxManager) => {
-  trxManager.ppHandlers.push({
+  trxManager.acquirerHandlers.push({
     name: fairpay.handlerName,
     classes: fairpay.handlerClasses,
     defaultMinimumAmount: null,
@@ -30,7 +30,7 @@ module.exports = (trxManager) => {
           amount: ctx.transaction.amount
         },
         ctx.transaction.userToken,
-        ctx.paymentProvider.paymentProviderConfig.config
+        ctx.acquirer.acquirerConfig.config
       ))
 
       ctx.transaction.userToken = undefined
@@ -60,7 +60,7 @@ module.exports = (trxManager) => {
         // TODO: rollback need to decided when saving signature fail
         await fairpay.apiSaveSignature(fpCtx)
       } else {
-        throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
       }
     }
   })

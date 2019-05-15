@@ -1,5 +1,10 @@
 'use strict'
 
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
+
+const script = require('../helpers/script')
+
 module.exports = (sequelize, DataTypes) => {
   let outlet = sequelize.define('outlet', {
     idAlias: DataTypes.CHAR(40),
@@ -57,6 +62,18 @@ module.exports = (sequelize, DataTypes) => {
       'merchantId'
     ] }
   })
+  outlet.addScope('merchantStaff', (merchantStaffId) => ({
+    attributes: {
+      exclude: ['deletedAt']
+    },
+    where: {
+      id: {
+        [Op.in]: Sequelize.literal(
+          script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+        )
+      }
+    }
+  }))
 
   outlet.associate = function (models) {
     outlet.belongsTo(models.resource, {

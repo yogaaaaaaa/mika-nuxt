@@ -20,6 +20,12 @@ module.exports = {
         type: Sequelize.CHAR(64, true)
       },
 
+      secure: {
+        allowNull: false,
+        defaultValue: false,
+        type: Sequelize.BOOLEAN
+      },
+
       userType: {
         allowNull: false,
         type: Sequelize.CHAR(32)

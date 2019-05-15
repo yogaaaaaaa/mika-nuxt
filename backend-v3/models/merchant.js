@@ -85,10 +85,10 @@ module.exports = (sequelize, DataTypes) => {
       'partnerId'
     ] }
   })
-  merchant.addScope('paymentProviderConfig', {
+  merchant.addScope('acquirerConfig', {
     include: [
       {
-        model: sequelize.models.paymentProviderConfig,
+        model: sequelize.models.acquirerConfig,
         on: {
           [Op.or]: [
             { merchantId: null },
@@ -140,17 +140,17 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     merchant.belongsTo(models.partner, { foreignKey: 'partnerId' })
-    merchant.hasMany(models.paymentProvider, { foreignKey: 'merchantId' })
-    merchant.hasMany(models.paymentProviderConfig, { foreignKey: 'merchantId' })
+    merchant.hasMany(models.acquirer, { foreignKey: 'merchantId' })
+    merchant.hasMany(models.acquirerConfig, { foreignKey: 'merchantId' })
     merchant.hasMany(models.agent, { foreignKey: 'merchantId' })
     merchant.hasMany(models.terminal, { foreignKey: 'merchantId' })
 
     merchant.belongsToMany(
-      models.paymentProviderType,
+      models.acquirerType,
       {
-        through: 'merchantPaymentProviderType',
+        through: 'merchantAcquirerType',
         foreignKey: 'merchantId',
-        otherKey: 'paymentProviderTypeId'
+        otherKey: 'acquirerTypeId'
       }
     )
   }

@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('paymentProviderType', [
+    return queryInterface.bulkInsert('acquirerType', [
       {
         id: 1,
         class: 'linkaja',
@@ -56,6 +56,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('paymentProviderType', null, {})
+    return queryInterface.bulkDelete('acquirerType', null, {})
   }
 }

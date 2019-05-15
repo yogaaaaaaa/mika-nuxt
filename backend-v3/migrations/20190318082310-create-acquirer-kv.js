@@ -3,7 +3,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (t) => {
-      await queryInterface.createTable('paymentProviderConfigKv', {
+      await queryInterface.createTable('acquirerConfigKv', {
         id: {
           allowNull: false,
           autoIncrement: true,
@@ -11,11 +11,11 @@ module.exports = {
           type: Sequelize.INTEGER
         },
 
-        paymentProviderConfigId: {
+        acquirerConfigId: {
           allowNull: false,
           type: Sequelize.INTEGER,
           references: {
-            model: 'paymentProviderConfig',
+            model: 'acquirerConfig',
             key: 'id'
           }
         },
@@ -27,11 +27,11 @@ module.exports = {
           type: Sequelize.STRING(2048)
         }
       }, { transaction: t })
-      await queryInterface.addIndex('paymentProviderConfigKv', { fields: ['paymentProviderConfigId', 'name'], unique: true, transaction: t })
-      await queryInterface.addIndex('paymentProviderConfigKv', { fields: ['value'], transaction: t })
+      await queryInterface.addIndex('acquirerConfigKv', { fields: ['acquirerConfigId', 'name'], unique: true, transaction: t })
+      await queryInterface.addIndex('acquirerConfigKv', { fields: ['value'], transaction: t })
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('paymentProviderConfigKv')
+    return queryInterface.dropTable('acquirerConfigKv')
   }
 }

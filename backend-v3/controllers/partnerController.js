@@ -2,7 +2,7 @@
 
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const extApiAuth = require('../helpers/extApiAuth')
 const models = require('../models')
 
@@ -23,9 +23,9 @@ module.exports.generatePartnerApiKey = async (req, res, next) => {
     }, { transaction: t })
   })
 
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS,
+    msg.msgTypes.MSG_SUCCESS,
     key
   )
 }

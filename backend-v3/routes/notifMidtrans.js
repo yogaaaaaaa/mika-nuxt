@@ -6,7 +6,7 @@
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const ppMidtransNotifController = require('../controllers/ppMidtransNotifController')
+const ppMidtransNotifController = require('../controllers/aqMidtransNotifController')
 const ppMidtransConfig = require('../configs/ppMidtransConfig')
 const router = express.Router()
 

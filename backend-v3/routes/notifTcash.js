@@ -3,7 +3,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const urlBodyParser = bodyParser.urlencoded({ extended: false })
-const ppTcashNotifController = require('../controllers/ppTcashNotifController')
+const ppTcashNotifController = require('../controllers/aqTcashNotifController')
 const ppTcashConfig = require('../configs/ppTcashConfig')
 
 const router = express.Router()

@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Default TCASH/LinkAja Payment provider config
+ * Default TCASH/LinkAja Acquirer config
  */
 
 const configName = 'ppTcashConfig'

@@ -17,7 +17,7 @@ const dTimer = require('./dTimer')
 const events = Object.create(require('events').prototype)
 
 const appConfig = require('../configs/appConfig')
-const { msgTypes } = require('../configs/msgFactoryTypesConfig')
+const { msgTypes } = require('../configs/msgTypesConfig')
 const types = require('../configs/trxManagerTypesConfig')
 
 module.exports.types = types
@@ -41,7 +41,7 @@ module.exports.error = (name, message) => {
 }
 
 /**
- * Map trxManager errorTypes to msgFactory msgTypes
+ * Map trxManager errorTypes to msg msgTypes
  */
 module.exports.errorToMsgTypes = (err) => {
   if (err.name === exports.errorTypes.AMOUNT_TOO_LOW) {
@@ -50,39 +50,39 @@ module.exports.errorToMsgTypes = (err) => {
     return msgTypes.MSG_ERROR_TRANSACTION_AMOUNT_TOO_HIGH
   } else if (err.name === exports.errorTypes.NEED_USER_TOKEN) {
     return msgTypes.MSG_ERROR_TRANSACTION_NEED_USER_TOKEN
-  } else if (err.name === exports.errorTypes.INVALID_PAYMENT_PROVIDER) {
-    return msgTypes.MSG_ERROR_TRANSACTION_INVALID_PAYMENT_PROVIDER
-  } else if (err.name === exports.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING) {
-    return msgTypes.MSG_ERROR_TRANSACTION_PAYMENT_PROVIDER_NOT_RESPONDING
+  } else if (err.name === exports.errorTypes.INVALID_ACQUIRER) {
+    return msgTypes.MSG_ERROR_TRANSACTION_INVALID_ACQUIRER
+  } else if (err.name === exports.errorTypes.ACQUIRER_NOT_RESPONDING) {
+    return msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_NOT_RESPONDING
   } else if (err.name === exports.errorTypes.INVALID_TRANSACTION) {
   } else if (err.name === exports.errorTypes.INVALID_AGENT) {
   }
 }
 
 /**
- * Array containing payment provider handler
+ * Array containing acquirer handler
  */
-module.exports.ppHandlers = []
+module.exports.acquirerHandlers = []
 
-module.exports.getPpInformation = (handler) => {
-  let ppHandler = exports.findPpHandler(handler)
+module.exports.getAcquirerInfo = (handler) => {
+  let acquirerHandler = exports.findAcquirerHandler(handler)
   return {
-    name: ppHandler.name,
-    classes: ppHandler.classes,
-    defaultMaximumAmount: ppHandler.defaultMaximumAmount ? ppHandler.defaultMaximumAmount : null,
-    defaultMinimumAmount: ppHandler.defaultMinimumAmount ? ppHandler.defaultMinimumAmount : null,
-    properties: ppHandler.properties
+    name: acquirerHandler.name,
+    classes: acquirerHandler.classes,
+    defaultMaximumAmount: acquirerHandler.defaultMaximumAmount ? acquirerHandler.defaultMaximumAmount : null,
+    defaultMinimumAmount: acquirerHandler.defaultMinimumAmount ? acquirerHandler.defaultMinimumAmount : null,
+    properties: acquirerHandler.properties
   }
 }
 
 /**
- * Find payment provider handler
+ * Find acquirer handler
  * based on name
  */
-module.exports.findPpHandler = (name) => {
+module.exports.findAcquirerHandler = (name) => {
   name = name.toLowerCase()
   name = name.replace(' ', '_')
-  for (let pp of exports.ppHandlers) {
+  for (let pp of exports.acquirerHandlers) {
     if (pp.name === name) {
       return pp
     }
@@ -98,7 +98,7 @@ module.exports.emitStatusChange = (transaction) => {
     transactionStatus: transaction.status,
     transactionSettlementStatus: transaction.settlementStatus,
     agentId: transaction.agentId,
-    paymentProviderId: transaction.paymentProviderId
+    acquirerId: transaction.acquirerId
   })
 }
 
@@ -126,35 +126,35 @@ module.exports.forceStatus = async (transactionId, transactionStatus) => {
 }
 
 /**
- * Build transaction context data (include agent, merchant, paymentProvider, and its handler)
+ * Build transaction context data (include agent, merchant, acquirer, and its handler)
  */
 module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
   let ctx = Object.assign({
     transactionId: null,
     transaction,
-    paymentProvider: null,
+    acquirer: null,
     agent: null,
-    ppHandler: null
+    acquirerHandler: null
   }, extraCtx)
 
   if (ctx.transactionId) {
     ctx.transaction = await models.transaction.scope('trxManager').findByPk(ctx.transactionId)
     if (!ctx.transaction) throw exports.error(exports.errorTypes.INVALID_TRANSACTION)
     ctx.agent = ctx.transaction.agent
-    ctx.paymentProvider = ctx.transaction.paymentProvider
+    ctx.acquirer = ctx.transaction.acquirer
   } else {
     ctx.agent = await models.agent.scope(
-      { method: ['trxManager', ctx.transaction.paymentProviderId] }
+      { method: ['trxManager', ctx.transaction.acquirerId] }
     ).findByPk(ctx.transaction.agentId)
 
     if (!ctx.agent) throw exports.error(exports.errorTypes.INVALID_AGENT)
 
-    if (!ctx.agent.merchant.paymentProviders.length) throw exports.error(exports.errorTypes.INVALID_PAYMENT_PROVIDER)
-    ctx.paymentProvider = ctx.agent.merchant.paymentProviders[0]
+    if (!ctx.agent.merchant.acquirers.length) throw exports.error(exports.errorTypes.INVALID_ACQUIRER)
+    ctx.acquirer = ctx.agent.merchant.acquirers[0]
   }
 
-  ctx.ppHandler = exports.findPpHandler(ctx.paymentProvider.paymentProviderConfig.handler)
-  if (!ctx.ppHandler) throw exports.error(exports.errorTypes.INVALID_PAYMENT_PROVIDER_HANDLER)
+  ctx.acquirerHandler = exports.findAcquirerHandler(ctx.acquirer.acquirerConfig.handler)
+  if (!ctx.acquirerHandler) throw exports.error(exports.errorTypes.INVALID_ACQUIRER_HANDLER)
 
   return ctx
 }
@@ -167,22 +167,22 @@ module.exports.create = async (transaction, options) => {
 
   let trxCreateResult = null
 
-  if (ctx.paymentProvider.minimumAmount) {
-    if (ctx.transaction.amount < ctx.paymentProvider.minimumAmount) {
+  if (ctx.acquirer.minimumAmount) {
+    if (ctx.transaction.amount < ctx.acquirer.minimumAmount) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_LOW)
     }
-  } else if (ctx.ppHandler.defaultMinimumAmount) {
-    if (ctx.transaction.amount < ctx.ppHandler.defaultMinimumAmount) {
+  } else if (ctx.acquirerHandler.defaultMinimumAmount) {
+    if (ctx.transaction.amount < ctx.acquirerHandler.defaultMinimumAmount) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_LOW)
     }
   }
 
-  if (ctx.paymentProvider.defaultMaximumAmount) {
-    if (ctx.transaction.amount > ctx.paymentProvider.defaultMaximumAmount) {
+  if (ctx.acquirer.defaultMaximumAmount) {
+    if (ctx.transaction.amount > ctx.acquirer.defaultMaximumAmount) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_HIGH)
     }
-  } else if (ctx.ppHandler.defaultMaximum) {
-    if (ctx.transaction.amount > ctx.ppHandler.defaultMaximum) {
+  } else if (ctx.acquirerHandler.defaultMaximum) {
+    if (ctx.transaction.amount > ctx.acquirerHandler.defaultMaximum) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_HIGH)
     }
   }
@@ -194,12 +194,12 @@ module.exports.create = async (transaction, options) => {
 
   ctx.transaction = models.transaction.build(ctx.transaction)
 
-  if (typeof ctx.ppHandler.handler === 'function') {
-    let handlerResult = await ctx.ppHandler.handler(ctx)
+  if (typeof ctx.acquirerHandler.handler === 'function') {
+    let handlerResult = await ctx.acquirerHandler.handler(ctx)
     if (handlerResult) trxCreateResult = handlerResult
   }
 
-  if (ctx.redirectTo && ctx.paymentProvider.gateway) {
+  if (ctx.redirectTo && ctx.acquirer.gateway) {
     return {
       redirectTo: ctx.redirectTo
     }
@@ -221,7 +221,7 @@ module.exports.create = async (transaction, options) => {
     trxCreateResult = {
       transactionId: ctx.transaction.id,
       agentId: ctx.transaction.agentId,
-      paymentProviderId: ctx.transaction.paymentProviderId,
+      acquirerId: ctx.transaction.acquirerId,
       amount: ctx.transaction.amount,
       transactionStatus: ctx.transaction.status,
       transactionSettlementStatus: ctx.transaction.settlementStatus,
@@ -258,8 +258,8 @@ dTimer.handleEvent(async (event) => {
 
       ctx.transaction.status = exports.transactionStatuses.FAILED
 
-      if (typeof ctx.ppHandler.timeoutHandler === 'function') {
-        await ctx.ppHandler.timeoutHandler(ctx)
+      if (typeof ctx.acquirerHandler.timeoutHandler === 'function') {
+        await ctx.acquirerHandler.timeoutHandler(ctx)
       }
 
       await ctx.transaction.save()
@@ -275,7 +275,7 @@ dTimer.handleEvent(async (event) => {
 })
 
 /**
- * Add all payment provider handlers
+ * Add all acquirer handlers
  */
 const handlerDir = 'trxManagerHandlers'
 fs

@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('paymentProvider', {
+    return queryInterface.createTable('acquirer', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -24,7 +24,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      sharePaymentProvider: {
+      shareAcquirer: {
         type: Sequelize.FLOAT
       },
       shareMerchant: {
@@ -60,18 +60,18 @@ module.exports = {
           key: 'id'
         }
       },
-      paymentProviderConfigId: {
+      acquirerConfigId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'paymentProviderConfig',
+          model: 'acquirerConfig',
           key: 'id'
         }
       },
-      paymentProviderTypeId: {
+      acquirerTypeId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: 'paymentProviderType',
+          model: 'acquirerType',
           key: 'id'
         }
       },
@@ -94,6 +94,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('paymentProvider')
+    return queryInterface.dropTable('acquirer')
   }
 }

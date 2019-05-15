@@ -1,6 +1,6 @@
 'use strict'
 
-const midtrans = require('../helpers/ppMidtrans')
+const midtrans = require('../helpers/aqMidtrans')
 const trxManager = require('../helpers/trxManager')
 const models = require('../models')
 
@@ -23,7 +23,7 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
         referenceNumber: req.body.transaction_id,
         status: trxManager.transactionStatuses.CREATED
       },
-      include: [ models.paymentProvider.scope('paymentProviderConfig') ]
+      include: [ models.acquirer.scope('acquirerConfig') ]
     })
 
     if (!transaction) {
@@ -31,7 +31,7 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
       return
     }
 
-    let midtransConfig = midtrans.mixConfig(transaction.paymentProvider.paymentProviderConfig.config)
+    let midtransConfig = midtrans.mixConfig(transaction.acquirer.acquirerConfig.config)
 
     if (!midtrans.checkNotificationSignature(Object.assign(req.body, midtransConfig))) {
       res.status(401).type('text').send('UNAUTHORIZED')

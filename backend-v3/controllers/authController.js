@@ -3,7 +3,7 @@
 const errorMiddleware = require('../middlewares/errorMiddleware')
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const auth = require('../helpers/auth')
 
 const { body } = require('express-validator/check')
@@ -42,17 +42,17 @@ module.exports.login = async (req, res, next) => {
       response.brokerDetail = authResult.brokerDetail
     }
 
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_AUTH_LOGIN,
+      msg.msgTypes.MSG_SUCCESS_AUTH_LOGIN,
       response
     )
     return
   }
 
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID_CREDENTIAL
+    msg.msgTypes.MSG_ERROR_AUTH_INVALID_CREDENTIAL
   )
 }
 
@@ -71,9 +71,9 @@ module.exports.loginMiddlewares = [
  */
 module.exports.logout = async (req, res, next) => {
   if (await auth.removeAuth(req.sessionToken)) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_AUTH_LOGOUT
+      msg.msgTypes.MSG_SUCCESS_AUTH_LOGOUT
     )
   }
 }
@@ -88,15 +88,15 @@ module.exports.sessionTokenCheckValidator = [
 module.exports.sessionTokenCheck = async (req, res, next) => {
   let checkAuth = await auth.checkAuth(req.body.sessionToken)
   if (checkAuth) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
+      msg.msgTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
       checkAuth
     )
   } else {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID_TOKEN
+      msg.msgTypes.MSG_ERROR_AUTH_INVALID_TOKEN
     )
   }
 }
@@ -124,16 +124,16 @@ module.exports.changePasswordValidator = [
 module.exports.changePassword = async (req, res, next) => {
   if (await auth.changePassword(req.auth.userId, req.body.password, req.body.oldPassword)) {
     await auth.removeAuth(req.sessionToken)
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+      msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
     return
   }
 
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
+    msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
   )
 }
 
@@ -159,9 +159,9 @@ module.exports.resetPasswordValidator = [
  */
 module.exports.resetPassword = async (req, res, next) => {
   if (auth.resetAuth(req.body.userId, req.body.password)) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+      msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
   }
 }

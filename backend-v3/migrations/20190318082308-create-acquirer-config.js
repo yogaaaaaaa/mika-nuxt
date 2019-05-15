@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('paymentProviderConfig', {
+    return queryInterface.createTable('acquirerConfig', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -54,6 +54,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('paymentProviderConfig')
+    return queryInterface.dropTable('acquirerConfig')
   }
 }

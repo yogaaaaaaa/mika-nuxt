@@ -7,7 +7,7 @@
 const crypto = require('crypto')
 
 const trxManager = require('./trxManager')
-const msgFactory = require('./msgFactory')
+const msg = require('./msg')
 const mqtt = require('./mqtt')
 const models = require('../models')
 
@@ -95,18 +95,18 @@ trxManager.listenStatusChange(async (event) => {
     let eventType = null
 
     if (event.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
-      eventType = msgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS
+      eventType = msg.eventTypes.EVENT_TRANSACTION_SUCCESS
     }
 
     if (event.transactionStatus === trxManager.transactionStatuses.FAILED) {
-      eventType = msgFactory.eventTypes.EVENT_TRANSACTION_FAILED
+      eventType = msg.eventTypes.EVENT_TRANSACTION_FAILED
     }
 
     if (eventType) {
       let transaction = await models.transaction.scope('agent').findByPk(event.transactionId)
       await exports.notifToAgent(
         event.agentId,
-        msgFactory.createNotification(
+        msg.createNotification(
           eventType,
           transaction,
           undefined,

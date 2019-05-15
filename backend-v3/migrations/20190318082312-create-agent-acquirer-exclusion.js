@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('paymentProviderType', {
+    return queryInterface.createTable('agentAcquirerExclusion', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,29 +10,21 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      class: {
+      agentId: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'agent',
+          key: 'id'
+        }
       },
-
-      name: {
+      acquirerId: {
         allowNull: false,
-        type: Sequelize.STRING
-      },
-      description: {
-        type: Sequelize.STRING
-      },
-
-      thumbnail: {
-        type: Sequelize.STRING,
-        defaultValue: 'default-img.png'
-      },
-      thumbnailGray: {
-        type: Sequelize.STRING,
-        defaultValue: 'default-gray-img.png'
-      },
-      chartColor: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'acquirer',
+          key: 'id'
+        }
       },
 
       deletedAt: {
@@ -53,6 +45,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('paymentProviderType')
+    return queryInterface.dropTable('agentAcquirerExclusion')
   }
 }

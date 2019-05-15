@@ -6,13 +6,14 @@ const Op = Sequelize.Op
 const script = require('../helpers/script')
 
 module.exports = (sequelize, DataTypes) => {
-  let paymentProvider = sequelize.define('paymentProvider', {
+  let acquirer = sequelize.define('acquirer', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
     minimumAmount: DataTypes.INTEGER,
     maximumAmount: DataTypes.INTEGER,
 
+    shareAcquirer: DataTypes.FLOAT,
     shareMerchant: DataTypes.FLOAT,
     shareMerchantWithPartner: DataTypes.FLOAT,
     sharePartner: DataTypes.FLOAT,
@@ -23,16 +24,17 @@ module.exports = (sequelize, DataTypes) => {
     hidden: DataTypes.BOOLEAN,
 
     merchantId: DataTypes.INTEGER,
-    paymentProviderConfigId: DataTypes.INTEGER,
-    paymentProviderTypeId: DataTypes.INTEGER
+    acquirerConfigId: DataTypes.INTEGER,
+    acquirerTypeId: DataTypes.INTEGER
   }, {
     freezeTableName: true,
     paranoid: true
   })
 
-  paymentProvider.addScope('excludeShare', {
+  acquirer.addScope('excludeShare', {
     attributes: {
       exclude: [
+        'shareAcquirer',
         'shareMerchant',
         'shareMerchantWithPartner',
         'sharePartner',
@@ -40,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   })
-  paymentProvider.addScope('excludeExtra', {
+  acquirer.addScope('excludeExtra', {
     attributes: {
       exclude: [
         'minimumAmount',
@@ -51,33 +53,33 @@ module.exports = (sequelize, DataTypes) => {
     }
   })
 
-  paymentProvider.addScope('paymentProviderType', () => ({
+  acquirer.addScope('acquirerType', () => ({
     include: [
-      sequelize.models.paymentProviderType
+      sequelize.models.acquirerType
     ]
   }))
-  paymentProvider.addScope('paymentProviderConfig', () => ({
+  acquirer.addScope('acquirerConfig', () => ({
     include: [
-      sequelize.models.paymentProviderConfig.scope('paymentProviderConfigKv')
+      sequelize.models.acquirerConfig.scope('acquirerConfigKv')
     ]
   }))
-  paymentProvider.addScope('agentExclusion', (agentId) => ({
+  acquirer.addScope('agentExclusion', (agentId) => ({
     where: {
       id: {
         [Op.notIn]: Sequelize.literal(
-          `(${script.get('query/getAgentPaymentProviderExclusion.sql', [agentId])})`
+          script.get('subquery/getAcquirerExclusionByAgent.sql', [ agentId ])
         )
       }
     }
   }))
 
-  paymentProvider.associate = (models) => {
-    paymentProvider.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-    paymentProvider.belongsTo(models.paymentProviderConfig, { foreignKey: 'paymentProviderConfigId' })
-    paymentProvider.belongsTo(models.paymentProviderType, { foreignKey: 'paymentProviderTypeId' })
+  acquirer.associate = (models) => {
+    acquirer.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+    acquirer.belongsTo(models.acquirerConfig, { foreignKey: 'acquirerConfigId' })
+    acquirer.belongsTo(models.acquirerType, { foreignKey: 'acquirerTypeId' })
 
-    paymentProvider.hasMany(models.transaction, { foreignKey: 'paymentProviderId' })
+    acquirer.hasMany(models.transaction, { foreignKey: 'acquirerId' })
   }
 
-  return paymentProvider
+  return acquirer
 }

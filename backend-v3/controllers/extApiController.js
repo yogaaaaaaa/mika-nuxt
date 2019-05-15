@@ -2,7 +2,7 @@
 
 const models = require('../models')
 const extApiObject = require('../helpers/extApiObject')
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const trxManager = require('../helpers/trxManager')
 
 const queryMiddleware = require('../middlewares/queryMiddleware')
@@ -13,16 +13,16 @@ const { body, query } = require('express-validator/check')
 const extApiTrxCallback = require('../helpers/extApiTrxCallback')
 
 module.exports.getRoot = async (req, res, next) => {
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS,
+    msg.msgTypes.MSG_SUCCESS,
     'MIKA Public API'
   )
 }
 
 module.exports.createTransactionValidator = [
   body('agentId').exists(),
-  body('paymentProviderId').exists(),
+  body('acquirerId').exists(),
   body('amount').isNumeric(),
   body('userToken').optional(),
   body('userTokenType').isString().optional(),
@@ -36,9 +36,9 @@ module.exports.createTransaction = async (req, res, next) => {
   if (!await models.agent.scope(
     { method: ['validPartner', req.auth.partnerId] }
   ).findByPk(req.body.agentId)) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_ERROR_TRANSACTION_INVALID_AGENT
+      msg.msgTypes.MSG_ERROR_TRANSACTION_INVALID_AGENT
     )
     return
   }
@@ -46,7 +46,7 @@ module.exports.createTransaction = async (req, res, next) => {
   try {
     let createTrxResult = await trxManager.create({
       agentId: req.body.agentId,
-      paymentProviderId: req.body.paymentProviderId,
+      acquirerId: req.body.acquirerId,
       amount: req.body.amount,
       ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
       userToken: req.body.userToken,
@@ -54,9 +54,9 @@ module.exports.createTransaction = async (req, res, next) => {
     })
 
     if (!createTrxResult.transactionId) {
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR_TRANSACTION_UNSUPPORTED_PAYMENT_PROVIDER
+        msg.msgTypes.MSG_ERROR_TRANSACTION_UNSUPPORTED_ACQUIRER
       )
       return
     }
@@ -71,23 +71,23 @@ module.exports.createTransaction = async (req, res, next) => {
     let mappedTransaction = extApiObject.mapCreatedTransaction(createTrxResult)
 
     if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
+        msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
         mappedTransaction
       )
       return
     }
 
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
       mappedTransaction
     )
   } catch (err) {
     let msgType = trxManager.errorToMsgTypes(err)
     if (msgType) {
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
         msgType
       )
@@ -110,7 +110,7 @@ module.exports.getTransactionsValidator = [
       'updatedAt',
       'transactionStatus',
       'amount',
-      'paymentProviderId'
+      'acquirerId'
     ].includes(orderBy)) {
       if (orderBy === 'transactionStatus') {
         req.query.order_by = 'status'
@@ -132,11 +132,11 @@ module.exports.getTransactions = async (req, res, next) => {
   if (req.params.transactionId) {
     query.where.id = req.params.transactionId
     let transaction = await models.transaction.scope({ method: ['partner', req.auth.partnerId] }).findOne(query)
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
       transaction
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msg.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
       extApiObject.mapTransaction(transaction) || undefined
     )
   } else {
@@ -156,11 +156,11 @@ module.exports.getTransactions = async (req, res, next) => {
         .findAll(query)
     }
 
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
       transactions.length > 0
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_NO_ENTITY,
+        ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msg.msgTypes.MSG_SUCCESS_NO_ENTITY,
       transactions.map((transaction) => extApiObject.mapTransaction(transaction))
     )
   }
@@ -181,7 +181,7 @@ module.exports.getAgentsValidator = [
       'agentName',
       'createdAt',
       'updatedAt',
-      'paymentProviderId'
+      'acquirerId'
     ].includes(orderBy)) {
       if (orderBy === 'transactionStatus') {
         req.query.order_by = 'status'
@@ -208,11 +208,11 @@ module.exports.getAgents = async (req, res, next) => {
     let agent = await models.agent
       .scope({ method: ['partner', req.auth.partnerId] })
       .findOne(query)
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
       agent
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msg.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
       extApiObject.mapAgent(agent) || undefined
     )
   } else {
@@ -226,11 +226,11 @@ module.exports.getAgents = async (req, res, next) => {
         .scope({ method: ['partner', req.auth.partnerId] })
         .findAll(query)
     }
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
       agents.length > 0
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_NO_ENTITY,
+        ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msg.msgTypes.MSG_SUCCESS_NO_ENTITY,
       agents.map((agent) => extApiObject.mapAgent(agent))
     )
   }
@@ -276,11 +276,11 @@ module.exports.getMerchants = async (req, res, next) => {
       .scope({ method: ['partner', req.auth.partnerId] })
       .findOne(query)
 
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
       merchant
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msg.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
       extApiObject.mapMerchant(merchant) || undefined
     )
   } else {
@@ -288,11 +288,11 @@ module.exports.getMerchants = async (req, res, next) => {
       .scope({ method: ['partner', req.auth.partnerId] })
       .findAll(query)
 
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
       merchants.length > 0
-        ? msgFactory.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msgFactory.msgTypes.MSG_SUCCESS_NO_ENTITY,
+        ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : msg.msgTypes.MSG_SUCCESS_NO_ENTITY,
       merchants.map((merchant) => extApiObject.mapMerchant(merchant))
     )
   }
@@ -311,18 +311,18 @@ module.exports.debugSetTransactionStatus = async (req, res, next) => {
       method: ['validPartner', req.auth.partnerId]
     }).findByPk(req.params.transactionId)) {
       if (await trxManager.forceStatus(req.params.transactionId, req.params.transactionStatus)) {
-        msgFactory.expressCreateResponse(
+        msg.expressCreateResponse(
           res,
-          msgFactory.msgTypes.MSG_SUCCESS
+          msg.msgTypes.MSG_SUCCESS
         )
         return
       }
     }
   }
 
-  res.status(msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST.code).send(
-    msgFactory.generateExtApiResponseMessage(
-      msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST
+  res.status(msg.msgTypes.MSG_ERROR_BAD_REQUEST.code).send(
+    msg.generateExtApiResponseMessage(
+      msg.msgTypes.MSG_ERROR_BAD_REQUEST
     )
   )
 }

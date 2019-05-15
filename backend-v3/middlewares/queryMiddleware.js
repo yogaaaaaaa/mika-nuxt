@@ -7,27 +7,47 @@ const models = require('../models')
 const Sequelize = models.Sequelize
 const Op = Sequelize.Op
 
+function validateFieldComponents (validModels, fieldComps) {
+  if (fieldComps.length > 1) {
+    if (
+      !models[validModels[0]].associations[fieldComps[0]] || // correct association with top model
+      !models[fieldComps[0]] // included in valid models
+    ) return false
+    for (let i = 1; i < fieldComps.length; i++) {
+      if (i === fieldComps.length - 1) {
+        if (!models[fieldComps[i - 1]].rawAttributes.hasOwnProperty(fieldComps[i])) return false // correct property of previous model
+        if (models[fieldComps[i - 1]].rawAttributes[fieldComps[i]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
+      } else {
+        if (!validModels.includes(fieldComps[i])) return false // included in valid models
+        if (!models[fieldComps[i - 1]].associations[fieldComps[i]]) return false // correct association of previous model
+      }
+    }
+  } else {
+    if (!models[validModels[0]].rawAttributes.hasOwnProperty(fieldComps[0])) return false // correct property of top model
+    if (models[validModels[0]].rawAttributes[fieldComps[0]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
+  }
+  return true
+}
+
 /**
  * Validator for paginationToSequelize middleware,
- * `model` is included as parameter to check if `req.query.order_by` is valid in model
+ * `validModels` is included as parameter to check if `req.query.order_by` is valid in model
  */
-module.exports.paginationToSequelizeValidator = (model) => [
+module.exports.paginationToSequelizeValidator = (validModels) => [
   query('page').isNumeric().optional(),
   query('per_page').isNumeric().optional(),
   query('get_count').isBoolean().optional(),
   query('order')
     .isIn(['desc', 'asc'])
-    .optional()
-    .withMessage('Invalid order type, use \'desc\' for descending or \'asc\' for ascending'),
+    .optional(),
   query('order_by')
-    .custom(val => models[model].rawAttributes.hasOwnProperty(val))
+    .custom(orderByField => validateFieldComponents(validModels, orderByField.split('.')))
     .optional()
-    .withMessage('Invalid field name in order_by')
 ]
 
 /**
  * Generate sequelize query setting for pagination in `req.sequelizePagination` or
- * apply to existing query via `req.applyPaginationSequelize` function
+ * apply to existing query via `req.applySequelizePaginationScope` function
  */
 module.exports.paginationToSequelize = (req, res, next) => {
   req.query.page = parseInt(req.query.page) || 1
@@ -38,51 +58,46 @@ module.exports.paginationToSequelize = (req, res, next) => {
   req.query.order = req.query.order || 'desc'
   req.query.order_by = req.query.order_by || 'createdAt'
 
-  req.paginationSequelize = {
-    offset: (req.query.page - 1) * req.query.per_page,
-    limit: req.query.per_page,
-    order: [
-      [req.query.order_by, req.query.order]
-    ]
+  let fieldComponents = req.query.order_by.split('.')
+  let orderBy = fieldComponents.map((fieldComponent) => {
+    if (models[fieldComponent]) {
+      return models[fieldComponent]
+    } else {
+      return fieldComponent
+    }
+  })
+  orderBy.push(req.query.order)
+
+  req.applySequelizePaginationScope = (model) => {
+    if (model) {
+      if (model._scope && typeof model.scope === 'function') {
+        return models[model.name].scope(Object.assign(model._scope, {
+          offset: (req.query.page - 1) * req.query.per_page,
+          limit: req.query.per_page,
+          order: [
+            orderBy
+          ]
+        }))
+      }
+    }
   }
-  req.applyPaginationSequelize = (query) => {
-    if (typeof query !== 'object') return
-    Object.assign(query, req.paginationSequelize)
-  }
+
   next()
 }
 
 /**
  * Validator for filtersToSequelize middleware,
  * `validModels` is included as parameter to check whether field name in `filters` is valid
+ *
  * NOTE: first index of `validModels` must be the top model
  */
 module.exports.filtersToSequelizeValidator = (validModels) => [
+  query('deleted').isBoolean().optional(),
   query('filters')
     .custom((filters) => {
       for (const filter of _.flatten(_.values(filters))) {
         let field = filter.split(',')[0]
-        let fieldComponents = field.split('.')
-
-        if (fieldComponents.length > 1) {
-          if (
-            !validModels[0] === fieldComponents[0] || // correct top model
-            !models[validModels[0]].associations[fieldComponents[0]] || // correct association with top model
-            !models[fieldComponents[0]] // included in valid models
-          ) return false
-          for (let i = 1; i < fieldComponents.length; i++) {
-            if (i === fieldComponents.length - 1) {
-              if (!models[fieldComponents[i - 1]].rawAttributes.hasOwnProperty(fieldComponents[i])) return false // correct property of previous model
-              if (models[fieldComponents[i - 1]].rawAttributes[fieldComponents[i]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
-            } else {
-              if (!validModels.includes(fieldComponents[i])) return false // included in valid models
-              if (!models[fieldComponents[i - 1]].associations[fieldComponents[i]]) return false // correct association of previous model
-            }
-          }
-        } else {
-          if (!models[validModels[0]].rawAttributes.hasOwnProperty(field)) return false // correct property of top model
-          if (models[validModels[0]].rawAttributes[fieldComponents[0]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
-        }
+        if (!validateFieldComponents(validModels, field.split('.'))) return false
       }
       return true
     })
@@ -93,8 +108,8 @@ module.exports.filtersToSequelizeValidator = (validModels) => [
  * Generate sequelize query setting for simple filter,
  * via array in query string (`req.query.filters`)
  *
- * Generated query setting is available in `req.filtersWhereSequelize` to be inserted to `where` of sequelize query setting.
- * Filters setting can be applied to existing query via `req.applyFiltersWhereSequelize` function
+ * Filters setting can be applied as models scope via `req.applySequelizeFiltersScope` function which receive
+ * Scoped model
  *
  * Each element of `filters[]` is consist of 3 parts, delimited by comma :
  *
@@ -106,87 +121,136 @@ module.exports.filtersToSequelizeValidator = (validModels) => [
  * Example of query string :
  * `filters[]=status,eq,success&filters[]=name,like,%name%`
  *
- * When query param of filter is included with name e.g `filter[a]` it will group with logical or operation.
- * In sense, `filters` parameter is in form minterm.
+ * It translate to :
+ *
+ * `(status = success) and (name like %name%)`
  *
  * Another example :
  *
- * `filters[a]=status,eq,success&filters[a]=name,like,%name%&filters[]=amount,gt,2000&filters[]=paymentProvider.paymentProviderType.class,eq,tcash`
+ * `filters[]=status,eq,success&filters[]=status,eq,failed&filters[]=amount,gt,2000&filters[]=acquirer.acquirerType.class,eq,tcash`
  *
  * It translate to :
  *
- * `((status = success) or (name like %name%)) and (amount > 2000) and (paymentProvider.paymentProviderType.class = tcash)`
+ * `((status = success) or (status = failed)) and (amount > 2000) and (acquirer.acquirerType.class = tcash)`
  */
 module.exports.filtersToSequelize = (req, res, next) => {
-  req.filtersWhereSequelize = {}
-  req.applyFiltersWhereSequelize = (query) => {
-    if (typeof query !== 'object') return
-    if (!query.where) query.where = {}
-    Object.assign(query.where, req.filtersWhereSequelize)
+  let filters = null
+  let eagerFilters = null
+
+  const translateOp = (field, op, value) => {
+    switch (op) {
+      case 'eq':
+        return {
+          [field]: value
+        }
+      case 'eqnull':
+        return {
+          [field]: null
+        }
+      case 'ne':
+        return {
+          [field]: { [Op.ne]: value }
+        }
+      case 'gt':
+        return {
+          [field]: { [Op.gt]: value }
+        }
+      case 'gte':
+        return {
+          [field]: { [Op.gte]: value }
+        }
+      case 'lt':
+        return {
+          [field]: { [Op.lt]: value }
+        }
+      case 'lte':
+        return {
+          [field]: { [Op.lte]: value }
+        }
+      case 'like':
+        return {
+          [field]: { [Op.like]: value }
+        }
+    }
   }
 
-  const parseFilter = (filter) => {
-    let filterSplit = filter.split(',')
-    if (filterSplit.length >= 2) {
-      let field = filterSplit[0].indexOf('.') ? `$${filterSplit[0]}$` : filterSplit[0]
+  if (Array.isArray(req.query.filters)) {
+    filters = {}
+    eagerFilters = {}
+
+    req.query.filters.forEach(filter => {
+      let filterSplit = filter.split(',')
+
+      let field = filterSplit[0]
+      let fieldProperty = field.split('.')
+      fieldProperty = fieldProperty[fieldProperty.length - 1]
       let op = filterSplit[1]
       let value = filterSplit.length > 2 ? filterSplit.slice(2, filterSplit.length).join(',') : ''
-      switch (op) {
-        case 'eq':
-          return {
-            [field]: value
+
+      let targetFilters = field.indexOf('.') > 0 ? eagerFilters : filters
+
+      if (targetFilters[field]) {
+        if (targetFilters[field][Op.or]) {
+          targetFilters[field][Op.or].push(translateOp(fieldProperty, op, value))
+        } else {
+          targetFilters[field] = {
+            [Op.or]: [targetFilters[field], translateOp(fieldProperty, op, value)]
           }
-        case 'eqnull':
-          return {
-            [field]: null
-          }
-        case 'ne':
-          return {
-            [field]: { [Op.ne]: value }
-          }
-        case 'gt':
-          return {
-            [field]: { [Op.gt]: value }
-          }
-        case 'gte':
-          return {
-            [field]: { [Op.gte]: value }
-          }
-        case 'lt':
-          return {
-            [field]: { [Op.lt]: value }
-          }
-        case 'lte':
-          return {
-            [field]: { [Op.lte]: value }
-          }
-        case 'like':
-          return {
-            [field]: { [Op.like]: value }
-          }
+        }
+      } else {
+        targetFilters[field] = translateOp(fieldProperty, op, value)
       }
-    }
+    })
   }
 
-  let andFilters = []
-  for (const filter of _.values(req.query.filters)) {
-    if (Array.isArray(filter)) {
-      let orFilter = []
-      for (const subFilter of filter) {
-        orFilter.push(parseFilter(subFilter))
+  req.applySequelizeFiltersScope = (model) => {
+    const eagerTraverse = (query, fields, where, level = 0) => {
+      if (level === (fields.length - 1)) {
+        if (!_.isPlainObject(query)) { // convert direct model include to plain object
+          query = { model: query }
+        }
+        if (!_.isPlainObject(query.where)) {
+          query.where = {}
+        }
+        if (!Array.isArray(query.where[Op.and])) {
+          query.where[Op.and] = []
+        }
+        query.where[Op.and].push(where)
+        return
       }
-      if (orFilter.length) {
-        andFilters.push({
-          [Op.or]: orFilter
-        })
+
+      if (_.isPlainObject(query)) {
+        if (Array.isArray(query.include)) {
+          for (let i = 0; i < query.include.length; i++) {
+            if (!_.isPlainObject(query.include[i])) {
+              query.include[i] = { model: query.include[i] } // convert direct model include to plain object
+            }
+            if (query.include[i].model.name === fields[level]) {
+              if (!(fields.length - 2 === level) && !Array.isArray(query.include[i].include)) {
+                throw Error('invalid model in fields')
+              } else {
+                eagerTraverse(query.include[i], fields, where, (level + 1))
+              }
+              return
+            }
+          }
+        }
       }
-    } else {
-      andFilters.push(parseFilter(filter))
     }
-  }
-  if (andFilters.length) {
-    req.filtersWhereSequelize = {
-      [Op.and]: andFilters
+
+    if (!filters && !eagerFilters) {
+      return model
+    }
+
+    if (model) {
+      if (model._scope && typeof model.scope === 'function') {
+        let query = model._scope
+        if (req.query.deleted) query.paranoid = false
+        if (!query.where) query.where = {}
+        query.where[Op.and] = _.values(filters)
+        Object.keys(eagerFilters).forEach(field => eagerTraverse(query, field.split('.'), eagerFilters[field]))
+        return models[model.name].scope(query)
+      }
     }
   }
 
@@ -197,15 +261,15 @@ module.exports.filtersToSequelize = (req, res, next) => {
  * Validator for timeGroupToSequelize, include `model` as parameter
  * to check if `req.query.group_field` is valid in model and with correct data type
  */
-module.exports.timeGroupSequelize = (model) => [
-  query('group_tz_offset')
+module.exports.timeGroupToSequelizeValidator = (model) => [
+  query('group')
+    .custom(val => models[model].rawAttributes[val].type.constructor.name === Sequelize.DATE.name)
+    .optional(),
+  query('group_tz')
     .custom((val) => val.match(/[+-][0-2]\d:?[0-5]\d/))
     .optional(),
   query('group_time')
     .isIn(['minute', 'hour', 'day', 'month', 'year'])
-    .optional(),
-  query('group_field')
-    .custom(val => models[model].rawAttributes[val].type.constructor.name === Sequelize.DATE.name)
     .optional()
 ]
 
@@ -213,21 +277,28 @@ module.exports.timeGroupSequelize = (model) => [
  * Generate sequelize group (aggregation) by time query setting
  */
 module.exports.timeGroupToSequelize = (req, res, next) => {
-  req.query.group_field = req.query.group_field || 'createdAt'
+  req.query.group = req.query.group || 'createdAt'
   req.query.group_time = req.query.group_time || 'hour'
-  req.query.group_offset = req.query.group_offset || '+0000'
+  req.query.group_tz = req.query.group_tz || '+0000'
 
   let offsetComponents = req.query.group_offset.match(/([+-])([0-2]\d):?([0-5]\d)/)
   let offsetMinutes = (parseInt(`${offsetComponents[1]}1`)) * (parseInt(offsetComponents[2]) * 60) + parseInt(offsetComponents[3])
 
-  req.timeGroupSequelize = [
-    Sequelize.literal(`${req.query.group_time !== 'day' ? req.query.group_time.toUppercase() : 'DATE'}(DATE_ADD(\`${req.query.group_field}\`, INTERVAL ${offsetMinutes} MINUTE))`)
+  let group = [
+    Sequelize.literal(`${req.query.group_time !== 'day' ? req.query.group_time.toUppercase() : 'DATE'}(DATE_ADD(\`${req.query.group}\`, INTERVAL ${offsetMinutes} MINUTE))`)
   ]
 
-  req.applyTimeGroupSequelize = (query) => {
-    if (typeof query !== 'object') return
-    if (!Array.isArray(query.group)) query.group = []
-    query.group.push(req.timeGroupSequelize)
+  req.applySequelizeTimeGroupScope = (model) => {
+    if (model) {
+      if (model._scope && typeof model.scope === 'function') {
+        let query = model._scope
+        if (!query.group) query.group = []
+        query.group.push(group)
+        return models[model.name].scope(query).scope({
+          attributes: [ req.query.group ]
+        })
+      }
+    }
   }
   next()
 }

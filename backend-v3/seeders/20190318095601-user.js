@@ -48,6 +48,7 @@ module.exports = {
       },
       {
         id: 7,
+        secure: true,
         username: 'agent',
         password: '$2a$10$BVGsnmCBVa9k5JuDWgarWu43M95H.bnEaHu6fnburECV1I4dX0D/6',
         userType: 'agent'

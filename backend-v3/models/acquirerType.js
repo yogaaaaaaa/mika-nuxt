@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let paymentProviderType = sequelize.define('paymentProviderType', {
+  let acquirerType = sequelize.define('acquirerType', {
     class: DataTypes.STRING,
 
     name: DataTypes.STRING,
@@ -15,9 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
-  paymentProviderType.associate = (models) => {
-    paymentProviderType.hasMany(models.paymentProvider, { foreignKey: 'paymentProviderTypeId' })
+  acquirerType.associate = (models) => {
+    acquirerType.hasMany(models.acquirer, { foreignKey: 'acquirerTypeId' })
   }
 
-  return paymentProviderType
+  return acquirerType
 }

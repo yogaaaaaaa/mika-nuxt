@@ -1,6 +1,6 @@
 'use strict'
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const auth = require('../helpers/auth')
 
 const appConfig = require('../configs/appConfig')
@@ -54,17 +54,17 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
  */
 module.exports.authErrorHandler = async (req, res, next) => {
   if (!req.auth) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_ERROR_AUTH_INVALID
+      msg.msgTypes.MSG_ERROR_AUTH_INVALID
     )
     return
   }
 
   if (req.authInvalidUserType || req.authInvalidUserRole) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_ERROR_AUTH_FORBIDDEN
+      msg.msgTypes.MSG_ERROR_AUTH_FORBIDDEN
     )
     return
   }

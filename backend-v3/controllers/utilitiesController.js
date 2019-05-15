@@ -1,19 +1,19 @@
 'use strict'
 
 const trxManager = require('../helpers/trxManager')
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const auth = require('../helpers/auth')
 
 /**
  * List all enumeration types in mika system
  */
 module.exports.listTypes = async (req, res, next) => {
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS,
+    msg.msgTypes.MSG_SUCCESS,
     {
       trxManager: trxManager.types,
-      msgFactory: msgFactory.types,
+      msg: msg.types,
       authTypes: {
         userRoles: auth.userRoles,
         userTypes: auth.userTypes

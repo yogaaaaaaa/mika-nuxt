@@ -13,10 +13,12 @@ const auth = require('../helpers/auth')
 
 const appConfig = require('../configs/appConfig')
 
+const merchantStaffController = require('../controllers/merchantStaffController')
+const outletController = require('../controllers/outletController')
 const generalController = require('../controllers/generalController')
 const agentController = require('../controllers/agentController')
 const transactionController = require('../controllers/transactionController')
-const paymentProviderController = require('../controllers/paymentProviderController')
+const acquirerController = require('../controllers/acquirerController')
 const authController = require('../controllers/authController')
 const utilitiesController = require('../controllers/utilitiesController')
 const terminalController = require('../controllers/terminalController')
@@ -104,17 +106,30 @@ router.get('/agent',
   authMiddleware.authErrorHandler,
   agentController.getAgent
 )
-router.get([ '/agent/payment_providers', '/agent/payment_providers/:paymentProviderId' ],
+router.get(
+  [
+    '/agent/acquirers',
+    '/agent/acquirers/:acquirerId'
+  ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  paymentProviderController.getAgentPaymentProviders
+  acquirerController.getAgentAcquirers
 )
-router.get([ '/agent/transactions', '/agent/transactions/:transactionId', '/agent/transactions/by_alias/:idAlias' ],
+router.get(
+  [
+    '/agent/transactions',
+    '/agent/transactions/:transactionId',
+    '/agent/transactions/by_alias/:idAlias'
+  ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   transactionController.getAgentTransactionsMiddlewares
 )
-router.post(['/agent/transactions', '/agent/transaction'],
+router.post(
+  [
+    '/agent/transactions',
+    '/agent/transaction'
+  ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   transactionController.createTransactionMiddlewares
@@ -124,24 +139,54 @@ router.post(['/agent/transactions', '/agent/transaction'],
  * Merchant Staff related endpoints
  */
 router.get('/merchant_staff',
-  authMiddleware.auth([auth.userTypes.MERCHANT]),
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  merchantStaffController.getMerchantStaff
 )
-router.get(['/merchant_staff/transactions', '/merchant/transactions/:id'],
-  authMiddleware.auth([auth.userTypes.MERCHANT]),
+router.get(
+  [
+    '/merchant_staff/outlets',
+    '/merchant_staff/outlets/:outletId'
+  ],
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  outletController.getMerchantStaffOutletsMiddlewares
 )
-router.get('/merchant_staff/transactions_statistic',
-  authMiddleware.auth([auth.userTypes.MERCHANT]),
+router.get(
+  [
+    '/merchant_staff/agents',
+    '/merchant_staff/agents/:agentId',
+    '/merchant_staff/outlets/:outletId/agents'
+  ],
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  agentController.getMerchantStaffAgentsMiddlewares
 )
-router.get('/merchant_staff/transactions_time_group',
-  authMiddleware.auth([auth.userTypes.MERCHANT]),
+router.get(
+  [
+    '/merchant_staff/transactions',
+    '/merchant_staff/transactions/:transactionId',
+    '/merchant_staff/outlets/:outletId/transactions'
+  ],
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented
+  transactionController.getMerchantStaffTransactionsMiddlewares
+)
+router.get(
+  [
+    '/merchant_staff/statistics/transactions/acquirer'
+  ],
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
+  authMiddleware.authErrorHandler,
+  transactionController.getMerchantStaffTransactionStatsMiddlewares
+)
+router.get(
+  [
+    '/merchant_staff/statistics/transactions/time_group_count'
+  ],
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
+  authMiddleware.authErrorHandler,
+  transactionController.getMerchantStaffTransactionTimeGroupCountMiddlewares
 )
 
 /**

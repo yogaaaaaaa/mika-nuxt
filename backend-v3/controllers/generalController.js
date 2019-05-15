@@ -1,6 +1,6 @@
 'use strict'
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const appConfig = require('../configs/appConfig')
 
 /**
@@ -9,16 +9,16 @@ const appConfig = require('../configs/appConfig')
  * Its ok ...
  */
 module.exports.notImplemented = (req, res, next) => {
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_ERROR_NOT_IMPLEMENTED
+    msg.msgTypes.MSG_ERROR_NOT_IMPLEMENTED
   )
 }
 
 module.exports.moved = (url, baseUrl = appConfig.baseUrl) => (req, res, next) => {
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS_MOVED,
+    msg.msgTypes.MSG_SUCCESS_MOVED,
     `${baseUrl}${url}`
   )
 }
@@ -27,9 +27,9 @@ module.exports.moved = (url, baseUrl = appConfig.baseUrl) => (req, res, next) =>
  * Welcome controller
  */
 module.exports.welcome = (req, res, next) => {
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS,
+    msg.msgTypes.MSG_SUCCESS,
     'Welcome to backend-v3'
   )
 }

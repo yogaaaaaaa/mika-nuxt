@@ -1,13 +1,13 @@
 'use strict'
 
-const tcash = require('../ppTcash')
+const tcash = require('../aqTcash')
 
 /**
   * TCASH Payment gateway handler
   */
 
 module.exports = (trxManager) => {
-  trxManager.ppHandlers.push({
+  trxManager.acquirerHandlers.push({
     name: tcash.handlerName,
     classes: tcash.handlerClasses,
     defaultMinimumAmount: 100,
@@ -25,7 +25,7 @@ module.exports = (trxManager) => {
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ctx.transaction.token = tcash.createQrCode(Object.assign({
         acc_no: ctx.transaction.id
-      }, tcash.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)))
+      }, tcash.mixConfig(ctx.acquirer.acquirerConfig.config)))
     }
   })
 }

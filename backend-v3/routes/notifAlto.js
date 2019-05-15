@@ -1,12 +1,12 @@
 'use strict'
 
 /**
- * Route to handle alto payment provider notification
+ * Route to handle alto acquirer notification
  */
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const ppAltoNotifController = require('../controllers/ppAltoNotifController')
+const ppAltoNotifController = require('../controllers/aqAltoNotifController')
 const ppAltoConfig = require('../configs/ppAltoConfig')
 
 const router = express.Router()

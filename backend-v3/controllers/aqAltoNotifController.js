@@ -1,6 +1,6 @@
 'use strict'
 
-const alto = require('../helpers/ppAlto')
+const alto = require('../helpers/aqAlto')
 const models = require('../models')
 const trxManager = require('../helpers/trxManager')
 
@@ -18,11 +18,11 @@ module.exports.altoHandleNotification = [
           referenceNumber: data.trade_no,
           amount: data.amount
         },
-        include: [ models.paymentProvider.scope('paymentProviderConfig') ]
+        include: [ models.acquirer.scope('acquirerConfig') ]
       })
       if (!transaction) next()
 
-      let altoConfig = alto.mixConfig(transaction.paymentProvider.paymentProviderConfig)
+      let altoConfig = alto.mixConfig(transaction.acquirer.acquirerConfig)
 
       if (!alto.altoVerifyContainer(altoConfig.altoPemAltoPublicKey, req.body)) next()
       if (altoConfig.mch_id !== data.mch_id) next()

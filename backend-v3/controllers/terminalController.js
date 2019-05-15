@@ -2,7 +2,7 @@
 
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 const cipherbox = require('../helpers/cipherbox')
 const models = require('../models')
 
@@ -26,9 +26,9 @@ module.exports.generateTerminalCbKey = async (req, res, next) => {
     })
   })
 
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_SUCCESS,
+    msg.msgTypes.MSG_SUCCESS,
     cb3Key
   )
 }

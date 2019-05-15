@@ -1,6 +1,6 @@
 'use strict'
 
-const tcash = require('../helpers/ppTcash')
+const tcash = require('../helpers/aqTcash')
 const trxManager = require('../helpers/trxManager')
 const models = require('../models')
 
@@ -12,10 +12,10 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       },
       include: [{
         required: true,
-        model: models.paymentProvider.scope('id'),
+        model: models.acquirer.scope('id'),
         include: [
           {
-            model: models.paymentProviderConfig.scope('paymentProviderConfigKv'),
+            model: models.acquirerConfig.scope('acquirerConfigKv'),
             where: { handler: tcash.handlerName }
           }
         ]
@@ -31,7 +31,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       return
     }
 
-    let config = tcash.mixConfig(transaction.paymentProvider.paymentProviderConfig.config)
+    let config = tcash.mixConfig(transaction.acquirer.acquirerConfig.config)
 
     if (
       (req.body.terminal === config.tcashTerminal) &&

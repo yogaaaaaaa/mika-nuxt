@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('paymentProviderConfig', [
+    return queryInterface.bulkInsert('acquirerConfig', [
       {
         id: 1,
         name: 'Tcash/LinkAja Default configuration',
@@ -23,6 +23,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('paymentProviderConfig', null, {})
+    return queryInterface.bulkDelete('acquirerConfig', null, {})
   }
 }

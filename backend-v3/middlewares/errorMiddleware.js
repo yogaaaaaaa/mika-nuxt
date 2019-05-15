@@ -1,15 +1,15 @@
 'use strict'
 
 const { validationResult } = require('express-validator/check')
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 
 /**
  * Not found handler middleware, place before errorHandler
  */
 module.exports.notFoundErrorHandler = (req, res, next) => {
-  msgFactory.expressCreateResponse(
+  msg.expressCreateResponse(
     res,
-    msgFactory.msgTypes.MSG_ERROR_NOT_FOUND
+    msg.msgTypes.MSG_ERROR_NOT_FOUND
   )
 }
 
@@ -20,14 +20,14 @@ module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
     console.error(err.stack)
     if (err.status === 400) { // status assigned by body-parser when encounter parsing error
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST
+        msg.msgTypes.MSG_ERROR_BAD_REQUEST
       )
     } else {
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR
+        msg.msgTypes.MSG_ERROR
       )
     }
   }
@@ -39,9 +39,9 @@ module.exports.errorHandler = (err, req, res, next) => {
 module.exports.validatorErrorHandler = (req, res, next) => {
   const validationErrors = validationResult(req).array()
   if (validationErrors.length > 0) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION,
+      msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION,
       validationErrors.map((data) => {
         if (data.msg === 'Invalid value') {
           return `${data.location}.${data.param}`
@@ -61,17 +61,17 @@ module.exports.validatorErrorHandler = (req, res, next) => {
 module.exports.sequelizeErrorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeForeignKeyConstraintError') {
     if (Array.isArray(err.fields)) {
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
+        msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
         err.fields.map((field) => `${field}`)
       )
     }
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     if (Array.isArray(err.fields)) {
-      msgFactory.expressCreateResponse(
+      msg.expressCreateResponse(
         res,
-        msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT,
+        msg.msgTypes.MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT,
         err.fields.map((field) => `${field}`)
       )
     }

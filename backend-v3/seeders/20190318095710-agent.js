@@ -6,7 +6,6 @@ module.exports = {
       {
         id: 1,
         name: 'Agent Maju Tembak',
-        secure: true,
         userId: 7,
         merchantId: 1,
         outletId: 1

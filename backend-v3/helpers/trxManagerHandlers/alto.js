@@ -1,13 +1,13 @@
 'use strict'
 
 /**
-* ALTO Payment provider handler
+* ALTO Acquirer handler
 */
 
-const alto = require('../ppAlto')
+const alto = require('../aqAlto')
 
 module.exports = (trxManager) => {
-  trxManager.ppHandlers.push({
+  trxManager.acquirerHandlers.push({
     name: alto.handlerName,
     classes: alto.handlerClasses,
     defaultMinimumAmount: 1000,
@@ -23,7 +23,7 @@ module.exports = (trxManager) => {
       ]
     },
     async handler (ctx) {
-      let altoConfig = alto.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)
+      let altoConfig = alto.mixConfig(ctx.acquirer.acquirerConfig.config)
 
       let response = await alto.altoMakeQrCodePayment(Object.assign({
         out_trade_no: ctx.transaction.id,
@@ -31,7 +31,7 @@ module.exports = (trxManager) => {
         amount: ctx.transaction.amount
       }, altoConfig))
 
-      if (!response) throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
+      if (!response) throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
 
       ctx.transaction.token = response.uri
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT

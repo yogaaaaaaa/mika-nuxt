@@ -8,8 +8,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const debugController = require('../controllers/debugController')
-const altoDebugController = require('../controllers/ppAltoDebugController')
-const midtransDebugController = require('../controllers/ppMidtransDebugController')
+const altoDebugController = require('../controllers/aqAltoDebugController')
+const midtransDebugController = require('../controllers/aqMidtransDebugController')
 
 const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')

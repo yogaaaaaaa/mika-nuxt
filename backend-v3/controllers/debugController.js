@@ -3,7 +3,7 @@
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const trxManager = require('../helpers/trxManager')
 
-const msgFactory = require('../helpers/msgFactory')
+const msg = require('../helpers/msg')
 
 /**
  * Controller to forcefully change transaction status
@@ -11,15 +11,15 @@ const msgFactory = require('../helpers/msgFactory')
 module.exports.changeTransactionStatus = async (req, res, next) => {
   let transaction = await trxManager.forceStatus(req.params.transactionId, req.params.transactionStatus)
   if (transaction) {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_SUCCESS,
+      msg.msgTypes.MSG_SUCCESS,
       transaction
     )
   } else {
-    msgFactory.expressCreateResponse(
+    msg.expressCreateResponse(
       res,
-      msgFactory.msgTypes.MSG_ERROR_BAD_REQUEST
+      msg.msgTypes.MSG_ERROR_BAD_REQUEST
     )
   }
 }

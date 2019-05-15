@@ -1,13 +1,13 @@
 'use strict'
 
 /**
-* MIDTRANS Gopay Payment provider handler
+* MIDTRANS Gopay Acquirer handler
 */
 
-const midtrans = require('../ppMidtrans')
+const midtrans = require('../aqMidtrans')
 
 module.exports = (trxManager) => {
-  trxManager.ppHandlers.push({
+  trxManager.acquirerHandlers.push({
     name: midtrans.handlerName,
     classes: midtrans.handlerClasses,
     defaultMinimumAmount: 1,
@@ -22,7 +22,7 @@ module.exports = (trxManager) => {
       userTokenTypes: []
     },
     async handler (ctx) {
-      let midtransConfig = midtrans.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)
+      let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
       let response = await midtrans.gopayChargeRequest(Object.assign({
         order_id: ctx.transaction.id,
@@ -30,7 +30,7 @@ module.exports = (trxManager) => {
       }, midtransConfig))
 
       if (!response) {
-        throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
       }
 
       for (let action of response.actions) {
@@ -44,7 +44,7 @@ module.exports = (trxManager) => {
       ctx.transaction.referenceNumberName = 'transaction_id'
     },
     async timeoutHandler (ctx) {
-      let midtransConfig = midtrans.mixConfig(ctx.paymentProvider.paymentProviderConfig.config)
+      let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
       let response = await midtrans.statusTransaction(Object.assign({
         order_id: ctx.transaction.id,
@@ -52,7 +52,7 @@ module.exports = (trxManager) => {
       }, midtransConfig))
 
       if (!response) {
-        throw trxManager.error(trxManager.errorTypes.PAYMENT_PROVIDER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
       }
 
       if (

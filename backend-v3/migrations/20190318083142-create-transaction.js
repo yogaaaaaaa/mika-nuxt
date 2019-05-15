@@ -127,11 +127,11 @@ module.exports = {
           key: 'id'
         }
       },
-      paymentProviderId: {
+      acquirerId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: 'paymentProvider',
+          model: 'acquirer',
           key: 'id'
         }
       }

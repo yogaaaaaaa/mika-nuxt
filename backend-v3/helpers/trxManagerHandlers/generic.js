@@ -1,27 +1,27 @@
 'use strict'
 
 /**
- * Generic payment provider handler
+ * Generic acquirer handler
  * Provided as example and template
 */
 
 module.exports = (trxManager) => {
-  trxManager.ppHandlers.push({
+  trxManager.acquirerHandlers.push({
     // Name to use this handler
     name: 'generic',
 
-    // Default minimum of this payment provider
+    // Default minimum of this acquirer
     defaultMinimumAmount: 1,
 
-    // Default maximum of this payment provider
+    // Default maximum of this acquirer
     defaultMaximumAmount: 1000000,
 
-    // Classes for this handler. Classes is simple name for **certain** payment provider
+    // Classes for this handler. Classes is simple name for **certain** acquirer
     // Used mostly by frontend
     classes: ['generic', 'berkumapay'],
 
     // properties sub property contain comma delimited list that define various things like
-    // what kind of token this Payment provider wants or generate
+    // what kind of token this Acquirer wants or generate
     properties: {
       flows: [trxManager.transactionFlows.PROVIDE_TOKEN],
       tokenTypes: [trxManager.tokenTypes.TOKEN_QRCODE_CONTENT],

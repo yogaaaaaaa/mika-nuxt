@@ -28,12 +28,6 @@ module.exports = {
         type: Sequelize.FLOAT
       },
 
-      secure: {
-        allowNull: false,
-        defaultValue: false,
-        type: Sequelize.BOOLEAN
-      },
-
       userId: {
         type: Sequelize.INTEGER,
         references: {

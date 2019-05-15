@@ -10,7 +10,7 @@ const redis = require('./redis')
 
 const models = require('../models')
 
-const msgFactory = require('./msgFactory')
+const msg = require('./msg')
 const extApiObject = require('./extApiObject')
 const trxManager = require('./trxManager')
 
@@ -54,12 +54,12 @@ trxManager.listenStatusChange(async (event) => {
 
     let eventType = null
     if (event.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
-      eventType = msgFactory.eventTypes.EVENT_TRANSACTION_SUCCESS
+      eventType = msg.eventTypes.EVENT_TRANSACTION_SUCCESS
     } else if (event.transactionStatus === trxManager.transactionStatus.FAILED) {
-      eventType = msgFactory.eventTypes.EVENT_TRANSACTION_FAILED
+      eventType = msg.eventTypes.EVENT_TRANSACTION_FAILED
     }
 
-    let callbackPayload = msgFactory.createNotification(
+    let callbackPayload = msg.createNotification(
       eventType,
       mappedTransaction
     )

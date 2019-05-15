@@ -5,7 +5,7 @@
  * to generate message format for Internal API and External/Public API
  */
 
-const types = require('../configs/msgFactoryTypesConfig')
+const types = require('../configs/msgTypesConfig')
 
 const appConfig = require('../configs/appConfig')
 
@@ -92,4 +92,38 @@ module.exports.expressCreateResponse = (
   res
     .status(messageType.httpStatus)
     .send(exports.createResponse(messageType, data, meta))
+}
+
+/**
+ * Directly send specific entity response message
+ * via express.js `res` variable.
+ *
+ * It will automatically create pagination
+ * if `dataTotalCount`, `req.query.page`, `req.query.per_page` exists
+ */
+module.exports.expressCreateEntityResponse = (
+  res,
+  data,
+  dataTotalCount,
+  req
+) => {
+  if (Array.isArray(data)) {
+    exports.expressCreateResponse(
+      res,
+      data.length > 0
+        ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : exports.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+      data,
+      (dataTotalCount && req)
+        ? exports.createPaginationMeta(req.query.page, req.query.per_page, dataTotalCount)
+        : undefined
+    )
+  } else {
+    exports.expressCreateResponse(res,
+      data
+        ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
+        : exports.msgTypes.MSG_SUCCESS_NO_ENTITY,
+      data || undefined
+    )
+  }
 }

@@ -1,5 +1,10 @@
 'use strict'
 
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
+
+const script = require('../helpers/script')
+
 module.exports = (sequelize, DataTypes) => {
   let agent = sequelize.define('agent', {
     name: DataTypes.STRING,
@@ -8,8 +13,6 @@ module.exports = (sequelize, DataTypes) => {
     generalLocationLong: DataTypes.STRING,
     generalLocationLat: DataTypes.STRING,
     generalLocationRadiusMeter: DataTypes.FLOAT,
-
-    secure: DataTypes.BOOLEAN,
 
     userId: DataTypes.INTEGER,
     outletId: DataTypes.INTEGER,
@@ -26,39 +29,56 @@ module.exports = (sequelize, DataTypes) => {
       sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant')
     ]
   }))
-  agent.addScope('agentPaymentProvider', (paymentProviderId) => ({
-    attributes: ['id', 'merchantId'], // NOTE: merchantId need to included or query will fail, bug in sequelize maybe ?
+  agent.addScope('merchantStaff', (merchantStaffId) => ({
+    attributes: { exclude: ['deletedAt'] },
+    include: [
+      sequelize.models.outlet.scope('excludeDeletedAt', 'excludeMerchant')
+    ],
+    where: {
+      [Op.and]: [
+        {
+          outletId: {
+            [Op.in]: Sequelize.literal(
+              script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+            )
+          }
+        }
+      ]
+    }
+  }))
+  agent.addScope('agentAcquirer', (acquirerId) => ({
+    attributes: ['id'],
     include: [
       {
         model: sequelize.models.merchant.scope('id'),
         include: [
           {
-            where: paymentProviderId ? { id: paymentProviderId } : undefined,
-            model: sequelize.models.paymentProvider.scope(
+            where: acquirerId ? { id: acquirerId } : undefined,
+            model: sequelize.models.acquirer.scope(
               { method: ['agentExclusion', '`agent`.`id`'] },
               'excludeTimestamp',
               'excludeShare'
             ),
             include: [
-              sequelize.models.paymentProviderType.scope('excludeTimestamp'),
-              sequelize.models.paymentProviderConfig.scope('excludeTimestamp', 'excludeConfig')
+              sequelize.models.acquirerType.scope('excludeTimestamp'),
+              sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
             ]
           }
         ]
       }
     ]
   }))
-  agent.addScope('trxManager', (paymentProviderId) => ({
+  agent.addScope('trxManager', (acquirerId) => ({
     include: [
       {
         model: sequelize.models.merchant,
         include: [
           {
-            where: paymentProviderId ? { id: paymentProviderId } : undefined,
+            where: acquirerId ? { id: acquirerId } : undefined,
             required: false,
-            model: sequelize.models.paymentProvider.scope(
-              'paymentProviderType',
-              'paymentProviderConfig',
+            model: sequelize.models.acquirer.scope(
+              'acquirerType',
+              'acquirerConfig',
               { method: ['agentExclusion', '`agent`.`id`'] }
             )
           }
@@ -84,12 +104,12 @@ module.exports = (sequelize, DataTypes) => {
           where: whereMerchant,
           include: [
             {
-              model: sequelize.models.paymentProvider.scope(
+              model: sequelize.models.acquirer.scope(
                 { method: ['agentExclusion', '`agent`.`id`'] }
               ),
               required: false,
               include: [
-                sequelize.models.paymentProviderType
+                sequelize.models.acquirerType
               ]
             }
           ]

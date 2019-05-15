@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('merchantPaymentProviderType', {
+    return queryInterface.createTable('merchantAcquirerType', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -18,11 +18,11 @@ module.exports = {
           key: 'id'
         }
       },
-      paymentProviderTypeId: {
+      acquirerTypeId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: 'paymentProviderType',
+          model: 'acquirerType',
           key: 'id'
         }
       },
@@ -45,6 +45,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('merchantPaymentProviderType')
+    return queryInterface.dropTable('merchantAcquirerType')
   }
 }

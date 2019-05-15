@@ -1,18 +1,18 @@
 'use strict'
 
 const models = require('../models')
-const alto = require('../helpers/ppAlto')
+const alto = require('../helpers/aqAlto')
 
 module.exports.queryTransaction = async (req, res, next) => {
   let response = {}
 
-  let paymentProviderConfig = await models.paymentProviderConfig.scope('paymentProviderConfigKv').findOne({
+  let acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
     where: {
-      id: req.body.paymentProviderConfigId
+      id: req.body.acquirerConfigId
     }
   }) || { config: {} }
 
-  let altoConfig = alto.mixConfig(paymentProviderConfig.config)
+  let altoConfig = alto.mixConfig(acquirerConfig.config)
 
   response.payQuery = await alto.altoQueryPayment(Object.assign({
     out_trade_no: req.body.out_trade_no

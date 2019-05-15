@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Contain enumeration of transaction and payment provider providers.
+ * Contain enumeration of transaction and acquirer providers.
  */
 
 const configName = 'trxManagerType'
@@ -40,7 +40,7 @@ let baseConfig = {
   },
 
   /**
-  * Merchant presented/payment provider generated type of token
+  * Merchant presented/acquirer generated type of token
   */
   tokenTypes: {
     TOKEN_QRCODE_CONTENT: 'tokenQrCodeContent',
@@ -58,7 +58,7 @@ let baseConfig = {
   },
 
   /**
-  * Definition of payment flow accepted by payment provider
+  * Definition of payment flow accepted by acquirer
   */
   transactionFlows: {
     PROVIDE_TOKEN: 'flowProvideToken',
@@ -74,16 +74,16 @@ let baseConfig = {
 
   /**
   * Shared error code used in trxManager function and
-  * payment provider handler
+  * acquirer handler
   */
   errorTypes: {
     INVALID_TRANSACTION: 'trxManagerTransactionNotFound',
     INVALID_AGENT: 'trxManagerAgentNotFound',
     AMOUNT_TOO_LOW: 'trxManagerAmountATooLow',
     AMOUNT_TOO_HIGH: 'trxManagerAmountATooHigh',
-    INVALID_PAYMENT_PROVIDER: 'trxManagerInvalidPaymentProvider',
-    INVALID_PAYMENT_PROVIDER_HANDLER: 'trxManagerPpHandlerNotFound',
-    PAYMENT_PROVIDER_NOT_RESPONDING: 'trxManagerPaymentProviderNotResponding',
+    INVALID_ACQUIRER: 'trxManagerInvalidAcquirer',
+    INVALID_ACQUIRER_HANDLER: 'trxManagerPpHandlerNotFound',
+    ACQUIRER_NOT_RESPONDING: 'trxManagerAcquirerNotResponding',
     NEED_EXTRA_CONFIG: 'trxManagerExtraConfigNeeded',
     NEED_USER_TOKEN: 'trxManagerUserTokenNeeded',
     INVALID_USER_TOKEN: 'trxManagerUserTokenInvalid',

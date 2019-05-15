@@ -15,10 +15,10 @@ module.exports.mapTransaction = (transaction) => {
   mappedTransaction.merchant.merchantId = String(transaction.agent.merchantId)
   mappedTransaction.merchant.merchantName = transaction.agent.merchant.name
 
-  mappedTransaction.paymentProvider = {}
-  mappedTransaction.paymentProvider.paymentProviderId = String(transaction.paymentProviderId)
-  mappedTransaction.paymentProvider.paymentProviderName = transaction.paymentProvider.paymentProviderType.name
-  mappedTransaction.paymentProvider.minimumAmount = transaction.paymentProvider.minimumAmount
+  mappedTransaction.acquirer = {}
+  mappedTransaction.acquirer.acquirerId = String(transaction.acquirerId)
+  mappedTransaction.acquirer.acquirerName = transaction.acquirer.acquirerType.name
+  mappedTransaction.acquirer.minimumAmount = transaction.acquirer.minimumAmount
 
   mappedTransaction.transactionStatus = transaction.status
   mappedTransaction.token = transaction.token
@@ -63,13 +63,13 @@ module.exports.mapAgent = (agent) => {
   mappedAgent.merchant.merchantId = String(agent.merchantId)
   mappedAgent.merchant.merchantName = agent.merchant.name
 
-  mappedAgent.paymentProviders = []
-  for (let paymentProvider of agent.merchant.paymentProviders) {
-    mappedAgent.paymentProviders.push({
-      paymentProviderId: String(paymentProvider.id),
-      paymentProviderName: paymentProvider.paymentProviderType.name,
-      minimumAmount: paymentProvider.minimumAmount,
-      maximumAmount: paymentProvider.maximumAmount
+  mappedAgent.acquirers = []
+  for (let acquirer of agent.merchant.acquirers) {
+    mappedAgent.acquirers.push({
+      acquirerId: String(acquirer.id),
+      acquirerName: acquirer.acquirerType.name,
+      minimumAmount: acquirer.minimumAmount,
+      maximumAmount: acquirer.maximumAmount
     })
   }
 
