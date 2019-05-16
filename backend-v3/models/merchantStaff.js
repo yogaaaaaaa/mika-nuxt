@@ -27,12 +27,12 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
-  merchantStaff.addScope('merchantStaff', {
+  merchantStaff.addScope('merchantStaff', () => ({
     attributes: { exclude: ['deletedAt'] },
     include: [
       sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
     ]
-  })
+  }))
 
   merchantStaff.associate = function (models) {
     merchantStaff.belongsTo(models.user, { foreignKey: 'userId' })

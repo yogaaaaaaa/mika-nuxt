@@ -2,6 +2,7 @@
 
 const _ = require('lodash')
 const { query } = require('express-validator/check')
+const { sanitizeQuery } = require('express-validator/filter')
 
 const models = require('../models')
 const Sequelize = models.Sequelize
@@ -70,15 +71,13 @@ module.exports.paginationToSequelize = (req, res, next) => {
 
   req.applySequelizePaginationScope = (model) => {
     if (model) {
-      if (model._scope && typeof model.scope === 'function') {
-        return models[model.name].scope(Object.assign(model._scope, {
-          offset: (req.query.page - 1) * req.query.per_page,
-          limit: req.query.per_page,
-          order: [
-            orderBy
-          ]
-        }))
-      }
+      return models[model.name].scope(Object.assign(model._scope, {
+        offset: (req.query.page - 1) * req.query.per_page,
+        limit: req.query.per_page,
+        order: [
+          orderBy
+        ]
+      }))
     }
   }
 
@@ -182,8 +181,7 @@ module.exports.filtersToSequelize = (req, res, next) => {
       let filterSplit = filter.split(',')
 
       let field = filterSplit[0]
-      let fieldProperty = field.split('.')
-      fieldProperty = fieldProperty[fieldProperty.length - 1]
+      let fieldProperty = field.split('.').pop()
       let op = filterSplit[1]
       let value = filterSplit.length > 2 ? filterSplit.slice(2, filterSplit.length).join(',') : ''
 
@@ -243,14 +241,15 @@ module.exports.filtersToSequelize = (req, res, next) => {
     }
 
     if (model) {
-      if (model._scope && typeof model.scope === 'function') {
-        let query = model._scope
-        if (req.query.deleted) query.paranoid = false
-        if (!query.where) query.where = {}
-        query.where[Op.and] = _.values(filters)
-        Object.keys(eagerFilters).forEach(field => eagerTraverse(query, field.split('.'), eagerFilters[field]))
-        return models[model.name].scope(query)
-      }
+      let prevScope = model._scope
+
+      if (req.query.deleted) prevScope.paranoid = false
+      if (!prevScope.where) prevScope.where = {}
+
+      prevScope.where[Op.and] = _.values(filters)
+      Object.keys(eagerFilters).forEach(field => eagerTraverse(prevScope, field.split('.'), eagerFilters[field]))
+
+      return models[model.name].scope(prevScope)
     }
   }
 
@@ -261,15 +260,22 @@ module.exports.filtersToSequelize = (req, res, next) => {
  * Validator for timeGroupToSequelize, include `model` as parameter
  * to check if `req.query.group_field` is valid in model and with correct data type
  */
-module.exports.timeGroupToSequelizeValidator = (model) => [
+module.exports.timeGroupToSequelizeValidator = (validModel) => [
+  (req, res, next) => {
+    req.query.group = req.query.group || 'createdAt'
+    req.query.group_time = req.query.group_time || 'hour'
+    req.query.utc_offset = req.query.utc_offset || '+0000'
+    next()
+  },
   query('group')
-    .custom(val => models[model].rawAttributes[val].type.constructor.name === Sequelize.DATE.name)
+    .custom((group) => models[validModel].rawAttributes[group].type.constructor.name === Sequelize.DATE.name)
     .optional(),
-  query('group_tz')
-    .custom((val) => val.match(/[+-][0-2]\d:?[0-5]\d/))
-    .optional(),
+  sanitizeQuery('group').customSanitizer(group => `${validModel}.${group}`),
   query('group_time')
     .isIn(['minute', 'hour', 'day', 'month', 'year'])
+    .optional(),
+  query('utc_offset')
+    .custom((val) => val.match(/[+-][0-2]\d:?[0-5]\d/))
     .optional()
 ]
 
@@ -277,27 +283,36 @@ module.exports.timeGroupToSequelizeValidator = (model) => [
  * Generate sequelize group (aggregation) by time query setting
  */
 module.exports.timeGroupToSequelize = (req, res, next) => {
-  req.query.group = req.query.group || 'createdAt'
-  req.query.group_time = req.query.group_time || 'hour'
-  req.query.group_tz = req.query.group_tz || '+0000'
-
-  let offsetComponents = req.query.group_offset.match(/([+-])([0-2]\d):?([0-5]\d)/)
+  let offsetComponents = req.query.utc_offset.match(/([+-])([0-2]\d):?([0-5]\d)/)
   let offsetMinutes = (parseInt(`${offsetComponents[1]}1`)) * (parseInt(offsetComponents[2]) * 60) + parseInt(offsetComponents[3])
 
+  let fieldName = req.query.group.split('.').map(comp => `\`${comp}\``).join('.')
+
   let group = [
-    Sequelize.literal(`${req.query.group_time !== 'day' ? req.query.group_time.toUppercase() : 'DATE'}(DATE_ADD(\`${req.query.group}\`, INTERVAL ${offsetMinutes} MINUTE))`)
+    Sequelize.literal(
+      `${req.query.group_time !== 'day' ? req.query.group_time.toUpperCase() : 'DATE'}(DATE_ADD(${fieldName}, INTERVAL ${offsetMinutes} MINUTE))`
+    )
   ]
 
   req.applySequelizeTimeGroupScope = (model) => {
     if (model) {
-      if (model._scope && typeof model.scope === 'function') {
-        let query = model._scope
-        if (!query.group) query.group = []
-        query.group.push(group)
-        return models[model.name].scope(query).scope({
-          attributes: [ req.query.group ]
-        })
+      let prevScope = model._scope
+
+      if (Array.isArray(prevScope.group)) {
+        prevScope.group.push(group)
+      } else {
+        prevScope.group = [
+          group
+        ]
       }
+
+      if (Array.isArray(prevScope.attributes)) {
+        prevScope.attributes.push(req.query.group.split('.').pop())
+      } else {
+        prevScope.attributes = [ req.query.group.split('.').pop() ]
+      }
+
+      return models[model.name].scope(prevScope)
     }
   }
   next()

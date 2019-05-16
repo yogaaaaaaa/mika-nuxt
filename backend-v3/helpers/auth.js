@@ -105,7 +105,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
       where: {
         userId: user.id
       },
-      attributes: ['id', 'secure', 'merchantId']
+      attributes: ['id', 'merchantId']
     })
     if (agent) {
       authResult.auth.userType = exports.userTypes.AGENT

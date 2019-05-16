@@ -46,7 +46,7 @@ module.exports.validatorErrorHandler = (req, res, next) => {
         if (data.msg === 'Invalid value') {
           return `${data.location}.${data.param}`
         } else {
-          return data.msg
+          return `${data.location}.${data.param} : ${data.msg}`
         }
       })
     )

@@ -53,8 +53,7 @@ module.exports.getMerchantStaffAgents = async (req, res, next) => {
         res,
         agents.rows,
         agents.count,
-        req.query.page,
-        req.query.per_page
+        req
       )
     } else {
       msg.expressCreateEntityResponse(

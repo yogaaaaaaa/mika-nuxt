@@ -112,7 +112,7 @@ module.exports.expressCreateEntityResponse = (
       res,
       data.length > 0
         ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : exports.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        : exports.msgTypes.MSG_SUCCESS_NO_ENTITY,
       data,
       (dataTotalCount && req)
         ? exports.createPaginationMeta(req.query.page, req.query.per_page, dataTotalCount)
@@ -122,7 +122,7 @@ module.exports.expressCreateEntityResponse = (
     exports.expressCreateResponse(res,
       data
         ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : exports.msgTypes.MSG_SUCCESS_NO_ENTITY,
+        : exports.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
       data || undefined
     )
   }

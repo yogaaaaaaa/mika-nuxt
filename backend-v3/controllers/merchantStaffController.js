@@ -13,8 +13,8 @@ const models = require('../models')
 /**
  * Get self merchant staff
  */
-module.exports.getMerchantStaff = (req, res, next) => {
-  let merchantStaff = models.merchantStaff
+module.exports.getMerchantStaff = async (req, res, next) => {
+  let merchantStaff = await models.merchantStaff
     .scope('merchantStaff')
     .findByPk(req.auth.merchantStaffId)
 

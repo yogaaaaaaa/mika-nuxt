@@ -12,16 +12,17 @@ const models = require('../models')
 // const Sequelize = models.Sequelize
 
 module.exports.getMerchantStaffOutlets = async (req, res, next) => {
-  let query = {}
+  let query = { where: {} }
 
-  if (Object.keys(req.params).some(key => req.params[key])) {
-    if (req.params.outletId) query.where.id = req.params.outletId
-    if (req.params.idAlias) query.where.idAlias = req.params.idAlias
+  if (req.params.outletId) query.where.id = req.params.outletId
+  if (req.params.idAlias) query.where.idAlias = req.params.idAlias
+
+  if (req.params.outletId || req.params.idAlias) {
     msg.expressCreateEntityResponse(
       res,
       await models.outlet
         .scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
-        .findOne(query) || undefined
+        .findOne(query)
     )
   } else {
     let scopedOutlet =

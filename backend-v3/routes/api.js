@@ -174,15 +174,15 @@ router.get(
 )
 router.get(
   [
-    '/merchant_staff/statistics/transactions/acquirer'
+    '/merchant_staff/statistics/transactions/by_acquirer'
   ],
   authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  transactionController.getMerchantStaffTransactionStatsMiddlewares
+  transactionController.getMerchantStaffAcquererTransactionStatsMiddlewares
 )
 router.get(
   [
-    '/merchant_staff/statistics/transactions/time_group_count'
+    '/merchant_staff/statistics/transactions/count_by_time_group'
   ],
   authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,

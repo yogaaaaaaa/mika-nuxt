@@ -10,7 +10,6 @@ const errorMiddleware = require('../middlewares/errorMiddleware')
 const queryMiddleware = require('../middlewares/queryMiddleware')
 
 const models = require('../models')
-const Sequelize = models.Sequelize
 
 /**
  * Validator middleware(s) for createTransaction
@@ -125,8 +124,7 @@ module.exports.getAgentTransactions = async (req, res, next) => {
         res,
         transactions.rows,
         transactions.count,
-        req.query.page,
-        req.query.per_page
+        req
       )
     } else {
       msg.expressCreateEntityResponse(
@@ -158,7 +156,7 @@ module.exports.getMerchantStaffTransactions = async (req, res, next) => {
     let scopedTransaction =
       req.applySequelizeFiltersScope(
         req.applySequelizePaginationScope(
-          models
+          models.transaction
             .scope({ method: [ 'merchantStaff', req.auth.merchantStaffId, req.params.outletId ] })
         )
       )
@@ -168,8 +166,7 @@ module.exports.getMerchantStaffTransactions = async (req, res, next) => {
         res,
         transactions.rows,
         transactions.count,
-        req.query.page,
-        req.query.per_page
+        req
       )
     } else {
       msg.expressCreateEntityResponse(
@@ -191,11 +188,10 @@ module.exports.getMerchantStaffAcquererTransactionStats = async (req, res, next)
     )
   )
 
-  let transactionStatistics = await scopedTransaction.findAll()
-
   msg.expressCreateEntityResponse(
     res,
-    transactionStatistics.map(transactionStatistic => {
+    (await scopedTransaction.findAll()).map(transactionStatistic => {
+      transactionStatistic = transactionStatistic.toJSON()
       transactionStatistic.agent = undefined
       return transactionStatistic
     })
@@ -209,14 +205,18 @@ module.exports.getMerchantStaffAcquererTransactionStats = async (req, res, next)
 module.exports.getMerchantStaffTransactionTimeGroupCount = async (req, res, next) => {
   let scopedTransaction = req.applySequelizeFiltersScope(
     req.applySequelizeTimeGroupScope(
-      models.transaction.scope(
-        { method: [ 'merchantStaffTransactionTimeGroupCount', req.auth.merchantStaffId ] }
+      req.applySequelizePaginationScope(
+        models.transaction.scope(
+          { method: [ 'merchantStaffTransactionTimeGroupCount', req.auth.merchantStaffId ] }
+        )
       )
     )
   )
+
   msg.expressCreateEntityResponse(
     res,
     (await scopedTransaction.findAll()).map(transactionCount => {
+      transactionCount = transactionCount.toJSON()
       transactionCount.agent = undefined
       return transactionCount
     })
@@ -272,8 +272,10 @@ module.exports.getMerchantStaffAcquererTransactionStatsMiddlewares = [
  */
 module.exports.getMerchantStaffTransactionTimeGroupCountMiddlewares = [
   queryMiddleware.timeGroupToSequelizeValidator('transaction'),
+  queryMiddleware.paginationToSequelizeValidator(['transaction']),
   queryMiddleware.filtersToSequelizeValidator(['transaction', 'agent', 'acquirer', 'acquirerType']),
   errorMiddleware.validatorErrorHandler,
+  queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
   queryMiddleware.timeGroupToSequelize,
   exports.getMerchantStaffTransactionTimeGroupCount
