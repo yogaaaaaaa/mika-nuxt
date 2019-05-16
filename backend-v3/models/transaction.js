@@ -141,10 +141,12 @@ module.exports = (sequelize, DataTypes) => {
         model: sequelize.models.agent,
         attributes: [ 'id', 'outletId' ],
         where: {
-          outletId: {
-            [Op.in]: Sequelize.literal(
-              script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
-            )
+          [Op.and]: {
+            outletId: {
+              [Op.in]: Sequelize.literal(
+                script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+              )
+            }
           }
         }
       }
@@ -160,11 +162,15 @@ module.exports = (sequelize, DataTypes) => {
         model: sequelize.models.agent,
         attributes: ['outletId'],
         where: {
-          outletId: {
-            [Op.in]: Sequelize.literal(
-              script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
-            )
-          }
+          [Op.and]: [
+            {
+              outletId: {
+                [Op.in]: Sequelize.literal(
+                  script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                )
+              }
+            }
+          ]
         }
       }
     ]

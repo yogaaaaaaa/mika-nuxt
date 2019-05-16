@@ -44,7 +44,7 @@ module.exports.getMerchantStaffAgents = async (req, res, next) => {
     let scopedAgent =
       req.applySequelizeFiltersScope(
         req.applySequelizePaginationScope(
-          models.agent.scope('merchantStaff')
+          models.agent.scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
         )
       )
     if (req.query.get_count) {

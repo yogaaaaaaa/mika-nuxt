@@ -67,11 +67,15 @@ module.exports = (sequelize, DataTypes) => {
       exclude: ['deletedAt']
     },
     where: {
-      id: {
-        [Op.in]: Sequelize.literal(
-          script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
-        )
-      }
+      [Op.and]: [
+        {
+          id: {
+            [Op.in]: Sequelize.literal(
+              script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+            )
+          }
+        }
+      ]
     }
   }))
 
