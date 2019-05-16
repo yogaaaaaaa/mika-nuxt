@@ -7,6 +7,9 @@ module.exports = {
     database: process.env.MIKA_DB_NAME || 'mika_v3_12',
     host: process.env.MIKA_DB_HOST || '127.0.0.1',
     dialect: 'mariadb',
+    dialectOptions: {
+      timezone: 'Etc/GMT'
+    },
     freezeTableName: true,
     logging: console.log,
     benchmark: true
@@ -17,6 +20,9 @@ module.exports = {
     database: process.env.MIKA_DB_NAME,
     host: process.env.MIKA_DB_HOST || '127.0.0.1',
     dialect: 'mariadb',
+    dialectOptions: {
+      timezone: 'Etc/GMT'
+    },
     freezeTableName: true,
     logging: false,
     pool: {
