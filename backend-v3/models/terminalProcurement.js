@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     terminalBatchId: DataTypes.INTEGER,
     adminId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

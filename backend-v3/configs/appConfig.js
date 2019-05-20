@@ -27,7 +27,7 @@ let baseConfig = {
 
   allowedOrigin: process.env.MIKA_ALLOWED_ORIGIN || (process.env.NODE_ENV === 'development' ? '*' : 'https://api.mikaapp.id'),
 
-  transactionTimeoutSecond: 200,
+  transactionExpirySecond: 200,
 
   authSessionTokenHeader: 'x-access-token',
   authSecretKey: process.env.MIKA_AUTH_SECRET_KEY || 'mika_secret_key',

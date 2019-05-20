@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     agentId: DataTypes.INTEGER,
     acquirerId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

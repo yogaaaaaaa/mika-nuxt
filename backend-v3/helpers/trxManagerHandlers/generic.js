@@ -37,7 +37,7 @@ module.exports = (trxManager) => {
     },
 
     // This handler will be called when transaction is timed out
-    async timeoutHandler (ctx) {
+    async expiryHandler (ctx) {
     },
 
     async followUpHandler (ctx) {

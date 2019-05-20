@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       get: kv.selfKvGetter('acquirerConfigKvs')
     }
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

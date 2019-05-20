@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
 
     resourceId: DataTypes.CHAR(27)
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

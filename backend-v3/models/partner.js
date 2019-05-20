@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     bankAccountName: DataTypes.STRING,
     bankAccountNumber: DataTypes.STRING
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

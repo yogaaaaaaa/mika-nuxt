@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     thumbnailGray: DataTypes.STRING,
     chartColor: DataTypes.STRING
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

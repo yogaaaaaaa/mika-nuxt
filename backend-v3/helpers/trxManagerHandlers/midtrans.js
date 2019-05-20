@@ -24,10 +24,11 @@ module.exports = (trxManager) => {
     async handler (ctx) {
       let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await midtrans.gopayChargeRequest(Object.assign({
+      let response = await midtrans.gopayChargeRequest({
         order_id: ctx.transaction.id,
-        gross_amount: ctx.transaction.amount
-      }, midtransConfig))
+        gross_amount: ctx.transaction.amount,
+        ...midtransConfig
+      })
 
       if (!response) {
         throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
@@ -43,13 +44,14 @@ module.exports = (trxManager) => {
       ctx.transaction.referenceNumber = response.transaction_id
       ctx.transaction.referenceNumberName = 'transaction_id'
     },
-    async timeoutHandler (ctx) {
+    async expiryHandler (ctx) {
       let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await midtrans.statusTransaction(Object.assign({
+      let response = await midtrans.statusTransaction({
         order_id: ctx.transaction.id,
-        gross_amount: ctx.transaction.amount
-      }, midtransConfig))
+        gross_amount: ctx.transaction.amount,
+        ...midtransConfig
+      })
 
       if (!response) {
         throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
@@ -68,9 +70,10 @@ module.exports = (trxManager) => {
       await ctx.transaction.save()
 
       if (ctx.transaction.status === trxManager.transactionStatuses.FAILED) {
-        await midtrans.expireTransaction(Object.assign({
-          order_id: ctx.transaction.id
-        }, midtransConfig))
+        await midtrans.expireTransaction({
+          order_id: ctx.transaction.id,
+          ...midtransConfig
+        })
       }
     }
   })

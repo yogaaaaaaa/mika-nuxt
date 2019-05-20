@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true,
     hooks: {

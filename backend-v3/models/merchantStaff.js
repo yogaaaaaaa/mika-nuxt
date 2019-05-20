@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     merchantId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })
@@ -31,6 +32,27 @@ module.exports = (sequelize, DataTypes) => {
     attributes: { exclude: ['deletedAt'] },
     include: [
       sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
+    ]
+  }))
+  merchantStaff.addScope('merchantStaffAcquirer', (acquirerId) => ({
+    attributes: ['id'],
+    include: [
+      {
+        model: sequelize.models.merchant.scope('id'),
+        include: [
+          {
+            where: acquirerId ? { id: acquirerId } : undefined,
+            model: sequelize.models.acquirer.scope(
+              'excludeTimestamp',
+              'excludeShare'
+            ),
+            include: [
+              sequelize.models.acquirerType.scope('excludeTimestamp'),
+              sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
+            ]
+          }
+        ]
+      }
     ]
   }))
 

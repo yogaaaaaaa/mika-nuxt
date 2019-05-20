@@ -1,6 +1,7 @@
 'use strict'
 
 const _ = require('lodash')
+const micromatch = require('micromatch')
 const { query } = require('express-validator/check')
 const { sanitizeQuery } = require('express-validator/filter')
 
@@ -15,10 +16,10 @@ function validateFieldComponents (validModels, fieldComps) {
       !models[fieldComps[0]] // included in valid models
     ) return false
     for (let i = 1; i < fieldComps.length; i++) {
-      if (i === fieldComps.length - 1) {
+      if (i === fieldComps.length - 1) { // check attributes
         if (!models[fieldComps[i - 1]].rawAttributes.hasOwnProperty(fieldComps[i])) return false // correct property of previous model
         if (models[fieldComps[i - 1]].rawAttributes[fieldComps[i]].type.constructor.name === Sequelize.VIRTUAL.name) return false // property is not virtual
-      } else {
+      } else { // check models relation
         if (!validModels.includes(fieldComps[i])) return false // included in valid models
         if (!models[fieldComps[i - 1]].associations[fieldComps[i]]) return false // correct association of previous model
       }
@@ -30,11 +31,20 @@ function validateFieldComponents (validModels, fieldComps) {
   return true
 }
 
+function matchFieldPatterns (field, bannedFields = null, acceptedFields = null) {
+  if (Array.isArray(bannedFields)) {
+    if (micromatch.isMatch(field, bannedFields)) return false
+  } else if (Array.isArray(acceptedFields)) {
+    if (!micromatch.isMatch(field, acceptedFields)) return false
+  }
+  return true
+}
+
 /**
  * Validator for paginationToSequelize middleware,
  * `validModels` is included as parameter to check if `req.query.order_by` is valid in model
  */
-module.exports.paginationToSequelizeValidator = (validModels) => [
+module.exports.paginationToSequelizeValidator = (validModels, bannedFields = null, acceptedFields = null) => [
   query('page').isNumeric().optional(),
   query('per_page').isNumeric().optional(),
   query('get_count').isBoolean().optional(),
@@ -42,7 +52,10 @@ module.exports.paginationToSequelizeValidator = (validModels) => [
     .isIn(['desc', 'asc'])
     .optional(),
   query('order_by')
-    .custom(orderByField => validateFieldComponents(validModels, orderByField.split('.')))
+    .custom(orderByField => {
+      if (!matchFieldPatterns(orderByField, bannedFields, acceptedFields)) return false
+      return validateFieldComponents(validModels, orderByField.split('.'))
+    })
     .optional()
 ]
 
@@ -90,12 +103,20 @@ module.exports.paginationToSequelize = (req, res, next) => {
  *
  * NOTE: first index of `validModels` must be the top model
  */
-module.exports.filtersToSequelizeValidator = (validModels) => [
-  query('deleted').isBoolean().optional(),
+module.exports.filtersToSequelizeValidator = (validModels, bannedFields = null, acceptedFields = null) => [
+  (req, res, next) => {
+    if (Array.isArray(req.query.f) && !Array.isArray(req.query.filters)) {
+      req.query.filters = req.query.f
+    } else if (Array.isArray(req.query.f) && Array.isArray(req.query.filters)) {
+      req.query.filters.concat(req.query.f)
+    }
+    next()
+  },
   query('filters')
     .custom((filters) => {
       for (const filter of _.flatten(_.values(filters))) {
         let field = filter.split(',')[0]
+        if (!matchFieldPatterns(field, bannedFields, acceptedFields)) return false
         if (!validateFieldComponents(validModels, field.split('.'))) return false
       }
       return true
@@ -142,13 +163,25 @@ module.exports.filtersToSequelize = (req, res, next) => {
         return {
           [field]: value
         }
+      case 'neq':
+        return {
+          [field]: { [Op.ne]: value }
+        }
+      case 'eqtrue':
+        return {
+          [field]: true
+        }
+      case 'eqfalse':
+        return {
+          [field]: false
+        }
       case 'eqnull':
         return {
           [field]: null
         }
-      case 'ne':
+      case 'neqnull':
         return {
-          [field]: { [Op.ne]: value }
+          [field]: { [Op.ne]: null }
         }
       case 'gt':
         return {
@@ -243,7 +276,6 @@ module.exports.filtersToSequelize = (req, res, next) => {
     if (model) {
       let prevScope = model._scope
 
-      if (req.query.deleted) prevScope.paranoid = false
       if (!prevScope.where) prevScope.where = {}
 
       prevScope.where[Op.and] = _.values(filters)
@@ -254,6 +286,21 @@ module.exports.filtersToSequelize = (req, res, next) => {
   }
 
   next()
+}
+
+module.exports.commonValidator = [
+  query('deleted').isBoolean().optional()
+]
+
+module.exports.commonQueryToSequelize = (req, res, next) => {
+  req.applySequelizeCommon = (model) => {
+    if (model) {
+      let prevScope = model._scope
+      if (req.query.deleted) prevScope.paranoid = false
+
+      return models[model.name].scope(prevScope)
+    }
+  }
 }
 
 /**

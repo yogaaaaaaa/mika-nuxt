@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     outletId: DataTypes.INTEGER,
     merchantStaffId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

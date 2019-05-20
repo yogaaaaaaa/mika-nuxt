@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
 
     manufacturer: DataTypes.STRING
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

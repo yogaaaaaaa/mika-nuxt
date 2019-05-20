@@ -1,46 +1,11 @@
 'use strict'
 
-const uid = require('../helpers/uid')
-
-function generateTransaction (
-  merchantShortName,
-  agentIds,
-  acquirerIds,
-  dateStart,
-  dateEnd,
-  count = 100,
-  amountMin = 100,
-  amountMax = 5000000,
-  statuses = ['success', 'failed']
-) {
-  let result = []
-
-  let timestampDiff = dateEnd.getTime() - dateStart.getTime()
-
-  while (count) {
-    let genId = uid.generateTransactionId(merchantShortName)
-    let createdAtTimestamp = Math.round(dateStart.getTime() + (Math.random() * timestampDiff))
-    let updatedAtTimestamp = Math.round(createdAtTimestamp + (Math.random() * (200 * 1000)))
-
-    result.push({
-      id: genId.id,
-      idAlias: genId.idAlias,
-      amount: Math.round(amountMin + (Math.random() * amountMax)),
-      status: statuses[Math.round((Math.random() * (statuses.length - 1)))],
-      agentId: agentIds[Math.round((Math.random() * (agentIds.length - 1)))],
-      acquirerId: acquirerIds[Math.round((Math.random() * (acquirerIds.length - 1)))],
-      createdAt: new Date(createdAtTimestamp),
-      updatedAt: new Date(updatedAtTimestamp)
-    })
-    count--
-  }
-  return result
-}
+const fake = require('../helpers/fake')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     console.log('run me')
-    const generateMerchant1 = (count = 100) => generateTransaction(
+    const generateMerchant1 = (count = 100) => fake.transactions(
       'majutembak',
       [1],
       [1, 2, 3, 4],
@@ -49,7 +14,7 @@ module.exports = {
       count
     )
 
-    const generateMerchant2 = (count = 100) => generateTransaction(
+    const generateMerchant2 = (count = 100) => fake.transactions(
       'agromesupermoe',
       [2, 3],
       [5, 6, 7, 8],

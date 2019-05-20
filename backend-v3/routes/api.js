@@ -145,6 +145,15 @@ router.get('/merchant_staff',
 )
 router.get(
   [
+    '/merchant_staff/acquirers',
+    '/merchant_staff/acquirers/:acquirerId'
+  ],
+  authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
+  authMiddleware.authErrorHandler,
+  acquirerController.getMerchantStaffAcquirers
+)
+router.get(
+  [
     '/merchant_staff/outlets',
     '/merchant_staff/outlets/:outletId'
   ],

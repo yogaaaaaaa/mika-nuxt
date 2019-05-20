@@ -25,11 +25,12 @@ module.exports = (trxManager) => {
     async handler (ctx) {
       let altoConfig = alto.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await alto.altoMakeQrCodePayment(Object.assign({
+      let response = await alto.altoMakeQrCodePayment({
         out_trade_no: ctx.transaction.id,
         subject: 'MIKA Payment',
-        amount: ctx.transaction.amount
-      }, altoConfig))
+        amount: ctx.transaction.amount,
+        ...altoConfig
+      })
 
       if (!response) throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
 

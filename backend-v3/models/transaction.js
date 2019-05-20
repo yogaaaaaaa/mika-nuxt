@@ -56,8 +56,9 @@ module.exports = (sequelize, DataTypes) => {
       get: kv.selfKvGetter('transactionExtraKvs')
     }
   }, {
+    timestamps: true,
     freezeTableName: true,
-    paranoid: true
+    paranoid: false
   })
 
   transaction.addScope('transactionExtraKv', () => ({
@@ -67,7 +68,6 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   transaction.addScope('agent', () => ({
-    attributes: { exclude: ['deletedAt'] },
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       {
@@ -89,7 +89,6 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   transaction.addScope('merchantStaff', (merchantStaffId, outletId) => ({
-    attributes: { exclude: ['deletedAt'] },
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       {

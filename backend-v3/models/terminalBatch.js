@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     batchStatus: DataTypes.STRING,
     dateArrived: DataTypes.DATE
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

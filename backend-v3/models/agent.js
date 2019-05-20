@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     outletId: DataTypes.INTEGER,
     merchantId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

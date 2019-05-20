@@ -11,8 +11,9 @@ module.exports = (sequelize, DataTypes) => {
     reason: DataTypes.TEXT,
     transactionId: DataTypes.CHAR(27)
   }, {
+    timestamps: true,
     freezeTableName: true,
-    paranoid: true
+    paranoid: false
   })
 
   transactionRefund.associate = (models) => {

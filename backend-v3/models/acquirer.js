@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     acquirerConfigId: DataTypes.INTEGER,
     acquirerTypeId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

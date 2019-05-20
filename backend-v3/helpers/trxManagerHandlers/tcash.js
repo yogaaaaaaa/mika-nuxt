@@ -3,8 +3,8 @@
 const tcash = require('../aqTcash')
 
 /**
-  * TCASH Payment gateway handler
-  */
+ * Tcash/LinkAja Acquirer handler
+ */
 
 module.exports = (trxManager) => {
   trxManager.acquirerHandlers.push({
@@ -23,9 +23,10 @@ module.exports = (trxManager) => {
     },
     async handler (ctx) {
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
-      ctx.transaction.token = tcash.createQrCode(Object.assign({
-        acc_no: ctx.transaction.id
-      }, tcash.mixConfig(ctx.acquirer.acquirerConfig.config)))
+      ctx.transaction.token = tcash.createQrCode({
+        acc_no: ctx.transaction.id,
+        ...tcash.mixConfig(ctx.acquirer.acquirerConfig.config)
+      })
     }
   })
 }

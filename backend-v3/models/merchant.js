@@ -52,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
 
     partnerId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

@@ -27,9 +27,9 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
         acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler)
       }
     }
-    msg.expressCreateResponse(
+
+    msg.expressCreateEntityResponse(
       res,
-      acquirer ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msg.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
       acquirer
     )
   } else {
@@ -45,14 +45,59 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
       }
     }
 
-    msg.expressCreateResponse(
+    msg.expressCreateEntityResponse(
       res,
-      acquirers ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND : msg.msgTypes.MSG_SUCCESS_ENTITY_NOT_FOUND,
       acquirers.map((acquirer) => {
         acquirer = acquirer.toJSON()
         acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler)
         return acquirer
       })
+    )
+  }
+}
+
+/**
+ * Get one or many merchant staff acquirers (via `req.auth.merchantStaffId`)
+ */
+module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
+  let query = {
+    where: {
+      id: req.auth.merchantStaffId
+    }
+  }
+
+  if (req.params.acquirerId) {
+    let acquirer = null
+
+    let merchantStaff = await models.merchantStaff.scope(
+      { method: ['merchantStaffAcquirer', req.params.acquirerId] }
+    ).findOne(query)
+
+    if (merchantStaff) {
+      if (merchantStaff.merchant.acquirers.length) {
+        acquirer = merchantStaff.merchant.acquirers[0]
+      }
+    }
+    msg.expressCreateEntityResponse(
+      res,
+      acquirer
+    )
+  } else {
+    let acquirers = null
+
+    let merchantStaff = await models.merchantStaff.scope(
+      'merchantStaffAcquirer'
+    ).findOne(query)
+
+    if (merchantStaff) {
+      if (merchantStaff.merchant.acquirers.length) {
+        acquirers = merchantStaff.merchant.acquirers
+      }
+    }
+
+    msg.expressCreateEntityResponse(
+      res,
+      acquirers
     )
   }
 }

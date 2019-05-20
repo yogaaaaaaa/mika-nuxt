@@ -214,7 +214,7 @@ module.exports.create = async (transaction, options) => {
     await dTimer.postEvent({
       event: exports.eventTypes.TRANSACTION_EXPIRY,
       transactionId: ctx.transaction.id
-    }, appConfig.transactionTimeoutSecond * 1000)
+    }, appConfig.transactionExpirySecond * 1000)
   }
 
   if (!trxCreateResult) {
@@ -225,7 +225,8 @@ module.exports.create = async (transaction, options) => {
       amount: ctx.transaction.amount,
       transactionStatus: ctx.transaction.status,
       transactionSettlementStatus: ctx.transaction.settlementStatus,
-      createdAt: ctx.transaction.createdAt
+      createdAt: ctx.transaction.createdAt,
+      expirySecond: appConfig.transactionExpirySecond
     }
     if (ctx.transaction.token && ctx.transaction.tokenType) {
       trxCreateResult.token = ctx.transaction.token
@@ -243,7 +244,7 @@ module.exports.followUp = async (transaction, options = {}) => {
 }
 
 /**
- * Handle timeout event from redis timer
+ * Handle expiry event from redis timer
  */
 dTimer.handleEvent(async (event) => {
   debug.dTimer('event', event)
@@ -258,7 +259,7 @@ dTimer.handleEvent(async (event) => {
 
       ctx.transaction.status = exports.transactionStatuses.FAILED
 
-      if (typeof ctx.acquirerHandler.timeoutHandler === 'function') {
+      if (typeof ctx.acquirerHandler.expiryHandler === 'function') {
         await ctx.acquirerHandler.timeoutHandler(ctx)
       }
 

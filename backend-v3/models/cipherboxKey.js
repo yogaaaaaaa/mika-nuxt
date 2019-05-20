@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 
     terminalId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

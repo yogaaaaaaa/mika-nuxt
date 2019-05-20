@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
 
     userId: DataTypes.INTEGER
   }, {
+    timestamps: true,
     freezeTableName: true,
     paranoid: true
   })

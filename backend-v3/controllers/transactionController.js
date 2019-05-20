@@ -238,7 +238,10 @@ module.exports.createTransactionMiddlewares = [
  */
 module.exports.getAgentTransactionsMiddlewares = [
   queryMiddleware.paginationToSequelizeValidator(['transaction']),
-  queryMiddleware.filtersToSequelizeValidator(['transaction', 'acquirer', 'acquirerType', 'acquirerConfig']),
+  queryMiddleware.filtersToSequelizeValidator(
+    ['transaction', 'acquirer', 'acquirerType', 'acquirerConfig'],
+    ['*deletedAt']
+  ),
   errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
@@ -250,7 +253,10 @@ module.exports.getAgentTransactionsMiddlewares = [
  */
 module.exports.getMerchantStaffTransactionsMiddlewares = [
   queryMiddleware.paginationToSequelizeValidator(['transaction']),
-  queryMiddleware.filtersToSequelizeValidator(['transaction', 'agent', 'acquirer', 'acquirerType']),
+  queryMiddleware.filtersToSequelizeValidator(
+    [ 'transaction', 'agent', 'acquirer' ],
+    ['*deletedAt']
+  ),
   errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
@@ -261,7 +267,10 @@ module.exports.getMerchantStaffTransactionsMiddlewares = [
  * All Middlewares for getMerchantStaffAcquirerTransactionStats
  */
 module.exports.getMerchantStaffAcquererTransactionStatsMiddlewares = [
-  queryMiddleware.filtersToSequelizeValidator(['transaction', 'agent', 'acquirer', 'acquirerType']),
+  queryMiddleware.filtersToSequelizeValidator(
+    [ 'transaction', 'agent', 'acquirer' ],
+    ['*deletedAt']
+  ),
   errorMiddleware.validatorErrorHandler,
   queryMiddleware.filtersToSequelize,
   exports.getMerchantStaffAcquererTransactionStats
@@ -272,8 +281,13 @@ module.exports.getMerchantStaffAcquererTransactionStatsMiddlewares = [
  */
 module.exports.getMerchantStaffTransactionTimeGroupCountMiddlewares = [
   queryMiddleware.timeGroupToSequelizeValidator('transaction'),
-  queryMiddleware.paginationToSequelizeValidator(['transaction']),
-  queryMiddleware.filtersToSequelizeValidator(['transaction', 'agent', 'acquirer', 'acquirerType']),
+  queryMiddleware.paginationToSequelizeValidator(
+    ['transaction'],
+    ['*deletedAt']
+  ),
+  queryMiddleware.filtersToSequelizeValidator(
+    [ 'transaction', 'agent', 'acquirer' ],
+    ['*deletedAt']),
   errorMiddleware.validatorErrorHandler,
   queryMiddleware.paginationToSequelize,
   queryMiddleware.filtersToSequelize,
