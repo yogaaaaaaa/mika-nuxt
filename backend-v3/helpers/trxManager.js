@@ -268,7 +268,7 @@ dTimer.handleEvent(async (event) => {
       ctx.transaction.status = exports.transactionStatuses.FAILED
 
       if (typeof ctx.acquirerHandler.expiryHandler === 'function') {
-        await ctx.acquirerHandler.timeoutHandler(ctx)
+        await ctx.acquirerHandler.expiryHandler(ctx)
       }
 
       await ctx.transaction.save()

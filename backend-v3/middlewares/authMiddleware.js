@@ -42,7 +42,11 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
         if (!allowedUserTypes.includes(req.auth.userType)) req.authInvalidUserType = true
       }
       if (Array.isArray(allowedUserRoles)) {
-        if (!allowedUserRoles.find(userRole => req.auth.userRoles.includes(userRole))) req.authInvalidUserRole = true
+        if (!Array.isArray(req.auth.userRoles)) {
+          req.authInvalidUserRole = true
+        } else {
+          if (!allowedUserRoles.find(userRole => req.auth.userRoles.includes(userRole))) req.authInvalidUserRole = true
+        }
       }
     }
   }
