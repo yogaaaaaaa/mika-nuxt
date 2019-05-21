@@ -260,6 +260,7 @@ module.exports.filtersToSequelize = (req, res, next) => {
               if (!(fields.length - 2 === level) && !Array.isArray(query.include[i].include)) {
                 throw Error('invalid model in fields')
               } else {
+                if (typeof query.required !== 'boolean' && level > 0) query.required = true
                 eagerTraverse(query.include[i], fields, where, (level + 1))
               }
               return
@@ -289,18 +290,20 @@ module.exports.filtersToSequelize = (req, res, next) => {
 }
 
 module.exports.commonValidator = [
-  query('deleted').isBoolean().optional()
+  query('archived').isBoolean().optional(),
+  query('deep_archived').isBoolean().optional() // unused for now
 ]
 
-module.exports.commonQueryToSequelize = (req, res, next) => {
-  req.applySequelizeCommon = (model) => {
+module.exports.commonToSequelize = (req, res, next) => {
+  req.applySequelizeCommonScope = (model) => {
     if (model) {
       let prevScope = model._scope
-      if (req.query.deleted) prevScope.paranoid = false
+      if (req.query.archived) prevScope.paranoid = false
 
       return models[model.name].scope(prevScope)
     }
   }
+  next()
 }
 
 /**

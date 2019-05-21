@@ -11,13 +11,13 @@ const msg = require('../helpers/msg')
 module.exports.changeTransactionStatus = async (req, res, next) => {
   let transaction = await trxManager.forceStatus(req.params.transactionId, req.params.transactionStatus)
   if (transaction) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS,
       transaction
     )
   } else {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_BAD_REQUEST
     )

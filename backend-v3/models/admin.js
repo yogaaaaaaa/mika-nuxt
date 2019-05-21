@@ -11,8 +11,15 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
+    deletedAt: 'archivedAt',
     paranoid: true
   })
+
+  admin.addScope('adminHead', () => ({
+    include: [
+      sequelize.models.user.scope('excludePassword')
+    ]
+  }))
 
   admin.associate = (models) => {
     admin.belongsTo(models.user, { foreignKey: 'userId' })

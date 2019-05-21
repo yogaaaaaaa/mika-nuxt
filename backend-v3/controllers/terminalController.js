@@ -26,16 +26,13 @@ module.exports.generateTerminalCbKey = async (req, res, next) => {
     })
   })
 
-  msg.expressCreateResponse(
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS,
     cb3Key
   )
 }
 
-/**
- * All Middlewares for generateTerminalCbKey
- */
 module.exports.generateTerminalCbKeyMiddlewares = [
   module.exports.generateTerminalCbKey,
   errorMiddleware.sequelizeErrorHandler

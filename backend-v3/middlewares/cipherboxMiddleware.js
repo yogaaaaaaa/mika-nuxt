@@ -48,7 +48,7 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
 
       if (!unbox) {
         debug.processCipherbox('unbox failed')
-        msg.expressCreateResponse(
+        msg.expressResponse(
           res,
           msg.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
         )
@@ -92,7 +92,7 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
 
   if (mandatory && req.auth) {
     if (req.auth.terminalId) {
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_AUTH_CIPHERBOX_MANDATORY
       )

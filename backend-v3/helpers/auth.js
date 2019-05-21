@@ -21,8 +21,8 @@ module.exports.userTypes = {
 }
 
 module.exports.userRoles = {
+  ADMIN_HEAD: 'adminHead',
   ADMIN_FINANCE: 'adminFinance',
-  ADMIN_HR: 'adminHr',
   ADMIN_MARKETING: 'adminMarketing',
   ADMIN_SUPPORT: 'adminSupport',
   ADMIN_LOGISTIC: 'adminLogistic'
@@ -195,6 +195,13 @@ module.exports.removeAuth = async (sessionToken) => {
     }
     return true
   }
+}
+
+/**
+ * Remove auth by id
+ */
+module.exports.removeAuthByUserId = async (userId) => {
+  exports.removeAuth(await exports.getSessionToken(userId))
 }
 
 /**

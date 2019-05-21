@@ -34,7 +34,7 @@ let baseConfig = {
       isError: true,
       httpStatus: 500,
       status: 'sys-500',
-      message: 'Internal Server Error'
+      message: 'Internal server error'
     },
     MSG_ERROR_NOT_IMPLEMENTED: {
       isError: true,
@@ -70,12 +70,12 @@ let baseConfig = {
       isError: true,
       httpStatus: 404,
       status: 'sys-404',
-      message: 'URL Not Found'
+      message: 'URL not found'
     },
     MSG_SUCCESS_MOVED: {
       httpStatus: 301,
       status: 'sys-301',
-      message: 'Endpoints moved'
+      message: 'Endpoint moved'
     },
 
     MSG_SUCCESS_ENTITY_FOUND: {
@@ -88,47 +88,58 @@ let baseConfig = {
       status: 'ent-201',
       message: 'Entity(s) created'
     },
-    MSG_SUCCESS_ENTITY_UPDATED: {
+    MSG_SUCCESS_ENTITY_CREATED_NO_DATA: {
       httpStatus: 201,
       status: 'ent-202',
+      message: 'Entity(s) created with no data'
+    },
+    MSG_SUCCESS_ENTITY_UPDATED: {
+      httpStatus: 200,
+      status: 'ent-203',
       message: 'Entity(s) updated'
     },
     MSG_SUCCESS_ENTITY_DELETED: {
-      httpStatus: 201,
-      status: 'ent-203',
+      httpStatus: 200,
+      status: 'ent-204',
       message: 'Entity(s) deleted'
     },
-    MSG_SUCCESS_ENTITY_RESTORED: {
-      httpStatus: 201,
-      status: 'ent-204',
-      message: 'Entity(s) restored'
-    },
     // NOTE: Created to be compatible with HTTP REST Style when single resource not found
-    MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND: {
+    MSG_ERROR_ENTITY_NOT_FOUND: {
       httpStatus: 404,
+      isError: true,
       status: 'ent-404',
-      message: 'Entity Not found'
+      message: 'Entity not found'
     },
     MSG_SUCCESS_NO_ENTITY: {
       httpStatus: 200,
       status: 'ent-405',
       message: 'No Entity(s)'
     },
+    MSG_SUCCESS_NO_ENTITY_UPDATED: {
+      httpStatus: 200,
+      status: 'ent-406',
+      message: 'No Entity(s) to update'
+    },
+    MSG_SUCCESS_NO_ENTITY_DELETED: {
+      httpStatus: 200,
+      status: 'ent-407',
+      message: 'No Entity(s) to delete'
+    },
 
     MSG_SUCCESS_AUTH_LOGIN: {
       httpStatus: 200,
       status: 'auth-200',
-      message: 'Login Success'
+      message: 'Login success'
     },
     MSG_SUCCESS_AUTH_LOGOUT: {
       httpStatus: 200,
       status: 'auth-201',
-      message: 'Logout Success'
+      message: 'Logout success'
     },
     MSG_SUCCESS_AUTH_TOKEN_CHECK: {
       httpStatus: 200,
       status: 'auth-202',
-      message: 'Session token still valid'
+      message: 'Session token is still valid'
     },
     MSG_SUCCESS_AUTH_CHANGE_PASSWORD: {
       httpStatus: 200,
@@ -151,7 +162,7 @@ let baseConfig = {
       isError: true,
       httpStatus: 403,
       status: 'auth-403',
-      message: 'Forbidden to access this resource'
+      message: 'Forbidden to access this endpoint'
     },
     MSG_ERROR_AUTH_INVALID_TOKEN: {
       isError: true,
@@ -190,7 +201,7 @@ let baseConfig = {
     MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP: {
       httpStatus: 200,
       status: 'trx-202',
-      message: 'Transaction pending, follow up needed'
+      message: 'Transaction pending, follow up action is needed'
     },
     MSG_SUCCESS_TRANSACTION_REDIRECTED: {
       httpStatus: 303,
@@ -238,7 +249,7 @@ let baseConfig = {
       isError: true,
       httpStatus: 500,
       status: 'trx-500',
-      message: 'This acquirer is not currently supported'
+      message: 'Acquirer is not currently supported'
     },
     MSG_ERROR_TRANSACTION_ACQUIRER_NOT_RESPONDING: {
       isError: true,
@@ -250,7 +261,7 @@ let baseConfig = {
       isError: true,
       httpStatus: 500,
       status: 'trx-502',
-      message: 'Cannot create transaction, error occurred with acquirer handler'
+      message: 'Cannot create transaction, error occurred with internal acquirer handler'
     }
   },
 

@@ -64,20 +64,9 @@ module.exports.errorToMsgTypes = (err) => {
  */
 module.exports.acquirerHandlers = []
 
-module.exports.getAcquirerInfo = (handler) => {
-  let acquirerHandler = exports.findAcquirerHandler(handler)
-  return {
-    name: acquirerHandler.name,
-    classes: acquirerHandler.classes,
-    defaultMaximumAmount: acquirerHandler.defaultMaximumAmount ? acquirerHandler.defaultMaximumAmount : null,
-    defaultMinimumAmount: acquirerHandler.defaultMinimumAmount ? acquirerHandler.defaultMinimumAmount : null,
-    properties: acquirerHandler.properties
-  }
-}
-
 /**
- * Find acquirer handler
- * based on name
+ * Find acquirer handler object
+ * based its handler name
  */
 module.exports.findAcquirerHandler = (name) => {
   name = name.toLowerCase()
@@ -88,6 +77,25 @@ module.exports.findAcquirerHandler = (name) => {
     }
   }
 }
+
+/**
+ * Construct a displayable handler information from acquirer handler object
+ */
+module.exports.formatAcquirerInfo = (acquirerHandler) => {
+  return {
+    name: acquirerHandler.name,
+    classes: acquirerHandler.classes,
+    defaultMaximumAmount: acquirerHandler.defaultMaximumAmount ? acquirerHandler.defaultMaximumAmount : null,
+    defaultMinimumAmount: acquirerHandler.defaultMinimumAmount ? acquirerHandler.defaultMinimumAmount : null,
+    properties: acquirerHandler.properties
+  }
+}
+
+/**
+ * Return an displayable acquirer handler information
+ * by its handler name
+ */
+module.exports.getAcquirerInfo = (handlerName) => exports.formatAcquirerInfo(exports.findAcquirerHandler(handlerName))
 
 /**
  * Emit transaction status change (via nodejs event emitter).

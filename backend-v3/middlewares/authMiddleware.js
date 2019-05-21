@@ -54,7 +54,7 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
  */
 module.exports.authErrorHandler = async (req, res, next) => {
   if (!req.auth) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_AUTH_INVALID
     )
@@ -62,7 +62,7 @@ module.exports.authErrorHandler = async (req, res, next) => {
   }
 
   if (req.authInvalidUserType || req.authInvalidUserRole) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_AUTH_FORBIDDEN
     )

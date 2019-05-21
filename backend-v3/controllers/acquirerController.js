@@ -28,7 +28,7 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
       }
     }
 
-    msg.expressCreateEntityResponse(
+    msg.expressGetEntityResponse(
       res,
       acquirer
     )
@@ -45,7 +45,7 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
       }
     }
 
-    msg.expressCreateEntityResponse(
+    msg.expressGetEntityResponse(
       res,
       acquirers.map((acquirer) => {
         acquirer = acquirer.toJSON()
@@ -78,7 +78,7 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
         acquirer = merchantStaff.merchant.acquirers[0]
       }
     }
-    msg.expressCreateEntityResponse(
+    msg.expressGetEntityResponse(
       res,
       acquirer
     )
@@ -95,7 +95,7 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
       }
     }
 
-    msg.expressCreateEntityResponse(
+    msg.expressGetEntityResponse(
       res,
       acquirers
     )

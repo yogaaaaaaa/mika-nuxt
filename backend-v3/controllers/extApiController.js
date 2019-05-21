@@ -13,7 +13,7 @@ const { body, query } = require('express-validator/check')
 const extApiTrxCallback = require('../helpers/extApiTrxCallback')
 
 module.exports.getRoot = async (req, res, next) => {
-  msg.expressCreateResponse(
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS,
     'MIKA Public API'
@@ -36,7 +36,7 @@ module.exports.createTransaction = async (req, res, next) => {
   if (!await models.agent.scope(
     { method: ['validPartner', req.auth.partnerId] }
   ).findByPk(req.body.agentId)) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_TRANSACTION_INVALID_AGENT
     )
@@ -54,7 +54,7 @@ module.exports.createTransaction = async (req, res, next) => {
     })
 
     if (!createTrxResult.transactionId) {
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_TRANSACTION_UNSUPPORTED_ACQUIRER
       )
@@ -71,7 +71,7 @@ module.exports.createTransaction = async (req, res, next) => {
     let mappedTransaction = extApiObject.mapCreatedTransaction(createTrxResult)
 
     if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
         mappedTransaction
@@ -79,7 +79,7 @@ module.exports.createTransaction = async (req, res, next) => {
       return
     }
 
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
       mappedTransaction
@@ -87,7 +87,7 @@ module.exports.createTransaction = async (req, res, next) => {
   } catch (err) {
     let msgType = trxManager.errorToMsgTypes(err)
     if (msgType) {
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msgType
       )
@@ -132,11 +132,11 @@ module.exports.getTransactions = async (req, res, next) => {
   if (req.params.transactionId) {
     query.where.id = req.params.transactionId
     let transaction = await models.transaction.scope({ method: ['partner', req.auth.partnerId] }).findOne(query)
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       transaction
         ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msg.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        : msg.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND,
       extApiObject.mapTransaction(transaction) || undefined
     )
   } else {
@@ -156,7 +156,7 @@ module.exports.getTransactions = async (req, res, next) => {
         .findAll(query)
     }
 
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       transactions.length > 0
         ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
@@ -208,11 +208,11 @@ module.exports.getAgents = async (req, res, next) => {
     let agent = await models.agent
       .scope({ method: ['partner', req.auth.partnerId] })
       .findOne(query)
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       agent
         ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msg.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        : msg.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND,
       extApiObject.mapAgent(agent) || undefined
     )
   } else {
@@ -226,7 +226,7 @@ module.exports.getAgents = async (req, res, next) => {
         .scope({ method: ['partner', req.auth.partnerId] })
         .findAll(query)
     }
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       agents.length > 0
         ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
@@ -276,11 +276,11 @@ module.exports.getMerchants = async (req, res, next) => {
       .scope({ method: ['partner', req.auth.partnerId] })
       .findOne(query)
 
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       merchant
         ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : msg.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        : msg.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND,
       extApiObject.mapMerchant(merchant) || undefined
     )
   } else {
@@ -288,7 +288,7 @@ module.exports.getMerchants = async (req, res, next) => {
       .scope({ method: ['partner', req.auth.partnerId] })
       .findAll(query)
 
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       merchants.length > 0
         ? msg.msgTypes.MSG_SUCCESS_ENTITY_FOUND
@@ -311,7 +311,7 @@ module.exports.debugSetTransactionStatus = async (req, res, next) => {
       method: ['validPartner', req.auth.partnerId]
     }).findByPk(req.params.transactionId)) {
       if (await trxManager.forceStatus(req.params.transactionId, req.params.transactionStatus)) {
-        msg.expressCreateResponse(
+        msg.expressResponse(
           res,
           msg.msgTypes.MSG_SUCCESS
         )

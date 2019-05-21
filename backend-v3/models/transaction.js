@@ -71,6 +71,7 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       {
+        required: true,
         model: sequelize.models.acquirer.scope(
           'excludeShare',
           'excludeTimestamp'
@@ -87,7 +88,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-
   transaction.addScope('merchantStaff', (merchantStaffId, outletId) => ({
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
@@ -107,6 +107,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       {
+        required: true,
         model: sequelize.models.acquirer.scope('excludeShare', 'excludeTimestamp'),
         include: [
           sequelize.models.acquirerType.scope('excludeTimestamp')
@@ -114,7 +115,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-
   transaction.addScope('merchantStaffAcquirerTransactionStats', (merchantStaffId) => ({
     attributes: [
       'acquirerId',
@@ -127,6 +127,7 @@ module.exports = (sequelize, DataTypes) => {
     ],
     include: [
       {
+        required: true,
         model: sequelize.models.acquirer,
         attributes: [ 'id', 'name', 'description', 'shareMerchant', 'merchantId', 'acquirerTypeId' ],
         include: [
@@ -151,7 +152,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-
   transaction.addScope('merchantStaffTransactionTimeGroupCount', (merchantStaffId) => ({
     attributes: [
       [Sequelize.fn('COUNT', '*'), 'transactionCount']

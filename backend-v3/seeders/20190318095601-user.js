@@ -12,21 +12,21 @@ module.exports = {
         username: 'admin',
         password: '$2a$10$I0VTxW1XMXkL8uvzrK7Emex/z53RQdXlxubUMrgP1PxDH4CMkZgZa',
         userType: 'admin',
-        userRoles: 'adminFinance,adminHr,adminMarketing,adminSupport,adminLogistic'
+        userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
       },
       {
         id: 2,
         username: 'admin2',
         password: '$2a$10$QkbojWRg5IKnF0gK3e4CTud.pc.1lP5G1SBBxhPLATZxRZYiNGv2K',
         userType: 'admin',
-        userRoles: 'adminFinance'
+        userRoles: 'adminHead,adminFinance'
       },
       {
         id: 3,
         username: 'admin3',
         password: '$2a$10$As2NOwEj3.0cZR0CQ2u6BewGuyYpyuU2yG61kcHVFNJ8uguBGEvq6',
         userType: 'admin',
-        userRoles: 'adminFinance,adminHr'
+        userRoles: 'adminFinance'
       },
       {
         id: 4,

@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
+    deletedAt: 'archivedAt',
     paranoid: true
   })
 
@@ -65,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
   })
   outlet.addScope('merchantStaff', (merchantStaffId) => ({
     attributes: {
-      exclude: ['deletedAt']
+      exclude: ['archivedAt']
     },
     where: {
       [Op.and]: [

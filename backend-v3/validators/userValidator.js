@@ -1,9 +1,19 @@
 'use strict'
 
-const auth = require('../helpers/auth')
 const { body } = require('express-validator/check')
 
-module.exports.bodyUser = [
+const userTypesValidation = (validUserTypes) => body('user.userTypes').isIn(validUserTypes)
+const userRolesValidation = (validUserRoles) =>
+  body('user.userRoles').custom((userRoles) => {
+    if (!Array.isArray(userRoles)) return false
+    if (!Array.isArray(validUserRoles)) return false
+    for (const userRole of userRoles) {
+      if (!validUserRoles.includes(userRole)) return false
+    }
+    return true
+  })
+
+module.exports.bodyUserCreate = (validUserTypes, validUserRoles) => [
   body('user.username')
     .isString()
     .not()
@@ -12,11 +22,12 @@ module.exports.bodyUser = [
     .isString()
     .not()
     .isEmpty(),
-  body('user.userRoles').isIn(Object.keys(auth.userRoles).map(key => auth.userRoles[key])),
-  body('user.userTypes').isIn(Object.keys(auth.userTypes).map(key => auth.userTypes[key]))
+  body('user.userTypes').isIn(validUserTypes).optional(),
+  userTypesValidation(validUserTypes).optional(),
+  userRolesValidation(validUserRoles)
 ]
 
-module.exports.bodyUserOptional = [
+module.exports.bodyUserUpdate = (validUserTypes, validUserRoles) => [
   body('user.username')
     .isString()
     .not()
@@ -27,10 +38,6 @@ module.exports.bodyUserOptional = [
     .not()
     .isEmpty()
     .optional(),
-  body('user.userRoles')
-    .isIn(Object.keys(auth.userRoles).map(key => auth.userRoles[key]))
-    .optional(),
-  body('user.userTypes')
-    .isIn(Object.keys(auth.userTypes).map(key => auth.userTypes[key]))
-    .optional()
+  userTypesValidation(validUserTypes).optional(),
+  userRolesValidation(validUserRoles).optional()
 ]

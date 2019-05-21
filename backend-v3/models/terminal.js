@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
+    deletedAt: 'archivedAt',
     paranoid: true
   })
 
@@ -50,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
       ] }
     })
     terminal.addScope('agent', () => ({
-      attributes: { exclude: ['deletedAt'] },
+      attributes: { exclude: ['archivedAt'] },
       include: [
         models.terminalModel.scope('excludeTimestamp')
       ]

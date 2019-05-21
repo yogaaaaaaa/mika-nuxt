@@ -42,7 +42,7 @@ module.exports.login = async (req, res, next) => {
       response.brokerDetail = authResult.brokerDetail
     }
 
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_AUTH_LOGIN,
       response
@@ -50,7 +50,7 @@ module.exports.login = async (req, res, next) => {
     return
   }
 
-  msg.expressCreateResponse(
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_ERROR_AUTH_INVALID_CREDENTIAL
   )
@@ -71,7 +71,7 @@ module.exports.loginMiddlewares = [
  */
 module.exports.logout = async (req, res, next) => {
   if (await auth.removeAuth(req.sessionToken)) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_AUTH_LOGOUT
     )
@@ -88,13 +88,13 @@ module.exports.sessionTokenCheckValidator = [
 module.exports.sessionTokenCheck = async (req, res, next) => {
   let checkAuth = await auth.checkAuth(req.body.sessionToken)
   if (checkAuth) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_AUTH_TOKEN_CHECK,
       checkAuth
     )
   } else {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_AUTH_INVALID_TOKEN
     )
@@ -124,14 +124,14 @@ module.exports.changePasswordValidator = [
 module.exports.changePassword = async (req, res, next) => {
   if (await auth.changePassword(req.auth.userId, req.body.password, req.body.oldPassword)) {
     await auth.removeAuth(req.sessionToken)
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
     return
   }
 
-  msg.expressCreateResponse(
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
   )
@@ -159,7 +159,7 @@ module.exports.resetPasswordValidator = [
  */
 module.exports.resetPassword = async (req, res, next) => {
   if (auth.resetAuth(req.body.userId, req.body.password)) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )

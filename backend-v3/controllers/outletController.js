@@ -18,7 +18,7 @@ module.exports.getMerchantStaffOutlets = async (req, res, next) => {
   if (req.params.idAlias) query.where.idAlias = req.params.idAlias
 
   if (req.params.outletId || req.params.idAlias) {
-    msg.expressCreateEntityResponse(
+    msg.expressGetEntityResponse(
       res,
       await models.outlet
         .scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
@@ -34,14 +34,14 @@ module.exports.getMerchantStaffOutlets = async (req, res, next) => {
 
     if (req.query.get_count) {
       let outlets = await scopedOutlet.findAndCountAll(query)
-      msg.expressCreateEntityResponse(
+      msg.expressGetEntityResponse(
         res,
         outlets.rows,
         outlets.count,
         req
       )
     } else {
-      msg.expressCreateEntityResponse(
+      msg.expressGetEntityResponse(
         res,
         await scopedOutlet.findAll(query)
       )

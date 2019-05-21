@@ -113,7 +113,7 @@ module.exports = {
           key: 'id'
         }
       },
-      deletedAt: {
+      archivedAt: {
         allowNull: true,
         type: Sequelize.DATE,
         defaultValue: null

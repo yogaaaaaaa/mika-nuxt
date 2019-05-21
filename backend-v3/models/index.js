@@ -35,10 +35,10 @@ fs
 
 for (const modelName of Object.keys(models)) {
   models[modelName].addScope('excludeTimestamp', {
-    attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }
+    attributes: { exclude: ['archivedAt', 'createdAt', 'updatedAt'] }
   })
   models[modelName].addScope('excludeDeletedAt', {
-    attributes: { exclude: ['deletedAt'] }
+    attributes: { exclude: ['archivedAt'] }
   })
   models[modelName].addScope('excludeId', {
     attributes: { exclude: ['id'] }

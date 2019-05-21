@@ -20,7 +20,7 @@ module.exports.getAgent = async (req, res, next) => {
 
   if (!agent) throw Error('Agent should be exist')
 
-  msg.expressCreateEntityResponse(
+  msg.expressGetEntityResponse(
     res,
     agent
   )
@@ -36,7 +36,7 @@ module.exports.getMerchantStaffAgents = async (req, res, next) => {
 
   if (req.params.agentId) {
     query.where.id = req.params.agentId
-    msg.expressCreateEntityResponse(
+    msg.expressGetEntityResponse(
       res,
       await models.agent.scope('merchantStaff').findOne(query)
     )
@@ -49,14 +49,14 @@ module.exports.getMerchantStaffAgents = async (req, res, next) => {
       )
     if (req.query.get_count) {
       let agents = await scopedAgent.findAndCountAll(query)
-      msg.expressCreateEntityResponse(
+      msg.expressGetEntityResponse(
         res,
         agents.rows,
         agents.count,
         req
       )
     } else {
-      msg.expressCreateEntityResponse(
+      msg.expressGetEntityResponse(
         res,
         await scopedAgent.findAll(query)
       )

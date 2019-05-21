@@ -20,13 +20,7 @@
       "env_development": {
         "NODE_ENV": "development",
         "exec_mode": "fork",
-        "instances": 4,
         "watch": true
-      },
-      "env_local": {
-        "NODE_ENV": "local",
-        "exec_mode": "fork",
-        "instances": 2
       }
     }
   ]

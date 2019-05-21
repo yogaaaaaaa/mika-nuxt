@@ -20,18 +20,19 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
+    deletedAt: 'archivedAt',
     paranoid: true
   })
 
   agent.addScope('agent', () => ({
-    attributes: { exclude: ['deletedAt'] },
+    attributes: { exclude: ['archivedAt'] },
     include: [
       sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner'),
       sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant')
     ]
   }))
   agent.addScope('merchantStaff', (merchantStaffId) => ({
-    attributes: { exclude: ['deletedAt'] },
+    attributes: { exclude: ['archivedAt'] },
     include: [
       sequelize.models.outlet.scope('excludeDeletedAt', 'excludeMerchant')
     ],

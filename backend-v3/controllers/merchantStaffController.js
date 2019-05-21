@@ -20,7 +20,7 @@ module.exports.getMerchantStaff = async (req, res, next) => {
 
   if (!merchantStaff) throw Error('MerchantStaff should be exist')
 
-  msg.expressCreateEntityResponse(
+  msg.expressGetEntityResponse(
     res,
     merchantStaff
   )

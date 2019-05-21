@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
-    paranoid: true
+    deletedAt: 'archivedAt',
+paranoid: true
   })
 
   apiKey.associate = function (models) {

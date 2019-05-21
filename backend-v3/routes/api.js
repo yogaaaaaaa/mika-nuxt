@@ -72,10 +72,20 @@ router.post('/auth/change_password',
 /**
  * General utilities endpoints
  */
-router.get('/utilities/types',
+router.get('/utilities/msg_props',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  utilitiesController.listTypes
+  utilitiesController.listMsgProps
+)
+router.get('/utilities/trx_props',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  utilitiesController.listTrxManagerProps
+)
+router.get('/utilities/auth_props',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  utilitiesController.listAuthProps
 )
 
 /**
@@ -187,7 +197,7 @@ router.get(
   ],
   authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  transactionController.getMerchantStaffAcquererTransactionStatsMiddlewares
+  transactionController.getMerchantStaffAcquirerTransactionStatsMiddlewares
 )
 router.get(
   [
@@ -196,6 +206,33 @@ router.get(
   authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
   transactionController.getMerchantStaffTransactionTimeGroupCountMiddlewares
+)
+
+/**
+ * Head Administration related endpoints
+ */
+router.post('/head/admins',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  adminController.createAdminMiddlewares
+)
+router.get(
+  [
+    '/head/admins', '/head/admins/:adminId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  adminController.getAdminsMiddlewares
+)
+router.put('/head/admins/:adminId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  adminController.updateAdminMiddlewares
+)
+router.delete('/head/admins/:adminId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  adminController.deleteAdmin
 )
 
 /**
@@ -211,28 +248,9 @@ router.post('/logistic/terminals/:terminalId/generate_key',
  * Marketing Administration related endpoints
  */
 router.post('/marketing/partners/:partnerId/generate_apikey',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_SUPER]),
   authMiddleware.authErrorHandler,
   partnerController.generatePartnerApiKeyMiddlewares
-)
-
-/**
- * Human Resource Administration related endpoints
- */
-router.post('/hr/admins',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
-  authMiddleware.authErrorHandler,
-  adminController.createAdminMiddlewares
-)
-router.get(['/hr/admins', '/hr/admins/:adminId'],
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
-  authMiddleware.authErrorHandler,
-  adminController.getAdminsMiddlewares
-)
-router.put(['/hr/admins/:adminId'],
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HR]),
-  authMiddleware.authErrorHandler,
-  adminController.updateAdminMiddlewares
 )
 
 router.use(errorMiddleware.notFoundErrorHandler)

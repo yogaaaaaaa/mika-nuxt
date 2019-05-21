@@ -23,7 +23,7 @@ module.exports.generatePartnerApiKey = async (req, res, next) => {
     }, { transaction: t })
   })
 
-  msg.expressCreateResponse(
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS,
     key

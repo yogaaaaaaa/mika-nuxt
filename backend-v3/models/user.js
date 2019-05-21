@@ -20,14 +20,14 @@ module.exports = (sequelize, DataTypes) => {
         if (Array.isArray(val)) {
           this.setDataValue('userRoles', val.join(','))
         } else if (typeof val === 'string') {
-          this.setDataValue('userRoles', '')
+          this.setDataValue('userRoles', val)
         }
       }
     }
   }, {
     timestamps: true,
     freezeTableName: true,
-    paranoid: true,
+    paranoid: false,
     hooks: {
       async beforeSave (user) {
         user.password = await hash.bcryptHash(user.password)
@@ -39,10 +39,11 @@ module.exports = (sequelize, DataTypes) => {
     return hash.compareBcryptHash(this.getDataValue('password'), password)
   }
 
+  user.addScope('excludePassword', {
+    attributes: { exclude: ['password'] }
+  })
+
   user.associate = (models) => {
-    user.addScope('excludePassword', {
-      attributes: { exclude: ['password'] }
-    })
   }
 
   return user

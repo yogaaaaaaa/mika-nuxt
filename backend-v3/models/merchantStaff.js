@@ -25,11 +25,12 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
+    deletedAt: 'archivedAt',
     paranoid: true
   })
 
   merchantStaff.addScope('merchantStaff', () => ({
-    attributes: { exclude: ['deletedAt'] },
+    attributes: { exclude: ['archivedAt'] },
     include: [
       sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
     ]

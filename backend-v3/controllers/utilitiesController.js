@@ -4,20 +4,35 @@ const trxManager = require('../helpers/trxManager')
 const msg = require('../helpers/msg')
 const auth = require('../helpers/auth')
 
-/**
- * List all enumeration types in mika system
- */
-module.exports.listTypes = async (req, res, next) => {
-  msg.expressCreateResponse(
+module.exports.listTrxManagerProps = (req, res, next) => {
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS,
     {
-      trxManager: trxManager.types,
-      msg: msg.types,
-      authTypes: {
-        userRoles: auth.userRoles,
-        userTypes: auth.userTypes
-      }
+      types: trxManager.types,
+      handlers: trxManager.acquirerHandlers.map((acquirerHandler) => trxManager.formatAcquirerInfo(acquirerHandler))
+    }
+  )
+}
+
+module.exports.listMsgProps = (req, res, next) => {
+  msg.expressResponse(
+    res,
+    msg.msgTypes.MSG_SUCCESS,
+    {
+      msgTypes: msg.msgTypes,
+      eventTypes: msg.eventTypes
+    }
+  )
+}
+
+module.exports.listAuthProps = (req, res, next) => {
+  msg.expressResponse(
+    res,
+    msg.msgTypes.MSG_SUCCESS,
+    {
+      userRoleTypes: auth.userRoles,
+      userTypes: auth.userTypes
     }
   )
 }

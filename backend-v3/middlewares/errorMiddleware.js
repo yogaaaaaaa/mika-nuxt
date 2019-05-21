@@ -7,7 +7,7 @@ const msg = require('../helpers/msg')
  * Not found handler middleware, place before errorHandler
  */
 module.exports.notFoundErrorHandler = (req, res, next) => {
-  msg.expressCreateResponse(
+  msg.expressResponse(
     res,
     msg.msgTypes.MSG_ERROR_NOT_FOUND
   )
@@ -20,12 +20,12 @@ module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
     console.error(err.stack)
     if (err.status === 400) { // status assigned by body-parser when encounter parsing error
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_BAD_REQUEST
       )
     } else {
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR
       )
@@ -39,14 +39,14 @@ module.exports.errorHandler = (err, req, res, next) => {
 module.exports.validatorErrorHandler = (req, res, next) => {
   const validationErrors = validationResult(req).array()
   if (validationErrors.length > 0) {
-    msg.expressCreateResponse(
+    msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION,
       validationErrors.map((data) => {
         if (data.msg === 'Invalid value') {
           return `${data.location}.${data.param}`
         } else {
-          return `${data.location}.${data.param} : ${data.msg}`
+          return `${data.location}.${data.param}: ${data.msg}`
         }
       })
     )
@@ -61,21 +61,22 @@ module.exports.validatorErrorHandler = (req, res, next) => {
 module.exports.sequelizeErrorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeForeignKeyConstraintError') {
     if (Array.isArray(err.fields)) {
-      msg.expressCreateResponse(
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
         err.fields.map((field) => `${field}`)
       )
+      return
     }
   } else if (err.name === 'SequelizeUniqueConstraintError') {
-    if (Array.isArray(err.fields)) {
-      msg.expressCreateResponse(
+    if (Array.isArray(err.errors)) {
+      msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT,
-        err.fields.map((field) => `${field}`)
+        err.errors.map(error => `${error.instance._modelOptions.name.singular}.${error.path}: ${error.value}`)
       )
+      return
     }
-  } else {
-    throw err
   }
+  throw err
 }

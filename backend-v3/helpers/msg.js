@@ -83,7 +83,7 @@ module.exports.createPaginationMeta = (page, perPage, totalCount) => {
 /**
  * Directly send response message via express.js `res` variable
  */
-module.exports.expressCreateResponse = (
+module.exports.expressResponse = (
   res,
   messageType,
   data,
@@ -95,20 +95,36 @@ module.exports.expressCreateResponse = (
 }
 
 /**
- * Directly send specific entity response message
+ * Directly send specific create entity response message
+ * via express.js `res` variable.
+ */
+module.exports.expressCreateEntityResponse = (
+  res,
+  data
+) => {
+  exports.expressResponse(res,
+    data
+      ? exports.msgTypes.MSG_SUCCESS_ENTITY_CREATED
+      : exports.msgTypes.MSG_SUCCESS_ENTITY_CREATED_NO_DATA,
+    data || undefined
+  )
+}
+
+/**
+ * Directly send specific get entity response message
  * via express.js `res` variable.
  *
  * It will automatically create pagination
  * if `dataTotalCount`, `req.query.page`, `req.query.per_page` exists
  */
-module.exports.expressCreateEntityResponse = (
+module.exports.expressGetEntityResponse = (
   res,
   data,
   dataTotalCount,
   req
 ) => {
   if (Array.isArray(data)) {
-    exports.expressCreateResponse(
+    exports.expressResponse(
       res,
       data.length > 0
         ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
@@ -119,11 +135,67 @@ module.exports.expressCreateEntityResponse = (
         : undefined
     )
   } else {
-    exports.expressCreateResponse(res,
+    exports.expressResponse(res,
       data
         ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
-        : exports.msgTypes.MSG_SUCCESS_SINGLE_ENTITY_NOT_FOUND,
+        : exports.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND,
       data || undefined
+    )
+  }
+}
+
+/**
+ * Directly send specific update entity response message
+ * via express.js `res` variable.
+ */
+module.exports.expressUpdateEntityResponse = (
+  res,
+  updateCount,
+  data,
+  found = true
+) => {
+  if (!found) {
+    exports.expressResponse(res,
+      exports.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
+    )
+    return
+  }
+  if (updateCount) {
+    exports.expressResponse(res,
+      exports.msgTypes.MSG_SUCCESS_ENTITY_UPDATED,
+      data || undefined
+    )
+  } else {
+    exports.expressResponse(res,
+      exports.msgTypes.MSG_SUCCESS_NO_ENTITY_UPDATED
+    )
+  }
+}
+
+/**
+ * Directly send specific delete entity response message
+ * via express.js `res` variable.
+ */
+module.exports.expressDeleteEntityResponse = (
+  res,
+  deleteCount,
+  found = true
+) => {
+  if (!found) {
+    exports.expressResponse(res,
+      exports.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
+    )
+    return
+  }
+  if (deleteCount) {
+    exports.expressResponse(
+      res,
+      exports.msgTypes.MSG_SUCCESS_ENTITY_DELETED
+    )
+  } else {
+    exports.expressResponse(
+      res,
+      exports.msgTypes.MSG_SUCCESS_NO_ENTITY_DELETED
     )
   }
 }
