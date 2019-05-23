@@ -1,5 +1,5 @@
 # Assets External Sources
-NOTE: Please include any external assets used in this project here
+NOTE: Please include any external assets used in here
 ### Fonts
 - __Roboto Fonts__ Collection from Google (https://fonts.google.com/specimen/Roboto)
 ### Logo

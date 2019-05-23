@@ -58,55 +58,6 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
-  merchant.addScope('excludeLegal', {
-    attributes: { exclude: [
-      'taxCardNumber',
-      'scannedTaxCardResourceId',
-      'scannedBankStatementResourceId',
-      'scannedSkmenkumhamResourceId',
-      'scannedSiupResourceId',
-      'scannedTdpResourceId',
-      'scannedSkdpResourceId',
-      'ownerIdCardNumber',
-      'ownerIdCardType',
-      'ownerTaxCardNumber',
-      'ownerScannedIdCardResourceId',
-      'ownerScannedTaxCardResourceId'
-    ] }
-  })
-  merchant.addScope('excludeBank', {
-    attributes: { exclude: [
-      'bankName',
-      'bankBranchName',
-      'bankAccountName',
-      'bankAccountNumber'
-    ] }
-  })
-  merchant.addScope('excludePartner', {
-    attributes: { exclude: [
-      'partnerId'
-    ] }
-  })
-  merchant.addScope('acquirerConfig', {
-    include: [
-      {
-        model: sequelize.models.acquirerConfig,
-        on: {
-          [Op.or]: [
-            { merchantId: null },
-            { merchantId: { [Op.eq]: sequelize.col('merchant.id') } }
-          ]
-        }
-      }
-    ]
-  })
-
-  merchant.addScope('partner', (partnerId) => ({
-    where: {
-      partnerId
-    }
-  }))
-
   merchant.associate = (models) => {
     merchant.belongsTo(models.resource, {
       foreignKey: 'scannedTaxCardResourceId',
@@ -156,6 +107,58 @@ module.exports = (sequelize, DataTypes) => {
       }
     )
   }
+
+  merchant.addScope('excludeLegal', {
+    attributes: { exclude: [
+      'taxCardNumber',
+      'scannedTaxCardResourceId',
+      'scannedBankStatementResourceId',
+      'scannedSkmenkumhamResourceId',
+      'scannedSiupResourceId',
+      'scannedTdpResourceId',
+      'scannedSkdpResourceId',
+      'ownerIdCardNumber',
+      'ownerIdCardType',
+      'ownerTaxCardNumber',
+      'ownerScannedIdCardResourceId',
+      'ownerScannedTaxCardResourceId'
+    ] }
+  })
+  merchant.addScope('excludeBank', {
+    attributes: { exclude: [
+      'bankName',
+      'bankBranchName',
+      'bankAccountName',
+      'bankAccountNumber'
+    ] }
+  })
+  merchant.addScope('excludePartner', {
+    attributes: { exclude: [
+      'partnerId'
+    ] }
+  })
+  merchant.addScope('acquirerConfig', {
+    include: [
+      {
+        model: sequelize.models.acquirerConfig,
+        on: {
+          [Op.or]: [
+            { merchantId: null },
+            { merchantId: { [Op.eq]: sequelize.col('merchant.id') } }
+          ]
+        }
+      }
+    ]
+  })
+
+  merchant.addScope('partner', (partnerId) => ({
+    where: {
+      partnerId
+    }
+  }))
+
+  merchant.addScope('admin', () => ({
+  }))
 
   return merchant
 }

@@ -53,7 +53,7 @@ module.exports.getAdmins = async (req, res, next) => {
     where: {}
   }
 
-  let scopedAdmin = req.applySequelizeCommonScope(models.admin.scope('adminHead'))
+  let scopedAdmin = req.applySequelizeCommonScope(models.admin.scope('admin'))
 
   if (req.params.adminId) {
     query.where.id = req.params.adminId
@@ -86,7 +86,7 @@ module.exports.getAdmins = async (req, res, next) => {
 }
 
 module.exports.updateAdmin = async (req, res, next) => {
-  let scopedAdmin = models.admin.scope('adminHead', { paranoid: false })
+  let scopedAdmin = models.admin.scope('admin', { paranoid: false })
   let updateCount = 0
   let admin
   let found = false
@@ -127,7 +127,7 @@ module.exports.updateAdmin = async (req, res, next) => {
 }
 
 module.exports.deleteAdmin = async (req, res, next) => {
-  let scopedAdmin = models.admin.scope('adminHead', { paranoid: false })
+  let scopedAdmin = models.admin.scope('admin', { paranoid: false })
   let admin
 
   await models.sequelize.transaction(async t => {

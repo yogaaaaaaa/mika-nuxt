@@ -204,46 +204,39 @@ router.get(
 )
 
 /**
- * Head Administration related endpoints
+ * Back-office Endpoint
  */
-router.post('/head/admins',
+router.post('/back_office/admins',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
   adminController.createAdminMiddlewares
 )
-router.get(
-  [
-    '/head/admins', '/head/admins/:adminId'
-  ],
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
-  authMiddleware.authErrorHandler,
-  adminController.getAdminsMiddlewares
-)
-router.put('/head/admins/:adminId',
+router.put('/back_office/admins/:adminId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
   adminController.updateAdminMiddlewares
 )
-router.delete('/head/admins/:adminId',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+router.get(
+  [
+    '/back_office/admins',
+    '/back_office/admins/:adminId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], []),
+  authMiddleware.authErrorHandler,
+  adminController.getAdminsMiddlewares
+)
+router.delete('/back_office/admins/:adminId',
+  authMiddleware.auth([auth.userTypes.ADMIN], []),
   authMiddleware.authErrorHandler,
   adminController.deleteAdmin
 )
-
-/**
- * Logistic Administration related endpoints
- */
-router.post('/logistic/terminals/:terminalId/generate_key',
+router.post('/back_office/terminals/:terminalId/generate_key',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_LOGISTIC]),
   authMiddleware.authErrorHandler,
   terminalController.generateTerminalCbKeyMiddlewares
 )
-
-/**
- * Marketing Administration related endpoints
- */
-router.post('/marketing/partners/:partnerId/generate_apikey',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_SUPER]),
+router.post('/back_office/partners/:partnerId/api',
+  authMiddleware.auth([auth.userTypes.ADMIN], []),
   authMiddleware.authErrorHandler,
   partnerController.generatePartnerApiKeyMiddlewares
 )
