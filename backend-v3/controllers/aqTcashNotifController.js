@@ -1,7 +1,7 @@
 'use strict'
 
-const tcash = require('../helpers/aqTcash')
-const trxManager = require('../helpers/trxManager')
+const tcash = require('../libs/aqTcash')
+const trxManager = require('../libs/trxManager')
 const models = require('../models')
 
 module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {

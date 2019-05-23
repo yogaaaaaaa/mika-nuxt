@@ -55,8 +55,6 @@ module.exports.get = (name, replacements) => {
   let script = exports.map.get(name)
   if (Array.isArray(replacements)) {
     let i = 0
-    console.log(script)
-    console.log(replacements)
     script = script.split('?').reduce((acc, v) => {
       let retval = `${acc}${replacements[i]}${v}`
       i++

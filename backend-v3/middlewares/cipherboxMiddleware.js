@@ -1,7 +1,7 @@
 'use strict'
 
-const msg = require('../helpers/msg')
-const cipherbox = require('../helpers/cipherbox')
+const msg = require('../libs/msg')
+const cipherbox = require('../libs/cipherbox')
 const models = require('../models')
 
 const debug = {

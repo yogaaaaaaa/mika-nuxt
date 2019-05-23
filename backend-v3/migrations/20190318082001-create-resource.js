@@ -16,11 +16,6 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      archivedAt: {
-        allowNull: true,
-        type: Sequelize.DATE,
-        defaultValue: null
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

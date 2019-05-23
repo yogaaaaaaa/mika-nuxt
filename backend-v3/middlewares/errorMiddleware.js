@@ -1,7 +1,7 @@
 'use strict'
 
 const { validationResult } = require('express-validator/check')
-const msg = require('../helpers/msg')
+const msg = require('../libs/msg')
 
 /**
  * Not found handler middleware, place before errorHandler

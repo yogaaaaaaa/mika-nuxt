@@ -9,7 +9,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
 
-const auth = require('../helpers/auth')
+const auth = require('../libs/auth')
 
 const appConfig = require('../configs/appConfig')
 
@@ -25,7 +25,7 @@ const terminalController = require('../controllers/terminalController')
 const partnerController = require('../controllers/partnerController')
 const adminController = require('../controllers/adminController')
 
-const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
+// const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
@@ -43,11 +43,7 @@ router.use([
 /**
  * Hello endpoint
  */
-router.all('/',
-  cipherboxMiddleware.processCipherbox(),
-  authMiddleware.auth(),
-  generalController.welcome
-)
+router.all('/', generalController.welcome)
 
 /**
  * Auth Endpoints
@@ -89,24 +85,23 @@ router.get('/utilities/auth_props',
 )
 
 /**
- * Resource(s) related endpoints
+ * File resource(s) related endpoints
  */
-router.get('/resources/:resourceId',
+router.post('/resources/:resourceId/files',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented)
+  generalController.notImplemented
+)
+router.get('/resources/:resourceId/files',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
 router.get('/files/:fileId',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  generalController.notImplemented)
-router.post('/resources',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented)
-router.post('/resources/:resourceId/file',
-  authMiddleware.auth([auth.userTypes.ADMIN]),
-  authMiddleware.authErrorHandler,
-  generalController.notImplemented)
+  generalController.notImplemented
+)
 
 /**
  * Agent related endpoints

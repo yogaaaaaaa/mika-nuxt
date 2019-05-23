@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "pm2 start ecosystem.json --env development",
     "production": "pm2 start ecosystem.json --env production",
+    "db-drop": "sequelize db:drop --config configs/dbConfig.js",
+    "db-create": "sequelize db:create --config configs/dbConfig.js",
     "db-migrate": "sequelize db:migrate --config configs/dbConfig.js",
     "db-seed": "sequelize db:seed:all --config configs/dbConfig.js"
   },

@@ -1,6 +1,6 @@
 'use strict'
 
-const hash = require('../helpers/hash')
+const hash = require('../libs/hash')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

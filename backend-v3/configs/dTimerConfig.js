@@ -4,7 +4,7 @@
  * Default Dtimer Config
  */
 
-const uid = require('../helpers/uid')
+const uid = require('../libs/uid')
 const appConfig = require('./appConfig')
 
 const configName = 'dTimerConfig'

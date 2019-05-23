@@ -1,7 +1,7 @@
 'use strict'
 
-const midtrans = require('../helpers/aqMidtrans')
-const trxManager = require('../helpers/trxManager')
+const midtrans = require('../libs/aqMidtrans')
+const trxManager = require('../libs/trxManager')
 const models = require('../models')
 
 module.exports.midtransHandleNotification = async function (req, res, next) {

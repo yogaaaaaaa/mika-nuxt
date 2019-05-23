@@ -1,16 +1,16 @@
 'use strict'
 
 const models = require('../models')
-const extApiObject = require('../helpers/extApiObject')
-const msg = require('../helpers/msg')
-const trxManager = require('../helpers/trxManager')
+const extApiObject = require('../libs/extApiObject')
+const msg = require('../libs/msg')
+const trxManager = require('../libs/trxManager')
 
 const queryMiddleware = require('../middlewares/queryMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const { body, query } = require('express-validator/check')
 
-const extApiTrxCallback = require('../helpers/extApiTrxCallback')
+const extApiTrxCallback = require('../libs/extApiTrxCallback')
 
 module.exports.getRoot = async (req, res, next) => {
   msg.expressResponse(

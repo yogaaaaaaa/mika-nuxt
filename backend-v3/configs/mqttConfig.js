@@ -4,7 +4,7 @@
  * Default Mqtt Config
  */
 
-const uid = require('../helpers/uid')
+const uid = require('../libs/uid')
 
 const appConfig = require('./appConfig')
 

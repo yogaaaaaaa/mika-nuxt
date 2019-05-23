@@ -1,29 +1,12 @@
 'use strict'
 
-/**
- * Sequelize model loader
- */
-
 const fs = require('fs')
 const path = require('path')
-const Sequelize = require('sequelize')
-
-const ready = require('../helpers/ready')
-ready.addModule('database')
+const sequelize = require('../libs/sequelize')
 
 const basename = path.basename(__filename)
 
-const config = require('../configs/dbConfig')[process.env.NODE_ENV || 'development']
-console.log('Database:', config.database)
-
 let models = {}
-
-let sequelize = new Sequelize(config.database, config.username, config.password, config)
-sequelize
-  .authenticate()
-  .then(() => {
-    ready.ready('database')
-  })
 
 fs
   .readdirSync(__dirname)
@@ -53,6 +36,6 @@ for (const modelName of Object.keys(models)) {
 }
 
 models.sequelize = sequelize
-models.Sequelize = Sequelize
+models.Sequelize = sequelize.Sequelize
 
 module.exports = models

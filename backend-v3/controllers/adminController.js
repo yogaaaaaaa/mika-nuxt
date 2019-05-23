@@ -2,8 +2,8 @@
 
 const _ = require('lodash')
 
-const msg = require('../helpers/msg')
-const auth = require('../helpers/auth')
+const msg = require('../libs/msg')
+const auth = require('../libs/auth')
 
 const userValidator = require('../validators/userValidator')
 

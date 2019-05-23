@@ -1,6 +1,6 @@
 'use strict'
 
-const extApiAuth = require('../helpers/extApiAuth')
+const extApiAuth = require('../libs/extApiAuth')
 
 module.exports.extApiAuth = async (req, res, next) => {
   req.auth = null

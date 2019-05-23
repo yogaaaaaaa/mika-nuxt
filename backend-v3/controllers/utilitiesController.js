@@ -1,8 +1,8 @@
 'use strict'
 
-const trxManager = require('../helpers/trxManager')
-const msg = require('../helpers/msg')
-const auth = require('../helpers/auth')
+const trxManager = require('../libs/trxManager')
+const msg = require('../libs/msg')
+const auth = require('../libs/auth')
 
 module.exports.listTrxManagerProps = (req, res, next) => {
   msg.expressResponse(

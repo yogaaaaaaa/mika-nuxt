@@ -4,29 +4,18 @@
  * Internal API auth implementation
  */
 
-const redis = require('./redis')
-const models = require('../models')
 const jwt = require('jsonwebtoken')
 
-const notif = require('../helpers/notif')
+const redis = require('./redis')
+const models = require('../models')
+const notif = require('../libs/notif')
 
 const appConfig = require('../configs/appConfig')
+const types = require('./types/authTypes')
 
-module.exports.userTypes = {
-  ADMIN: 'admin',
-  AGENT: 'agent',
-  MERCHANT_STAFF: 'merchantStaff',
-  PARTNER_STAFF: 'partnerStaff',
-  ACQUIRER_STAFF: 'acquirerStaff'
-}
-
-module.exports.userRoles = {
-  ADMIN_HEAD: 'adminHead',
-  ADMIN_FINANCE: 'adminFinance',
-  ADMIN_MARKETING: 'adminMarketing',
-  ADMIN_SUPPORT: 'adminSupport',
-  ADMIN_LOGISTIC: 'adminLogistic'
-}
+module.exports.types = types
+module.exports.userTypes = types.userTypes
+module.exports.userRoles = types.userRoles
 
 function redisKey (...keys) {
   return `auth:${keys.reduce((acc, key) => `${acc}:${key}`)}`
@@ -64,9 +53,7 @@ module.exports.verifyToken = (sessionToken, secretKey = appConfig.authSecretKey)
     if (payload) {
       return payload
     }
-  } catch (err) {
-    console.error(err)
-  }
+  } catch (err) {}
 }
 
 /**

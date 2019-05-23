@@ -1,9 +1,9 @@
 'use strict'
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
-const trxManager = require('../helpers/trxManager')
+const trxManager = require('../libs/trxManager')
 
-const msg = require('../helpers/msg')
+const msg = require('../libs/msg')
 
 /**
  * Controller to forcefully change transaction status

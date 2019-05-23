@@ -1,8 +1,8 @@
 'use strict'
 
-const alto = require('../helpers/aqAlto')
+const alto = require('../libs/aqAlto')
 const models = require('../models')
-const trxManager = require('../helpers/trxManager')
+const trxManager = require('../libs/trxManager')
 
 /**
  * Handle request of Alto pay and  notification

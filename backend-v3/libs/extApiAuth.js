@@ -21,7 +21,7 @@ async function getApiKey (idKey) {
   try {
     apiKey = JSON.parse(await redis.get(redisKeyName))
   } catch (err) {
-    console.log(err)
+    console.err(err)
   }
 
   if (!apiKey) {

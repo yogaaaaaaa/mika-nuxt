@@ -3,8 +3,8 @@
 const errorMiddleware = require('../middlewares/errorMiddleware')
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 
-const msg = require('../helpers/msg')
-const auth = require('../helpers/auth')
+const msg = require('../libs/msg')
+const auth = require('../libs/auth')
 
 const { body } = require('express-validator/check')
 

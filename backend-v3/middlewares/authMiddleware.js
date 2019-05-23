@@ -1,7 +1,7 @@
 'use strict'
 
-const msg = require('../helpers/msg')
-const auth = require('../helpers/auth')
+const msg = require('../libs/msg')
+const auth = require('../libs/auth')
 
 const appConfig = require('../configs/appConfig')
 
@@ -64,7 +64,6 @@ module.exports.authErrorHandler = async (req, res, next) => {
     )
     return
   }
-
   if (req.authInvalidUserType || req.authInvalidUserRole) {
     msg.expressResponse(
       res,
@@ -72,7 +71,6 @@ module.exports.authErrorHandler = async (req, res, next) => {
     )
     return
   }
-
   next()
 }
 

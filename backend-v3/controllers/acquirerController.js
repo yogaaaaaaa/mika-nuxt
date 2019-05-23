@@ -1,7 +1,7 @@
 'use strict'
 
-const trxManager = require('../helpers/trxManager')
-const msg = require('../helpers/msg')
+const trxManager = require('../libs/trxManager')
+const msg = require('../libs/msg')
 const models = require('../models')
 
 /**

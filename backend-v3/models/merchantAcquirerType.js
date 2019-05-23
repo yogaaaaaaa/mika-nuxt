@@ -7,8 +7,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     freezeTableName: true,
-    deletedAt: 'archivedAt',
-    paranoid: true
+    paranoid: false
   })
 
   merchantAcquirerType.associate = (models) => {

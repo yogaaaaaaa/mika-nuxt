@@ -1,16 +1,18 @@
 'use strict'
 
-const fake = require('../helpers/fake')
+const fake = require('../libs/fake')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    console.log('run me')
+    const startDate = new Date('2017-01-01T00:00:00.000Z')
+    const endDate = new Date()
+
     const generateMerchant1 = (count = 100) => fake.transactions(
       'majutembak',
       [1],
       [1, 2, 3, 4],
-      new Date('2017-01-01T00:00:00.000Z'),
-      new Date(),
+      startDate,
+      endDate,
       count
     )
 
@@ -18,8 +20,8 @@ module.exports = {
       'agromesupermoe',
       [2, 3],
       [5, 6, 7, 8],
-      new Date('2017-01-01T00:00:00.000Z'),
-      new Date(),
+      startDate,
+      endDate,
       count
     )
 

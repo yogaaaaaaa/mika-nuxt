@@ -1,13 +1,11 @@
 'use strict'
 
-const multer = require('multer')
-const msg = require('../helpers/msg')
+// const multer = require('multer')
+// const msg = require('../libs/msg')
 
-const models = require('../models')
+// const models = require('../models')
 
-module.exports.uploadFile = [
-
-]
+module.exports.uploadFile = []
 
 module.exports.createResource = async (req, res, next) => {
   next()

@@ -105,19 +105,25 @@ module.exports.paginationToSequelize = (req, res, next) => {
  */
 module.exports.filtersToSequelizeValidator = (validModels, bannedFields = null, acceptedFields = null) => [
   (req, res, next) => {
-    if (Array.isArray(req.query.f) && !Array.isArray(req.query.filters)) {
+    if (_.isPlainObject(req.query.f) && !_.isPlainObject(req.query.filters)) {
       req.query.filters = req.query.f
-    } else if (Array.isArray(req.query.f) && Array.isArray(req.query.filters)) {
-      req.query.filters.concat(req.query.f)
+    } else if (_.isPlainObject(req.query.f) && _.isPlainObject(req.query.filters)) {
+      Object.assign(req.query.filters, req.query.f)
     }
     next()
   },
   query('filters')
     .custom((filters) => {
-      for (const filter of _.flatten(_.values(filters))) {
-        let field = filter.split(',')[0]
+      if (!_.isPlainObject(filters)) return false
+      for (const filterKey of Object.keys(filters)) {
+        let field = filterKey.split(',')[0]
         if (!matchFieldPatterns(field, bannedFields, acceptedFields)) return false
         if (!validateFieldComponents(validModels, field.split('.'))) return false
+        if (Array.isArray(filters[filterKey])) {
+          if (filters[filterKey].some((filterContent) => typeof filterContent !== 'string')) return false
+        } else if (typeof filters[filterKey] !== 'string') {
+          return false
+        }
       }
       return true
     })
@@ -206,31 +212,41 @@ module.exports.filtersToSequelize = (req, res, next) => {
     }
   }
 
-  if (Array.isArray(req.query.filters)) {
+  if (_.isPlainObject(req.query.filters)) {
     filters = {}
     eagerFilters = {}
 
-    req.query.filters.forEach(filter => {
-      let filterSplit = filter.split(',')
+    Object.keys(req.query.filters).forEach((filterKey) => {
+      let filterKeySplit = filterKey.split(',')
 
-      let field = filterSplit[0]
+      let field = filterKeySplit[0]
       let fieldProperty = field.split('.').pop()
-      let op = filterSplit[1]
-      let value = filterSplit.length > 2 ? filterSplit.slice(2, filterSplit.length).join(',') : ''
+      let groupOp = (filterKeySplit[1] || 'and').toLowerCase()
+      if (groupOp === 'or') {
+        groupOp = Op.or
+      } else {
+        groupOp = Op.and
+      }
 
-      let targetFilters = field.indexOf('.') > 0 ? eagerFilters : filters
+      let filterContents = Array.isArray(req.query.filters[filterKey]) ? req.query.filters[filterKey] : [req.query.filters[filterKey]]
 
-      if (targetFilters[field]) {
-        if (targetFilters[field][Op.or]) {
-          targetFilters[field][Op.or].push(translateOp(fieldProperty, op, value))
-        } else {
-          targetFilters[field] = {
-            [Op.or]: [targetFilters[field], translateOp(fieldProperty, op, value)]
+      filterContents.forEach((filterContent) => {
+        let filterContentSplit = filterContent.split(',')
+        let op = filterContentSplit[0]
+        let value = filterContentSplit.length > 1 ? filterContentSplit.slice(1, filterContentSplit.length).join(',') : ''
+
+        let targetFilters = field.indexOf('.') > 0 ? eagerFilters : filters
+
+        let translatedOp = translateOp(fieldProperty, op, value)
+        if (translatedOp) {
+          if (!targetFilters[field]) targetFilters[field] = {}
+          if (targetFilters[field][groupOp]) {
+            targetFilters[field][groupOp].push(translatedOp)
+          } else {
+            targetFilters[field][groupOp] = [translatedOp]
           }
         }
-      } else {
-        targetFilters[field] = translateOp(fieldProperty, op, value)
-      }
+      })
     })
   }
 
@@ -240,13 +256,14 @@ module.exports.filtersToSequelize = (req, res, next) => {
         if (!_.isPlainObject(query)) { // convert direct model include to plain object
           query = { model: query }
         }
-        if (!_.isPlainObject(query.where)) {
-          query.where = {}
-        }
-        if (!Array.isArray(query.where[Op.and])) {
-          query.where[Op.and] = []
+
+        if (!query.where) query.where = {}
+        if (!query.where[Op.and]) query.where[Op.and] = []
+        if (_.isPlainObject(query.where[Op.and])) {
+          query.where[Op.and] = [ query.where[Op.and] ]
         }
         query.where[Op.and].push(where)
+
         return
       }
 
@@ -278,8 +295,12 @@ module.exports.filtersToSequelize = (req, res, next) => {
       let prevScope = model._scope
 
       if (!prevScope.where) prevScope.where = {}
+      if (!prevScope.where[Op.and]) prevScope.where[Op.and] = []
+      if (_.isPlainObject(prevScope.where[Op.and])) {
+        prevScope.where[Op.and] = [ prevScope.where[Op.and] ]
+      }
+      Object.keys(filters).forEach(field => prevScope.where[Op.and].push(filters[field]))
 
-      prevScope.where[Op.and] = _.values(filters)
       Object.keys(eagerFilters).forEach(field => eagerTraverse(prevScope, field.split('.'), eagerFilters[field]))
 
       return models[model.name].scope(prevScope)

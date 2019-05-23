@@ -3,7 +3,7 @@
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
-const script = require('../helpers/script')
+const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
   let acquirer = sequelize.define('acquirer', {

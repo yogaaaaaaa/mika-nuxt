@@ -2,8 +2,8 @@
 
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
-const msg = require('../helpers/msg')
-const extApiAuth = require('../helpers/extApiAuth')
+const msg = require('../libs/msg')
+const extApiAuth = require('../libs/extApiAuth')
 const models = require('../models')
 
 module.exports.generatePartnerApiKey = async (req, res, next) => {

@@ -17,8 +17,8 @@ const dTimer = require('./dTimer')
 const events = Object.create(require('events').prototype)
 
 const appConfig = require('../configs/appConfig')
-const { msgTypes } = require('../configs/msgTypesConfig')
-const types = require('../configs/trxManagerTypesConfig')
+const { msgTypes } = require('./types/msgTypes')
+const types = require('./types/trxManagerTypes')
 
 module.exports.types = types
 module.exports.transactionStatuses = types.transactionStatuses

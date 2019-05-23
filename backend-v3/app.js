@@ -6,7 +6,7 @@ console.log('Running with NODE_ENV', process.env.NODE_ENV)
 const express = require('express')
 require('express-async-errors')
 
-const ready = require('./helpers/ready')
+const ready = require('./libs/ready')
 
 const path = require('path')
 const logger = require('morgan')

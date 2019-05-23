@@ -5,7 +5,7 @@ const kv = require('./helpers/kv')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
-const script = require('../helpers/script')
+const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
   let transaction = sequelize.define('transaction', {
@@ -232,9 +232,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-
-  transaction.setKv = kv.setKvMethod('transactionId')
-  transaction.getKv = kv.getKvMethod('transactionId')
 
   transaction.associate = (models) => {
     transaction.belongsTo(models.agent, { foreignKey: 'agentId' })

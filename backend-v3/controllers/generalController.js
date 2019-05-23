@@ -1,6 +1,6 @@
 'use strict'
 
-const msg = require('../helpers/msg')
+const msg = require('../libs/msg')
 const appConfig = require('../configs/appConfig')
 
 /**

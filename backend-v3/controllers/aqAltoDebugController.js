@@ -1,7 +1,7 @@
 'use strict'
 
 const models = require('../models')
-const alto = require('../helpers/aqAlto')
+const alto = require('../libs/aqAlto')
 
 module.exports.queryTransaction = async (req, res, next) => {
   let response = {}

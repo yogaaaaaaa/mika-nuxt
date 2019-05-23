@@ -37,11 +37,6 @@ module.exports = {
         }
       },
 
-      archivedAt: {
-        allowNull: true,
-        type: Sequelize.DATE,
-        defaultValue: null
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
