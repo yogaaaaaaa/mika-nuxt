@@ -1,0 +1,13 @@
+{
+  "name": "mika-tools",
+  "version": "1.0.0",
+  "description": "Collection Debugging and test tools for MIKA development",
+  "author": "MIKA",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "commander": "^2.19.0",
+    "mqtt": "^2.18.8",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2"
+  }
+}
