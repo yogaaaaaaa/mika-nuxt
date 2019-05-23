@@ -1,0 +1,5234 @@
+{
+	"info": {
+		"_postman_id": "a3ce63f1-0696-4979-95a0-626c15ac2a77",
+		"name": "backend-v3",
+		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `version`\nContain current revison of backend, with format \n```\n{{branch}}-{{commitHash}}-{{commitCount}} {{enviroment}} {{commitTime}}\n```\n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\n- `data`\nIf any data is included, it will be in `data`.\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints or unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token. \n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n### Filters\nMost plural endpoint provide capability to filter entities, including specific endpoint if noted. Filters is defined as array of query string (e.g `filters[]`) that formatted with\n`attributes,op,value`\n\nOperator supported by `filters[]`\n- `eq` (equal)\n- `eqnull` (equal null)\n- `ne` (not equal)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `filters[]=status,eq,succes`\n- `filters[]=acquirer.name,like,%tcash%`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ready to Use (Staging Environment Only)",
+			"item": [
+				{
+					"name": "Authentication",
+					"item": [
+						{
+							"name": "{{baseUrl}}/api/auth/login (as agent)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"agent\",\n    \"password\": \"agent\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as agent2)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"agent2\",\n    \"password\": \"agent2\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as agent3)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"agent3\",\n    \"password\": \"agent3\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as admin)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"agent3\",\n    \"password\": \"agent3\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as admin2)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin2\",\n    \"password\": \"admin2\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as admin3)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin3\",\n    \"password\": \"admin3\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as merchantStaff)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"merchantStaff\",\n    \"password\": \"merchantStaff\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as merchantStaff2)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"merchantStaff2\",\n    \"password\": \"merchantStaff2\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/auth/login (as merchantStaff3)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "db07f491-3423-466f-89ad-226799857463",
+										"exec": [
+											"let body = JSON.parse(responseBody)",
+											"",
+											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"merchantStaff3\",\n    \"password\": \"merchantStaff3\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Transaction",
+					"item": [],
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "54b0fa2b-daa9-4d43-8f0f-5d41a8eae16f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "470e42f2-76f4-47d0-a601-1d806cd4a41a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "{{baseUrl}}/api/auth/login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									"let body = JSON.parse(responseBody)",
+									"",
+									"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{agentUsername}}\",\n    \"password\": \"{{agentPassword}}\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/auth/logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/auth/change_password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"oldPassword\":\"agent3\",\n\t\"password\": \"agentthree\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/change_password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"change_password"
+							]
+						},
+						"description": "Change passwor of currently authenticated user (based on session token)"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/auth/check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"sessionToken\":\"{{mikaSessionToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/check",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"check"
+							]
+						},
+						"description": "Check session token if its still valid and renew its expiry via `sessionToken` properties. This endpoint doesnt need authentication.\n"
+					},
+					"response": []
+				}
+			],
+			"description": "Collection of endpoints for authentication.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4bd3e37a-aa3c-4fea-b7d8-8e368f5de125",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c6c7257d-4ada-40f6-b1d6-7e9f58efef2f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "For Agent",
+			"item": [
+				{
+					"name": "{{baseUrl}}/api/agent",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{mikaSessionToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent"
+							]
+						},
+						"description": "Get current agent data"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/acquirers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/acquirers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"acquirers"
+							]
+						},
+						"description": "Get current agent acquirers"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/acquirers/:acquirerId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/acquirers/:acquirerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"acquirers",
+								":acquirerId"
+							],
+							"variable": [
+								{
+									"key": "acquirerId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get one acquirers"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,success",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,failed",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get current agent transactions"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions/:transactionId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions/:transactionsId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions",
+								":transactionsId"
+							],
+							"variable": [
+								{
+									"key": "transactionsId",
+									"value": "1KG001EbksvL6bOyWodMvuFpi9j"
+								}
+							]
+						},
+						"description": "Get current agent transactions by id"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions/by_alias/:aliasId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions/by_alias/:idAlias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions",
+								"by_alias",
+								":idAlias"
+							],
+							"variable": [
+								{
+									"key": "idAlias",
+									"value": "agromesupermoe-1566GQ-Z9455C"
+								}
+							]
+						},
+						"description": "Get transactions by alias id (friendly id)"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"acquirerId\": 8,\n\t\"amount\": 1000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions"
+							]
+						},
+						"description": "Create transaction"
+					},
+					"response": [
+						{
+							"name": "{{baseUrl}}/agent/transaction with user token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/javascript",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/agent/transaction",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"agent",
+										"transaction"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "For Merchant Staff",
+			"item": [
+				{
+					"name": "{{baseUrl}}/api/merchant_staff",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff"
+							]
+						},
+						"description": "Get current merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/outlets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/outlets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"outlets"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[name]",
+									"value": "like,%l%",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all outlets under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/acquirers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/acquirers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"acquirers"
+							]
+						},
+						"description": "Get acquirers under merchant's merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/acquirers/:acquirerId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/acquirers/:acquirerId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"acquirers",
+								":acquirerId"
+							],
+							"variable": [
+								{
+									"key": "acquirerId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get single acquirer under merchant's merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/outlets/:outletid",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/outlets/:outletId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"outlets",
+								":outletId"
+							],
+							"variable": [
+								{
+									"key": "outletId",
+									"value": "2"
+								}
+							]
+						},
+						"description": "Get single outlet under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/agents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/agents?f[name]=like,%moe 2%",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"agents"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[name]",
+									"value": "like,%moe 2%"
+								}
+							]
+						},
+						"description": "Get agents under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/agents/:agentId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/agents/:agentId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"agents",
+								":agentId"
+							],
+							"variable": [
+								{
+									"key": "agentId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get single agents under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/outlets/:outletId/agents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/outlets/:outletId/agents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"outlets",
+								":outletId",
+								"agents"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "outletId",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get agents under outlet under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,success",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,failed",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all transaction under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/transactions/:transactionId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/transactions/:transactionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"transactions",
+								":transactionId"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get single transaction under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/outlets/:outletId/transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/transactions/:transactionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"transactions",
+								":transactionId"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,success",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,failed",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get transactions under outlets under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/statistics/transactions/by_acquirer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/statistics/transactions/by_acquirer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"statistics",
+								"transactions",
+								"by_acquirer"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,success",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,failed",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get transaction acquirer statistics under merchant staff"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/merchant_staff/statistics/transactions/count_by_time_group",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/merchant_staff/statistics/transactions/count_by_time_group",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"merchant_staff",
+								"statistics",
+								"transactions",
+								"count_by_time_group"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "get_count",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "order_by",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "filters[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op.value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,success",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,failed",
+									"disabled": true
+								},
+								{
+									"key": "group",
+									"value": "createdAt",
+									"description": "Group attribute (datetime only, e.g createdAt, updatedAt)",
+									"disabled": true
+								},
+								{
+									"key": "group_time",
+									"value": "minute",
+									"description": "Group time (minute, hour, day, month, year)",
+									"disabled": true
+								},
+								{
+									"key": "utc_offset",
+									"value": "%2B0700",
+									"description": "UTC offset (e.g +0700)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get transaction grouped by time under merchant staff"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "For Admin",
+			"item": [
+				{
+					"name": "Head Admin",
+					"item": [
+						{
+							"name": "{{baseUrl}}/api/head/admins",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\":\"Admin Siradmin\",\n\t\"user\": {\n\t\t\"username\":\"obviousadmin\",\n\t\t\"password\":\"adminpassword\",\n\t\t\"userRoles\": [\"adminFinance\",\"adminMarketing\"]\n\t}\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
+						},
+						{
+							"name": "{{baseUrl}}/api/head/admins",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"value": "{{mikaSessionToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"disabled": true
+										},
+										{
+											"key": "order",
+											"value": "asc",
+											"disabled": true
+										},
+										{
+											"key": "order_by",
+											"value": "createdAt",
+											"disabled": true
+										},
+										{
+											"key": "get_count",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "archived",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "filters[]",
+											"value": "user.username,eq,admin",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/head/admins/:adminId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"value": "{{mikaSessionToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins/:adminId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins",
+										":adminId"
+									],
+									"query": [
+										{
+											"key": "archived",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "adminId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/head/admins/:adminId",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"Mikhail Gorbachev\",\n\t\"user\": {\n\t\t\"password\": \"notsoobvious\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins/:adminId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins",
+										":adminId"
+									],
+									"variable": [
+										{
+											"key": "adminId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/head/admins/:adminId (Archive entity)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"archivedAt\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins/:adminId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins",
+										":adminId"
+									],
+									"variable": [
+										{
+											"key": "adminId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/head/admins/:adminId (Un-Archive entity)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"archivedAt\": false\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins/:adminId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins",
+										":adminId"
+									],
+									"variable": [
+										{
+											"key": "adminId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/head/admins",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/head/admins/:adminId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"head",
+										"admins",
+										":adminId"
+									],
+									"variable": [
+										{
+											"key": "adminId",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
+						}
+					],
+					"description": "API for human resource role.\nIt able to create create/modify other admin user.",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "cb4a2c99-df88-44e3-913d-8cfb33a21563",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "345068bb-b725-42bd-a0e5-889b3ad5113a",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Marketing and Finance",
+					"item": [
+						{
+							"name": "Marketing Only",
+							"item": [
+								{
+									"name": "{{baseUrl}}/api/marketing/partners/:partnerId/generate_apikey",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/marketing/partners/:partnerId/generate_apikey",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"marketing",
+												"partners",
+												":partnerId",
+												"generate_apikey"
+											],
+											"variable": [
+												{
+													"key": "partnerId",
+													"value": "1"
+												}
+											]
+										},
+										"description": "Generate terminal cipherbox key for certain terminal"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/api/marketing/merchants",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"paymentProviderId\": 1,\n\t\"amount\": 1000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchant",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchant"
+											]
+										},
+										"description": "Create user"
+									},
+									"response": [
+										{
+											"name": "{{baseUrl}}/agent/transaction with user token",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-access-token",
+														"type": "text",
+														"value": "{{mikaSessionToken}}"
+													},
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/javascript",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/agent/transaction",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"agent",
+														"transaction"
+													]
+												}
+											},
+											"_postman_previewlanguage": "json",
+											"header": [],
+											"cookie": [],
+											"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+										}
+									]
+								},
+								{
+									"name": "{{baseUrl}}/api/marketing/merchants",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants"
+											]
+										},
+										"description": "Get all merchant data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/api/marketing/merchants/:merchantId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"value": "{{mikaSessionToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Get current merchant data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/api/marketing/merchants/:merchantId",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "x-access-token",
+												"value": "{{mikaSessionToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Edit current merchant data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/payment_providers",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/payment_providers",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"payment_providers"
+											]
+										},
+										"description": "Get all payment provider data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/payment_providers/:payment_providerId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/payment_providers",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"payment_providers"
+											]
+										},
+										"description": "Get current payment provider data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/outlets",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/outlets",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"outlets"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Get all outlet data by merchant"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/outlets",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/outlets",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"outlets"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Create outlet based current merchant"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/outlets/:outletId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/outlets/:outletId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"outlets",
+												":outletId"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												},
+												{
+													"key": "outletId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Get current outlet data by merchant"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/agents",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/agents",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"agents"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Get all agent data by merchant"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/agents",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/agents",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"agents"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Create agent data by merchant"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/agents/:agentId",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merhcantId/agents/:agentId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merhcantId",
+												"agents",
+												":agentId"
+											],
+											"variable": [
+												{
+													"key": "merhcantId",
+													"value": ""
+												},
+												{
+													"key": "agentId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Edit current agent data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/outlets/:outletId/agents",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/agents",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"agents"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Get all agent data by current merchant and outlet"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/merchants/:merchantId/outlets/:outletId/agents/:agentId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/merchants/:merchantId/agents",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"merchants",
+												":merchantId",
+												"agents"
+											],
+											"variable": [
+												{
+													"key": "merchantId",
+													"value": ""
+												}
+											]
+										},
+										"description": "Get current agent data by current merchant and outlet"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/outlets",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/outlet",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"outlet"
+											]
+										},
+										"description": "Get all outlet data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/outlets/:outletId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/outlet",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"outlet"
+											]
+										},
+										"description": "Get current outlet data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/outlets/:outletId",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/outlet",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"outlet"
+											]
+										},
+										"description": "Edit current outlet data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/outlets/:outlet/agents",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/outlet",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"outlet"
+											]
+										},
+										"description": "Get all agent data by outlet"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/outlets/:outlet/agents/:agentId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/outlet",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"outlet"
+											]
+										},
+										"description": "Get current agent data by outlet"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/agents",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/agents",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"agents"
+											]
+										},
+										"description": "Get all agents data"
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/marketing/agents/:agentId",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{baseUrl}}/marketing/agents",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"marketing",
+												"agents"
+											]
+										},
+										"description": "Get current agents data"
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Finance Only",
+							"item": [],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions"
+									]
+								},
+								"description": "Get all transaction data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/:transactionId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions"
+									]
+								},
+								"description": "Get current transaction data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/merchants",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions/merchants",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions",
+										"merchants"
+									]
+								},
+								"description": "Get all transaction data per merchant"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/merchants/:merchantId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions/merchants/:merchantId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions",
+										"merchants",
+										":merchantId"
+									],
+									"variable": [
+										{
+											"key": "merchantId",
+											"value": ""
+										}
+									]
+								},
+								"description": "Get all transaction data in current merchant"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/acquirers/:acquirerId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions/payment_providers",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions",
+										"payment_providers"
+									]
+								},
+								"description": "Get all transaction data by payment provider"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/outlets",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions/outlets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions",
+										"outlets"
+									]
+								},
+								"description": "Get all transaction data per outlet"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/agents",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions/agents",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions",
+										"agents"
+									]
+								},
+								"description": "Get all transaction data per agent"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/finance/transactions/terminals",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/finance/transactions/terminals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"finance",
+										"transactions",
+										"terminals"
+									]
+								},
+								"description": "Get all transaction data per terminal"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Logistic",
+					"item": [
+						{
+							"name": "{{baseUrl}}/logistic/terminals",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminals"
+									]
+								},
+								"description": "Get all terminal data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/api/logistic/terminals/:terminalId/generate_key",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/logistic/terminals/:terminalId/generate_cbkey",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"logistic",
+										"terminals",
+										":terminalId",
+										"generate_cbkey"
+									],
+									"variable": [
+										{
+											"key": "terminalId",
+											"value": "1"
+										}
+									]
+								},
+								"description": "Generate terminal cipherbox key for certain terminal"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/procurements",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/procurements",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"procurements"
+									]
+								},
+								"description": "Get all proqurement data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/request_procurements",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/request_procurements",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"request_procurements"
+									]
+								},
+								"description": "create request proqurement data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/terminal_setup/attribute",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminal_setup/attribute",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminal_setup",
+										"attribute"
+									]
+								},
+								"description": "Create attribute for terminal setup"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/delivery",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/delivery",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"delivery"
+									]
+								},
+								"description": "Get all delivery data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/delivery",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"paymentProviderId\": 1,\n\t\"amount\": 1000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/delivery",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"delivery"
+									]
+								},
+								"description": "Create delivery"
+							},
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
+						},
+						{
+							"name": "{{baseUrl}}/logistic/delivery/:deliveryId",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/delivery/:deliveryId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"delivery",
+										":deliveryId"
+									],
+									"variable": [
+										{
+											"key": "deliveryId",
+											"value": ""
+										}
+									]
+								},
+								"description": "Edit current delivery data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/assign_courier",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/assign_courier",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"assign_courier"
+									]
+								},
+								"description": "Get all assign courier data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/terminal_swap",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminal_swap",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminal_swap"
+									]
+								},
+								"description": "Get all terminal swap data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/terminal_maintenance",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminal_maintenance",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminal_maintenance"
+									]
+								},
+								"description": "Get all terminal maintenance data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/terminal_maintenance/:terminalMaintenanceId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminal_maintenance/:terminalMaintenanceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminal_maintenance",
+										":terminalMaintenanceId"
+									],
+									"variable": [
+										{
+											"key": "terminalMaintenanceId",
+											"value": ""
+										}
+									]
+								},
+								"description": "Get current terminal maintenance data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/terminal_maintenance",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminal_maintenance",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminal_maintenance"
+									]
+								},
+								"description": "create terminal maintenance data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/terminal_maintenance/:terminalMaintenanceId",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminal_maintenance",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminal_maintenance"
+									]
+								},
+								"description": "Update current terminal maintenance data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/logistic/delivery/:deliveryId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/delivery/:deliveryId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"delivery",
+										":deliveryId"
+									],
+									"variable": [
+										{
+											"key": "deliveryId",
+											"value": ""
+										}
+									]
+								},
+								"description": "Get current delivery data"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Call Center",
+					"item": [
+						{
+							"name": "{{baseUrl}}/call_center/issue",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/call_center/issue",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"call_center",
+										"issue"
+									]
+								},
+								"description": "Get all terminal data"
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/call_center/issue",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"paymentProviderId\": 1,\n\t\"amount\": 1000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/call_center/issue",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"call_center",
+										"issue"
+									]
+								},
+								"description": "Create issue"
+							},
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
+						},
+						{
+							"name": "{{baseUrl}}/call_center/issue Copy",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/logistic/terminals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"logistic",
+										"terminals"
+									]
+								},
+								"description": "Get all terminal data"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
+		{
+			"name": "Resources",
+			"item": [
+				{
+					"name": "{{baseUrl}}/api/resources/:resourceId/files",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"collection1\",\n\t\"description\": \"tax card scan\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources/:resourceId/files",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								":resourceId",
+								"files"
+							],
+							"variable": [
+								{
+									"key": "resourceId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Upload file to certain resource."
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/resources/:resourceId/files",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"collection1\",\n\t\"description\": \"tax card scan\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources/:resourceId/files",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								":resourceId",
+								"files"
+							],
+							"variable": [
+								{
+									"key": "resourceId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Upload file to certain resource."
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/files/:fileId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"collection1\",\n\t\"description\": \"tax card scan\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources/:resourceId/files",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								":resourceId",
+								"files"
+							],
+							"variable": [
+								{
+									"key": "resourceId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Download file"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/files/:fileId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "db07f491-3423-466f-89ad-226799857463",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"collection1\",\n\t\"description\": \"tax card scan\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"resources"
+							]
+						},
+						"description": "Login to mika backend"
+					},
+					"response": []
+				}
+			],
+			"description": "Resource(s) contain collection of file(s).",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "90e8937e-b1c6-42b1-a42c-adb072a29562",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c0d1a14d-6f51-49c0-a583-742543b7d33a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Utilities",
+			"item": [
+				{
+					"name": "{{baseUrl}}/api/utilities/msg_props",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/utilities/msg_props",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utilities",
+								"msg_props"
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/utilities/trx_props",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/utilities/trx_props",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utilities",
+								"trx_props"
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/utilities/auth_props",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/utilities/auth_props",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utilities",
+								"auth_props"
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				}
+			],
+			"description": "Misc utilities"
+		},
+		{
+			"name": "Debug",
+			"item": [
+				{
+					"name": "{{baseUrl}}/debug/echo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-mika-debug",
+								"type": "text",
+								"value": "{{mikaDebugKey}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/debug/echo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"debug",
+								"echo"
+							]
+						},
+						"description": "Will echo JSON object send to this endpoints"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/debug/transaction/:transactionId/status/:transactionStatus",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-mika-debug",
+								"type": "text",
+								"value": "{{mikaDebugKey}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/debug/transaction/:transactionId/status/:transactionStatus",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"debug",
+								"transaction",
+								":transactionId",
+								"status",
+								":transactionStatus"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "1KG06s77JnRNCQ9qMmes7ZRSIo4"
+								},
+								{
+									"key": "transactionStatus",
+									"value": "success"
+								}
+							]
+						},
+						"description": "Forcefully change status of certain transaction"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/debug/alto/transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-mika-debug",
+								"type": "text",
+								"value": "{{mikaDebugKey}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"out_trade_no\": \"1KCtanJdU7IjK2mC57xuAGRihUK\",\n\t\"paymentProviderConfigId\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/debug/alto/transaction",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"debug",
+								"alto",
+								"transaction"
+							]
+						},
+						"description": "Forcefully change status of certain transaction"
+					},
+					"response": []
+				}
+			],
+			"description": "Debug endpoints"
+		},
+		{
+			"name": "External/Public API",
+			"item": [
+				{
+					"name": "{{baseUrl}}/mika",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika"
+							]
+						},
+						"description": "Mika public api welcome end points"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/merchants",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/merchants?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"merchants"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all merchants under partner api key"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/merchants/:merchantId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/merchants/:merchantId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"merchants",
+								":merchantId"
+							],
+							"variable": [
+								{
+									"key": "merchantId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/merchants/:merchantId/agents",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/merchants/:merchantId/agents?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"merchants",
+								":merchantId",
+								"agents"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "merchantId",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/merchants/:merchantId/transactions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/merchants/:merchantId/transactions?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"merchants",
+								":merchantId",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "merchantId",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/agents",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/agents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"agents"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/agents/:agentId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/agents/:agentId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"agents",
+								":agentId"
+							],
+							"variable": [
+								{
+									"key": "agentId",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/agents/:agentId/transactions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/agents/:agentId/transactions?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"agents",
+								":agentId",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "agentId",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/transactions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/transactions?page=1&per_page=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/transactions/:transactionId",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"agentId\": \"1\",\n\t\"paymentProviderId\":\"1\",\n\t\"amount\":2500\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/transactions/:transactionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"transactions",
+								":transactionId"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "1KLv7UubAQJvKUj9uOtVgKAmffB"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/mika/transactions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{extApiToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"agentId\": \"4\",\n\t\"paymentProviderId\":\"1\",\n\t\"amount\": 2500\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mika/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"mika",
+								"transactions"
+							]
+						},
+						"description": "Create transactions"
+					},
+					"response": []
+				}
+			],
+			"description": "Mika public API. All JWT token is constructed via Pre-request script.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4700f8a6-2924-4fc1-9ce2-28185e7e888e",
+						"type": "text/javascript",
+						"exec": [
+							"const key = {",
+							"        \"idKey\": \"15432ad43d04\",",
+							"        \"secretKey\": \"Jhqu2NuRkG+Qn7M9\",",
+							"        \"secretKeyHashed\": \"7d84462f851b06f5d01b83e0242594ea5ab639e31b4ef7e01345303e93863f15\",",
+							"        \"sharedKey\": \"ER//zNjXqzH2RTC4\"",
+							"    }",
+							"",
+							"const { idKey, secretKey, sharedKey } = key",
+							"",
+							"function base64url (source) {",
+							"  // Encode in classical base64",
+							"  let encodedSource = CryptoJS.enc.Base64.stringify(source)",
+							"",
+							"  // Remove padding equal characters",
+							"  encodedSource = encodedSource.replace(/=+$/, '')",
+							"",
+							"  // Replace characters according to base64url specifications",
+							"  encodedSource = encodedSource.replace(/\\+/g, '-')",
+							"  encodedSource = encodedSource.replace(/\\//g, '_')",
+							"",
+							"  return encodedSource",
+							"}",
+							"",
+							"const header = {",
+							"  'typ': 'JWT',",
+							"  'alg': 'HS256'",
+							"}",
+							"",
+							"const payload = {",
+							"  keyId: idKey,",
+							"  keySecret: secretKey,",
+							"  iat: Math.floor((new Date().getTime()) / 1000)",
+							"}",
+							"",
+							"let secret = sharedKey",
+							"",
+							"// encode header",
+							"let stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header))",
+							"let encodedHeader = base64url(stringifiedHeader)",
+							"",
+							"// encode data",
+							"let stringifiedData = CryptoJS.enc.Utf8.parse(JSON.stringify(payload))",
+							"let encodedData = base64url(stringifiedData)",
+							"",
+							"// build token",
+							"let token = encodedHeader + '.' + encodedData",
+							"",
+							"// sign token",
+							"let signature = CryptoJS.HmacSHA256(token, secret)",
+							"signature = base64url(signature)",
+							"let signedToken = token + '.' + signature",
+							"",
+							"postman.setEnvironmentVariable('extApiToken', signedToken)",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f6a3d8a-269d-4305-8208-fb45ede19275",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "{{baseUrl}}/api",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api"
+					]
+				},
+				"description": "Mika backend landing page"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3b7e2a55-bdec-4c55-9ded-ee8613410be4",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "54c965b2-3f37-4c33-a013-df9e945373ea",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "8f00206d-58cb-4530-a0db-f1b8a64ea9ed",
+			"key": "baseUrl",
+			"value": "https://stg12api.mikaapp.id",
+			"type": "string"
+		},
+		{
+			"id": "7dbb1899-f643-4e83-97fd-a94a7395176a",
+			"key": "agentUsername",
+			"value": "agent2",
+			"type": "string"
+		},
+		{
+			"id": "31dfca62-622b-49d6-bda8-d2f11f77577b",
+			"key": "agentPassword",
+			"value": "agent2",
+			"type": "string"
+		},
+		{
+			"id": "28f51caf-737c-4d6a-8450-403eb59fff46",
+			"key": "merchantUsername",
+			"value": "merchant2",
+			"type": "string"
+		},
+		{
+			"id": "6efb33d5-6780-477f-9527-28494b47ad54",
+			"key": "merchantPassword",
+			"value": "merchant2",
+			"type": "string"
+		},
+		{
+			"id": "6b0e9b99-f78f-47ba-aae8-b4e80a688d06",
+			"key": "mikaDebugKey",
+			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
+			"type": "string"
+		},
+		{
+			"id": "9e6b360c-5045-44fb-a72b-840b0f8f73b8",
+			"key": "adminUsername",
+			"value": "admin",
+			"type": "string"
+		},
+		{
+			"id": "2e41aa94-1613-48e9-b89c-d43bcefe54ca",
+			"key": "adminPassword",
+			"value": "admin",
+			"type": "string"
+		}
+	]
+}
