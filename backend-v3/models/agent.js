@@ -10,13 +10,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
-    generalLocationLong: DataTypes.STRING,
-    generalLocationLat: DataTypes.STRING,
-    generalLocationRadiusMeter: DataTypes.FLOAT,
+    generalLocationLong: DataTypes.DECIMAL(12, 8),
+    generalLocationLat: DataTypes.DECIMAL(12, 8),
+    generalLocationRadiusMeter: DataTypes.DECIMAL(10, 2),
 
     userId: DataTypes.INTEGER,
-    outletId: DataTypes.INTEGER,
-    merchantId: DataTypes.INTEGER
+    outletId: DataTypes.INTEGER
   }, {
     timestamps: true,
     freezeTableName: true,
@@ -24,11 +23,22 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
+  agent.associate = (models) => {
+    agent.belongsTo(models.user, { foreignKey: 'userId' })
+    agent.belongsTo(models.outlet, { foreignKey: 'outletId' })
+
+    agent.hasMany(models.transaction, { foreignKey: 'agentId' })
+  }
+
   agent.addScope('agent', () => ({
     attributes: { exclude: ['archivedAt'] },
     include: [
-      sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner'),
-      sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant')
+      {
+        model: sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant'),
+        include: [
+          sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
+        ]
+      }
     ]
   }))
   agent.addScope('merchantStaff', (merchantStaffId) => ({
@@ -52,18 +62,25 @@ module.exports = (sequelize, DataTypes) => {
     attributes: ['id'],
     include: [
       {
-        model: sequelize.models.merchant.scope('id'),
+        model: sequelize.models.outlet.scope('id'),
+        required: true,
         include: [
           {
-            where: acquirerId ? { id: acquirerId } : undefined,
-            model: sequelize.models.acquirer.scope(
-              { method: ['agentExclusion', '`agent`.`id`'] },
-              'excludeTimestamp',
-              'excludeShare'
-            ),
+            model: sequelize.models.merchant.scope('id'),
+            required: true,
             include: [
-              sequelize.models.acquirerType.scope('excludeTimestamp'),
-              sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
+              {
+                where: acquirerId ? { id: acquirerId } : undefined,
+                model: sequelize.models.acquirer.scope(
+                  { method: ['agentExclusion', '`agent`.`id`'] },
+                  'excludeTimestamp',
+                  'excludeShare'
+                ),
+                include: [
+                  sequelize.models.acquirerType.scope('excludeTimestamp'),
+                  sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
+                ]
+              }
             ]
           }
         ]
@@ -73,16 +90,23 @@ module.exports = (sequelize, DataTypes) => {
   agent.addScope('trxManager', (acquirerId) => ({
     include: [
       {
-        model: sequelize.models.merchant,
+        model: sequelize.models.outlet.scope('id'),
+        required: true,
         include: [
           {
-            where: acquirerId ? { id: acquirerId } : undefined,
-            required: false,
-            model: sequelize.models.acquirer.scope(
-              'acquirerType',
-              'acquirerConfig',
-              { method: ['agentExclusion', '`agent`.`id`'] }
-            )
+            model: sequelize.models.merchant,
+            required: true,
+            include: [
+              {
+                model: sequelize.models.acquirer.scope(
+                  'acquirerType',
+                  'acquirerConfig',
+                  { method: ['agentExclusion', '`agent`.`id`'] }
+                ),
+                where: acquirerId ? { id: acquirerId } : undefined,
+                required: false
+              }
+            ]
           }
         ]
       }
@@ -102,16 +126,21 @@ module.exports = (sequelize, DataTypes) => {
     return {
       include: [
         {
-          model: sequelize.models.merchant,
-          where: whereMerchant,
+          model: sequelize.models.outlet,
           include: [
             {
-              model: sequelize.models.acquirer.scope(
-                { method: ['agentExclusion', '`agent`.`id`'] }
-              ),
-              required: false,
+              model: sequelize.models.merchant,
+              where: whereMerchant,
               include: [
-                sequelize.models.acquirerType
+                {
+                  model: sequelize.models.acquirer.scope(
+                    { method: ['agentExclusion', '`agent`.`id`'] }
+                  ),
+                  include: [
+                    sequelize.models.acquirerType
+                  ],
+                  required: false
+                }
               ]
             }
           ]
@@ -130,14 +159,20 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-
-  agent.associate = (models) => {
-    agent.belongsTo(models.user, { foreignKey: 'userId' })
-    agent.belongsTo(models.outlet, { foreignKey: 'outletId' })
-    agent.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-
-    agent.hasMany(models.transaction, { foreignKey: 'agentId' })
-  }
+  agent.addScope('admin', () => ({
+    include: [
+      {
+        model: sequelize.models.outlet,
+        attributes: [
+          'id',
+          'name',
+          'description',
+          'merchantId'
+        ]
+      },
+      sequelize.models.user.scope('excludePassword')
+    ]
+  }))
 
   return agent
 }

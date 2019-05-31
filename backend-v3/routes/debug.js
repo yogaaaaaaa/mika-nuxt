@@ -4,7 +4,7 @@
  * Quick and dirty debug route handler
  */
 
-const express = require('express')
+const express = require('../libs/express')
 const bodyParser = require('body-parser')
 
 const debugController = require('../controllers/debugController')
@@ -28,4 +28,6 @@ router.post('/alto/transaction', altoDebugController.queryTransaction)
 router.use(errorMiddleware.notFoundErrorHandler)
 router.use(errorMiddleware.errorHandler)
 
-module.exports = router
+const debugRouter = express.Router()
+debugRouter.use('/debug', router)
+module.exports = debugRouter

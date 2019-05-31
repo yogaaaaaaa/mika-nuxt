@@ -13,8 +13,9 @@ module.exports.generatePartnerApiKey = async (req, res, next) => {
     await models.apiKey.destroy({
       where: {
         partnerId: req.params.partnerId
-      }
-    }, { transaction: t })
+      },
+      transaction: t
+    })
     await models.apiKey.create({
       idKey: key.idKey,
       secretKey: key.secretKeyHashed,

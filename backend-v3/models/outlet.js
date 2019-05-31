@@ -7,7 +7,7 @@ const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
   let outlet = sequelize.define('outlet', {
-    idAlias: DataTypes.CHAR(40),
+    idAlias: DataTypes.CHAR(25),
 
     name: DataTypes.STRING,
     description: DataTypes.STRING,
@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
 
     email: DataTypes.STRING,
     website: DataTypes.STRING,
-    locationLong: DataTypes.STRING,
-    locationLat: DataTypes.STRING,
+    locationLong: DataTypes.DECIMAL(12, 8),
+    locationLat: DataTypes.DECIMAL(12, 8),
     streetAddress: DataTypes.STRING,
     locality: DataTypes.STRING,
     district: DataTypes.STRING,
@@ -80,6 +80,18 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   }))
+  outlet.addScope('admin', () => ({
+    include: [
+      {
+        model: sequelize.models.resource,
+        as: 'outletPhotoResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'cashierDeskPhotoResource'
+      }
+    ]
+  }))
 
   outlet.associate = function (models) {
     outlet.belongsTo(models.resource, {
@@ -92,6 +104,21 @@ module.exports = (sequelize, DataTypes) => {
     })
     outlet.belongsTo(models.merchant, { foreignKey: 'merchantId' })
     outlet.hasMany(models.terminal, { foreignKey: 'outletId' })
+  }
+
+  outlet.createWithResources = async (value, options) => {
+    let resources = Array(2)
+    for (let i = 0; i < resources.length; i++) {
+      resources[i] = sequelize.models.resource.buildWithId()
+      await resources[i].save(options)
+    }
+
+    let outletInstance = outlet.build(value, options)
+    outletInstance.outletPhotoResourceId = resources[0].id
+    outletInstance.cashierDeskPhotoResourceId = resources[1].id
+
+    await outletInstance.save(options)
+    return outletInstance
   }
 
   return outlet

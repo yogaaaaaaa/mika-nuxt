@@ -36,10 +36,10 @@ module.exports = {
       },
 
       locationLong: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL(12, 8)
       },
       locationLat: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL(12, 8)
       },
 
       streetAddress: {
@@ -76,6 +76,7 @@ module.exports = {
           key: 'id'
         }
       },
+
       archivedAt: {
         allowNull: true,
         type: Sequelize.DATE,

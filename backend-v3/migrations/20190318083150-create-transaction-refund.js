@@ -11,7 +11,7 @@ module.exports = {
 
       amount: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.DECIMAL(28, 2)
       },
       reason: {
         type: Sequelize.STRING

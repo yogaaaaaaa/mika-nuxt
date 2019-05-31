@@ -2,18 +2,20 @@
 
 const { body } = require('express-validator/check')
 
-const userTypesValidation = (validUserTypes) => body('user.userTypes').isIn(validUserTypes)
-const userRolesValidation = (validUserRoles) =>
+const helper = require('./helper')
+
+const userRolesValidator = (validUserRoles) =>
   body('user.userRoles').custom((userRoles) => {
-    if (!Array.isArray(userRoles)) return false
-    if (!Array.isArray(validUserRoles)) return false
-    for (const userRole of userRoles) {
-      if (!validUserRoles.includes(userRole)) return false
+    if (Array.isArray(validUserRoles)) {
+      if (!Array.isArray(userRoles)) return false
+      for (const userRole of userRoles) {
+        if (!validUserRoles.includes(userRole)) return false
+      }
     }
     return true
   })
 
-module.exports.bodyUserCreate = (validUserTypes, validUserRoles) => [
+module.exports.bodyNestedCreate = (defaultUserType, validUserRoles) => [
   body('user.username')
     .isString()
     .not()
@@ -22,12 +24,11 @@ module.exports.bodyUserCreate = (validUserTypes, validUserRoles) => [
     .isString()
     .not()
     .isEmpty(),
-  body('user.userTypes').isIn(validUserTypes).optional(),
-  userTypesValidation(validUserTypes).optional(),
-  userRolesValidation(validUserRoles)
+  helper.bodyDefault('user.userType', defaultUserType),
+  userRolesValidator(validUserRoles)
 ]
 
-module.exports.bodyUserUpdate = (validUserTypes, validUserRoles) => [
+module.exports.bodyNestedUpdate = (defaultUserType, validUserRoles) => [
   body('user.username')
     .isString()
     .not()
@@ -38,6 +39,6 @@ module.exports.bodyUserUpdate = (validUserTypes, validUserRoles) => [
     .not()
     .isEmpty()
     .optional(),
-  userTypesValidation(validUserTypes).optional(),
-  userRolesValidation(validUserRoles).optional()
+  helper.bodyDefaultExist('user.userType', defaultUserType),
+  userRolesValidator(validUserRoles).optional()
 ]

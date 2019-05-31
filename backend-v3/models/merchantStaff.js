@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     occupation: DataTypes.STRING,
 
-    locationLong: DataTypes.STRING,
-    locationLat: DataTypes.STRING,
+    locationLong: DataTypes.DECIMAL(12, 8),
+    locationLat: DataTypes.DECIMAL(12, 8),
     streetAddress: DataTypes.STRING,
     locality: DataTypes.STRING,
     district: DataTypes.STRING,
@@ -28,6 +28,20 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'archivedAt',
     paranoid: true
   })
+
+  merchantStaff.associate = function (models) {
+    merchantStaff.belongsTo(models.user, { foreignKey: 'userId' })
+    merchantStaff.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+
+    merchantStaff.belongsToMany(
+      models.outlet,
+      {
+        through: 'merchantStaffOutlet',
+        foreignKey: 'merchantStaffId',
+        otherKey: 'outletId'
+      }
+    )
+  }
 
   merchantStaff.addScope('merchantStaff', () => ({
     attributes: { exclude: ['archivedAt'] },
@@ -56,20 +70,11 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-
-  merchantStaff.associate = function (models) {
-    merchantStaff.belongsTo(models.user, { foreignKey: 'userId' })
-    merchantStaff.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-
-    merchantStaff.belongsToMany(
-      models.outlet,
-      {
-        through: 'outletMerchantStaff',
-        foreignKey: 'merchantStaffId',
-        otherKey: 'outletId'
-      }
-    )
-  }
+  merchantStaff.addScope('admin', () => ({
+    include: [
+      sequelize.models.user.scope('excludePassword')
+    ]
+  }))
 
   return merchantStaff
 }

@@ -38,11 +38,13 @@ module.exports.setKvMethod = (entityIdName) => {
     await this.destroy({
       where: {
         [entityIdName]: entityId
-      }
-    }, t ? { transaction: t } : undefined)
+      },
+      transaction: t
+    })
     for (const key in objectKv) {
       if (objectKv.hasOwnProperty(key)) {
         await this.create({
+          [entityIdName]: entityId,
           name: key,
           value: objectKv[key]
         }, t ? { transaction: t } : undefined)

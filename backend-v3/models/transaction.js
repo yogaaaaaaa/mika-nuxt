@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
 
     idAlias: DataTypes.CHAR(40),
 
-    amount: DataTypes.INTEGER,
+    amount: DataTypes.DECIMAL(28, 2),
 
     status: DataTypes.CHAR(32),
     settlementStatus: DataTypes.CHAR(32),
@@ -42,8 +42,8 @@ module.exports = (sequelize, DataTypes) => {
     aliasThumbnail: DataTypes.STRING,
     aliasThumbnailGray: DataTypes.STRING,
 
-    locationLong: DataTypes.STRING,
-    locationLat: DataTypes.STRING,
+    locationLong: DataTypes.DECIMAL(12, 8),
+    locationLat: DataTypes.DECIMAL(12, 8),
     ipAddress: DataTypes.STRING,
 
     voidReason: DataTypes.TEXT,
@@ -60,6 +60,15 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     paranoid: false
   })
+
+  transaction.associate = (models) => {
+    transaction.belongsTo(models.agent, { foreignKey: 'agentId' })
+    transaction.belongsTo(models.terminal, { foreignKey: 'terminalId' })
+    transaction.belongsTo(models.acquirer, { foreignKey: 'acquirerId' })
+    transaction.hasMany(models.transactionExtraKv, { foreignKey: 'transactionId' })
+
+    transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
+  }
 
   transaction.addScope('transactionExtraKv', () => ({
     include: [
@@ -222,7 +231,12 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       {
         model: sequelize.models.agent,
-        include: [ sequelize.models.merchant ]
+        include: [
+          {
+            model: sequelize.models.outlet,
+            include: sequelize.models.merchant
+          }
+        ]
       },
       {
         model: sequelize.models.acquirer.scope(
@@ -233,14 +247,31 @@ module.exports = (sequelize, DataTypes) => {
     ]
   }))
 
-  transaction.associate = (models) => {
-    transaction.belongsTo(models.agent, { foreignKey: 'agentId' })
-    transaction.belongsTo(models.terminal, { foreignKey: 'terminalId' })
-    transaction.belongsTo(models.acquirer, { foreignKey: 'acquirerId' })
-    transaction.hasMany(models.transactionExtraKv, { foreignKey: 'transactionId' })
-
-    transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
-  }
+  transaction.addScope('admin', () => ({
+    include: [
+      {
+        model: sequelize.models.agent,
+        attributes: [
+          'id',
+          'name',
+          'outletId'
+        ],
+        include: [
+          {
+            model: sequelize.models.outlet,
+            attributes: [
+              'id',
+              'name',
+              'merchantId'
+            ]
+          }
+        ]
+      },
+      {
+        model: sequelize.models.acquirer.scope('acquirerType')
+      }
+    ]
+  }))
 
   return transaction
 }

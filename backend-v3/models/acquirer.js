@@ -10,13 +10,13 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
-    minimumAmount: DataTypes.INTEGER,
-    maximumAmount: DataTypes.INTEGER,
+    minimumAmount: DataTypes.DECIMAL(28, 2),
+    maximumAmount: DataTypes.DECIMAL(28, 2),
 
-    shareAcquirer: DataTypes.FLOAT,
-    shareMerchant: DataTypes.FLOAT,
-    shareMerchantWithPartner: DataTypes.FLOAT,
-    sharePartner: DataTypes.FLOAT,
+    shareAcquirer: DataTypes.DECIMAL(5, 4),
+    shareMerchant: DataTypes.DECIMAL(5, 4),
+    shareMerchantWithPartner: DataTypes.DECIMAL(5, 4),
+    sharePartner: DataTypes.DECIMAL(5, 4),
 
     directSettlement: DataTypes.BOOLEAN,
 
@@ -32,6 +32,14 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'archivedAt',
     paranoid: true
   })
+
+  acquirer.associate = (models) => {
+    acquirer.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+    acquirer.belongsTo(models.acquirerConfig, { foreignKey: 'acquirerConfigId' })
+    acquirer.belongsTo(models.acquirerType, { foreignKey: 'acquirerTypeId' })
+
+    acquirer.hasMany(models.transaction, { foreignKey: 'acquirerId' })
+  }
 
   acquirer.addScope('excludeShare', {
     attributes: {
@@ -75,13 +83,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }))
 
-  acquirer.associate = (models) => {
-    acquirer.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-    acquirer.belongsTo(models.acquirerConfig, { foreignKey: 'acquirerConfigId' })
-    acquirer.belongsTo(models.acquirerType, { foreignKey: 'acquirerTypeId' })
-
-    acquirer.hasMany(models.transaction, { foreignKey: 'acquirerId' })
-  }
+  acquirer.addScope('admin', () => ({
+    include: [
+      sequelize.models.acquirerType
+    ]
+  }))
 
   return acquirer
 }

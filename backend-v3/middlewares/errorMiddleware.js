@@ -60,20 +60,25 @@ module.exports.validatorErrorHandler = (req, res, next) => {
  */
 module.exports.sequelizeErrorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeForeignKeyConstraintError') {
-    if (Array.isArray(err.fields)) {
+    if (err.reltype === 'parent') {
       msg.expressResponse(
         res,
-        msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY,
-        err.fields.map((field) => `${field}`)
+        msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_PARENT
       )
-      return
+    } else if (err.reltype === 'child') {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_CHILD,
+        err.fields
+      )
     }
+    return
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     if (Array.isArray(err.errors)) {
       msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT,
-        err.errors.map(error => `${error.instance._modelOptions.name.singular}.${error.path}: ${error.value}`)
+        err.errors.map(error => `${error.instance._modelOptions.name.singular}.${error.path}`)
       )
       return
     }

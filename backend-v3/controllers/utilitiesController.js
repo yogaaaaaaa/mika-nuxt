@@ -1,8 +1,13 @@
 'use strict'
 
+const fs = require('fs')
+
 const trxManager = require('../libs/trxManager')
 const msg = require('../libs/msg')
 const auth = require('../libs/auth')
+const cipherbox = require('../libs/cipherbox')
+
+const dirConfig = require('../configs/dirConfig')
 
 module.exports.listTrxManagerProps = (req, res, next) => {
   msg.expressResponse(
@@ -32,7 +37,23 @@ module.exports.listAuthProps = (req, res, next) => {
     msg.msgTypes.MSG_SUCCESS,
     {
       userRoleTypes: auth.userRoles,
-      userTypes: auth.userTypes
+      userTypes: auth.userTypes,
+      cipherboxKeyStatuses: cipherbox.keyStatuses
     }
+  )
+}
+
+module.exports.listThumbnails = async (req, res, next) => {
+  msg.expressResponse(
+    res,
+    msg.msgTypes.MSG_SUCCESS,
+    await (new Promise(async (resolve, reject) => {
+      fs.readdir(dirConfig.thumbnailDir, {
+        withFileTypes: true
+      }, (err, files) => {
+        if (err) reject(err)
+        resolve(files.filter(file => file.isFile()).map(file => file.name))
+      })
+    }))
   )
 }

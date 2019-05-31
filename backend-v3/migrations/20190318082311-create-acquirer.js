@@ -18,23 +18,23 @@ module.exports = {
       },
 
       minimumAmount: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DECIMAL(28, 2)
       },
       maximumAmount: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DECIMAL(28, 2)
       },
 
       shareAcquirer: {
-        type: Sequelize.FLOAT
+        type: Sequelize.DECIMAL(5, 4)
       },
       shareMerchant: {
-        type: Sequelize.FLOAT
+        type: Sequelize.DECIMAL(5, 4)
       },
       shareMerchantWithPartner: {
-        type: Sequelize.FLOAT
+        type: Sequelize.DECIMAL(5, 4)
       },
       sharePartner: {
-        type: Sequelize.FLOAT
+        type: Sequelize.DECIMAL(5, 4)
       },
 
       directSettlement: {

@@ -4,7 +4,7 @@ module.exports = {
   development: {
     username: process.env.MIKA_DB_USERNAME || 'mikadev',
     password: process.env.MIKA_DB_PASSWORD || 'mikadev',
-    database: process.env.MIKA_DB_NAME || 'mika_v3_12',
+    database: process.env.MIKA_DB_NAME || 'mika_v3_13',
     host: process.env.MIKA_DB_HOST || '127.0.0.1',
     dialect: 'mysql',
     dialectOptions: {

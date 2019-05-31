@@ -8,18 +8,26 @@ const auth = require('../libs/auth')
 
 const { body } = require('express-validator/check')
 
-/**
- * Validator for login controller
- */
 module.exports.loginValidator = [
   body('username').exists(),
   body('password').exists(),
   body('userTypes').isArray().optional()
 ]
 
-/**
- * Login user
- */
+module.exports.resetPasswordValidator = [
+  body('userId').exists(),
+  body('password').isString()
+]
+
+module.exports.sessionTokenCheckValidator = [
+  body('sessionToken').isString()
+]
+
+module.exports.changePasswordValidator = [
+  body('oldPassword').isString().isLength({ min: 8, max: 250 }),
+  body('password').isString().isLength({ min: 8, max: 250 })
+]
+
 module.exports.login = async (req, res, next) => {
   let options = {}
 
@@ -56,19 +64,6 @@ module.exports.login = async (req, res, next) => {
   )
 }
 
-/**
- * All Middlewares for createTransaction
- */
-module.exports.loginMiddlewares = [
-  cipherboxMiddleware.processCipherbox(),
-  exports.loginValidator,
-  errorMiddleware.validatorErrorHandler,
-  exports.login
-]
-
-/**
- * Logout user
- */
 module.exports.logout = async (req, res, next) => {
   if (await auth.removeAuth(req.sessionToken)) {
     msg.expressResponse(
@@ -78,13 +73,6 @@ module.exports.logout = async (req, res, next) => {
   }
 }
 
-module.exports.sessionTokenCheckValidator = [
-  body('sessionToken').isString()
-]
-
-/**
- * Check current session token
- */
 module.exports.sessionTokenCheck = async (req, res, next) => {
   let checkAuth = await auth.checkAuth(req.body.sessionToken)
   if (checkAuth) {
@@ -101,26 +89,6 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
   }
 }
 
-/**
- * All Middlewares for checking session token
- */
-module.exports.sessionTokenCheckMiddlewares = [
-  exports.sessionTokenCheckValidator,
-  errorMiddleware.validatorErrorHandler,
-  exports.sessionTokenCheck
-]
-
-/**
- * Validator for changePassword controller
- */
-module.exports.changePasswordValidator = [
-  body('oldPassword').isString(),
-  body('password').isString()
-]
-
-/**
- * Change password based on current `req.auth`
- */
 module.exports.changePassword = async (req, res, next) => {
   if (await auth.changePassword(req.auth.userId, req.body.password, req.body.oldPassword)) {
     await auth.removeAuth(req.sessionToken)
@@ -137,26 +105,6 @@ module.exports.changePassword = async (req, res, next) => {
   )
 }
 
-/**
- * All Middlewares for changePassword
- */
-module.exports.changePasswordMiddlewares = [
-  exports.changePasswordValidator,
-  errorMiddleware.validatorErrorHandler,
-  exports.changePassword
-]
-
-/**
- * Validator for resetPassword controller
- */
-module.exports.resetPasswordValidator = [
-  body('userId').exists(),
-  body('password').isString()
-]
-
-/**
- * Reset password (all user) admin only
- */
 module.exports.resetPassword = async (req, res, next) => {
   if (auth.resetAuth(req.body.userId, req.body.password)) {
     msg.expressResponse(
@@ -165,6 +113,25 @@ module.exports.resetPassword = async (req, res, next) => {
     )
   }
 }
+
+module.exports.loginMiddlewares = [
+  cipherboxMiddleware.processCipherbox(),
+  exports.loginValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.login
+]
+
+module.exports.changePasswordMiddlewares = [
+  exports.changePasswordValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.changePassword
+]
+
+module.exports.sessionTokenCheckMiddlewares = [
+  exports.sessionTokenCheckValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.sessionTokenCheck
+]
 
 module.exports.resetPasswordMiddlewares = [
   exports.resetPasswordValidator,

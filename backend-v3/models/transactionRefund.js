@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.CHAR(27)
     },
 
-    amount: DataTypes.INTEGER,
+    amount: DataTypes.DECIMAL(28, 2),
     reason: DataTypes.TEXT,
     transactionId: DataTypes.CHAR(27)
   }, {

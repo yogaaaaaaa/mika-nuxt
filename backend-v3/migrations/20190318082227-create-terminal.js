@@ -15,10 +15,10 @@ module.exports = {
           type: Sequelize.INTEGER
         },
 
-        idAlias: {
+        idAlias: { // TODO: for now its optional
           // allowNull: false,
           unique: true,
-          type: Sequelize.CHAR(40, true)
+          type: Sequelize.CHAR(25, true)
         },
 
         name: {
@@ -36,7 +36,7 @@ module.exports = {
           unique: true
         },
         status: {
-          allowNull: false,
+          // allowNull: false,
           type: Sequelize.CHAR(32)
         },
 
@@ -49,7 +49,6 @@ module.exports = {
           }
         },
         terminalBatchId: {
-          allowNull: false,
           type: Sequelize.INTEGER,
           references: {
             model: 'terminalBatch',

@@ -1,29 +1,18 @@
 'use strict'
 
-process.env.NODE_ENV = 'development' || process.env.NODE_ENV
+process.env.NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase()
 console.log('Running with NODE_ENV', process.env.NODE_ENV)
 
-const express = require('express')
-require('express-async-errors')
-
+const express = require('./libs/express')
 const ready = require('./libs/ready')
-
-const path = require('path')
-const logger = require('morgan')
 
 const appConfig = require('./configs/appConfig')
 
-/**
- * MIKA app
- */
 const app = express()
 app.disable('x-powered-by')
 app.set('etag', false)
-
-/**
- * Logger middleware
- */
-app.use(logger('dev'))
+// app.use(require('compression'))
+app.use(require('morgan')('dev'))
 
 /**
  * Notification route for acquirer
@@ -36,23 +25,23 @@ app.use(require('./routes/notifMidtrans'))
  * Debug Route
  */
 if (process.env.NODE_ENV === 'development') {
-  app.use('/debug', require('./routes/debug'))
+  app.use(require('./routes/debug'))
 }
 
 /**
  * External/Public API
  */
-app.use('/mika', require('./routes/extApi'))
+// app.use(require('./routes/extApi'))
 
 /**
  * Internal API
  */
-app.use('/api', require('./routes/api'))
+app.use(require('./routes/api'))
 
 /**
  * Public resources
  */
-app.use('/thumbnails', express.static(path.join(__dirname, 'assets', 'images')))
+app.use(require('./routes/public'))
 
 /**
  * Home page
@@ -78,13 +67,11 @@ app.use((req, res, next) => {
  */
 app.use((err, req, res, next) => {
   let message = 'Internal Server Error'
-
   if (err) {
     if (req.app.get('env') === 'development') {
       message = `${message}\n${err.message}`
     }
   }
-
   res
     .status(500)
     .type('text')
