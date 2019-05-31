@@ -22,7 +22,7 @@ module.exports.createResponse = (
   toJSON = false
 ) => {
   let msg = {
-    version: appConfig.version,
+    version: appConfig.version || undefined,
     status: messageType.status,
     message: messageType.message,
     isError: messageType.isError || false,
@@ -93,10 +93,9 @@ module.exports.expressCreateEntityResponse = (
   res,
   data
 ) => {
-  exports.expressResponse(res,
-    data
-      ? exports.msgTypes.MSG_SUCCESS_ENTITY_CREATED
-      : exports.msgTypes.MSG_SUCCESS_ENTITY_CREATED_NO_DATA,
+  exports.expressResponse(
+    res,
+    exports.msgTypes.MSG_SUCCESS_ENTITY_CREATED,
     data || undefined
   )
 }
@@ -105,14 +104,15 @@ module.exports.expressCreateEntityResponse = (
  * Directly send specific get entity response message
  * via express.js `res` variable.
  *
- * It will automatically create pagination
- * if `dataTotalCount`, `req.query.page`, `req.query.per_page` exists
+ * It automatically create pagination details in meta
+ * if `dataTotalCount`, `page`, `perPage` exists
  */
 module.exports.expressGetEntityResponse = (
   res,
   data,
   dataTotalCount,
-  req
+  page,
+  perPage
 ) => {
   if (Array.isArray(data)) {
     exports.expressResponse(
@@ -121,8 +121,8 @@ module.exports.expressGetEntityResponse = (
         ? exports.msgTypes.MSG_SUCCESS_ENTITY_FOUND
         : exports.msgTypes.MSG_SUCCESS_NO_ENTITY,
       data,
-      (dataTotalCount && req)
-        ? exports.createPaginationMeta(req.query.page, req.query.per_page, dataTotalCount)
+      (dataTotalCount && page && perPage)
+        ? exports.createPaginationMeta(page, perPage, dataTotalCount)
         : undefined
     )
   } else {
@@ -141,7 +141,7 @@ module.exports.expressGetEntityResponse = (
  */
 module.exports.expressUpdateEntityResponse = (
   res,
-  updateCount,
+  updated,
   data,
   found = true
 ) => {
@@ -151,7 +151,7 @@ module.exports.expressUpdateEntityResponse = (
     )
     return
   }
-  if (updateCount) {
+  if (updated) {
     exports.expressResponse(res,
       exports.msgTypes.MSG_SUCCESS_ENTITY_UPDATED,
       data || undefined
@@ -169,16 +169,17 @@ module.exports.expressUpdateEntityResponse = (
  */
 module.exports.expressDeleteEntityResponse = (
   res,
-  deleteCount,
+  deleted,
   found = true
 ) => {
   if (!found) {
-    exports.expressResponse(res,
+    exports.expressResponse(
+      res,
       exports.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
     )
     return
   }
-  if (deleteCount) {
+  if (deleted) {
     exports.expressResponse(
       res,
       exports.msgTypes.MSG_SUCCESS_ENTITY_DELETED

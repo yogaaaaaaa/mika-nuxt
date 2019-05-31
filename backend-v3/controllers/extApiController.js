@@ -5,7 +5,7 @@ const extApiObject = require('../libs/extApiObject')
 const msg = require('../libs/msg')
 const trxManager = require('../libs/trxManager')
 
-const queryMiddleware = require('../middlewares/queryMiddleware')
+const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const { body, query } = require('express-validator/check')
@@ -168,9 +168,9 @@ module.exports.getTransactions = async (req, res, next) => {
 
 module.exports.getTransactionsMiddlewares = [
   exports.getTransactionsValidator,
-  queryMiddleware.paginationToSequelizeValidator('transaction'),
+  queryToSequelizeMiddleware.paginationValidator('transaction'),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
+  queryToSequelizeMiddleware.paginationToSequelize,
   exports.getTransactions
 ]
 
@@ -238,9 +238,9 @@ module.exports.getAgents = async (req, res, next) => {
 
 module.exports.getAgentsMiddlewares = [
   exports.getAgentsValidator,
-  queryMiddleware.paginationToSequelizeValidator('agent'),
+  queryToSequelizeMiddleware.paginationValidator('agent'),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
+  queryToSequelizeMiddleware.pagination,
   exports.getAgents
 ]
 
@@ -299,9 +299,9 @@ module.exports.getMerchants = async (req, res, next) => {
 }
 module.exports.getMerchantsMiddlewares = [
   exports.getMerchantsValidator,
-  queryMiddleware.paginationToSequelizeValidator('merchant'),
+  queryToSequelizeMiddleware.paginationToSequelizeValidator('merchant'),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
+  queryToSequelizeMiddleware.paginationToSequelize,
   exports.getMerchants
 ]
 

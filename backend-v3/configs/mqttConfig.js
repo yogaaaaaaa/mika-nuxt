@@ -5,6 +5,7 @@
  */
 
 const uid = require('../libs/uid')
+const dir = require('../libs/dir')
 
 const appConfig = require('./appConfig')
 
@@ -26,18 +27,6 @@ let baseConfig = {
   waitConnectTimeoutSecond: 30
 }
 
-if (!baseConfig.clientId) {
-  let clientIdFile = 'mqttClientId'
-  let clientId = appConfig.readCacheFile(clientIdFile)
-
-  if (clientId) {
-    baseConfig.clientId = clientId
-  } else {
-    baseConfig.clientId = `${appConfig.name}-${baseConfig.superuserName}-${uid.randomString()}`
-    appConfig.writeCacheFile(clientIdFile, baseConfig.clientId)
-  }
-}
-
 /**
  * Load external config file
  */
@@ -45,6 +34,17 @@ try {
   let extraConfig = require(`./_configs/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
   console.log(`Config ${configName} is mixed`)
-} catch (error) { }
+} catch (error) {}
+
+if (!baseConfig.clientId) {
+  let clientIdFile = 'mqttClientId'
+  let clientId = dir.readCacheFile(clientIdFile)
+  if (clientId) {
+    baseConfig.clientId = clientId
+  } else {
+    baseConfig.clientId = `${appConfig.namespace}${appConfig.name}-${baseConfig.superuserName}-${uid.randomString()}`
+    dir.writeCacheFile(clientIdFile, baseConfig.clientId)
+  }
+}
 
 module.exports = baseConfig

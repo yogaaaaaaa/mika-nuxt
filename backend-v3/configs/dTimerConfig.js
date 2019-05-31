@@ -7,6 +7,8 @@
 const uid = require('../libs/uid')
 const appConfig = require('./appConfig')
 
+const dir = require('../libs/dir')
+
 const configName = 'dTimerConfig'
 
 let baseConfig = {
@@ -18,17 +20,6 @@ let baseConfig = {
   disabled: false
 }
 
-if (!baseConfig.nodename) {
-  const nodenameFile = 'dTimerNodeName'
-  let nodename = appConfig.readCacheFile(nodenameFile)
-  if (nodename) {
-    baseConfig.nodeName = nodename
-  } else {
-    baseConfig.nodeName = `${appConfig.name}-${uid.randomString()}`
-    appConfig.writeCacheFile(nodenameFile, baseConfig.nodeName)
-  }
-}
-
 /**
  * Load external config file
  */
@@ -38,8 +29,15 @@ try {
   console.log(`Config ${configName} is mixed`)
 } catch (error) { }
 
-if (baseConfig.disabled) {
-  console.log('dtimer is disabled')
+if (!baseConfig.nodename) {
+  const nodenameFile = 'dTimerNodeName'
+  let nodename = dir.readCacheFile(nodenameFile)
+  if (nodename) {
+    baseConfig.nodeName = nodename
+  } else {
+    baseConfig.nodeName = `${appConfig.namespace}${appConfig.name}-${uid.randomString()}`
+    dir.writeCacheFile(nodenameFile, baseConfig.nodeName)
+  }
 }
 
 module.exports = baseConfig

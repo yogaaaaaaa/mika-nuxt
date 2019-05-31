@@ -10,10 +10,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      idAlias: {
-        allowNull: false,
+      idAlias: { // TODO: for now its optional
+        // allowNull: false,
         unique: true,
-        type: Sequelize.CHAR(40, true)
+        type: Sequelize.CHAR(25, true)
       },
 
       name: {

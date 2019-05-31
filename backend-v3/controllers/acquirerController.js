@@ -1,12 +1,15 @@
 'use strict'
 
-const trxManager = require('../libs/trxManager')
 const msg = require('../libs/msg')
 const models = require('../models')
 
-/**
- * Get one or many agent's acquirers (via `req.auth.userType`)
- */
+const trxManager = require('../libs/trxManager')
+
+const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
+const errorMiddleware = require('../middlewares/errorMiddleware')
+
+const acquirerValidator = require('../validators/acquirerValidator')
+
 module.exports.getAgentAcquirers = async (req, res, next) => {
   let query = {
     where: {
@@ -22,8 +25,8 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
     ).findOne(query)
 
     if (agent) {
-      if (agent.merchant.acquirers.length) {
-        acquirer = agent.merchant.acquirers[0]
+      if (agent.outlet.merchant.acquirers.length) {
+        acquirer = agent.outlet.merchant.acquirers[0]
         acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler)
       }
     }
@@ -40,8 +43,8 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
     ).findOne(query)
 
     if (agent) {
-      if (agent.merchant.acquirers.length) {
-        acquirers = agent.merchant.acquirers
+      if (agent.outlet.merchant.acquirers.length) {
+        acquirers = agent.outlet.merchant.acquirers
       }
     }
 
@@ -56,9 +59,6 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
   }
 }
 
-/**
- * Get one or many merchant staff acquirers (via `req.auth.merchantStaffId`)
- */
 module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
   let query = {
     where: {
@@ -101,3 +101,143 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
     )
   }
 }
+
+module.exports.createAcquirer = async (req, res, next) => {
+  if (req.params.merchantId) {
+    req.body.merchantId = req.params.merchantId
+  }
+
+  let acquirer = await models.acquirer.create(req.body)
+
+  msg.expressCreateEntityResponse(
+    res,
+    await models.acquirer
+      .scope('admin')
+      .findByPk(acquirer.id)
+  )
+}
+
+module.exports.getAcquirers = async (req, res, next) => {
+  let scopedAcquirer = req.applySequelizeCommonScope(models.acquirer.scope('admin'))
+  let query = { where: {} }
+
+  if (req.params.acquirerId) {
+    query.where.id = req.params.acquirerId
+    msg.expressGetEntityResponse(
+      res,
+      await scopedAcquirer.findOne(query)
+    )
+  } else {
+    scopedAcquirer =
+      req.applySequelizeFilterScope(
+        req.applySequelizePaginationScope(
+          scopedAcquirer
+        )
+      )
+    if (req.query.get_count) {
+      let acquirers = await scopedAcquirer.findAndCountAll(query)
+      msg.expressGetEntityResponse(
+        res,
+        acquirers.rows,
+        acquirers.count,
+        req.query.page,
+        req.query.per_page
+      )
+    } else {
+      msg.expressGetEntityResponse(
+        res,
+        await scopedAcquirer.findAll(query)
+      )
+    }
+  }
+}
+
+module.exports.updateAcquirer = async (req, res, next) => {
+  let scopedAcquirer = models.acquirer.scope('paranoid')
+  let acquirer
+
+  let updated = false
+  let found = false
+
+  await models.sequelize.transaction(async t => {
+    acquirer = await scopedAcquirer.findByPk(req.params.acquirerId, { transaction: t })
+    if (acquirer) {
+      found = true
+
+      Object.assign(acquirer, req.body)
+
+      if (req.body.archivedAt === true || req.body.archivedAt === false) {
+        acquirer.setDataValue('archivedAt', req.body.archivedAt ? new Date() : null)
+      }
+
+      if (acquirer.changed()) updated = true
+      await acquirer.save({ transaction: t })
+    }
+  })
+
+  if (updated) {
+    acquirer = await scopedAcquirer.findByPk(req.params.acquirerId)
+  }
+
+  msg.expressUpdateEntityResponse(
+    res,
+    updated,
+    acquirer,
+    found
+  )
+}
+
+module.exports.deleteAcquirer = async (req, res, next) => {
+  let scopedAcquirer = models.acquirer.scope('paranoid')
+  let acquirer
+
+  await models.sequelize.transaction(async t => {
+    acquirer = await scopedAcquirer.findByPk(req.params.acquirerId, { transaction: t })
+    if (acquirer) await acquirer.destroy({ force: true, transaction: t })
+  })
+
+  msg.expressDeleteEntityResponse(
+    res,
+    acquirer,
+    acquirer
+  )
+}
+
+module.exports.createAcquirerMiddlewares = [
+  acquirerValidator.bodyCreate,
+  errorMiddleware.validatorErrorHandler,
+  exports.createAcquirer,
+  errorMiddleware.sequelizeErrorHandler
+]
+
+module.exports.updateAcquirerMiddlewares = [
+  acquirerValidator.bodyUpdate,
+  errorMiddleware.validatorErrorHandler,
+  exports.updateAcquirer,
+  errorMiddleware.sequelizeErrorHandler
+]
+
+module.exports.getAcquirersMiddlewares = [
+  queryToSequelizeMiddleware.commonValidator,
+  queryToSequelizeMiddleware.paginationValidator(['acquirer']),
+  queryToSequelizeMiddleware.filterValidator(['acquirer']),
+  errorMiddleware.validatorErrorHandler,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
+  queryToSequelizeMiddleware.common,
+  exports.getAcquirers
+]
+
+module.exports.getMerchantStaffAcquirersMiddlewares = [
+  queryToSequelizeMiddleware.paginationValidator(['acquirer']),
+  queryToSequelizeMiddleware.filterValidator(['acquirer'], ['*archivedAt']),
+  errorMiddleware.validatorErrorHandler,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
+  module.exports.getMerchantStaffAcquirers
+]
+
+module.exports.deleteAcquirerMiddlewares = [
+  exports.deleteAcquirer,
+  errorMiddleware.sequelizeErrorHandler
+]

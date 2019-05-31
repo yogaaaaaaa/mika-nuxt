@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
-    idAlias: DataTypes.CHAR(40),
+    idAlias: DataTypes.CHAR(25),
 
     serialNumber: DataTypes.STRING,
     imei: DataTypes.STRING,
@@ -54,6 +54,11 @@ module.exports = (sequelize, DataTypes) => {
       attributes: { exclude: ['archivedAt'] },
       include: [
         models.terminalModel.scope('excludeTimestamp')
+      ]
+    }))
+    terminal.addScope('admin', () => ({
+      include: [
+        models.terminalModel
       ]
     }))
   }

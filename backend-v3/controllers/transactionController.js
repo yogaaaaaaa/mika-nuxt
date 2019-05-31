@@ -1,15 +1,14 @@
 'use strict'
 
+const { body } = require('express-validator/check')
+
 const msg = require('../libs/msg')
 const trxManager = require('../libs/trxManager')
-
-const { body } = require('express-validator/check')
+const models = require('../models')
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
-const queryMiddleware = require('../middlewares/queryMiddleware')
-
-const models = require('../models')
+const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 
 module.exports.createTransactionValidator = [
   body('amount').isNumeric(),
@@ -21,10 +20,6 @@ module.exports.createTransactionValidator = [
   body('flags').isArray().optional()
 ]
 
-/**
- * Create new transaction by agent
- * (via `req.auth.agentId`)
- */
 module.exports.createTransaction = async (req, res, next) => {
   try {
     const createTrxResult = await trxManager.create(
@@ -90,10 +85,6 @@ module.exports.createTransaction = async (req, res, next) => {
   }
 }
 
-/**
- * Get one or many transactions owned by agent
- * (via `req.auth.agentId`)
- */
 module.exports.getAgentTransactions = async (req, res, next) => {
   let query = {
     where: {
@@ -111,7 +102,7 @@ module.exports.getAgentTransactions = async (req, res, next) => {
     )
   } else {
     let scopedTransaction =
-      req.applySequelizeFiltersScope(
+      req.applySequelizeFilterScope(
         req.applySequelizePaginationScope(
           models.transaction.scope('agent')
         )
@@ -122,7 +113,8 @@ module.exports.getAgentTransactions = async (req, res, next) => {
         res,
         transactions.rows,
         transactions.count,
-        req
+        req.query.page,
+        req.query.per_page
       )
     } else {
       msg.expressGetEntityResponse(
@@ -133,10 +125,6 @@ module.exports.getAgentTransactions = async (req, res, next) => {
   }
 }
 
-/**
- * Get one or many transactions owned by merchant staff
- * (via `req.auth.merchantStaffId`)
- */
 module.exports.getMerchantStaffTransactions = async (req, res, next) => {
   let query = { where: {} }
 
@@ -152,7 +140,7 @@ module.exports.getMerchantStaffTransactions = async (req, res, next) => {
     )
   } else {
     let scopedTransaction =
-      req.applySequelizeFiltersScope(
+      req.applySequelizeFilterScope(
         req.applySequelizePaginationScope(
           models.transaction
             .scope({ method: [ 'merchantStaff', req.auth.merchantStaffId, req.params.outletId ] })
@@ -164,7 +152,8 @@ module.exports.getMerchantStaffTransactions = async (req, res, next) => {
         res,
         transactions.rows,
         transactions.count,
-        req
+        req.query.page,
+        req.query.per_page
       )
     } else {
       msg.expressGetEntityResponse(
@@ -175,12 +164,8 @@ module.exports.getMerchantStaffTransactions = async (req, res, next) => {
   }
 }
 
-/**
- * Get acquirer transaction statistics owned by merchant staff
- * (via `req.auth.merchantStaffId`)
- */
 module.exports.getMerchantStaffAcquirerTransactionStats = async (req, res, next) => {
-  let scopedTransaction = req.applySequelizeFiltersScope(
+  let scopedTransaction = req.applySequelizeFilterScope(
     models.transaction.scope(
       { method: [ 'merchantStaffAcquirerTransactionStats', req.auth.merchantStaffId ] }
     )
@@ -196,14 +181,11 @@ module.exports.getMerchantStaffAcquirerTransactionStats = async (req, res, next)
   )
 }
 
-/**
- * Get acquirer transaction time group count owned by merchant staff
- * (via `req.auth.merchantStaffId`)
- */
 module.exports.getMerchantStaffTransactionTimeGroupCount = async (req, res, next) => {
-  let scopedTransaction = req.applySequelizeFiltersScope(
-    req.applySequelizeTimeGroupScope(
-      req.applySequelizePaginationScope(
+  let scopedTransaction =
+  req.applySequelizeOrderScope(
+    req.applySequelizeFilterScope(
+      req.applySequelizeTimeGroupScope(
         models.transaction.scope(
           { method: [ 'merchantStaffTransactionTimeGroupCount', req.auth.merchantStaffId ] }
         )
@@ -221,6 +203,46 @@ module.exports.getMerchantStaffTransactionTimeGroupCount = async (req, res, next
   )
 }
 
+module.exports.getTransactions = async (req, res, next) => {
+  let query = {
+    where: {}
+  }
+
+  let scopedTransaction = models.transaction.scope('admin')
+
+  if (req.params.transactionId) query.where.id = req.params.transactionId
+  if (req.params.idAlias) query.where.idAlias = req.params.idAlias
+
+  if (req.params.transactionId || req.params.idAlias) {
+    msg.expressGetEntityResponse(
+      res,
+      await scopedTransaction.findOne(query)
+    )
+  } else {
+    scopedTransaction =
+      req.applySequelizeFilterScope(
+        req.applySequelizePaginationScope(
+          scopedTransaction
+        )
+      )
+    if (req.query.get_count) {
+      let transactions = await scopedTransaction.findAndCountAll(query)
+      msg.expressGetEntityResponse(
+        res,
+        transactions.rows,
+        transactions.count,
+        req.query.page,
+        req.query.per_page
+      )
+    } else {
+      msg.expressGetEntityResponse(
+        res,
+        await scopedTransaction.findAll(query)
+      )
+    }
+  }
+}
+
 module.exports.createTransactionMiddlewares = [
   cipherboxMiddleware.processCipherbox(true),
   module.exports.createTransactionValidator,
@@ -229,51 +251,61 @@ module.exports.createTransactionMiddlewares = [
 ]
 
 module.exports.getAgentTransactionsMiddlewares = [
-  queryMiddleware.paginationToSequelizeValidator(['transaction']),
-  queryMiddleware.filtersToSequelizeValidator(
+  queryToSequelizeMiddleware.paginationValidator(['transaction']),
+  queryToSequelizeMiddleware.filterValidator(
     ['transaction', 'acquirer', 'acquirerType', 'acquirerConfig'],
     ['*archivedAt']
   ),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
-  queryMiddleware.filtersToSequelize,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
   exports.getAgentTransactions
 ]
 
 module.exports.getMerchantStaffTransactionsMiddlewares = [
-  queryMiddleware.paginationToSequelizeValidator(['transaction']),
-  queryMiddleware.filtersToSequelizeValidator(
+  queryToSequelizeMiddleware.paginationValidator(['transaction']),
+  queryToSequelizeMiddleware.filterValidator(
     ['transaction', 'agent', 'acquirer', 'acquirer', 'acquirerType', 'acquirerConfig'],
     ['*archivedAt']
   ),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
-  queryMiddleware.filtersToSequelize,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
   exports.getMerchantStaffTransactions
 ]
 
 module.exports.getMerchantStaffAcquirerTransactionStatsMiddlewares = [
-  queryMiddleware.filtersToSequelizeValidator(
+  queryToSequelizeMiddleware.filterValidator(
     ['transaction', 'agent', 'acquirer', 'acquirerType'],
     ['*archivedAt']
   ),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.filtersToSequelize,
+  queryToSequelizeMiddleware.filter,
   exports.getMerchantStaffAcquirerTransactionStats
 ]
 
 module.exports.getMerchantStaffTransactionTimeGroupCountMiddlewares = [
-  queryMiddleware.timeGroupToSequelizeValidator('transaction'),
-  queryMiddleware.paginationToSequelizeValidator(
-    ['transaction'],
+  queryToSequelizeMiddleware.paginationValidator(['transaction']),
+  queryToSequelizeMiddleware.timeGroupValidator('transaction'),
+  queryToSequelizeMiddleware.filterValidator(
+    ['transaction', 'agent', 'acquirer', 'acquirerType', 'acquirerConfig'],
     ['*archivedAt']
   ),
-  queryMiddleware.filtersToSequelizeValidator(
-    ['transaction', 'agent', 'acquirer', 'acquirerType', 'acquirerConfig'],
-    ['*archivedAt']),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
-  queryMiddleware.filtersToSequelize,
-  queryMiddleware.timeGroupToSequelize,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
+  queryToSequelizeMiddleware.timeGroup,
   exports.getMerchantStaffTransactionTimeGroupCount
+]
+
+module.exports.getTransactionsMiddlewares = [
+  queryToSequelizeMiddleware.paginationValidator(['transaction']),
+  queryToSequelizeMiddleware.filterValidator(
+    ['transaction', 'acquirer', 'acquirerType', 'agent', 'outlet'],
+    ['*archivedAt']
+  ),
+  errorMiddleware.validatorErrorHandler,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
+  exports.getTransactions
 ]

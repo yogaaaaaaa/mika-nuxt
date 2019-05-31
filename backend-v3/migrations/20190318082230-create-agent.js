@@ -19,13 +19,13 @@ module.exports = {
       },
 
       generalLocationLong: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL(12, 8)
       },
       generalLocationLat: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL(12, 8)
       },
       generalLocationRadiusMeter: {
-        type: Sequelize.FLOAT
+        type: Sequelize.DECIMAL(10, 2)
       },
 
       userId: {
@@ -40,14 +40,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: {
           model: 'outlet',
-          key: 'id'
-        }
-      },
-      merchantId: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'merchant',
           key: 'id'
         }
       },

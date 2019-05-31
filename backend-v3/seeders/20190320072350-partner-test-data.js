@@ -95,7 +95,6 @@ module.exports = {
           id: 1000,
           name: 'Agent Partner Test',
           userId: 1000,
-          merchantId: 1000,
           outletId: 1000
         }
       ], { transaction: t })

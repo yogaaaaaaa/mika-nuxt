@@ -92,12 +92,22 @@ module.exports.doAuth = async function (username, password, options = {}) {
       where: {
         userId: user.id
       },
-      attributes: ['id', 'merchantId']
+      include: [
+        {
+          model: models.outlet,
+          attributes: [
+            'id',
+            'merchantId'
+          ]
+        }
+      ],
+      attributes: ['id', 'outletId']
     })
     if (agent) {
       authResult.auth.userType = exports.userTypes.AGENT
       authResult.auth.agentId = agent.id
-      authResult.auth.merchantId = agent.merchantId
+      authResult.auth.outletId = agent.outletId
+      authResult.auth.merchantId = agent.outlet.merchantId
       authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
     }
   }

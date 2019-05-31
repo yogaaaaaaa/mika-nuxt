@@ -6,6 +6,8 @@ module.exports = {
       {
         id: 1,
         name: 'LinkAja Maju Tembak',
+        gateway: false,
+        hidden: false,
         minimumAmount: 100,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -18,6 +20,8 @@ module.exports = {
       {
         id: 2,
         name: 'Gopay Maju Tembak',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -30,6 +34,8 @@ module.exports = {
       {
         id: 3,
         name: 'Alipay Maju Tembak',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1000,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -42,6 +48,8 @@ module.exports = {
       {
         id: 4,
         name: 'WeChat Pay Maju Tembak',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1000,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -55,6 +63,8 @@ module.exports = {
       {
         id: 5,
         name: 'LinkAja Super Moe',
+        gateway: false,
+        hidden: false,
         minimumAmount: 100,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -67,6 +77,8 @@ module.exports = {
       {
         id: 6,
         name: 'Gopay Super Moe',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -79,6 +91,8 @@ module.exports = {
       {
         id: 7,
         name: 'Alipay Super Moe',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1000,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -91,6 +105,8 @@ module.exports = {
       {
         id: 8,
         name: 'WeChat Pay Super Moe',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1000,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -103,6 +119,8 @@ module.exports = {
 
       {
         name: 'LinkAja Anak Asing',
+        gateway: false,
+        hidden: false,
         minimumAmount: 100,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -114,6 +132,8 @@ module.exports = {
       },
       {
         name: 'Gopay Anak Asing',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -125,6 +145,8 @@ module.exports = {
       },
       {
         name: 'Alipay Anak Asing',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1000,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -136,6 +158,8 @@ module.exports = {
       },
       {
         name: 'WeChat Pay Anak Asing',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1000,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -148,6 +172,8 @@ module.exports = {
 
       {
         name: 'LinkAja Sayur Jayagiri',
+        gateway: false,
+        hidden: false,
         minimumAmount: 100,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -159,6 +185,8 @@ module.exports = {
       },
       {
         name: 'Gopay Sayur Jayagiri',
+        gateway: false,
+        hidden: false,
         minimumAmount: 1,
         shareAcquirer: 0.01,
         shareMerchant: 0.9800,
@@ -172,67 +200,77 @@ module.exports = {
       {
         name: 'Kartu Debit Maju Tembak',
         gateway: true,
+        hidden: false,
         acquirerTypeId: 5,
         merchantId: 1
       },
       {
         name: 'Kartu Kredit Maju Tembak',
         gateway: true,
+        hidden: false,
         acquirerTypeId: 6,
         merchantId: 1
       },
       {
         name: 'BRI Debit On-Us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 5,
         merchantId: 1
       },
       {
         name: 'BRI Kredit On-Us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 6,
         merchantId: 1
       },
       {
         name: 'BRI Debit Off-Us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 5,
         merchantId: 1
       },
       {
         name: 'BRI Kredit Off-Us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 6,
         merchantId: 1
       },
       {
         name: 'BNI Debit On-us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 5,
         merchantId: 1
       },
       {
         name: 'BNI Kredit On-us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 6,
         merchantId: 1
       },
       {
         name: 'BNI Debit Off-us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 5,
         merchantId: 1
       },
       {
         name: 'BNI Kredit Off-us Maju Tembak',
-        hidden: true,
+        gateway: false,
+        hidden: false,
         minimumAmount: 25000,
         acquirerTypeId: 6,
         merchantId: 1

@@ -1,11 +1,10 @@
 'use strict'
 
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-
 module.exports = (sequelize, DataTypes) => {
+  const Op = sequelize.Sequelize.Op
+
   let merchant = sequelize.define('merchant', {
-    idAlias: DataTypes.CHAR(40),
+    idAlias: DataTypes.CHAR(25),
 
     name: DataTypes.STRING,
     shortName: DataTypes.CHAR(25),
@@ -93,9 +92,9 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     merchant.belongsTo(models.partner, { foreignKey: 'partnerId' })
+    merchant.hasMany(models.outlet, { foreignKey: 'merchantId' })
     merchant.hasMany(models.acquirer, { foreignKey: 'merchantId' })
     merchant.hasMany(models.acquirerConfig, { foreignKey: 'merchantId' })
-    merchant.hasMany(models.agent, { foreignKey: 'merchantId' })
     merchant.hasMany(models.terminal, { foreignKey: 'merchantId' })
 
     merchant.belongsToMany(
@@ -158,7 +157,62 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   merchant.addScope('admin', () => ({
+    include: [
+      {
+        model: sequelize.models.resource,
+        as: 'scannedTaxCardResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'scannedBankStatementResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'scannedSkmenkumhamResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'scannedSiupResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'scannedTdpResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'scannedSkdpResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'ownerScannedIdCardResource'
+      },
+      {
+        model: sequelize.models.resource,
+        as: 'ownerScannedTaxCardResource'
+      }
+    ]
   }))
+
+  merchant.createWithResources = async (value, options) => {
+    let resources = Array(8)
+    for (let i = 0; i < resources.length; i++) {
+      resources[i] = sequelize.models.resource.buildWithId()
+      await resources[i].save(options)
+    }
+
+    let merchantInstance = merchant.build(value, options)
+    merchantInstance.scannedTaxCardResourceId = resources[0].id
+    merchantInstance.scannedBankStatementResourceId = resources[1].id
+    merchantInstance.scannedSkmenkumhamResourceId = resources[2].id
+    merchantInstance.scannedSiupResourceId = resources[3].id
+    merchantInstance.scannedTdpResourceId = resources[4].id
+    merchantInstance.scannedSkdpResourceId = resources[5].id
+    merchantInstance.ownerScannedIdCardResourceId = resources[6].id
+    merchantInstance.ownerScannedTaxCardResourceId = resources[7].id
+
+    await merchantInstance.save(options)
+    return merchantInstance
+  }
 
   return merchant
 }

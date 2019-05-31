@@ -20,7 +20,7 @@ module.exports = {
         },
         master: {
           allowNull: false,
-          default: false,
+          defaultValue: false,
           type: Sequelize.BOOLEAN
         },
 

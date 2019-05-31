@@ -134,7 +134,8 @@ module.exports.forceStatus = async (transactionId, transactionStatus) => {
 }
 
 /**
- * Build transaction context data (include agent, merchant, acquirer, and its handler)
+ * Build transaction context
+ * (include agent, merchant, acquirer, and its handler)
  */
 module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
   let ctx = Object.assign({
@@ -157,8 +158,8 @@ module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
 
     if (!ctx.agent) throw exports.error(exports.errorTypes.INVALID_AGENT)
 
-    if (!ctx.agent.merchant.acquirers.length) throw exports.error(exports.errorTypes.INVALID_ACQUIRER)
-    ctx.acquirer = ctx.agent.merchant.acquirers[0]
+    if (!ctx.agent.outlet.merchant.acquirers.length) throw exports.error(exports.errorTypes.INVALID_ACQUIRER)
+    ctx.acquirer = ctx.agent.outlet.merchant.acquirers[0]
   }
 
   ctx.acquirerHandler = exports.findAcquirerHandler(ctx.acquirer.acquirerConfig.handler)
@@ -167,6 +168,10 @@ module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
   return ctx
 }
 
+/**
+ * Create new transaction, it will invoke
+ * acquirer handler according to acquirerConfig.
+ */
 module.exports.create = async (transaction, options) => {
   let ctx = await exports.buildTransactionCtx(transaction, Object.assign({}, options, {
     redirectTo: null,
@@ -195,11 +200,10 @@ module.exports.create = async (transaction, options) => {
     }
   }
 
-  let genId = uid.generateTransactionId(ctx.agent.merchant.shortName)
+  let genId = uid.generateTransactionId(ctx.agent.outlet.merchant.shortName)
   ctx.transaction.id = genId.id
   ctx.transaction.idAlias = genId.idAlias
   ctx.transaction.status = exports.transactionStatuses.CREATED
-
   ctx.transaction = models.transaction.build(ctx.transaction)
 
   if (typeof ctx.acquirerHandler.handler === 'function') {
@@ -216,8 +220,10 @@ module.exports.create = async (transaction, options) => {
   if (typeof ctx.transaction.userToken === 'object') {
     ctx.transaction.userToken = undefined
   }
+
   await ctx.transaction.save()
 
+  // create expiry handler
   if (ctx.transaction.status === exports.transactionStatuses.CREATED) {
     await dTimer.postEvent({
       event: exports.eventTypes.TRANSACTION_EXPIRY,

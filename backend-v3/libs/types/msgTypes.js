@@ -47,17 +47,23 @@ module.exports.msgTypes = {
     status: 'sys-401',
     message: 'Bad request, validation error'
   },
-  MSG_ERROR_BAD_REQUEST_VALIDATION_FOREIGN_KEY: {
+  MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_CHILD: {
     isError: true,
     httpStatus: 400,
     status: 'sys-402',
-    message: 'Bad request, invalid identifier error'
+    message: 'Bad request, invalid entity identifier'
   },
   MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT: {
     isError: true,
     httpStatus: 409,
     status: 'sys-403',
-    message: 'Bad request, unique constraint error'
+    message: 'Bad request, unique constraint violation'
+  },
+  MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_PARENT: {
+    isError: true,
+    httpStatus: 400,
+    status: 'sys-403',
+    message: 'Bad request, entity is still used'
   },
   MSG_ERROR_NOT_FOUND: {
     isError: true,
@@ -81,19 +87,14 @@ module.exports.msgTypes = {
     status: 'ent-201',
     message: 'Entity(s) created'
   },
-  MSG_SUCCESS_ENTITY_CREATED_NO_DATA: {
-    httpStatus: 201,
-    status: 'ent-202',
-    message: 'Entity(s) created with no data'
-  },
   MSG_SUCCESS_ENTITY_UPDATED: {
     httpStatus: 200,
-    status: 'ent-203',
+    status: 'ent-202',
     message: 'Entity(s) updated'
   },
   MSG_SUCCESS_ENTITY_DELETED: {
     httpStatus: 200,
-    status: 'ent-204',
+    status: 'ent-203',
     message: 'Entity(s) deleted'
   },
   // NOTE: Created to be compatible with HTTP REST Style when single resource not found

@@ -1,34 +1,24 @@
 'use strict'
 
-const _ = require('lodash')
-
 const msg = require('../libs/msg')
 const auth = require('../libs/auth')
-
-const userValidator = require('../validators/userValidator')
-
-const { body } = require('express-validator/check')
-
-const queryMiddleware = require('../middlewares/queryMiddleware')
-const errorMiddleware = require('../middlewares/errorMiddleware')
-
 const models = require('../models')
 
-const commonAdminValidator = [
-  body('description').isString().optional(),
-  body('email').isEmail().optional()
-]
+const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
+const errorMiddleware = require('../middlewares/errorMiddleware')
 
-module.exports.createAdminValidator = [
-  body('name').isString().not().isEmpty(),
-  userValidator.bodyUserCreate([auth.userTypes.ADMIN], _.values(auth.userRoles))
-]
+const adminValidator = require('../validators/adminValidator')
 
-module.exports.updateAdminValidator = [
-  commonAdminValidator,
-  body('name').isString().not().isEmpty().optional(),
-  userValidator.bodyUserUpdate([auth.userTypes.ADMIN], _.values(auth.userRoles))
-]
+module.exports.getAdmin = async (req, res, next) => {
+  let admin = await models.admin.scope('admin').findByPk(req.auth.adminId)
+
+  if (!admin) throw Error('admin should be exist')
+
+  msg.expressGetEntityResponse(
+    res,
+    admin
+  )
+}
 
 module.exports.createAdmin = async (req, res, next) => {
   let admin
@@ -49,11 +39,8 @@ module.exports.createAdmin = async (req, res, next) => {
 }
 
 module.exports.getAdmins = async (req, res, next) => {
-  let query = {
-    where: {}
-  }
-
   let scopedAdmin = req.applySequelizeCommonScope(models.admin.scope('admin'))
+  let query = { where: {} }
 
   if (req.params.adminId) {
     query.where.id = req.params.adminId
@@ -63,7 +50,7 @@ module.exports.getAdmins = async (req, res, next) => {
     )
   } else {
     scopedAdmin =
-      req.applySequelizeFiltersScope(
+      req.applySequelizeFilterScope(
         req.applySequelizePaginationScope(
           scopedAdmin
         )
@@ -74,53 +61,57 @@ module.exports.getAdmins = async (req, res, next) => {
         res,
         admins.rows,
         admins.count,
-        req
+        req.query.page,
+        req.query.per_page
       )
     } else {
       msg.expressGetEntityResponse(
         res,
-        await await scopedAdmin.findAll(query)
+        await scopedAdmin.findAll(query)
       )
     }
   }
 }
 
 module.exports.updateAdmin = async (req, res, next) => {
-  let scopedAdmin = models.admin.scope('admin', { paranoid: false })
-  let updateCount = 0
+  let scopedAdmin = models.admin.scope('admin', 'paranoid')
   let admin
+
+  let updated = false
   let found = false
 
   await models.sequelize.transaction(async t => {
-    admin = await scopedAdmin.findOne({ where: { id: req.params.adminId } }, { transaction: t })
+    admin = await scopedAdmin.findByPk(req.params.adminId, { transaction: t })
     if (admin) {
       found = true
+
       if (req.body.user) {
         Object.assign(admin.user, req.body.user)
         delete req.body.user
-        if (admin.user.changed()) updateCount++
+
+        if (admin.user.changed()) updated = true
         await admin.user.save({ transaction: t })
       }
+
       Object.assign(admin, req.body)
-      if (!req.body.archivedAt) {
-        admin.setDataValue('archivedAt', null)
-      } else {
-        admin.setDataValue('archivedAt', new Date())
+
+      if (req.body.archivedAt === true || req.body.archivedAt === false) {
+        admin.setDataValue('archivedAt', req.body.archivedAt ? new Date() : null)
       }
-      if (req.body.archivedAt === null) admin.setDataValue(new Date())
-      if (admin.changed()) updateCount++
+
+      if (admin.changed()) updated = true
       await admin.save({ transaction: t })
     }
   })
 
-  if (updateCount) {
-    admin = await scopedAdmin.findOne({ where: { id: req.params.adminId }, paranoid: false })
+  if (updated) {
+    admin = await scopedAdmin.findByPk(req.params.adminId)
     await auth.removeAuthByUserId(admin.userId)
   }
 
   msg.expressUpdateEntityResponse(
     res,
-    updateCount,
+    updated,
     admin,
     found
   )
@@ -131,10 +122,12 @@ module.exports.deleteAdmin = async (req, res, next) => {
   let admin
 
   await models.sequelize.transaction(async t => {
-    admin = await scopedAdmin.findByPk(req.params.adminId)
+    admin = await scopedAdmin.findByPk(req.params.adminId, { transaction: t })
     if (admin) {
       await admin.destroy({ force: true, transaction: t })
-      await admin.user.destroy({ force: true, transaction: t })
+      if (admin.user) {
+        await admin.user.destroy({ force: true, transaction: t })
+      }
     }
   })
 
@@ -148,26 +141,31 @@ module.exports.deleteAdmin = async (req, res, next) => {
 }
 
 module.exports.createAdminMiddlewares = [
-  exports.createAdminValidator,
+  adminValidator.bodyCreate,
   errorMiddleware.validatorErrorHandler,
   exports.createAdmin,
   errorMiddleware.sequelizeErrorHandler
 ]
 
 module.exports.updateAdminMiddlewares = [
-  exports.updateAdminValidator,
+  adminValidator.bodyUpdate,
   errorMiddleware.validatorErrorHandler,
   exports.updateAdmin,
   errorMiddleware.sequelizeErrorHandler
 ]
 
 module.exports.getAdminsMiddlewares = [
-  queryMiddleware.commonValidator,
-  queryMiddleware.paginationToSequelizeValidator('admin'),
-  queryMiddleware.filtersToSequelizeValidator(['admin', 'user']),
+  queryToSequelizeMiddleware.commonValidator,
+  queryToSequelizeMiddleware.paginationValidator('admin'),
+  queryToSequelizeMiddleware.filterValidator(['admin', 'user']),
   errorMiddleware.validatorErrorHandler,
-  queryMiddleware.paginationToSequelize,
-  queryMiddleware.filtersToSequelize,
-  queryMiddleware.commonToSequelize,
+  queryToSequelizeMiddleware.common,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
   module.exports.getAdmins
+]
+
+module.exports.deleteAdminMiddlewares = [
+  module.exports.deleteAdmin,
+  errorMiddleware.sequelizeErrorHandler
 ]

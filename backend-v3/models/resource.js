@@ -6,8 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   let resource = sequelize.define('resource', {
     id: {
       primaryKey: true,
-      type: DataTypes.CHAR(27),
-      defaultValue: uid.ksuid.randomSync().string
+      type: DataTypes.CHAR(27)
     },
     name: DataTypes.STRING,
     description: DataTypes.STRING
@@ -17,9 +16,10 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: false
   })
 
-  resource.beforeCreate((newResource, options) => {
-    newResource.id = uid.ksuid.randomSync().string
-  })
+  resource.buildWithId = (value = {}, options = {}) => {
+    value.id = uid.ksuid.randomSync().string
+    return resource.build(value, options)
+  }
 
   resource.associate = (models) => {
     resource.hasMany(models.file, { foreignKey: 'resourceId' })

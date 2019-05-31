@@ -23,6 +23,14 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true
   })
 
+  acquirerConfig.associate = (models) => {
+    acquirerConfig.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+    acquirerConfig.hasMany(models.acquirer, { foreignKey: 'acquirerConfigId' })
+    acquirerConfig.hasMany(models.acquirerConfigKv, { foreignKey: 'acquirerConfigId' })
+  }
+
+  acquirerConfig.prototype.loadConfigKv = kv.selfKvLoad('acquirerConfigKvs')
+
   acquirerConfig.addScope('acquirerConfigKv', () => ({
     include: [
       {
@@ -37,14 +45,11 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   })
-
-  acquirerConfig.prototype.loadConfigKv = kv.selfKvLoad('acquirerConfigKvs')
-
-  acquirerConfig.associate = (models) => {
-    acquirerConfig.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-    acquirerConfig.hasMany(models.acquirer, { foreignKey: 'acquirerConfigId' })
-    acquirerConfig.hasMany(models.acquirerConfigKv, { foreignKey: 'acquirerConfigId' })
-  }
+  acquirerConfig.addScope('admin', () => ({
+    include: [
+      sequelize.models.acquirerConfigKv.scope('excludeEntity')
+    ]
+  }))
 
   return acquirerConfig
 }

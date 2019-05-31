@@ -28,7 +28,7 @@ module.exports = {
 
       amount: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.DECIMAL(28, 2)
       },
 
       status: {
@@ -36,7 +36,7 @@ module.exports = {
         type: Sequelize.CHAR(32)
       },
       settlementStatus: {
-        allowNull: false,
+        // allowNull: false,
         type: Sequelize.CHAR(32)
       },
 
@@ -94,10 +94,10 @@ module.exports = {
       },
 
       locationLong: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL(12, 8)
       },
       locationLat: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL(12, 8)
       },
       ipAddress: {
         type: Sequelize.STRING

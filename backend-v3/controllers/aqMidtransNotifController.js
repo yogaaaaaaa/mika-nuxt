@@ -11,15 +11,10 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
       return
     }
 
-    /**
-     * @NOTE
-     * Midtrans is using decimal (real number) in string format to represent gross_amount
-     * and MIKA system is using integer
-     */
     const transaction = await models.transaction.findOne({
       where: {
         id: req.body.order_id,
-        amount: parseInt(req.body.gross_amount),
+        amount: req.body.gross_amount,
         referenceNumber: req.body.transaction_id,
         status: trxManager.transactionStatuses.CREATED
       },

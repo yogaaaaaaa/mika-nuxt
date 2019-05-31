@@ -67,4 +67,6 @@ if (process.env.NODE_ENV === 'development') {
 router.use(errorMiddleware.notFoundErrorHandler)
 router.use(errorMiddleware.errorHandler)
 
-module.exports = router
+const extApiRouter = express.Router()
+extApiRouter.use('/mika', router)
+module.exports = extApiRouter
