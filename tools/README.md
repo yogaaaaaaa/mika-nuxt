@@ -51,3 +51,15 @@ Install dependency first using `npm install`
   # generate cb3 key
   node cbkey.js cb3
   ```
+
+## bench-std
+  Start standard benchmark with autocannon
+  ```bash
+  # show help
+  node bench-std.js --help
+  # benchmark to http://localhost:23000/generate/hash 
+  # with connections sweep  from 0 to 1000 with step 10 connections
+  # with 10 seconds on every test
+  # generate csv to "std-bench-now.js"
+  node bench-std.js --url http://localhost:23000/generate/hash --conn 0,1000,10 --duration 10 --output std-bench-now.js
+  ```
