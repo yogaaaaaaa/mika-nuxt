@@ -4,8 +4,12 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('agentAcquirerExclusion', [
       {
-        agentId: 3,
-        acquirerId: 7
+        agentId: 15,
+        acquirerId: 13
+      },
+      {
+        agentId: 15,
+        acquirerId: 14
       }
     ]
     , {})

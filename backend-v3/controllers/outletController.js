@@ -66,20 +66,29 @@ module.exports.createOutlet = async (req, res, next) => {
 }
 
 module.exports.getOutlets = async (req, res, next) => {
-  let scopedOutlet = req.applySequelizeCommonScope(models.outlet.scope('admin'))
   let query = { where: {} }
 
   if (req.params.outletId) {
+    let scopedOutlet = req.applySequelizeCommonScope(models.outlet.scope('admin'))
     query.where.id = req.params.outletId
     msg.expressGetEntityResponse(
       res,
       await scopedOutlet.findOne(query)
     )
   } else {
+    let scopedOutlet = models.outlet.scope({
+      method: [
+        'admin',
+        req.params.merchantStaffId || req.params.excludeMerchantStaffId,
+        req.params.excludeMerchantStaffId
+      ]
+    })
     scopedOutlet =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          scopedOutlet
+      req.applySequelizeCommonScope(
+        req.applySequelizeFilterScope(
+          req.applySequelizePaginationScope(
+            scopedOutlet
+          )
         )
       )
     if (req.query.get_count) {

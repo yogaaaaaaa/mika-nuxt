@@ -85,39 +85,67 @@ module.exports.msgTypes = {
   MSG_SUCCESS_ENTITY_CREATED: {
     httpStatus: 201,
     status: 'ent-201',
-    message: 'Entity(s) created'
+    message: 'Entity created'
   },
   MSG_SUCCESS_ENTITY_UPDATED: {
     httpStatus: 200,
     status: 'ent-202',
-    message: 'Entity(s) updated'
+    message: 'Entity updated'
   },
   MSG_SUCCESS_ENTITY_DELETED: {
     httpStatus: 200,
     status: 'ent-203',
-    message: 'Entity(s) deleted'
+    message: 'Entity deleted'
   },
-  // NOTE: Created to be compatible with HTTP REST Style when single resource not found
+  MSG_SUCCESS_NO_ENTITY: {
+    httpStatus: 200,
+    status: 'ent-204',
+    message: 'No Entity(s)'
+  },
+
   MSG_ERROR_ENTITY_NOT_FOUND: {
     httpStatus: 404,
     isError: true,
     status: 'ent-404',
     message: 'Entity not found'
   },
-  MSG_SUCCESS_NO_ENTITY: {
-    httpStatus: 200,
-    status: 'ent-405',
-    message: 'No Entity(s)'
-  },
-  MSG_SUCCESS_NO_ENTITY_UPDATED: {
+  MSG_SUCCESS_ENTITY_DO_NOT_NEED_UPDATE: {
     httpStatus: 200,
     status: 'ent-406',
-    message: 'No Entity(s) to update'
+    message: 'Entity not updated'
   },
-  MSG_SUCCESS_NO_ENTITY_DELETED: {
+
+  MSG_SUCCESS_ENTITY_ASSOCIATED: {
+    httpStatus: 201,
+    status: 'ent-210',
+    message: 'Entity(s) associated'
+  },
+  MSG_SUCCESS_ENTITY_DISSOCIATED: {
     httpStatus: 200,
-    status: 'ent-407',
-    message: 'No Entity(s) to delete'
+    status: 'ent-211',
+    message: 'Entity(s) dissociated'
+  },
+  MSG_SUCCESS_ENTITY_ASSOCIATED_WITH_SOME_FAILED: {
+    httpStatus: 207,
+    status: 'ent-213',
+    message: 'Cannot associate some Entity(s)'
+  },
+  MSG_SUCCESS_ENTITY_DISSOCIATED_WITH_SOME_FAILED: {
+    httpStatus: 207,
+    status: 'ent-214',
+    message: 'Cannot dissociate some Entity(s)'
+  },
+  MSG_ERROR_NO_ENTITY_ASSOCIATED: {
+    httpStatus: 400,
+    isError: true,
+    status: 'ent-410',
+    message: 'Cannot associate Entity(s)'
+  },
+  MSG_ERROR_NO_ENTITY_DISSOCIATED: {
+    httpStatus: 400,
+    isError: true,
+    status: 'ent-411',
+    message: 'Cannot dissociate Entity(s)'
   },
 
   MSG_SUCCESS_AUTH_LOGIN: {
@@ -207,25 +235,35 @@ module.exports.msgTypes = {
     status: 'trx-400',
     message: 'Invalid acquirer'
   },
-  MSG_ERROR_TRANSACTION_NEED_USER_TOKEN: {
-    httpStatus: 400,
-    status: 'trx-401',
-    message: 'User token needed'
-  },
-  MSG_ERROR_TRANSACTION_USER_TOKEN_NOT_FOR_ME: {
-    httpStatus: 400,
-    status: 'trx-402',
-    message: 'User token type is not supported'
-  },
   MSG_ERROR_TRANSACTION_INVALID_AGENT: {
     httpStatus: 400,
-    status: 'trx-403',
+    status: 'trx-401',
     message: 'Invalid agent for transaction'
   },
   MSG_ERROR_TRANSACTION_INVALID: {
     httpStatus: 400,
     status: 'trx-404',
     message: 'Invalid transaction'
+  },
+  MSG_ERROR_TRANSACTION_NEED_USER_TOKEN: {
+    httpStatus: 400,
+    status: 'trx-410',
+    message: 'User token needed'
+  },
+  MSG_ERROR_TRANSACTION_INVALID_USER_TOKEN: {
+    httpStatus: 400,
+    status: 'trx-411',
+    message: 'Invalid User token'
+  },
+  MSG_ERROR_TRANSACTION_USER_TOKEN_NOT_SUPPORTED: {
+    httpStatus: 400,
+    status: 'trx-412',
+    message: 'User token type is not supported'
+  },
+  MSG_ERROR_TRANSACTION_NEED_USER_TOKEN_TYPE: {
+    httpStatus: 400,
+    status: 'trx-413',
+    message: 'Ambiguous user token. Please include user token type'
   },
   MSG_ERROR_TRANSACTION_AMOUNT_TOO_LOW: {
     isError: true,
@@ -255,7 +293,7 @@ module.exports.msgTypes = {
     isError: true,
     httpStatus: 500,
     status: 'trx-502',
-    message: 'Cannot create transaction, error occurred with internal acquirer handler'
+    message: 'Cannot create transaction, error occurred in internal acquirer handler'
   }
 }
 

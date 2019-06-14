@@ -6,7 +6,7 @@
 
 const appConfig = require('./appConfig')
 
-const configName = 'ppAltoConfig'
+const configName = 'aqAltoConfig'
 
 const pemPrivateKey =
 `-----BEGIN RSA PRIVATE KEY-----

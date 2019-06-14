@@ -28,6 +28,7 @@ const terminalController = require('../controllers/terminalController')
 const terminalModelController = require('../controllers/terminalModelController')
 const transactionController = require('../controllers/transactionController')
 const utilitiesController = require('../controllers/utilitiesController')
+const merchantStaffOutletController = require('../controllers/merchantStaffOutletController')
 
 const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
@@ -101,6 +102,11 @@ router.post('/resources/:resourceId/files',
   generalController.notImplemented
 )
 router.get('/resources/:resourceId/files',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  generalController.notImplemented
+)
+router.delete('/resources/:resourceId/files',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   generalController.notImplemented
@@ -285,7 +291,9 @@ router.put('/back_office/merchants/:merchantId',
 router.get(
   [
     '/back_office/outlets',
-    '/back_office/outlets/:outletId'
+    '/back_office/outlets/:outletId',
+    '/back_office/merchant_staffs/:merchantStaffId/outlets',
+    '/back_office/merchant_staffs/:excludeMerchantStaffId/unassociated_outlets'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
@@ -300,6 +308,16 @@ router.put('/back_office/outlets/:outletId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
   outletController.updateOutletMiddlewares
+)
+router.post('/back_office/merchant_staffs/:merchantStaffId/associate_outlets',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  merchantStaffOutletController.associateOutletsMiddlewares
+)
+router.post('/back_office/merchant_staffs/:merchantStaffId/dissociate_outlets',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  merchantStaffOutletController.dissociateOutletsMiddlewares
 )
 
 /**
@@ -448,7 +466,7 @@ router.delete('/back_office/acquirer_configs/:acquirerConfigId',
 router.get(
   [
     '/back_office/transactions',
-    '/back_office/transactions/:transactionsId',
+    '/back_office/transactions/:transactionId',
     '/back_office/transactions/by_alias/:aliasId'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN]),

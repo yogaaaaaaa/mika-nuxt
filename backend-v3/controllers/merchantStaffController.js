@@ -137,7 +137,6 @@ module.exports.deleteMerchantStaff = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    merchantStaff,
     merchantStaff
   )
 }

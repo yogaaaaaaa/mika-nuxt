@@ -12,7 +12,7 @@ const redis = require('./redis')
 module.exports.handlerName = 'fairpay'
 module.exports.handlerClasses = ['emvDebit', 'emvCredit']
 
-exports.baseConfig = require('../configs/ppFairpayConfig')
+exports.baseConfig = require('../configs/aqFairpayConfig')
 
 /**
  * Does exactly what it says on the tin
@@ -49,11 +49,11 @@ function fairpayRequestAgent (config) {
   return request
 }
 
-function redisKey (key, config) {
-  return `ppfairpay:${config.username}:${key}`
+function redisKey (...keys) {
+  return `aqfairpay:${keys.reduce((acc, key) => `${acc}:${key}`)}`
 }
 
-module.exports.responseCodes = {
+module.exports.fairpayResponseCodes = {
   LOGIN_SUCCESS: '0000',
   LOGOUT_SUCCESS: '0001',
   RECEIPT_FIRST_COPY: '0040',
@@ -79,16 +79,16 @@ module.exports.getFairpayResponseCode = (response) => {
 
 module.exports.isFairpayResponseCodeNotAuth = (resCode) => {
   let notAuthCodes = [
-    exports.responseCodes.AUTH_NOT_LOGIN,
-    exports.responseCodes.AUTH_VALIDATION_FAILED,
-    exports.responseCodes.AUTH_BAD_TOKEN
+    exports.fairpayResponseCodes.AUTH_NOT_LOGIN,
+    exports.fairpayResponseCodes.AUTH_VALIDATION_FAILED,
+    exports.fairpayResponseCodes.AUTH_BAD_TOKEN
   ]
 
   if (notAuthCodes.includes(resCode)) return resCode
 }
 
 module.exports.getToken = async (config) => {
-  let token = await redis.get(redisKey('token', config))
+  let token = await redis.get(redisKey(config.username, 'token'))
   if (token) {
     config.token = token
     return token
@@ -96,7 +96,7 @@ module.exports.getToken = async (config) => {
 }
 
 module.exports.setToken = async (config) => {
-  return redis.set(redisKey(`token`, config), config.token)
+  return redis.set(redisKey(config.username, `token`), config.token)
 }
 
 module.exports.clearToken = async (config) => {
@@ -137,7 +137,6 @@ module.exports.createSaleRequest = (config) => {
   config.track_ksn = emv.ksnCounterRandomize(config.track_ksn)
 
   config.emvTags = null
-  config.track2Data = null
 
   if (config.emvData) {
     config.emvTags = emv.tlvDecode(config.emvData)
@@ -215,7 +214,7 @@ module.exports.apiLogin = async (config) => {
     })
 
   if (response.body) {
-    if (response.body.response_code === exports.fairpayResponseCode.LOGIN_SUCCESS) {
+    if (response.body.response_code === exports.fairpayResponseCodes.LOGIN_SUCCESS) {
       config.token = response.body.token
       await exports.setToken(config)
     }
@@ -237,7 +236,7 @@ module.exports.apiLogout = async (config) => {
     })
 
   if (response.body) {
-    if (response.body.response_code === exports.fairpayResponseCode.LOGOUT_SUCCESS) {
+    if (response.body.response_code === exports.fairpayResponseCodes.LOGOUT_SUCCESS) {
       config.token = response.body.token
       await exports.clearToken(config)
     }
@@ -255,7 +254,7 @@ module.exports.apiDebitCreditSale = async (config) => {
     .send(config.saleRequest)
 
   if (response.body) {
-    if (response.body.response_code === exports.fairpayResponseCode.SALE_APPROVED) {
+    if (response.body.response_code === exports.fairpayResponseCodes.SALE_APPROVED) {
       config.saleResponse = response.body
     }
     return response.body
@@ -272,7 +271,7 @@ module.exports.apiDebitCreditCheck = async (config) => {
     .send(config.saleRequest)
 
   if (response.body) {
-    if (response.body.response_code === exports.fairpayResponseCode.CHECK_PROCESS_SUCCESS) {
+    if (response.body.response_code === exports.fairpayResponseCodes.CHECK_PROCESS_SUCCESS) {
       config.cardType = response.body.is_debit_flag ? 'debit' : 'credit'
     }
     return response.body
@@ -296,8 +295,8 @@ module.exports.apiSaveSignature = async (config) => {
 
   if (response.body) {
     if (
-      response.body.response_code === exports.responseCodes.RECEIPT_FIRST_COPY ||
-      response.body.response_code === exports.responseCodes.RECEIPT_DUPLICATE_COPY
+      response.body.response_code === exports.fairpayResponseCodes.RECEIPT_FIRST_COPY ||
+      response.body.response_code === exports.fairpayResponseCodes.RECEIPT_DUPLICATE_COPY
     ) {
       config.saveSignatureResponse = response.body
     }
@@ -306,8 +305,6 @@ module.exports.apiSaveSignature = async (config) => {
 }
 
 module.exports.processAuthAndApi = async (apiRequestFunction, config, apiNumTry = 2) => {
-  await exports.apiAuthInit(config)
-
   while (apiNumTry) {
     let apiResponse = await apiRequestFunction(config)
     let apiResCode = exports.getFairpayResponseCode(apiResponse)

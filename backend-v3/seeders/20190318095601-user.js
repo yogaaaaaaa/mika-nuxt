@@ -1,17 +1,19 @@
 'use strict'
 
+const hash = require('../libs/hash')
+
 /**
  * Note: all password is the same as username
  */
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('user', [
+  up: async (queryInterface, Sequelize) => {
+    queryInterface.bulkInsert('user', [
       {
         id: 1,
         secure: false,
         username: 'admin',
-        password: '$2a$10$I0VTxW1XMXkL8uvzrK7Emex/z53RQdXlxubUMrgP1PxDH4CMkZgZa',
+        password: await hash.bcryptHash('admin'),
         userType: 'admin',
         userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
       },
@@ -19,58 +21,147 @@ module.exports = {
         id: 2,
         secure: false,
         username: 'admin2',
-        password: '$2a$10$QkbojWRg5IKnF0gK3e4CTud.pc.1lP5G1SBBxhPLATZxRZYiNGv2K',
+        password: await hash.bcryptHash('admin2'),
         userType: 'admin',
-        userRoles: 'adminHead,adminFinance'
+        userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
       },
       {
         id: 3,
         secure: false,
         username: 'admin3',
-        password: '$2a$10$As2NOwEj3.0cZR0CQ2u6BewGuyYpyuU2yG61kcHVFNJ8uguBGEvq6',
+        password: await hash.bcryptHash('admin3'),
         userType: 'admin',
         userRoles: 'adminFinance'
       },
       {
         id: 4,
         secure: false,
-        username: 'merchantStaff',
-        password: '$2a$10$km.1Uc4SADcFkbWTpA9IYu8mVwDvBknl7.4qFf2aSurn9P7ptnc4C',
-        userType: 'merchantStaff'
+        username: 'admin4',
+        password: await hash.bcryptHash('admin4'),
+        userType: 'admin',
+        userRoles: 'adminMarketing'
       },
       {
         id: 5,
         secure: false,
-        username: 'merchantStaff2',
-        password: '$2a$10$9OQ6.wN8j/jyrrXLENEh7OWf4qly.Wai3q5tlHKsVYGRRQwqxhD6W',
-        userType: 'merchantStaff'
+        username: 'admin5',
+        password: await hash.bcryptHash('admin5'),
+        userType: 'admin',
+        userRoles: 'adminSupport'
       },
       {
         id: 6,
         secure: false,
-        username: 'merchantStaff3',
-        password: '$2a$10$ro1HEPfG/bCmkG/DYU3I5uh2KnNGsB0p6qC/wJFB9VCMVPwDttpwW',
+        username: 'admin6',
+        password: await hash.bcryptHash('admin6'),
+        userType: 'admin',
+        userRoles: 'adminLogistic'
+      },
+
+      {
+        id: 11,
+        secure: false,
+        username: 'merchantStaff',
+        password: await hash.bcryptHash('merchantStaff'),
         userType: 'merchantStaff'
       },
       {
-        id: 7,
+        id: 12,
+        secure: false,
+        username: 'merchantStaff2',
+        password: await hash.bcryptHash('merchantStaff2'),
+        userType: 'merchantStaff'
+      },
+      {
+        id: 13,
+        secure: false,
+        username: 'merchantStaff3',
+        password: await hash.bcryptHash('merchantStaff3'),
+        userType: 'merchantStaff'
+      },
+      {
+        id: 14,
+        secure: false,
+        username: 'merchantStaff4',
+        password: await hash.bcryptHash('merchantStaff4'),
+        userType: 'merchantStaff'
+      },
+      {
+        id: 15,
+        secure: false,
+        username: 'merchantStaff5',
+        password: await hash.bcryptHash('merchantStaff5'),
+        userType: 'merchantStaff'
+      },
+
+      {
+        id: 21,
         secure: true,
         username: 'agent',
-        password: '$2a$10$BVGsnmCBVa9k5JuDWgarWu43M95H.bnEaHu6fnburECV1I4dX0D/6',
+        password: await hash.bcryptHash('agent'),
         userType: 'agent'
       },
       {
-        id: 8,
+        id: 22,
         secure: false,
         username: 'agent2',
-        password: '$2a$10$QOGhZdp1U3VFZE6kacM5ku6jxmpW82XOKuEFPoeDdvaTqyP2wDIn2',
+        password: await hash.bcryptHash('agent2'),
         userType: 'agent'
       },
       {
-        id: 9,
+        id: 23,
         secure: false,
         username: 'agent3',
-        password: '$2a$10$dwTTfvfPQdABNOW22rIkY.ZZeYR23ZzEl0KsQ2bz88gOHtU70.svu',
+        password: await hash.bcryptHash('agent3'),
+        userType: 'agent'
+      },
+      {
+        id: 24,
+        secure: false,
+        username: 'agent4',
+        password: await hash.bcryptHash('agent4'),
+        userType: 'agent'
+      },
+      {
+        id: 25,
+        secure: false,
+        username: 'agent5',
+        password: await hash.bcryptHash('agent5'),
+        userType: 'agent'
+      },
+      {
+        id: 26,
+        secure: false,
+        username: 'agent6',
+        password: await hash.bcryptHash('agent6'),
+        userType: 'agent'
+      },
+      {
+        id: 27,
+        secure: false,
+        username: 'agent7',
+        password: await hash.bcryptHash('agent7'),
+        userType: 'agent'
+      },
+      {
+        id: 28,
+        secure: false,
+        username: 'agent8',
+        password: await hash.bcryptHash('agent8'),
+        userType: 'agent'
+      },
+      {
+        id: 29,
+        secure: false,
+        username: 'agent9',
+        password: await hash.bcryptHash('agent9'),
+        userType: 'agent'
+      },
+      {
+        id: 30,
+        secure: false,
+        username: 'agent10',
+        password: await hash.bcryptHash('agent10'),
         userType: 'agent'
       }
     ]

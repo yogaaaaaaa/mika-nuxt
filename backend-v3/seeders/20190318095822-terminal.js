@@ -14,7 +14,6 @@ module.exports = {
         terminalBatchId: 1,
         merchantId: 1
       },
-
       {
         id: 2,
         idAlias: '778-005-F453',
@@ -24,8 +23,9 @@ module.exports = {
         status: 'ready',
         terminalBatchId: 1,
         terminalModelId: 1,
-        merchantId: 2
+        merchantId: 1
       },
+
       {
         id: 3,
         idAlias: '778-005-2ADR',
@@ -37,16 +37,18 @@ module.exports = {
         terminalBatchId: 1,
         merchantId: 2
       },
-
       {
         id: 4,
+        idAlias: '778-005-23AE',
         name: 'Terminal 4',
         serialNumber: 'V111178552520',
         imei: '861299031757590',
         status: 'arrived',
         terminalModelId: 1,
-        terminalBatchId: 1
+        terminalBatchId: 1,
+        merchantId: 2
       },
+
       {
         id: 5,
         name: 'Terminal 5',

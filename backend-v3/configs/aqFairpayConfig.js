@@ -4,7 +4,7 @@
  * Default fairpay acquirer config
  */
 
-const configName = 'ppFairpayConfig'
+const configName = 'aqFairpayConfig'
 
 const appConfig = require('./appConfig')
 
@@ -25,13 +25,12 @@ let baseConfig = {
 }
 
 /**
- * Load external config file '${configName}_extra.js' as extraConfig, in same directory
- * And create a mixin between baseConfig and extraConfig
+ * Load external config file
  */
 try {
-  let extraBaseConfig = require(`./${configName}_extra`)
-  baseConfig = Object.assign({}, baseConfig, extraBaseConfig)
-  console.log(`config ${configName} is mixed`)
+  let extraConfig = require(`./_configs/${configName}`)
+  baseConfig = Object.assign({}, baseConfig, extraConfig)
+  console.log(`Config ${configName} is mixed`)
 } catch (error) { }
 
 module.exports = baseConfig

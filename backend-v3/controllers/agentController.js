@@ -173,7 +173,6 @@ module.exports.deleteAgent = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    agent,
     agent
   )
 }

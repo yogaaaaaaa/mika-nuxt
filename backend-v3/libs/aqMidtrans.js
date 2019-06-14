@@ -10,7 +10,7 @@ const superagent = require('superagent')
 module.exports.handlerName = 'midtrans'
 module.exports.handlerClasses = ['gopay']
 
-module.exports.baseConfig = require('../configs/ppMidtransConfig')
+module.exports.baseConfig = require('../configs/aqMidtransConfig')
 
 function midtransRequestAgent (config) {
   const request = superagent

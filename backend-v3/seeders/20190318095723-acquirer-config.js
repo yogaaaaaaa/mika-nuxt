@@ -17,6 +17,11 @@ module.exports = {
         id: 3,
         name: 'Alto (WeChat Pay/Alipay) Default Configuration',
         handler: 'alto'
+      },
+      {
+        id: 10,
+        name: 'Fairpay Default Configuration',
+        handler: 'fairpay'
       }
     ]
     , {})

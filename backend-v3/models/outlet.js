@@ -80,18 +80,42 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   }))
-  outlet.addScope('admin', () => ({
-    include: [
-      {
-        model: sequelize.models.resource,
-        as: 'outletPhotoResource'
+  outlet.addScope('admin', (merchantStaffId, excludeByMerchantStaffId) => {
+    let scope = {
+      where: {
+        [Op.and]: []
       },
-      {
-        model: sequelize.models.resource,
-        as: 'cashierDeskPhotoResource'
-      }
-    ]
-  }))
+      include: [
+        {
+          model: sequelize.models.resource,
+          as: 'outletPhotoResource'
+        },
+        {
+          model: sequelize.models.resource,
+          as: 'cashierDeskPhotoResource'
+        }
+      ]
+    }
+
+    if (merchantStaffId) {
+      scope.where[Op.and].push({
+        id: {
+          [excludeByMerchantStaffId ? Op.notIn : Op.in]: Sequelize.literal(
+            script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+          )
+        }
+      })
+      scope.where[Op.and].push({
+        merchantId: {
+          [Op.in]: Sequelize.literal(
+            script.get('subquery/getMerchantByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+          )
+        }
+      })
+    }
+
+    return scope
+  })
 
   outlet.associate = function (models) {
     outlet.belongsTo(models.resource, {

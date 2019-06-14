@@ -6,13 +6,13 @@
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const ppMidtransNotifController = require('../controllers/aqMidtransNotifController')
-const ppMidtransConfig = require('../configs/ppMidtransConfig')
+const aqMidtransNotifController = require('../controllers/aqMidtransNotifController')
+const aqMidtransConfig = require('../configs/aqMidtransConfig')
 const router = express.Router()
 
-router.post(ppMidtransConfig.notifEndpoint,
+router.post(aqMidtransConfig.notifEndpoint,
   bodyParser.json(),
-  ppMidtransNotifController.midtransHandleNotification
+  aqMidtransNotifController.midtransHandleNotification
 )
 
 module.exports = router

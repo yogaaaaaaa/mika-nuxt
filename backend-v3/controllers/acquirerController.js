@@ -198,7 +198,6 @@ module.exports.deleteAcquirer = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    acquirer,
     acquirer
   )
 }

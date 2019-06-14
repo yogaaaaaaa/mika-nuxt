@@ -33,6 +33,7 @@
     "lodash": "^4.17.11",
     "mariadb": "^2.0.3",
     "micromatch": "^4.0.2",
+    "moleculer": "^0.13.9",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "mqtt": "^2.18.8",

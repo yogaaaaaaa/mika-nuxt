@@ -7,7 +7,7 @@
 module.exports.handlerName = 'tcash'
 module.exports.handlerClasses = ['linkaja', 'tcash']
 
-module.exports.baseConfig = require('../configs/ppTcashConfig')
+module.exports.baseConfig = require('../configs/aqTcashConfig')
 
 module.exports.tcashMessageCode = {
   TCASH_INQUIRY_SUCCESS: {

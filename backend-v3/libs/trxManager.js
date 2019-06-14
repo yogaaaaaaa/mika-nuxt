@@ -55,7 +55,15 @@ module.exports.errorToMsgTypes = (err) => {
   } else if (err.name === exports.errorTypes.ACQUIRER_NOT_RESPONDING) {
     return msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_NOT_RESPONDING
   } else if (err.name === exports.errorTypes.INVALID_TRANSACTION) {
+    return msgTypes.MSG_ERROR_TRANSACTION_INVALID
   } else if (err.name === exports.errorTypes.INVALID_AGENT) {
+    return msgTypes.MSG_ERROR_TRANSACTION_INVALID_AGENT
+  } else if (err.name === exports.errorTypes.INVALID_USER_TOKEN) {
+    return msgTypes.MSG_ERROR_TRANSACTION_INVALID_USER_TOKEN
+  } else if (err.name === exports.errorTypes.NEED_USER_TOKEN_TYPE) {
+    return msgTypes.MSG_ERROR_TRANSACTION_NEED_USER_TOKEN_TYPE
+  } else if (err.name === exports.errorTypes.USER_TOKEN_TYPE_NOT_SUPPORTED) {
+    return msgTypes.MSG_ERROR_TRANSACTION_USER_TOKEN_NOT_SUPPORTED
   }
 }
 
@@ -190,13 +198,35 @@ module.exports.create = async (transaction, options) => {
     }
   }
 
-  if (ctx.acquirer.defaultMaximumAmount) {
-    if (ctx.transaction.amount > ctx.acquirer.defaultMaximumAmount) {
+  if (ctx.acquirer.maximumAmount) {
+    if (ctx.transaction.amount > ctx.acquirer.maximumAmount) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_HIGH)
     }
-  } else if (ctx.acquirerHandler.defaultMaximum) {
-    if (ctx.transaction.amount > ctx.acquirerHandler.defaultMaximum) {
+  } else if (ctx.acquirerHandler.defaultMaximumAmount) {
+    if (ctx.transaction.amount > ctx.acquirerHandler.defaultMaximumAmount) {
       throw exports.error(exports.errorTypes.AMOUNT_TOO_HIGH)
+    }
+  }
+
+  if (
+    ctx.acquirerHandler.properties.flows.includes(exports.transactionFlows.GET_TOKEN) &&
+    !ctx.acquirerHandler.properties.flows.includes(exports.transactionFlows.PROVIDE_TOKEN) &&
+    !ctx.transaction.userToken
+  ) {
+    throw exports.error(exports.errorTypes.NEED_USER_TOKEN)
+  }
+
+  if (
+    ctx.acquirerHandler.properties.userTokenTypes.length > 1 &&
+    !ctx.transaction.userTokenType &&
+    ctx.transaction.userToken
+  ) {
+    throw exports.error(exports.errorTypes.NEED_USER_TOKEN_TYPE)
+  }
+
+  if (ctx.transaction.userTokenType) {
+    if (!ctx.acquirerHandler.properties.userTokenTypes.includes(ctx.acquirerHandler.properties.userTokenTypes)) {
+      throw exports.error(exports.errorTypes.USER_TOKEN_TYPE_NOT_SUPPORTED)
     }
   }
 
@@ -240,7 +270,7 @@ module.exports.create = async (transaction, options) => {
       transactionStatus: ctx.transaction.status,
       transactionSettlementStatus: ctx.transaction.settlementStatus,
       createdAt: ctx.transaction.createdAt,
-      expirySecond: appConfig.transactionExpirySecond
+      expirySecond: ctx.transaction.status === exports.transactionStatuses.CREATED ? appConfig.transactionExpirySecond : undefined
     }
     if (ctx.transaction.token && ctx.transaction.tokenType) {
       trxCreateResult.token = ctx.transaction.token
