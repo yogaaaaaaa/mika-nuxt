@@ -3,17 +3,17 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const urlBodyParser = bodyParser.urlencoded({ extended: false })
-const ppTcashNotifController = require('../controllers/aqTcashNotifController')
-const ppTcashConfig = require('../configs/ppTcashConfig')
+const aqTcashNotifController = require('../controllers/aqTcashNotifController')
+const aqTcashConfig = require('../configs/aqTcashConfig')
 
 const router = express.Router()
-router.post(ppTcashConfig.inquiryEndpoint,
+router.post(aqTcashConfig.inquiryEndpoint,
   urlBodyParser,
-  ppTcashNotifController.tcashHandleInquiryAndPay
+  aqTcashNotifController.tcashHandleInquiryAndPay
 )
-router.post(ppTcashConfig.payEndpoint,
+router.post(aqTcashConfig.payEndpoint,
   urlBodyParser,
-  ppTcashNotifController.tcashHandleInquiryAndPay
+  aqTcashNotifController.tcashHandleInquiryAndPay
 )
 
 module.exports = router

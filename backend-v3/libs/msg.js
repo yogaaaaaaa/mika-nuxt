@@ -158,7 +158,7 @@ module.exports.expressUpdateEntityResponse = (
     )
   } else {
     exports.expressResponse(res,
-      exports.msgTypes.MSG_SUCCESS_NO_ENTITY_UPDATED
+      exports.msgTypes.MSG_SUCCESS_ENTITY_DO_NOT_NEED_UPDATE
     )
   }
 }
@@ -169,8 +169,7 @@ module.exports.expressUpdateEntityResponse = (
  */
 module.exports.expressDeleteEntityResponse = (
   res,
-  deleted,
-  found = true
+  found
 ) => {
   if (!found) {
     exports.expressResponse(
@@ -179,15 +178,82 @@ module.exports.expressDeleteEntityResponse = (
     )
     return
   }
-  if (deleted) {
+  exports.expressResponse(
+    res,
+    exports.msgTypes.MSG_SUCCESS_ENTITY_DELETED
+  )
+}
+
+/**
+ * Directly send specific associate entity(s) response message
+ * via express.js `res` variable.
+ */
+module.exports.expressAssociateEntityResponse = (
+  res,
+  found,
+  failedIds,
+  idsLength
+) => {
+  if (!found) {
     exports.expressResponse(
       res,
-      exports.msgTypes.MSG_SUCCESS_ENTITY_DELETED
+      exports.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
     )
-  } else {
-    exports.expressResponse(
-      res,
-      exports.msgTypes.MSG_SUCCESS_NO_ENTITY_DELETED
-    )
+    return
   }
+
+  if (Array.isArray(failedIds) && idsLength) {
+    if (failedIds.length > 0) {
+      exports.expressResponse(
+        res,
+        failedIds.length === idsLength
+          ? exports.msgTypes.MSG_ERROR_NO_ENTITY_ASSOCIATED
+          : exports.msgTypes.MSG_SUCCESS_ENTITY_ASSOCIATED_WITH_SOME_FAILED,
+        { failedIds }
+      )
+      return
+    }
+  }
+
+  exports.expressResponse(
+    res,
+    exports.msgTypes.MSG_SUCCESS_ENTITY_ASSOCIATED
+  )
+}
+
+/**
+ * Directly send specific dissociate entity(s) response message
+ * via express.js `res` variable.
+ */
+module.exports.expressDissociateEntityResponse = (
+  res,
+  found,
+  failedIds,
+  idsLength
+) => {
+  if (!found) {
+    exports.expressResponse(
+      res,
+      exports.msgTypes.MSG_ERROR_ENTITY_NOT_FOUND
+    )
+    return
+  }
+
+  if (Array.isArray(failedIds) && idsLength) {
+    if (failedIds.length > 0) {
+      exports.expressResponse(
+        res,
+        failedIds.length === idsLength
+          ? exports.msgTypes.MSG_ERROR_NO_ENTITY_DISSOCIATED
+          : exports.msgTypes.MSG_SUCCESS_ENTITY_DISSOCIATED_WITH_SOME_FAILED,
+        { failedIds }
+      )
+      return
+    }
+  }
+
+  exports.expressResponse(
+    res,
+    exports.msgTypes.MSG_SUCCESS_ENTITY_DISSOCIATED
+  )
 }

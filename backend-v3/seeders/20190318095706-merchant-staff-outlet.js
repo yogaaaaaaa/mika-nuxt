@@ -7,14 +7,17 @@ module.exports = {
         outletId: 1,
         merchantStaffId: 1
       },
-
+      {
+        outletId: 2,
+        merchantStaffId: 1
+      },
       {
         outletId: 2,
         merchantStaffId: 2
       },
       {
         outletId: 3,
-        merchantStaffId: 2
+        merchantStaffId: 1
       },
       {
         outletId: 3,
@@ -22,12 +25,16 @@ module.exports = {
       },
 
       {
-        outletId: 4,
-        merchantStaffId: 4
+        outletId: 10,
+        merchantStaffId: 11
       },
       {
-        outletId: 5,
-        merchantStaffId: 5
+        outletId: 11,
+        merchantStaffId: 11
+      },
+      {
+        outletId: 11,
+        merchantStaffId: 12
       }
     ]
     , {})

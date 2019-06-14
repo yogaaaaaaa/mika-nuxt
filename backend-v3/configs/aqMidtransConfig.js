@@ -4,7 +4,7 @@
  * Default Midtrans Payment Gateway Config
  */
 
-const configName = 'ppMidtransConfig'
+const configName = 'aqMidtransConfig'
 
 const appConfig = require('./appConfig')
 

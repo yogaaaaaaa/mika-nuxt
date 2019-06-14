@@ -135,7 +135,6 @@ module.exports.deleteAdmin = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    admin,
     admin
   )
 }

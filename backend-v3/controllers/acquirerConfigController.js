@@ -120,7 +120,6 @@ module.exports.deleteAcquirerConfig = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    acquirerConfig,
     acquirerConfig
   )
 }

@@ -4,6 +4,8 @@
  * Fairpay middleware acquirer handler
  */
 
+const _ = require('lodash')
+
 const fairpay = require('../aqFairpay')
 
 module.exports = (trxManager) => {
@@ -23,7 +25,7 @@ module.exports = (trxManager) => {
       ]
     },
     handler: async (ctx) => {
-      if (!ctx.transaction.userToken) throw trxManager.error(trxManager.errorTypes.NEED_USER_TOKEN)
+      if (!_.isPlainObject(ctx.transaction.userToken)) throw trxManager.error(trxManager.errorTypes.INVALID_USER_TOKEN)
 
       let fpCtx = fairpay.mixConfig(Object.assign(
         {
@@ -35,11 +37,11 @@ module.exports = (trxManager) => {
 
       ctx.transaction.userToken = undefined
 
+      if (!fairpay.createSaleRequest(fpCtx)) throw trxManager.error(trxManager.errorTypes.INVALID_USER_TOKEN)
+
       if (!await fairpay.getToken(fpCtx)) await fairpay.apiLogin(fpCtx)
 
-      fairpay.createSaleRequest(fpCtx)
-
-      if (fpCtx.cardTypesOnly) {
+      if (Array.isArray(fpCtx.cardTypesOnly)) {
         await fairpay.processAuthAndApi(fairpay.apiDebitCreditCheck, fpCtx)
         if (!fpCtx.cardTypesOnly.includes(fpCtx.cardType)) {
           throw trxManager.error(trxManager.errorTypes.INVALID_USER_TOKEN)

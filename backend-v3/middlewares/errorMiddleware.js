@@ -75,10 +75,16 @@ module.exports.sequelizeErrorHandler = (err, req, res, next) => {
     return
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     if (Array.isArray(err.errors)) {
+      let data
+      try {
+        data = err.errors.map(error => `${error.instance._modelOptions.name.singular}.${error.path}`)
+      } catch (err) {
+        data = err.fields
+      }
       msg.expressResponse(
         res,
         msg.msgTypes.MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT,
-        err.errors.map(error => `${error.instance._modelOptions.name.singular}.${error.path}`)
+        data
       )
       return
     }

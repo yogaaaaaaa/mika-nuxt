@@ -101,7 +101,6 @@ module.exports.deleteAcquirerType = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    acquirerType,
     acquirerType
   )
 }

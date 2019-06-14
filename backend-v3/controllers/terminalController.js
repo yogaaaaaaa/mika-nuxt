@@ -130,7 +130,6 @@ module.exports.deleteTerminal = async (req, res, next) => {
 
   msg.expressDeleteEntityResponse(
     res,
-    terminal,
     terminal
   )
 }

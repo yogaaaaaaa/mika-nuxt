@@ -9,7 +9,7 @@ module.exports = {
 
     const generateMerchant1 = (count = 100) => fake.transactions(
       'majutembak',
-      [1],
+      [1, 2, 3, 4, 5],
       [1, 2, 3, 4],
       startDate,
       endDate,
@@ -18,20 +18,20 @@ module.exports = {
 
     const generateMerchant2 = (count = 100) => fake.transactions(
       'agromesupermoe',
-      [2, 3],
-      [5, 6, 7, 8],
+      [11, 12, 13, 14, 15],
+      [11, 12, 13, 14],
       startDate,
       endDate,
       count
     )
 
-    let count = 20
+    let count = 200
     while (count) {
       await queryInterface.bulkInsert('transaction', generateMerchant1(), {})
       count--
     }
 
-    count = 12
+    count = 120
     while (count) {
       await queryInterface.bulkInsert('transaction', generateMerchant2(), {})
       count--

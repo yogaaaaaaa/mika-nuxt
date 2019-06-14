@@ -88,6 +88,8 @@ module.exports.errorTypes = {
   ACQUIRER_NOT_RESPONDING: 'trxManagerAcquirerNotResponding',
   NEED_EXTRA_CONFIG: 'trxManagerExtraConfigNeeded',
   NEED_USER_TOKEN: 'trxManagerUserTokenNeeded',
+  NEED_USER_TOKEN_TYPE: 'trxManagerUserTokenTypeNeeded',
   INVALID_USER_TOKEN: 'trxManagerUserTokenInvalid',
+  USER_TOKEN_TYPE_NOT_SUPPORTED: 'trxManagerUserTokenTypeInvalid',
   JUST_ERROR: 'trxManagerUnknownError'
 }

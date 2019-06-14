@@ -6,14 +6,14 @@
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const ppAltoNotifController = require('../controllers/aqAltoNotifController')
-const ppAltoConfig = require('../configs/ppAltoConfig')
+const aqAltoNotifController = require('../controllers/aqAltoNotifController')
+const aqAltoConfig = require('../configs/aqAltoConfig')
 
 const router = express.Router()
 router.post(
-  ppAltoConfig.notifEndpoint,
+  aqAltoConfig.notifEndpoint,
   bodyParser.urlencoded({ extended: false }),
-  ppAltoNotifController.altoHandleNotification
+  aqAltoNotifController.altoHandleNotification
 )
 
 module.exports = router

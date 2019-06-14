@@ -4,7 +4,7 @@
  * Default TCASH/LinkAja Acquirer config
  */
 
-const configName = 'ppTcashConfig'
+const configName = 'aqTcashConfig'
 
 let baseConfig = {
   inquiryEndpoint: '/payment/tcash/inquiry',
