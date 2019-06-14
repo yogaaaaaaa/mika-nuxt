@@ -1,0 +1,207 @@
+<template>
+  <no-ssr>
+    <v-app id="inspire">
+      <v-navigation-drawer
+        :mini-variant="miniVariant"
+        v-model="drawer"
+        width="260"
+        dark
+        persistent
+        fixed
+        app
+      >
+        <v-toolbar flat class="transparent" dense>
+          <v-list
+            :class="{ 'list-border-bottom': miniVariant }"
+            class="pt-1 mb-1"
+          >
+            <v-list-tile>
+              <v-list-tile-content
+                v-if="!miniVariant"
+                style="margin-left: 50px"
+              >
+                <a href="/">
+                  <v-img src="/mika-logo.png" style="width:100px;" />
+                </a>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <v-btn icon @click.stop="miniVariant = !miniVariant;">
+                  <v-icon
+                    v-html="miniVariant ? 'chevron_right' : 'chevron_left'"
+                  />
+                </v-btn>
+              </v-list-tile-action>
+            </v-list-tile>
+          </v-list>
+        </v-toolbar>
+        <v-divider />
+        <v-list :class="{ 'list-border-bottom': miniVariant }" subheader>
+          <template v-for="item in items">
+            <v-tooltip :disabled="!miniVariant" :key="item._text" right>
+              <v-list-tile
+                slot="activator"
+                :key="item.icon"
+                :to="item.to"
+                exact
+                active-class="yellow--text"
+              >
+                <v-list-tile-action v-if="!miniVariant" class="ml-3">
+                  <v-icon v-html="item.icon" />
+                </v-list-tile-action>
+                <v-list-tile-action v-if="miniVariant">
+                  <v-icon v-html="item.icon" />
+                </v-list-tile-action>
+                <v-list-tile-content style="margin-left: -10px">
+                  <v-list-tile-title v-text="item.text" />
+                </v-list-tile-content>
+              </v-list-tile>
+              <span v-text="item.text" />
+            </v-tooltip>
+          </template>
+        </v-list>
+        <v-list-tile 
+          class="logout" 
+          @click="dialogConfirm = true"
+        >
+          <v-list-tile-action class="ml-3" v-if="!miniVariant">
+            <v-icon>logout</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-action v-if="miniVariant">
+            <v-icon>logout</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content style="margin-left: -10px">
+            <v-list-tile-title>Logout</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-navigation-drawer>
+      <v-toolbar app flat dense style="background-color: rgb(248, 248, 248)">
+        <v-toolbar-side-icon
+          class="hidden-lg-and-up"
+          @click.stop="drawer = !drawer;"
+        />
+        <div :v-if="isAuthenticated" class="hidden-sm-and-down blue--text">
+          <!-- <h2>{{ username }}</h2> -->
+        </div>
+        <v-spacer />
+        <div class="hidden-lg-and-up">
+          <a href="/admin">
+            <v-img
+              :src="`/mika-blue.png`"
+              style="width:120px; margin-top: 10px;"
+            />
+          </a>
+        </div>
+        <v-spacer />
+      </v-toolbar>
+      <admin-button />
+      <v-content class="back">
+        <v-container fluid> <nuxt /> </v-container>
+      </v-content>
+      <!-- <confirm 
+        :show="dialogConfirm"
+        :msg="msgLogout"
+        :scndBtn="btnConfirm"
+        @close="dialogConfirm = false"
+        @confirm="logout" 
+      /> -->
+    </v-app>
+  </no-ssr>
+</template>
+
+<script>
+import { mapGetters, mapState } from "vuex";
+import adminButton from "~/components/admin.vue"
+// import confirm from "~/components/confirm.vue";
+
+export default {
+  props: {
+    source: {
+      type: String,
+      default: ""
+    }
+  },
+  components: {
+    "admin-button": adminButton
+    // "confirm": confirm
+  },
+  data: () => ({
+    dialog: false,
+    drawer: null,
+    items: [
+      // { icon: "apps", text: "Dashboard", to: "/" },
+      // { icon: "contacts", text: "Admin", to: "/admin" },
+      { icon: "domain", text: "Merchant", to: "/merchants" },
+      { icon: "store", text: "Merchant Terminal", to: "/merchant-terminal" },
+      { icon: "payment", text: "Payment Gateway", to: "/payment-gateway" },
+      { icon: "monetization_on", text: "Transactions", to: "/transactions" },
+      // {
+      //   icon: "bubble_chart",
+      //   text: "Settlement Report",
+      //   to: "/settlement-report"
+      // }
+    ],
+    msgLogout: "Are you sure you want to logout?",
+    appName: "Mika",
+    fixed: false,
+    miniVariant: false,
+    right: true,
+    rightDrawer: false,
+    tabs: null,
+    username: "",
+    dialogConfirm: false,
+    btnConfirm: "Continue Logout"
+  }),
+  computed: {
+    ...mapGetters(["isAuthenticated", "loggedInUser"])
+  },
+  async mounted() {
+    await this.setUser()
+  },
+  methods: {
+    setUser() {
+      this.username = localStorage.username
+    },
+    async logout() {
+      await this.$auth.logout()
+      localStorage.username = false;
+      this.$axios.setHeader('Authorization', null);
+      this.$router.push('/login')
+    }
+  }
+};
+</script>
+
+<style>
+.float {
+  position: fixed;
+  bottom: 0;
+  right: 10px;
+  margin-bottom: 10px;
+}
+.action-icon {
+  display: flex;
+}
+.back {
+  /* background-color: rgb(248, 248, 248); */
+  margin-top: -75px;
+}
+.line {
+  position: relative;
+  top: 1em;
+  color: rgb(248, 248, 248);
+}
+.dongker {
+  background-color: rgb(0, 0, 75);
+}
+.loading {
+  text-align: center;
+  align-content: center;
+  align-items: center;
+  align-self: center;
+}
+.logout {
+  position: absolute;
+  bottom: 0px;
+  color: white;
+}
+</style>
