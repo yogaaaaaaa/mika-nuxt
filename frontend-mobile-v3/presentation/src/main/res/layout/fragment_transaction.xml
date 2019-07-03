@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            app:elevation="@null">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_account"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1"
+                app:contentInsetStart="@null"
+                app:elevation="@null">
+
+            <!--<Spinner-->
+            <!--android:id="@+id/spinner_title"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:layout_marginStart="15dp"-->
+            <!--android:textColor="@android:color/white"-->
+            <!--android:textSize="20sp" />-->
+
+            <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="@dimen/activity_horizontal_margin"
+            >
+
+                <LinearLayout
+                        android:id="@+id/btn_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:paddingStart="16dp">
+
+                    <TextView
+                            android:id="@+id/text_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="Semua Transaksi"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp"/>
+
+                    <ImageView
+                            android:id="@+id/drop_down"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="15dp"
+                            android:src="@drawable/ic_arrow_drop_down_black_24dp"
+                            android:tint="@color/white"/>
+
+                </LinearLayout>
+
+
+                <ImageView
+                        android:id="@+id/img_calendar"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="15dp"
+                        android:src="@drawable/ic_tune_black_24dp"
+                        android:tint="@color/white"/>
+
+            </RelativeLayout>
+
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/appBar">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_transaction"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/appBar"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <RelativeLayout
+            android:id="@+id/rv2"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/appBar"
+            android:layout_centerHorizontal="true"
+            android:background="@color/chooserDialogBg"
+            android:elevation="16dp"
+            android:outlineProvider="bounds"
+            android:visibility="gone">
+
+        <TextView
+                android:id="@+id/text_all_transaction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="@color/chooserDialogBg"
+                android:textColor="@color/lightGrey"
+                android:gravity="center"
+                android:padding="12dp"
+                android:textSize="12sp"
+                android:text="@string/all_transaction"
+                android:textStyle="bold"/>
+
+        <TextView
+                android:id="@+id/text_filter_by_month"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_all_transaction"
+                android:layout_centerHorizontal="true"
+                android:background="@color/chooserDialogBg"
+                android:textColor="@color/lightGrey"
+                android:padding="12dp"
+                android:textSize="12sp"
+                android:text="@string/filter_by_month"
+                android:gravity="center"
+                android:textStyle="bold"/>
+
+        <TextView
+                android:id="@+id/text_filter_by_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_filter_by_month"
+                android:layout_centerHorizontal="true"
+                android:background="@color/chooserDialogBg"
+                android:textColor="@color/lightGrey"
+                android:padding="12dp"
+                android:textSize="12sp"
+                android:text="@string/filter_by_date"
+                android:gravity="center"
+                android:textStyle="bold"/>
+
+    </RelativeLayout>
+
+    <LinearLayout
+            android:id="@+id/rlTipePembayaran"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@color/lightGrey"
+            android:orientation="vertical"
+            android:outlineProvider="bounds"
+            android:layout_below="@id/appBar"
+            android:layout_alignParentEnd="true"
+            android:elevation="16dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAcquirer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</RelativeLayout>

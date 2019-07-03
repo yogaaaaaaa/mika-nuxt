@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="@color/white">
+
+    <TextView
+            android:id="@+id/label_total_income"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:text="@string/total_pendapatan"
+            android:textSize="@dimen/font_size_small"/>
+
+    <TextView
+            android:id="@+id/label_total_income_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/label_total_income"
+            android:layout_marginTop="@dimen/view_margin_small"
+            android:layout_centerHorizontal="true"
+            android:textSize="@dimen/font_size_very_large"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            tools:text="Rp 1.500.000,-"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/lightGrey"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_below="@id/label_total_income_value"
+            android:weightSum="100">
+
+        <LinearLayout
+                android:id="@+id/layout_total_transaction"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="40"
+                android:gravity="center"
+                android:background="@color/white"
+                android:foreground="?attr/selectableItemBackground"
+                android:padding="10dp"
+                android:layout_marginTop="1dp"
+                android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/label_total_transaction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/total_transaction"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:textSize="@dimen/font_size_small"/>
+
+            <TextView
+                    android:id="@+id/label_total_transaction_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/view_margin_small"
+                    android:textSize="@dimen/font_size_large"
+                    tools:text="Rp 1.500.000,-"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_transaction"
+                    android:layout_marginTop="@dimen/view_margin"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="10sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="60"
+                android:gravity="center"
+                android:background="@color/white"
+                android:padding="10dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginStart="1dp"
+                android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/label_total_nett"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pendapatan_bersih"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:textSize="@dimen/font_size_small"/>
+
+            <TextView
+                    android:id="@+id/label_total_nett_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/view_margin_small"
+                    android:textSize="@dimen/font_size_large"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    tools:text="Rp 1.500.000,-"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:text="@string/view_transaction"
+                    android:layout_marginTop="@dimen/view_margin"
+                    android:textColor="@color/colorAccent"
+                    tools:textSize="10sp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>
