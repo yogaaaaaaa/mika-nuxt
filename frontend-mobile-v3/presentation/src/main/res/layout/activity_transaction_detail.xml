@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        tools:context=".agent.transactiondetail.TransactionDetailActivity">
+    <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            app:elevation="@null">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_transaction_detail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1"
+                app:contentInsetStart="@null"
+                app:elevation="@null">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="start|center_vertical"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/transaction_details"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"/>
+
+            <ImageView
+                    android:id="@+id/img_printer"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/ic_printer"/>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/appBar">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center_horizontal"
+                android:padding="15dp">
+
+            <!--<Button-->
+            <!--android:id="@+id/btn_done"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentBottom="true"-->
+            <!--style="@style/BaseButton"-->
+            <!--android:text="@string/done"/>-->
+
+            <LinearLayout
+                    android:id="@+id/layout_status"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingEnd="5dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                        android:id="@+id/img_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitXY"/>
+
+                <TextView
+                        android:id="@+id/text_transaction_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textSize="@dimen/font_size_very_large"
+                        android:textStyle="bold"/>
+
+            </LinearLayout>
+
+            <TextView
+                    android:id="@+id/text_status_detail"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textSize="@dimen/font_size_big"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_status"/>
+
+            <TextView
+                    android:id="@+id/separator_1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_status_detail"/>
+
+            <TextView
+                    android:id="@+id/separator_2"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_date"/>
+
+            <TextView
+                    android:id="@+id/separator_3"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_time"/>
+
+            <TextView
+                    android:id="@+id/separator_11"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/label_merchant_name"/>
+
+            <TextView
+                    android:id="@+id/separator_4"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_to"/>
+
+            <TextView
+                    android:id="@+id/separator_5"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_amount"/>
+
+            <TextView
+                    android:id="@+id/separator_6"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_acquirer"/>
+
+            <TextView
+                    android:id="@+id/separator_7"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/img_transaction_barcode"/>
+
+            <TextView
+                    android:id="@+id/separator_8"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/text_status_detail"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_transaction_ID"/>
+
+            <TextView
+                    android:id="@+id/separator_9"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_phone_number"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="192dp"/>
+
+            <TextView
+                    android:id="@+id/label_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/separator_1"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/date"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_date"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline21"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/text_date"/>
+
+            <TextView
+                    android:id="@+id/text_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_date"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_1"/>
+
+            <TextView
+                    android:id="@+id/label_time"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/separator_1"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/time"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_time"
+                    app:layout_constraintEnd_toStartOf="@+id/text_time"
+                    app:layout_constraintStart_toStartOf="@+id/label_date"
+                    app:layout_constraintTop_toTopOf="@+id/text_time"/>
+
+            <TextView
+                    android:id="@+id/text_time"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_time"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_2"/>
+
+            <!--<TextView-->
+            <!--android:id="@+id/txt_merchant_name"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Nama Merchant"-->
+            <!--android:textColor="@color/black"-->
+            <!--android:textSize="16sp" />-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/lbl_merchant_name"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:textColor="@color/black"-->
+            <!--android:textSize="16sp" />-->
+
+            <TextView
+                    android:id="@+id/label_merchant_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_date"
+                    android:layout_marginStart="8dp"
+                    android:text="Nama Merchant:"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_merchant_name"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline21"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/text_merchant_name"/>
+
+            <TextView
+                    android:id="@+id/text_merchant_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_to"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_3"/>
+
+            <TextView
+                    android:id="@+id/label_to"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_date"
+                    android:text="@string/sender"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_to"
+                    app:layout_constraintEnd_toStartOf="@+id/text_to"
+                    app:layout_constraintStart_toStartOf="@+id/label_date"
+                    app:layout_constraintTop_toTopOf="@+id/text_to"/>
+
+            <TextView
+                    android:id="@+id/text_to"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_to"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_11"/>
+
+            <TextView
+                    android:id="@+id/label_amount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_to"
+                    android:text="@string/amount"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_amount"
+                    app:layout_constraintEnd_toStartOf="@+id/text_amount"
+                    app:layout_constraintStart_toStartOf="@+id/label_date"
+                    app:layout_constraintTop_toTopOf="@+id/text_amount"/>
+
+            <TextView
+                    android:id="@+id/text_amount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_amount"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_4"/>
+
+            <TextView
+                    android:id="@+id/label_payment_method"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_amount"
+                    android:text="@string/payment_method"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_acquirer"
+                    app:layout_constraintEnd_toStartOf="@+id/text_acquirer"
+                    app:layout_constraintStart_toStartOf="@+id/label_amount"
+                    app:layout_constraintTop_toTopOf="@+id/text_acquirer"/>
+
+            <TextView
+                    android:id="@+id/text_acquirer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_payment_method"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_5"/>
+
+            <TextView
+                    android:id="@+id/label_transaction_no"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_acquirer"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/transaction"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@+id/text_transaction_no"
+                    app:layout_constraintStart_toStartOf="@+id/label_amount"
+                    app:layout_constraintTop_toBottomOf="@id/separator_6"/>
+
+            <TextView
+                    android:id="@+id/text_transaction_no"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_transaction_no"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@id/separator_6"/>
+
+            <TextView
+                    android:id="@+id/label_transaction_ID"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_transaction_no"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/transactionID"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_transaction_ID"
+                    app:layout_constraintEnd_toStartOf="@+id/text_transaction_ID"
+                    app:layout_constraintStart_toStartOf="@+id/label_payment_method"
+                    app:layout_constraintTop_toTopOf="@+id/separator_7"/>
+
+            <TextView
+                    android:id="@+id/text_transaction_ID"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_transaction_ID"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_7"/>
+
+            <TextView
+                    android:id="@+id/label_transaction_phone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_transaction_ID"
+                    android:text="@string/phone"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_phone_number"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline21"
+                    app:layout_constraintStart_toStartOf="@+id/label_transaction_ID"
+                    app:layout_constraintTop_toTopOf="@+id/text_phone_number"/>
+
+            <TextView
+                    android:id="@+id/text_phone_number"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_transaction_phone"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@+id/separator_8"/>
+
+            <ImageView
+                    android:id="@+id/img_transaction_barcode"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="16dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_transaction_no"/>
+
+            <TextView
+                    android:id="@+id/label_approval_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_acquirer"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/text_approval_code"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toStartOf="@+id/text_transaction_no"
+                    app:layout_constraintStart_toStartOf="@+id/label_amount"
+                    app:layout_constraintTop_toBottomOf="@id/separator_9"/>
+
+            <TextView
+                    android:id="@+id/text_approval_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_transaction_no"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/guideline21"
+                    app:layout_constraintTop_toBottomOf="@id/separator_9"/>
+
+            <ImageView
+                    android:id="@+id/img_approval_barcode"
+                    android:layout_width="260dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="16dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/label_approval_code"/>
+
+            <TextView
+                    android:id="@+id/separator_10"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@color/lightGrey"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/img_approval_barcode"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</RelativeLayout>

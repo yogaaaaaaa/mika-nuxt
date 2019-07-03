@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            app:elevation="@null">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1"
+                app:contentInsetStart="@null"
+                app:elevation="@null">
+
+            <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="@dimen/activity_horizontal_margin">
+
+                <LinearLayout
+                        android:id="@+id/btn_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="0dp">
+
+                    <TextView
+                            android:id="@+id/text_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp"
+                            tools:text="Nama Outlet"/>
+
+                    <ImageView
+                            android:id="@+id/drop_down"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="15dp"
+                            android:src="@drawable/ic_arrow_drop_down_black_24dp"
+                            android:tint="@color/white"/>
+
+                </LinearLayout>
+
+
+                <ImageView
+                        android:id="@+id/img_laporan"
+                        android:layout_width="25dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignTop="@id/btn_title"
+                        android:layout_alignBottom="@+id/btn_title"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="15dp"
+                        android:src="@drawable/ic_laporan"
+                        android:tint="@color/white"/>
+
+            </RelativeLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_below="@id/appBar">
+        <LinearLayout
+                android:id="@+id/clSorting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bottom_border"
+                android:elevation="16dp"
+                android:weightSum="1"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:id="@+id/btnPilihTanggal"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/choose_date"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"/>
+
+            <TextView
+                    android:id="@+id/btnTipePembayaran"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/all_method"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/appBar">
+
+
+            <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="82dp"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline22"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="329dp"/>
+
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/swipe_refresh"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="visible"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/list_transaction"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <ImageView
+                    android:id="@+id/pointerPilihTanggal"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="20dp"
+                    android:background="@drawable/shape_triangle"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="@+id/rlPilihTanggal"
+                    app:layout_constraintTop_toBottomOf="parent"/>
+
+            <LinearLayout
+                    android:id="@+id/rlPilihTanggal"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/lightGrey"
+                    android:orientation="vertical"
+                    android:outlineProvider="bounds"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@+id/guideline"
+                    app:layout_constraintTop_toBottomOf="@+id/pointerPilihTanggal">
+
+                <TextView
+                        android:id="@+id/btnBulanBerjalan"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:text="@string/transaction_current_month"
+                        style="@style/DarkButton"/>
+
+                <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:alpha="0.18"
+                        android:background="@color/black"/>
+
+                <TextView
+                        android:id="@+id/btnBerdasarBulan"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:text="@string/monthly_transaction"
+                        style="@style/DarkButton"/>
+
+                <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:alpha="0.18"
+                        android:background="@color/black"/>
+
+                <TextView
+                        android:id="@+id/btnBerdasarHari"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:text="@string/daily_transaction"
+                        style="@style/DarkButton"/>
+
+                <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="0.25dp"
+                        android:alpha="0.18"
+                        android:background="@color/black"/>
+
+            </LinearLayout>
+
+            <ImageView
+                    android:id="@+id/pointerTipePembayaran"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/shape_triangle"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline22"
+                    app:layout_constraintTop_toBottomOf="parent"/>
+
+            <LinearLayout
+                    android:id="@+id/rlTipePembayaran"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/lightGrey"
+                    android:orientation="vertical"
+                    android:outlineProvider="bounds"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline22"
+                    app:layout_constraintTop_toBottomOf="@+id/pointerTipePembayaran">
+
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvAcquirer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+</RelativeLayout>

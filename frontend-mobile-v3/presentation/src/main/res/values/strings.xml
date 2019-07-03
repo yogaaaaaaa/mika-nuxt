@@ -1,0 +1,195 @@
+<resources>
+    <string name="app_name">Mika</string>
+    <string name="forget_password">Lupa Kata Sandi</string>
+    <string name="sign_in">Masuk</string>
+    <string name="password">Kata Sandi</string>
+    <string name="username">Nama Pengguna</string>
+    <string name="title_activity_home">HomeActivity</string>
+
+    <string name="title_charge">Bayar</string>
+    <string name="title_transaction">Transaksi</string>
+    <string name="title_profile">Profil</string>
+    <string name="title_qr">QR Code</string>
+    <string name="button_percent">%</string>
+    <string name="button_7">7</string>
+    <string name="button_4">4</string>
+    <string name="button_1">1</string>
+    <string name="button_times">×</string>
+    <string name="button_8">8</string>
+    <string name="button_5">5</string>
+    <string name="button_2">2</string>
+    <string name="button_0">0</string>
+    <string name="button_division">÷</string>
+    <string name="button_9">9</string>
+    <string name="button_6">6</string>
+    <string name="button_3">3</string>
+    <string name="button_backspace">←</string>
+    <string name="button_pay">Bayar</string>
+    <string name="button_equal">=</string>
+    <string name="button_plus">+</string>
+    <string name="button_minus">-</string>
+    <string name="calc_sign">×÷+-</string>
+    <string name="profile">Profil</string>
+    <string name="today">Hari Ini</string>
+    <string name="currency">IDR</string>
+    <string name="zero">0</string>
+    <string name="choose_payment">Pilih Metode Pembayaran</string>
+    <string name="choose_other_payment">Pilih Metode Lainnya</string>
+    <string name="choose_camera">Mode Camera</string>
+    <string name="full_name">Nama Lengkap</string>
+    <string name="user_name">Username</string>
+    <string name="address">Alamat Email</string>
+    <string name="account">Akun</string>
+    <string name="contact_us">Kontak Kami</string>
+    <string name="change_password">Ganti Kata Sandi</string>
+    <string name="old_password">Kata Sandi Lama</string>
+    <string name="new_password">Kata Sandi Baru</string>
+    <string name="confirm_password">Konfirmasi Kata Sandi</string>
+    <string name="done">Selesai</string>
+    <string name="transaction_details">Detail Transaksi</string>
+    <string name="date">Tanggal:</string>
+    <string name="sender">Outlet:</string>
+    <string name="amount">Jumlah:</string>
+    <string name="payment_method">Metode Pembayaran:</string>
+    <string name="transaction">Transaksi:</string>
+    <string name="transactionID">Kode Pembayaran:</string>
+    <string name="phone">Nomor Telepon:</string>
+    <string name="time">Waktu:</string>
+    <string name="button_00">00</string>
+    <string name="button_dot">.</string>
+    <string name="log_out">Log Out</string>
+
+    <string name="transaction_success">Transaksi Sukses</string>
+    <string name="transaction_failed">Transaksi Gagal</string>
+    <string name="transaction_cancelled">Transaksi Dibatalkan</string>
+
+    <string name="dialog_text">Anda yakin mau keluar?</string>
+    <string name="ok">Ya</string>
+    <string name="cancel">Tidak</string>
+    <string name="please_scan">Silakan scan QR Code di atas\n
+        untuk menyelesaikan transaksi
+    </string>
+    <string-array name="menu_profile">
+        <item>Akun</item>
+        <item>Kontak Kami</item>
+        <item>Ubah Kata Sandi</item>
+        <item>Keluar</item>
+    </string-array>
+
+    <string-array name="transaction_filter">
+        <item>Semua Transaksi</item>
+        <item>Bulan Ini</item>
+        <item>Hari Ini</item>
+    </string-array>
+
+    <string name="error_server">Terjadi kesalahan pada server: Data tidak ada</string>
+    <string name="error_server21">Terjadi kesalahan pada server, Silahkan coba kembali</string>
+    <!--<string name="error_login">Terjadi gangguan pada koneksi internet anda atau server sedang mati</string>-->
+    <string name="error_inet_connection">Periksa kembali koneksi Internet Anda</string>
+
+    <string name="error_login">Sedang terjadi gangguan, periksa kembali koneksi Internet Anda</string>
+    <string name="error_server2">Terjadi kesalahan pada server, periksa kembali koneksi Internet Anda</string>
+    <string name="error_connect_bluetooth">Silakan menyalakan bluetooth</string>
+    <string name="error_connect_printer">Pastikan bluetooth terhubung dengan InnerPrinter</string>
+    <string name="error_server3">Terjadi kesalahan, tolong ulangi lagi</string>
+    <string name="title_activity_aaa">AAAActivity</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="total_pendapatan">Total Pendapatan</string>
+    <string name="total_transaction">Total Transaksi</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="lbl_report">Anda mengirimkan data\n laporan transaksi</string>
+    <string name="pendapatan_bersih">Pendapatan Bersih</string>
+    <string name="no_data">No Transaction Data</string>
+    <string name="pdf">pdf</string>
+    <string name="xlsx">xlsx</string>
+    <string name="custom_email">Kirim ke Email Lain</string>
+    <string name="title_refresh">refresh</string>
+    <string name="success_transaction_notification">Transaksi Sukses</string>
+    <string name="failed_transaction_notification">Transaksi Gagal</string>
+    <string name="channel_notification">mika</string>
+    <string name="intent_name_isnotification">isNotification</string>
+    <string name="intent_name_transaction">transaction</string>
+    <string name="intent_name_issucess">isSuccess</string>
+    <string name="text_continue">Lanjut</string>
+    <string name="text_clear">Hapus</string>
+    <string name="text_pin">PIN</string>
+    <string name="text_signature">Tanda Tangan</string>
+    <string name="title_text_valid">VALID\nTHRU</string>
+    <string name="title_text_monthyear">MONTH/YEAR</string>
+    <string name="title_btn_choose_payment">Pilih Metode Pembayaran Lainnya</string>
+    <string name="error_connect_pay_sdk">connect to sdk fail</string>
+    <string name="title_debit_card">Kartu Debit</string>
+    <string name="title_credit_card">Kartu Kredit</string>
+    <string name="message_insert_debit_card">Silakan masukkan\nkartu debit Anda</string>
+    <string name="message_insert_credit_card">Silahkan masukkan\nkartu kredit Anda</string>
+    <string name="message_input_pin">Masukkan PIN Anda</string>
+    <string name="message_input_signature">Tuliskan tanda tangan Anda</string>
+    <string name="error_unsupported_device">Perangkat tidak mendukung transaksi menggunakan kartu debit/kredit</string>
+    <string name="error_incomplete_pin">Lengkapi PIN</string>
+    <string name="text_okay">OK</string>
+    <string name="text_asterisk">∗</string>
+    <string name="message_scan_qrcode">Silakan pindai kode QR pelanggan untuk menyelesaikan transaksi</string>
+    <string name="text_mode_qr">Mode QR</string>
+    <string name="error_camera_not_found">Kamera tidak terdeteksi</string>
+    <string name="title_notification_camera">Notifikasi</string>
+    <string name="error_read_qr">Terjadi kesalahan pindai. Silakan coba lagi.</string>
+    <string name="error_read_qr_image">Terjadi kesalahan. Silakan coba lagi dengan gambar berbeda.</string>
+    <string name="message_loading_encrypt">Enkripsi data...</string>
+    <string name="message_loading_decrypt">Dekripsi data dari server...</string>
+    <string name="message_loading_finishTransaction">Menyelesaikan transaksi...</string>
+    <string name="message_loading_postTransaction">Menunggu balasan server...</string>
+    <string name="message_loading_compressImage">Kompres citra...</string>
+    <string name="text_setting_key">Atur Enkripsi Data Kartu</string>
+    <string name="message_scanqr_key">Silakan pindai kode QR untuk enkripsi data kartu</string>
+    <string name="error_parse_json">Terjadi kesalahan format JSON</string>
+    <string name="message_success_import_key">Pengaturan eknripsi data kartu berhasil</string>
+    <string name="error_apilevel_not_supported">Versi android tidak mendukung</string>
+    <string name="error_qr_not_valid">QR-Code tidak valid</string>
+    <string name="text_repeat_password">Ketik Ulang Kata Sandi Baru</string>
+    <string name="error_password_not_match">Kata sandi baru tidak sesuai. Tolong ulangi lagi</string>
+    <string name="text_approval_code">Approval Code:</string>
+    <string name="text_card_number">Nomor Kartu:</string>
+    <string name="message_read_nfc">Sedang membaca, mohon kartu jangan dilepas</string>
+    <string name="message_username_password_empty">Nama Pengguna atau Kata Sandi tidak boleh kosong</string>
+    <string name="success">success</string>
+    <string name="message_success_change_password">Sukses mengubah kata sandi</string>
+    <string name="message_warning_change_password">Harap lengkapi data</string>
+    <string name="loading">Mohon Tunggu...</string>
+    <string name="filter_by_month">Pilih Berdasarkan Bulan</string>
+    <string name="all_transaction">Semua Transaksi</string>
+    <string name="filter_by_date">Pilih Berdasarkan Tanggal</string>
+    <string name="text_ok">OKE</string>
+    <string name="text_batal">BATAL</string>
+    <string name="message_permission_access_location">Kami membutuhkan informasi lokasi. Izinkan aplikasi mengakses
+        lokasi Anda
+    </string>
+    <string name="pengguna">Pengguna</string>
+    <string name="outlet">Outlet</string>
+    <string name="alamat">Alamat</string>
+    <string name="alamat_email">Alamat Email</string>
+    <string name="nama_merchant">Nama Merchant</string>
+    <string name="message_activate_location">Aktifkan lokasi</string>
+    <string name="error_message_location">Terjadi kesalahan, lokasi saat ini tidak ditemukan. Tolong ulangi lagi
+    </string>
+    <string name="error_not_authenticated">Not authenticated</string>
+    <string name="title_year">Tahun</string>
+    <string name="title_month">Bulan</string>
+    <string name="title_date">Tanggal</string>
+    <string name="choose_date">Pilih Tanggal</string>
+    <string name="all_method">Semua Metode</string>
+    <string name="transaction_current_month">Transaksi Bulan Berjalan</string>
+    <string name="monthly_transaction">Transaksi Bulanan</string>
+    <string name="daily_transaction">Transaksi Harian</string>
+    <string name="find_outlet">Cari Outlet</string>
+    <string name="all_outlet">Semua Outlet</string>
+    <string name="view_transaction">Lihat Transaksi</string>
+    <string name="payment_type">Tipe Pembayaran</string>
+    <string name="content_desc_bgCard">background of card</string>
+    <string name="content_desc_imgCardType">Card issuer</string>
+    <string name="content_desc_logoMika">Mika logo</string>
+    <string name="content_desc_btnSearch">Search button</string>
+    <string name="content_desc_qrCode">QR code image</string>
+    <string name="activate_location">Aktifkan lokasi</string>
+    <string name="message_permission_location">Mohon aktifkan izin lokasi</string>
+</resources>
