@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     cardNetwork: DataTypes.STRING,
     cardIssuer: DataTypes.STRING,
     cardAcquirer: DataTypes.STRING,
-    cardPan: DataTypes.STRING,
+    cardPanMasked: DataTypes.STRING,
     cardType: DataTypes.STRING,
 
     aliasThumbnail: DataTypes.STRING,
@@ -77,6 +77,9 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   transaction.addScope('agent', () => ({
+    attributes: {
+      exclude: ['token', 'userToken', 'ipAddress']
+    },
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       {
@@ -128,7 +131,7 @@ module.exports = (sequelize, DataTypes) => {
     attributes: [
       'acquirerId',
       [Sequelize.literal('SUM(`transaction`.`amount`)'), 'amount'],
-      [Sequelize.literal('SUM(`transaction`.`amount` * `acquirer`.`shareMerchant`)'), 'nettAmount'],
+      [Sequelize.literal('SUM( (`transaction`.`amount` * IFNULL(`acquirer`.`shareMerchant`, 1)) - IFNULL(`acquirer`.`processFee`, 0))'), 'nettAmount'],
       [Sequelize.fn('COUNT', Sequelize.col('transaction.id')), 'transactionCount']
     ],
     group: [
@@ -180,6 +183,64 @@ module.exports = (sequelize, DataTypes) => {
             }
           ]
         }
+      }
+    ]
+  }))
+
+  transaction.addScope('merchantStaffReportOutletTransactionStats', (merchantStaffId) => ({
+    attributes: [
+      [Sequelize.literal('SUM(`transaction`.`amount`)'), 'amount'],
+      [Sequelize.literal('SUM( (`transaction`.`amount` * IFNULL(`acquirer`.`shareMerchant`, 1)) - IFNULL(`acquirer`.`processFee`, 0))'), 'nettAmount'],
+      [Sequelize.fn('COUNT', Sequelize.col('transaction.id')), 'transactionCount']
+    ],
+    group: [
+      Sequelize.col('agent.outletId')
+    ],
+    include: [
+      {
+        required: true,
+        model: sequelize.models.acquirer,
+        attributes: [ 'id' ]
+      },
+      {
+        model: sequelize.models.agent,
+        attributes: [ 'id', 'outletId' ],
+        include: [sequelize.models.outlet],
+        where: {
+          [Op.and]: {
+            outletId: {
+              [Op.in]: Sequelize.literal(
+                script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+              )
+            }
+          }
+        }
+      }
+    ]
+  }))
+  transaction.addScope('merchantStaffReport', (merchantStaffId) => ({
+    include: [
+      {
+        model: sequelize.models.agent,
+        include: [ sequelize.models.outlet ],
+        where: {
+          [Op.and]: [
+            {
+              outletId: {
+                [Op.in]: Sequelize.literal(
+                  script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                )
+              }
+            }
+          ]
+        }
+      },
+      {
+        required: true,
+        model: sequelize.models.acquirer,
+        include: [
+          sequelize.models.acquirerType
+        ]
       }
     ]
   }))

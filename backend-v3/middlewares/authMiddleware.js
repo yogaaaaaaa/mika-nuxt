@@ -3,7 +3,7 @@
 const msg = require('../libs/msg')
 const auth = require('../libs/auth')
 
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
 
 /**
  * Authentication check as middleware.
@@ -25,8 +25,8 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
   req.auth = null
   req.sessionToken = null
 
-  if (req.headers[appConfig.authSessionTokenHeader]) {
-    req.sessionToken = req.headers[appConfig.authSessionTokenHeader]
+  if (req.headers[commonConfig.authSessionTokenHeader]) {
+    req.sessionToken = req.headers[commonConfig.authSessionTokenHeader]
   } else if (req.headers['authorization']) {
     let authComponent = req.headers['authorization'].split(' ')
     if (authComponent[0].toLowerCase() === 'bearer') {
@@ -79,7 +79,7 @@ module.exports.authErrorHandler = async (req, res, next) => {
  */
 module.exports.debugAuth = async (req, res, next) => {
   req.auth = null
-  if (req.headers[appConfig.debugKeyHeader] === appConfig.debugKey) {
+  if (req.headers[commonConfig.debugKeyHeader] === commonConfig.debugKey) {
     req.auth = 'debug'
     next()
   }

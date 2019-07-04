@@ -4,9 +4,7 @@
  * Default Config for alto/wechat payment gateway
  */
 
-const appConfig = require('./appConfig')
-
-const configName = 'aqAltoConfig'
+const commonConfig = require('./commonConfig')
 
 const pemPrivateKey =
 `-----BEGIN RSA PRIVATE KEY-----
@@ -38,15 +36,16 @@ let baseConfig = {
   altoPemAltoPublicKey: pemAltoPublicKey,
   altoMchId: '101876'
 }
-baseConfig.notify_url = `${appConfig.baseUrl}${baseConfig.notifEndpoint}`
+baseConfig.notify_url = `${commonConfig.baseUrl}${baseConfig.notifEndpoint}`
 
 /**
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) { }
+  console.log(`${configName} is mixed`)
+} catch (err) {}
 
 module.exports = baseConfig

@@ -5,31 +5,72 @@ const fs = require('fs')
 
 const dirConfig = require('../configs/dirConfig')
 
-module.exports.getCachePath = (basename) => {
-  return path.join(dirConfig.cacheDir, basename)
+module.exports.getWorkDirPath = (...bases) => {
+  return path.join(dirConfig.workDir, ...bases)
 }
 
-module.exports.getWorkDirPath = (basename) => {
-  return path.join(dirConfig.workDir, basename)
+module.exports.getCachesDirPath = (...bases) => {
+  return path.join(dirConfig.cachesDir, ...bases)
+}
+
+module.exports.createCacheDir = (dirName) => {
+  return new Promise((resolve, reject) => {
+    let dirPath = exports.getCachesDirPath(dirName)
+    fs.mkdir(dirPath, (err) => {
+      if (err) return reject(err)
+      resolve(dirPath)
+    })
+  })
 }
 
 /**
- * Read a file in cache directory
- * WARNING: sync
+ * Read a file in cache directory.
+ *
+ * WARNING: sync function
  */
 module.exports.readCacheFile = (filename, toString = true) => {
   try {
-    let bufferRead = fs.readFileSync(exports.getCachePath(filename))
+    let bufferRead = fs.readFileSync(exports.getCachesDirPath(filename))
     return (toString ? bufferRead.toString('utf8') : bufferRead)
   } catch (err) {}
 }
 
 /**
- * Simple function to write a file to cache directory
- * WARNING: sync
+ * Simple function to write a file to cache directory.
+ *
+ * WARNING: sync function
  */
 module.exports.writeCacheFile = (filename, data) => {
   try {
-    return fs.writeFileSync(exports.getCachePath(filename), data)
+    return fs.writeFileSync(exports.getCachesDirPath(filename), data)
   } catch (err) {}
+}
+
+/**
+ * Search for all files recursively on dirPath
+ * with callback for each files
+ *
+ * callback: callback()
+ *
+ * WARNING: Sync function, callback can be async
+ */
+module.exports.loadFiles = (dirPath, callback) => {
+  async function searchFiles (dirPath, callback, rootPath) {
+    if (!rootPath) rootPath = dirPath
+    let nodes = fs.readdirSync(dirPath)
+    for (const node of nodes) {
+      let nodePath = path.join(dirPath, node)
+      let nodeStats = fs.statSync(nodePath)
+      if (nodeStats.isDirectory()) {
+        searchFiles(nodePath, callback, rootPath)
+      } else if (nodeStats.isFile()) {
+        if (typeof callback === 'function') {
+          let filePath = path.relative(rootPath, nodePath)
+          let data = fs.readFileSync(nodePath).toString('utf8')
+          await callback(filePath, data)
+        }
+      }
+    }
+  }
+  searchFiles(dirPath, callback)
 }

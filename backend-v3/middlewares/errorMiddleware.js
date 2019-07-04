@@ -1,7 +1,9 @@
 'use strict'
 
-const { validationResult } = require('express-validator/check')
+const { validationResult } = require('express-validator')
 const msg = require('../libs/msg')
+
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 /**
  * Not found handler middleware, place before errorHandler
@@ -19,17 +21,19 @@ module.exports.notFoundErrorHandler = (req, res, next) => {
 module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
     console.error(err.stack)
+
+    let msgTypes = msg.msgTypes.MSG_ERROR
+    let data = isEnvProduction ? undefined : err.stack.split('\n')
+
     if (err.status === 400) { // status assigned by body-parser when encounter parsing error
-      msg.expressResponse(
-        res,
-        msg.msgTypes.MSG_ERROR_BAD_REQUEST
-      )
-    } else {
-      msg.expressResponse(
-        res,
-        msg.msgTypes.MSG_ERROR
-      )
+      msgTypes = msg.msgTypes.MSG_ERROR_BAD_REQUEST
     }
+
+    msg.expressResponse(
+      res,
+      msgTypes,
+      data
+    )
   }
 }
 

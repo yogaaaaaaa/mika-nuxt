@@ -4,12 +4,10 @@
  * Default fairpay acquirer config
  */
 
-const configName = 'aqFairpayConfig'
-
-const appConfig = require('./appConfig')
+const commonConfig = require('./commonConfig')
 
 let baseConfig = {
-  baseUrl: 'http://autobot.dlinkddns.com:28028',
+  baseUrl: 'http://stg11fp.mikaapp.id:8080',
   username: 'fajar',
   password: '123456789',
   auth_code: 'Murdoc',
@@ -21,16 +19,17 @@ let baseConfig = {
   emv_ipek: '9889AE89A053EDD31DBE40ED03B39F90',
   emv_ksn: '6700CAED48735CE00000',
   last_key_download: '2018-11-14 04:56:41',
-  redisPrefix: `${appConfig.name}-fpPG`
+  redisPrefix: `${commonConfig.name}:aqFairpay`
 }
 
 /**
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) { }
+  console.log(`${configName} is mixed`)
+} catch (err) {}
 
 module.exports = baseConfig

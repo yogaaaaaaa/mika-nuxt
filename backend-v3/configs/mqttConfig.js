@@ -2,49 +2,42 @@
 
 /**
  * Default Mqtt Config
+ * Including auth generation for mosquitto_auth_plugin
  */
 
 const uid = require('../libs/uid')
-const dir = require('../libs/dir')
 
-const appConfig = require('./appConfig')
+const commonConfig = require('./commonConfig')
+const redisConfig = require('./redisConfig')
 
-const configName = 'mqttConfig'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 let baseConfig = {
-  url: process.env.MIKA_MQTT_URL || 'mqtt://localhost',
-  superuserName: process.env.MIKA_MQTT_SUPERUSER_NAME || 'superuser',
-  superuserPassword: process.env.MIKA_MQTT_SUPERUSER_PASSWORD || '',
-  authPattern: process.env.MIKA_MQTT_AUTH_PATTERN || `${appConfig.name}:mosq:%u`,
-  authACLPattern: process.env.MIKA_MQTT_AUTH_ACL_PATTERN || `${appConfig.name}:mosqacl:%u:%t`,
-  redisUrls: process.env.MIKA_MQTT_REDIS_URLS || appConfig.redisUrls,
+  url: 'mqtt://localhost',
+  superuserName: 'superuser',
+  superuserPassword: 'superuser',
+  authPattern: isEnvProduction ? `mika-v3:mosq:%u` : `mika-v3-dev:mosq:%u`,
+  authACLPattern: isEnvProduction ? `mika-v3:mosqacl:%u:%t` : `mika-v3-dev:mosqacl:%u:%t`,
+  redisUrls: redisConfig.urls,
   authExpirySecond: 7 * 24 * 60,
-  clientId: process.env.MIKA_MQTT_CLIENT_ID || null,
-  cleanSession: false,
+  clientId: null,
+  cleanSession: true,
   keepalive: 60,
   qosDefault: 1,
   passwordHashIter: 100,
   waitConnectTimeoutSecond: 30
 }
 
+baseConfig.clientId = `${commonConfig.name}-${baseConfig.superuserName}-${uid.randomString()}`
+
 /**
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
+  console.log(`${configName} is mixed`)
 } catch (error) {}
-
-if (!baseConfig.clientId) {
-  let clientIdFile = 'mqttClientId'
-  let clientId = dir.readCacheFile(clientIdFile)
-  if (clientId) {
-    baseConfig.clientId = clientId
-  } else {
-    baseConfig.clientId = `${appConfig.namespace}${appConfig.name}-${baseConfig.superuserName}-${uid.randomString()}`
-    dir.writeCacheFile(clientIdFile, baseConfig.clientId)
-  }
-}
 
 module.exports = baseConfig

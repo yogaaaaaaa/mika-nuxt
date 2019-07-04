@@ -1,46 +1,49 @@
 'use strict'
 
+/**
+ * Sequelize Database config
+ */
+
 const _ = require('lodash')
 
-const configName = 'dbConfig'
+const commonDbConfig = {
+  username: null,
+  password: null,
+  database: null,
+  dialect: 'mysql',
+  dialectOptions: {
+    timezone: 'Etc/GMT'
+  },
+  freezeTableName: true,
+  pool: {
+    max: 5,
+    acquire: 30000,
+    idle: 10000
+  }
+}
 
 let baseConfig = {
   development: {
-    username: process.env.MIKA_DB_USERNAME || 'mikadev',
-    password: process.env.MIKA_DB_PASSWORD || 'mikadev',
-    database: process.env.MIKA_DB_NAME || 'mika_v3_31',
-    host: process.env.MIKA_DB_HOST || '127.0.0.1',
-    dialect: 'mysql',
-    dialectOptions: {
-      timezone: 'Etc/GMT'
-    },
-    freezeTableName: true,
+    username: 'mikadev',
+    password: 'mikadev',
+    database: 'mika_v3_31',
+    host: '127.0.0.1',
+    port: 3306,
     logging: console.log,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    benchmark: true
+    benchmark: true,
+    ...commonDbConfig
   },
   production: {
-    username: process.env.MIKA_DB_USERNAME,
-    password: process.env.MIKA_DB_PASSWORD,
-    database: process.env.MIKA_DB_NAME,
-    host: process.env.MIKA_DB_HOST || '127.0.0.1',
-    dialect: 'mysql',
-    dialectOptions: {
-      timezone: 'Etc/GMT'
+    database: 'mika',
+    replication: {
+      write: { host: '127.0.0.1', username: 'mikadev', password: 'mikadev' },
+      read: [
+        { host: '127.0.0.1', username: 'mikadev', password: 'mikadev' }
+      ]
     },
-    freezeTableName: true,
     logging: false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+    benchmark: false,
+    ...commonDbConfig
   }
 }
 
@@ -48,9 +51,10 @@ let baseConfig = {
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   _.merge(baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) {}
+  console.log(`${configName} is mixed`)
+} catch (err) {}
 
 module.exports = baseConfig

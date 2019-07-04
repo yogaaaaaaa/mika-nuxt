@@ -65,7 +65,7 @@ module.exports.publish = async (topic, message, options = {}) => {
     dup: false
   }, options)
 
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     mqttClient.publish(topic, message, options, (err) => {
       if (err) {
         reject(err)

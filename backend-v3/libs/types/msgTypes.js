@@ -1,8 +1,8 @@
 'use strict'
 
 /**
- * Contain all message type used in mika-api, there are http status code (httpStatus)
- * and message status code (status) that exclusive to mika-api.
+ * Contain message type used in mika backend system, there are http status code (httpStatus)
+ * and message status code (status).
  *
  * mika-api internal code message format is consist of {{domain}}-{{code}}
  * example :
@@ -63,7 +63,7 @@ module.exports.msgTypes = {
     isError: true,
     httpStatus: 400,
     status: 'sys-403',
-    message: 'Bad request, entity is still used'
+    message: 'Bad request, entity is still used by another entity'
   },
   MSG_ERROR_NOT_FOUND: {
     isError: true,
@@ -287,13 +287,13 @@ module.exports.msgTypes = {
     isError: true,
     httpStatus: 500,
     status: 'trx-501',
-    message: 'Cannot create transaction, acquirer is not responding'
+    message: 'Cannot process transaction, acquirer is not responding'
   },
-  MSG_ERROR_TRANSACTION_ACQUIRER_HANDLER_ERROR: {
+  MSG_ERROR_TRANSACTION_INVALID_ACQUIRER_CONFIG: {
     isError: true,
     httpStatus: 500,
-    status: 'trx-502',
-    message: 'Cannot create transaction, error occurred in internal acquirer handler'
+    status: 'trx-510',
+    message: 'Cannot create transaction, invalid acquirer configuration'
   }
 }
 

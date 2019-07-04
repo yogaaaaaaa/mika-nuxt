@@ -3,7 +3,6 @@
 /**
  * Public/External API route handler
 */
-
 const express = require('express')
 const bodyParser = require('body-parser')
 
@@ -14,6 +13,8 @@ const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const extApiController = require('../controllers/extApiController')
+
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 router.use(bodyParser.json())
 
@@ -58,7 +59,7 @@ router.get(
 /**
  * Debug route for mika public api
  */
-if (process.env.NODE_ENV === 'development') {
+if (isEnvProduction) {
   router.post('/debug/transaction/:transactionId/status/:transactionStatus',
     extApiController.debugSetTransactionStatus
   )

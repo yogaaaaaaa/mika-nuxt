@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     minimumAmount: DataTypes.DECIMAL(28, 2),
     maximumAmount: DataTypes.DECIMAL(28, 2),
 
+    processFee: DataTypes.DECIMAL(28, 2),
     shareAcquirer: DataTypes.DECIMAL(5, 4),
     shareMerchant: DataTypes.DECIMAL(5, 4),
     shareMerchantWithPartner: DataTypes.DECIMAL(5, 4),
@@ -44,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
   acquirer.addScope('excludeShare', {
     attributes: {
       exclude: [
+        'processFee',
         'shareAcquirer',
         'shareMerchant',
         'shareMerchantWithPartner',

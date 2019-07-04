@@ -84,12 +84,14 @@ module.exports.errorTypes = {
   AMOUNT_TOO_LOW: 'trxManagerAmountATooLow',
   AMOUNT_TOO_HIGH: 'trxManagerAmountATooHigh',
   INVALID_ACQUIRER: 'trxManagerInvalidAcquirer',
-  INVALID_ACQUIRER_HANDLER: 'trxManagerPpHandlerNotFound',
+  INVALID_ACQUIRER_HANDLER: 'trxManagerInvalidAcquirerHandler',
+  INVALID_ACQUIRER_CONFIG: 'trxManagerInvalidAcquirerConfig',
   ACQUIRER_NOT_RESPONDING: 'trxManagerAcquirerNotResponding',
   NEED_EXTRA_CONFIG: 'trxManagerExtraConfigNeeded',
   NEED_USER_TOKEN: 'trxManagerUserTokenNeeded',
   NEED_USER_TOKEN_TYPE: 'trxManagerUserTokenTypeNeeded',
   INVALID_USER_TOKEN: 'trxManagerUserTokenInvalid',
   USER_TOKEN_TYPE_NOT_SUPPORTED: 'trxManagerUserTokenTypeInvalid',
+  ID_ALIAS_GENERATION_ERROR: 'trxManagerIdAliasGenerationError',
   JUST_ERROR: 'trxManagerUnknownError'
 }

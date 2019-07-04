@@ -3,7 +3,7 @@
 const msg = require('../libs/msg')
 const models = require('../models')
 
-const { body } = require('express-validator/check')
+const { body } = require('express-validator')
 
 const errorMiddleware = require('../middlewares/errorMiddleware')
 

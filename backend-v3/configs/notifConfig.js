@@ -1,24 +1,29 @@
 'use strict'
 
-const appConfig = require('./appConfig')
+/**
+ * Notification config
+ */
 
-const configName = 'notifConfig'
+const commonConfig = require('./commonConfig')
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 let baseConfig = {
-  brokerUrl: process.env.MIKA_MQTT_NOTIF_URL || (process.env.NODE_ENV === 'development' ? 'wss://stg12broker.mikaapp.id' : 'wss://broker.mikaapp.id'),
-  topicClientPrefix: process.env.MIKA_MQTT_NOTIF_CLIENT_TOPIC_PREFIX || `${appConfig.namespace}${appConfig.name}/notif-client`,
-  topicServerPrefix: process.env.MIKA_MQTT_NOTIF_SERVER_TOPIC_PREFIX || `${appConfig.namespace}${appConfig.name}/notif-server`,
-  topicBroadcastPrefix: process.env.MIKA_MQTT_NOTIF_BROADCAST_TOPIC_PREFIX || `${appConfig.namespace}${appConfig.name}/notif-broadcast`,
-  userPrefix: `${appConfig.namespace}user`
+  brokerUrl: isEnvProduction ? 'wss://broker.mikaapp.id' : 'wss://stg31broker.mikaapp.id',
+  topicClientPrefix: `${commonConfig.name}/notif-client`,
+  topicServerPrefix: `${commonConfig.name}/notif-server`,
+  topicBroadcastPrefix: `${commonConfig.name}/notif-broadcast`,
+
+  agentPrefix: isEnvProduction ? `agent` : `${commonConfig.name}-agent`
 }
 
 /**
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) { }
+  console.log(`${configName} is mixed`)
+} catch (err) {}
 
 module.exports = baseConfig

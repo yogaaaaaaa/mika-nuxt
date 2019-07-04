@@ -16,6 +16,7 @@ const modules = new Map()
 
 module.exports.addModule = async (name) => {
   if (!modules.get(name)) {
+    console.log('Ready: new module', name)
     modules.set(name, exports.state.NOT_READY)
   }
 }
@@ -38,7 +39,7 @@ module.exports.checkReadyAll = () => {
 
 module.exports.ready = (name) => {
   modules.set(name, exports.state.READY)
-  console.log('Module Ready:', name)
+  console.log('Ready:', name)
   exports.checkReadyAll()
 }
 

@@ -89,5 +89,7 @@ captures
 
 # Runtime specific
 cache
-_config
-_configs
+caches
+upload
+uploads
+_configs*

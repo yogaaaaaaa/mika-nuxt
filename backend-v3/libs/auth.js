@@ -10,7 +10,7 @@ const redis = require('./redis')
 const models = require('../models')
 const notif = require('../libs/notif')
 
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
 const types = require('./types/authTypes')
 
 module.exports.types = types
@@ -43,11 +43,11 @@ module.exports.deleteSessionToken = async (userId) => {
   await redis.del(redisKey(userId))
 }
 
-module.exports.generateToken = (payload, secretKey = appConfig.authSecretKey) => {
+module.exports.generateToken = (payload, secretKey = commonConfig.authSecretKey) => {
   return jwt.sign(payload, secretKey)
 }
 
-module.exports.verifyToken = (sessionToken, secretKey = appConfig.authSecretKey) => {
+module.exports.verifyToken = (sessionToken, secretKey = commonConfig.authSecretKey) => {
   try {
     let payload = jwt.verify(sessionToken, secretKey)
     if (payload) {
@@ -84,7 +84,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
       userRoles: user.userRoles
     },
     sessionToken: null,
-    authExpirySecond: appConfig.authExpirySecond
+    authExpirySecond: commonConfig.authExpirySecond
   }
 
   if (user.userType === exports.userTypes.AGENT) {
@@ -108,7 +108,7 @@ module.exports.doAuth = async function (username, password, options = {}) {
       authResult.auth.agentId = agent.id
       authResult.auth.outletId = agent.outletId
       authResult.auth.merchantId = agent.outlet.merchantId
-      authResult.brokerDetail = await notif.addAgent(agent.id, appConfig.authExpirySecond)
+      authResult.brokerDetail = await notif.addAgent(agent.id, commonConfig.authExpirySecond)
     }
   }
 
@@ -171,9 +171,9 @@ module.exports.checkAuth = async (sessionToken) => {
 
   if (auth) {
     if (await exports.getSessionToken(auth.userId) === sessionToken) {
-      await exports.refreshSessionToken(auth.userId, appConfig.authExpirySecond)
+      await exports.refreshSessionToken(auth.userId, commonConfig.authExpirySecond)
       if (auth.userType === exports.userTypes.AGENT) {
-        await notif.refreshAgent(auth.agentId, appConfig.authExpirySecond)
+        await notif.refreshAgent(auth.agentId, commonConfig.authExpirySecond)
       }
       return auth
     }

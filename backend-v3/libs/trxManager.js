@@ -16,7 +16,7 @@ const uid = require('./uid')
 const dTimer = require('./dTimer')
 const events = Object.create(require('events').prototype)
 
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
 const { msgTypes } = require('./types/msgTypes')
 const types = require('./types/trxManagerTypes')
 
@@ -64,6 +64,10 @@ module.exports.errorToMsgTypes = (err) => {
     return msgTypes.MSG_ERROR_TRANSACTION_NEED_USER_TOKEN_TYPE
   } else if (err.name === exports.errorTypes.USER_TOKEN_TYPE_NOT_SUPPORTED) {
     return msgTypes.MSG_ERROR_TRANSACTION_USER_TOKEN_NOT_SUPPORTED
+  } else if (err.name === exports.errorTypes.INVALID_ACQUIRER_HANDLER) {
+    return msgTypes.MSG_ERROR_TRANSACTION_INVALID_ACQUIRER_CONFIG
+  } else if (err.name === exports.errorTypes.INVALID_ACQUIRER_CONFIG) {
+    return msgTypes.MSG_ERROR_TRANSACTION_INVALID_ACQUIRER_CONFIG
   }
 }
 
@@ -103,7 +107,10 @@ module.exports.formatAcquirerInfo = (acquirerHandler) => {
  * Return an displayable acquirer handler information
  * by its handler name
  */
-module.exports.getAcquirerInfo = (handlerName) => exports.formatAcquirerInfo(exports.findAcquirerHandler(handlerName))
+module.exports.getAcquirerInfo = (handlerName) => {
+  let acquirerHandler = exports.findAcquirerHandler(handlerName)
+  if (acquirerHandler) return exports.formatAcquirerInfo(acquirerHandler)
+}
 
 /**
  * Emit transaction status change (via nodejs event emitter).
@@ -128,9 +135,14 @@ module.exports.listenStatusChange = (handler) => {
 /**
  * Forcefully change transaction status, includes event emitter
  */
-module.exports.forceStatus = async (transactionId, transactionStatus) => {
+module.exports.forceStatus = async (transactionId, transactionStatus, agentId) => {
   if (transactionStatus) {
-    let transaction = await models.transaction.findByPk(transactionId)
+    let transaction = await models.transaction.findOne({
+      where: {
+        id: transactionId,
+        agentId: agentId || undefined
+      }
+    })
 
     if (transaction) {
       transaction.status = transactionStatus
@@ -169,6 +181,8 @@ module.exports.buildTransactionCtx = async (transaction, extraCtx) => {
     if (!ctx.agent.outlet.merchant.acquirers.length) throw exports.error(exports.errorTypes.INVALID_ACQUIRER)
     ctx.acquirer = ctx.agent.outlet.merchant.acquirers[0]
   }
+
+  if (!ctx.acquirer.acquirerConfig) throw exports.error(exports.errorTypes.INVALID_ACQUIRER_CONFIG)
 
   ctx.acquirerHandler = exports.findAcquirerHandler(ctx.acquirer.acquirerConfig.handler)
   if (!ctx.acquirerHandler) throw exports.error(exports.errorTypes.INVALID_ACQUIRER_HANDLER)
@@ -247,18 +261,19 @@ module.exports.create = async (transaction, options) => {
     }
   }
 
-  if (typeof ctx.transaction.userToken === 'object') {
+  if (typeof ctx.transaction.userToken !== 'string') {
     ctx.transaction.userToken = undefined
   }
 
   await ctx.transaction.save()
+  await ctx.transaction.reload()
 
   // create expiry handler
   if (ctx.transaction.status === exports.transactionStatuses.CREATED) {
     await dTimer.postEvent({
       event: exports.eventTypes.TRANSACTION_EXPIRY,
       transactionId: ctx.transaction.id
-    }, appConfig.transactionExpirySecond * 1000)
+    }, commonConfig.transactionExpirySecond * 1000)
   }
 
   if (!trxCreateResult) {
@@ -270,7 +285,7 @@ module.exports.create = async (transaction, options) => {
       transactionStatus: ctx.transaction.status,
       transactionSettlementStatus: ctx.transaction.settlementStatus,
       createdAt: ctx.transaction.createdAt,
-      expirySecond: ctx.transaction.status === exports.transactionStatuses.CREATED ? appConfig.transactionExpirySecond : undefined
+      expirySecond: ctx.transaction.status === exports.transactionStatuses.CREATED ? commonConfig.transactionExpirySecond : undefined
     }
     if (ctx.transaction.token && ctx.transaction.tokenType) {
       trxCreateResult.token = ctx.transaction.token

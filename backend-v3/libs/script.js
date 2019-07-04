@@ -1,11 +1,13 @@
 'use strict'
 
 /**
- * Automatically load scripts to map object
+ * Automatically load scripts as map
  */
 
 const path = require('path')
 const fs = require('fs')
+
+const scriptsDir = path.resolve(path.join(__dirname, '..', 'scripts'))
 
 function stringTransform (string, newLineToSpace, singleSpace) {
   if (newLineToSpace) {
@@ -49,7 +51,7 @@ function loadScripts (dirPath, map, rootPath) {
   return map
 }
 
-module.exports.map = loadScripts(path.resolve(path.join(__dirname, '..', 'scripts')), new Map())
+module.exports.map = loadScripts(scriptsDir, new Map())
 
 module.exports.get = (name, replacements) => {
   let script = exports.map.get(name)

@@ -4,21 +4,23 @@
  * Config sample/template
  */
 
-const configName = 'sampleConfig'
-
 let baseConfig = {
   // Put your config here
 }
+
+// Put runtime generated config here
 
 /**
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) {}
+  console.log(`${configName} is mixed`)
+} catch (err) {}
 
+// Put after mix runtime generated config here
 // Place any sanity check here
 
 module.exports = baseConfig

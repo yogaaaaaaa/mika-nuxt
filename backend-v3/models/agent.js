@@ -1,11 +1,10 @@
 'use strict'
 
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-
 const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
+  const Op = sequelize.Sequelize.Op
+
   let agent = sequelize.define('agent', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
@@ -58,35 +57,44 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   }))
-  agent.addScope('agentAcquirer', (acquirerId) => ({
-    attributes: ['id'],
-    include: [
-      {
-        model: sequelize.models.outlet.scope('id'),
-        required: true,
-        include: [
-          {
-            model: sequelize.models.merchant.scope('id'),
-            required: true,
-            include: [
-              {
-                where: acquirerId ? { id: acquirerId } : undefined,
-                model: sequelize.models.acquirer.scope(
-                  { method: ['agentExclusion', '`agent`.`id`'] },
-                  'excludeTimestamp',
-                  'excludeShare'
-                ),
-                include: [
-                  sequelize.models.acquirerType.scope('excludeTimestamp'),
-                  sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
-                ]
-              }
-            ]
-          }
-        ]
+  agent.addScope('agentAcquirer', (acquirerId) => {
+    let whereAcquirer = {
+      acquirerConfigId: {
+        [Op.not]: null
       }
-    ]
-  }))
+    }
+    if (acquirerId) whereAcquirer.id = acquirerId
+
+    return {
+      attributes: ['id'],
+      include: [
+        {
+          model: sequelize.models.outlet.scope('id'),
+          required: true,
+          include: [
+            {
+              model: sequelize.models.merchant.scope('id'),
+              required: true,
+              include: [
+                {
+                  where: whereAcquirer,
+                  model: sequelize.models.acquirer.scope(
+                    { method: ['agentExclusion', '`agent`.`id`'] },
+                    'excludeTimestamp',
+                    'excludeShare'
+                  ),
+                  include: [
+                    sequelize.models.acquirerType.scope('excludeTimestamp'),
+                    sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  })
   agent.addScope('trxManager', (acquirerId) => ({
     include: [
       {

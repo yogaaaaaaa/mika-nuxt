@@ -2,12 +2,12 @@
 	"info": {
 		"_postman_id": "a3ce63f1-0696-4979-95a0-626c15ac2a77",
 		"name": "backend-v3",
-		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `version`\nContain current revison of backend, with format \n```\n{{branch}}-{{commitHash}}-{{commitCount}} {{enviroment}} {{commitTime}}\n```\n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\n- `data`\nIf any data is included, it will be in `data`.\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints or unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token. \n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n### Filters\nMost plural endpoint provide capability to filter entities, including specific endpoint if noted. Filters is defined as array of query string (e.g `filters[]`) that formatted with\n`attributes,op,value`\n\nOperator supported by `filters[]`\n- `eq` (equal)\n- `eqnull` (equal null)\n- `ne` (not equal)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `filters[]=status,eq,succes`\n- `filters[]=acquirer.name,like,%tcash%`",
+		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `version`\nContain current revison of backend, with format \n```\n{{branch}}-{{commitHash}}-{{commitCount}} {{enviroment}} {{commitTime}}\n```\n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\n- `data`\nIf any data is included, it will be in `data`.\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints or unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header or included as bearer style token, `Authorization: Bearer <token>`.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token. \n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n\n### Filters\nMost plural endpoint provide capability to filter entities, including specific endpoint if noted. Filters is defined as array of query string in url that formatted with `f[field]=op,value` or `filters[field]=op,value`\n\nOperator supported by `filters[]`\n- `eq` (equal)\n- `eqnull` (equal to `null`)\n- `eqtrue` (equal to `true`)\n- `neq` (not equal)\n- `neqnull` (not equal to `null`)\n- `neqtrue` (not equal to `true`)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `f[status]=eq,succes`\n- `f[acquirer.name]=like,%tcash%`\n\nAll of filter will be **and**-ed together, from example above it will filter entities with `status` equal (`eq`) to `sucess` **and** `acquirer.name` `like` `%tcash%`.\n\nFor **or** operation on the same field, extra `,or` in field name can be use. For example to filter entities with value of amount from 500 to 1000, is equal to `f[amount,or]=gte,500&f[amount,or]=lte,1000` in filter query string.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Ready to Use (Staging Environment Only)",
+			"name": "Example",
 			"item": [
 				{
 					"name": "Authentication",
@@ -416,26 +416,23 @@
 								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
 							},
 							"response": []
-						},
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "For Agent",
+					"item": [
 						{
-							"name": "{{baseUrl}}/api/auth/login Custom",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"id": "db07f491-3423-466f-89ad-226799857463",
-										"exec": [
-											"let body = JSON.parse(responseBody)",
-											"",
-											"pm.globals.set('mikaSessionToken', body.data.sessionToken)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
+							"name": "{{baseUrl}}/api/agent/transactions (EMV Chip) Example",
 							"request": {
 								"method": "POST",
 								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -445,47 +442,211 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"username\": \"vora\",\n    \"password\": \"vora\"\n}"
+									"raw": "{\n\t\"acquirerId\": 6,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"cardTypesOnly\": [\"credit\"],\n\t\t\"emvData\" : \"57104096750145500416D22032061000072882023C00950500800080009A031901229C01005F2A0203605F3401019F02060000000050009F03060000000000009F100706010A03A010029F1A0203609F2608D02323CDF6066D3F9F2701809F3303E008FF9F34031F00029F3501229F360200019F37049A47388B8F01089F49039F3704\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/auth/login",
+									"raw": "{{baseUrl}}/api/agent/transactions",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
-										"auth",
-										"login"
+										"agent",
+										"transactions"
 									]
 								},
-								"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+								"description": "Create transaction"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
+						},
+						{
+							"name": "{{baseUrl}}/api/agent/transactions (EMV Magstripe no pin) Example",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"acquirerId\": 6,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"cardTypesOnly\": [\"debit\"],\n\t\t\"track2Data\": \"5264227185167078=2206121864\",\n\t\t\"signatureData\": \"/9j/4AAQSkZJRgABAQEAeAB4AAD/4QAWRXhpZgAATU0AKgAAAAgAAAAAAAD/7AARRHVja3kAAQAEAAAAMgAA/+EDoGh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4NCjx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4NCgk8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPg0KCQk8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjk1NDdhMWFlLWU3NjAtNDRhYS1iNmVhLWUwNzQ5NTA1NDQ5MiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo2QTA2RTAxNzY4OEExMUU0OUE3MkQ5MjQxQ0MzNEYxNyIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo2QTA2RTAxNjY4OEExMUU0OUE3MkQ5MjQxQ0MzNEYxNyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxNCAoTWFjaW50b3NoKSI+DQoJCQk8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMzQ3MjAzZC1jZDJmLTRiNjUtODEwZS04NDBiNTE3YjUzNGMiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo5MmViOWFlYi1iMGY0LTEx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\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/agent/transactions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"agent",
+										"transactions"
+									]
+								},
+								"description": "Create transaction"
+							},
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
+						},
+						{
+							"name": "{{baseUrl}}/api/agent/transactions (EMV Magstripe) Example",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"acquirerId\": 5,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"cardTypesOnly\": [\"debit\"],\n\t\t\"track2Data\" : \"5264227185167078=2206121864\",\n\t\t\"pinData\": \"123456\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/agent/transactions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"agent",
+										"transactions"
+									]
+								},
+								"description": "Create transaction"
+							},
+							"response": [
+								{
+									"name": "{{baseUrl}}/agent/transaction with user token",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/javascript",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/agent/transaction",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"agent",
+												"transaction"
+											]
+										}
+									},
+									"_postman_previewlanguage": "json",
+									"header": [],
+									"cookie": [],
+									"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+								}
+							]
 						}
 					],
 					"_postman_isSubFolder": true
-				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "54b0fa2b-daa9-4d43-8f0f-5d41a8eae16f",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "470e42f2-76f4-47d0-a601-1d806cd4a41a",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
 				}
 			]
 		},
@@ -520,7 +681,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"{{agentUsername}}\",\n    \"password\": \"{{agentPassword}}\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
+							"raw": "{\n    \"username\": \"username\",\n    \"password\": \"password\",\n    \"userTypes\": [\n        \"merchantStaff\",\n        \"agent\",\n        \"admin\"\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/auth/login",
@@ -967,7 +1128,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"acquirerId\": 5,\n\t\"amount\": 1000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+							"raw": "{\n\t\"acquirerId\": 1,\n\t\"amount\": 25000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/agent/transactions",
@@ -1023,7 +1184,7 @@
 					]
 				},
 				{
-					"name": "{{baseUrl}}/api/agent/transactions (EMV Chip)",
+					"name": "{{baseUrl}}/api/agent/debug/change_transaction_status",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1041,165 +1202,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"acquirerId\": 6,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"cardTypesOnly\": [\"credit\"],\n\t\t\"emvData\" : \"57104096750145500416D22032061000072882023C00950500800080009A031901229C01005F2A0203605F3401019F02060000000050009F03060000000000009F100706010A03A010029F1A0203609F2608D02323CDF6066D3F9F2701809F3303E008FF9F34031F00029F3501229F360200019F37049A47388B8F01089F49039F3704\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+							"raw": "{\n\t\"transactionId\": \"1NGIO4uEkmvL1c1mkQXkO7s5HVN\",\n\t\"status\": \"success\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/agent/transactions",
+							"raw": "{{baseUrl}}/api/agent/debug/change_transaction_status",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"agent",
-								"transactions"
-							]
-						},
-						"description": "Create transaction"
-					},
-					"response": [
-						{
-							"name": "{{baseUrl}}/agent/transaction with user token",
-							"originalRequest": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "x-access-token",
-										"type": "text",
-										"value": "{{mikaSessionToken}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/javascript",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
-								},
-								"url": {
-									"raw": "{{baseUrl}}/agent/transaction",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"agent",
-										"transaction"
-									]
-								}
-							},
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"cookie": [],
-							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
-						}
-					]
-				},
-				{
-					"name": "{{baseUrl}}/api/agent/transactions (EMV Magstripe no pin)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "x-access-token",
-								"type": "text",
-								"value": "{{mikaSessionToken}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"acquirerId\": 6,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"cardTypesOnly\": [\"debit\"],\n\t\t\"track2Data\": \"5264227185167078=2206121864\",\n\t\t\"signatureData\": \"/9j/4AAQSkZJRgABAQEAeAB4AAD/4QAWRXhpZgAATU0AKgAAAAgAAAAAAAD/7AARRHVja3kAAQAEAAAAMgAA/+EDoGh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4NCjx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4NCgk8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPg0KCQk8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjk1NDdhMWFlLWU3NjAtNDRhYS1iNmVhLWUwNzQ5NTA1NDQ5MiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo2QTA2RTAxNzY4OEExMUU0OUE3MkQ5MjQxQ0MzNEYxNyIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo2QTA2RTAxNjY4OEExMUU0OUE3MkQ5MjQxQ0MzNEYxNyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxNCAoTWFjaW50b3NoKSI+DQoJCQk8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpmMzQ3MjAzZC1jZDJmLTRiNjUtODEwZS04NDBiNTE3YjUzNGMiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo5MmViOWFlYi1iMGY0LTEx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\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/agent/transactions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"agent",
-								"transactions"
-							]
-						},
-						"description": "Create transaction"
-					},
-					"response": [
-						{
-							"name": "{{baseUrl}}/agent/transaction with user token",
-							"originalRequest": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "x-access-token",
-										"type": "text",
-										"value": "{{mikaSessionToken}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/javascript",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
-								},
-								"url": {
-									"raw": "{{baseUrl}}/agent/transaction",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"agent",
-										"transaction"
-									]
-								}
-							},
-							"_postman_previewlanguage": "json",
-							"header": [],
-							"cookie": [],
-							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
-						}
-					]
-				},
-				{
-					"name": "{{baseUrl}}/api/agent/transactions (EMV Magstripe)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "x-access-token",
-								"type": "text",
-								"value": "{{mikaSessionToken}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"acquirerId\": 5,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"cardTypesOnly\": [\"debit\"],\n\t\t\"track2Data\" : \"5264227185167078=2206121864\",\n\t\t\"pinData\": \"123456\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/agent/transactions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"agent",
-								"transactions"
+								"debug",
+								"change_transaction_status"
 							]
 						},
 						"description": "Create transaction"
@@ -2376,7 +2390,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": "{\n\t\"shortName\": \"merchantcool\",\n\t\"name\": \"merchant Test 1\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/merchants",
@@ -2522,7 +2536,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\":\"Agent\",\n\t\"email\": \"merchantstaff100@mikaapp.id\"\n\t\"outletId\": 1,\n\t\"user\": {\n\t\t\"username\": \"newagent4\",\n\t\t\"password\": \"newagent4\"\n\t}\n}"
+									"raw": "{\n\t\"name\":\"Agent\",\n\t\"email\": \"merchantstaff100@mikaapp.id\",\n\t\"outletId\": 1,\n\t\"user\": {\n\t\t\"username\": \"newagent4\",\n\t\t\"password\": \"newagent4\"\n\t}\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/agents",
@@ -2832,7 +2846,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": "{\n    \"name\": \"LinkAja Toko Makmur\",\n    \"description\": null,\n    \"minimumAmount\": 100.0,\n    \"maximumAmount\": null,\n    \"processFee\": 200,\n    \"shareAcquirer\": 0.01,\n    \"shareMerchant\": 0.98,\n    \"shareMerchantWithPartner\": null,\n    \"sharePartner\": null,\n    \"directSettlement\": false,\n    \"gateway\": false,\n    \"hidden\": false,\n    \"merchantId\": 1,\n    \"acquirerConfigId\": null,\n    \"acquirerTypeId\": 1\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/acquirers",
@@ -2905,7 +2919,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": ""
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/acquirers/:acquirerId/excluded_agents/associate_agents",
@@ -2987,7 +3001,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": ""
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/acquirers/:acquirerId/excluded_agents/dissociate_agents",
@@ -3069,7 +3083,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"class\": \"linkaja\",\n\t\"name\": \"linkaja Super\",\n\t\"thumbnail\": \"linkaja.png\"\n}"
+									"raw": "{\n\t\"class\": \"linkaja\",\n\t\"name\": \"linkaja Super\",\n\t\"thumbnail\": \"linkaja.png\",\n\t\"chartColor\":\"#123122\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/acquirer_types",
@@ -8000,51 +8014,15 @@
 	],
 	"variable": [
 		{
-			"id": "8e03ff61-837f-4f04-9095-99e11a18c670",
+			"id": "36ddadd8-2ddb-431f-b21f-e2f23a00467b",
 			"key": "baseUrl",
-			"value": "https://stg13api.mikaapp.id",
+			"value": "https://stg31api.mikaapp.id",
 			"type": "string"
 		},
 		{
-			"id": "e0b22d1a-14f8-4832-9109-942c6130fed5",
-			"key": "agentUsername",
-			"value": "agent2",
-			"type": "string"
-		},
-		{
-			"id": "f3c096d8-e2fa-4ed5-9c2a-e8f9292a6c16",
-			"key": "agentPassword",
-			"value": "agent2",
-			"type": "string"
-		},
-		{
-			"id": "526b2727-f37e-41a9-9a16-1671b116cdad",
-			"key": "merchantUsername",
-			"value": "merchant2",
-			"type": "string"
-		},
-		{
-			"id": "91691b55-0d33-4d4e-b5fe-30f9fd25d879",
-			"key": "merchantPassword",
-			"value": "merchant2",
-			"type": "string"
-		},
-		{
-			"id": "fb2af84d-842d-4b76-8ece-515a7787d876",
+			"id": "5eb38aaa-962b-4ef7-a867-19accc8ee52b",
 			"key": "mikaDebugKey",
 			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
-			"type": "string"
-		},
-		{
-			"id": "d1947564-daa0-4532-a7aa-719843c8d3b4",
-			"key": "adminUsername",
-			"value": "admin",
-			"type": "string"
-		},
-		{
-			"id": "025b6252-34f2-464e-8eeb-8029bb1d5aff",
-			"key": "adminPassword",
-			"value": "admin",
 			"type": "string"
 		}
 	]

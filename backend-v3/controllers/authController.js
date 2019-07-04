@@ -6,7 +6,9 @@ const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const msg = require('../libs/msg')
 const auth = require('../libs/auth')
 
-const { body } = require('express-validator/check')
+const { body } = require('express-validator')
+
+const commonConfig = require('../configs/commonConfig')
 
 module.exports.loginValidator = [
   body('username').exists(),
@@ -43,7 +45,10 @@ module.exports.login = async (req, res, next) => {
   if (authResult) {
     let response = Object.assign({
       sessionToken: authResult.sessionToken,
-      authExpirySecond: authResult.authExpirySecond
+      authExpirySecond: authResult.authExpirySecond,
+      publicDetails: {
+        thumbnailsBaseUrl: `${commonConfig.baseUrl}${commonConfig.thumbnailsEndpoint}`
+      }
     }, authResult.auth)
 
     if (authResult.brokerDetail) {

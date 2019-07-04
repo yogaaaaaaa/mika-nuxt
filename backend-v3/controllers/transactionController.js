@@ -1,6 +1,7 @@
 'use strict'
 
-const { body } = require('express-validator/check')
+const _ = require('lodash')
+const { body } = require('express-validator')
 
 const msg = require('../libs/msg')
 const trxManager = require('../libs/trxManager')
@@ -18,6 +19,11 @@ module.exports.createTransactionValidator = [
   body('locationLong').isNumeric().optional(),
   body('locationLat').isNumeric().optional(),
   body('flags').isArray().optional()
+]
+
+module.exports.changeStatusTransactionValidator = [
+  body('transactionId').exists(),
+  body('status').isIn(_.values(trxManager.transactionStatuses))
 ]
 
 module.exports.createTransaction = async (req, res, next) => {
@@ -79,9 +85,24 @@ module.exports.createTransaction = async (req, res, next) => {
         msgType
       )
     } else {
-      console.error(err)
-      throw Error('Cannot handle createTransaction error')
+      throw err
     }
+  }
+}
+
+module.exports.changeStatusTransaction = async (req, res, next) => {
+  let transaction = await trxManager.forceStatus(req.body.transactionId, req.body.status, req.auth.agentId)
+
+  if (transaction) {
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS
+    )
+  } else {
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_ERROR_BAD_REQUEST
+    )
   }
 }
 
@@ -245,9 +266,15 @@ module.exports.getTransactions = async (req, res, next) => {
 
 module.exports.createTransactionMiddlewares = [
   cipherboxMiddleware.processCipherbox(true),
-  module.exports.createTransactionValidator,
+  exports.createTransactionValidator,
   errorMiddleware.validatorErrorHandler,
-  module.exports.createTransaction
+  exports.createTransaction
+]
+
+module.exports.changeStatusTransactionMiddlewares = [
+  exports.changeStatusTransactionValidator,
+  errorMiddleware.validatorErrorHandler,
+  exports.changeStatusTransaction
 ]
 
 module.exports.getAgentTransactionsMiddlewares = [

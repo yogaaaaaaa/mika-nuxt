@@ -1,6 +1,6 @@
 'use strict'
 
-const { body } = require('express-validator/check')
+const { body } = require('express-validator')
 
 const helper = require('./helper')
 
@@ -17,11 +17,9 @@ const userRolesValidator = (validUserRoles) =>
 
 module.exports.bodyNestedCreate = (defaultUserType, validUserRoles) => [
   body('user.username')
-    .isString()
     .not()
     .isEmpty(),
   body('user.password')
-    .isString()
     .not()
     .isEmpty(),
   helper.bodyDefault('user.userType', defaultUserType),
@@ -30,12 +28,10 @@ module.exports.bodyNestedCreate = (defaultUserType, validUserRoles) => [
 
 module.exports.bodyNestedUpdate = (defaultUserType, validUserRoles) => [
   body('user.username')
-    .isString()
     .not()
     .isEmpty()
     .optional(),
   body('user.password')
-    .isString()
     .not()
     .isEmpty()
     .optional(),
