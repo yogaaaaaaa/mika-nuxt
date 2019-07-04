@@ -1,6 +1,6 @@
 'use strict'
 
-const { query } = require('express-validator/check')
+const { query } = require('express-validator')
 
 const models = require('../../models')
 const helper = require('./helper')

@@ -11,7 +11,8 @@ const cookieParser = require('cookie-parser')
 
 const auth = require('../libs/auth')
 
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 const acquirerConfigController = require('../controllers/acquirerConfigController')
 const acquirerController = require('../controllers/acquirerController')
@@ -37,7 +38,7 @@ const router = express.Router()
 
 router.use([
   cors({
-    origin: appConfig.allowedOrigin,
+    origin: commonConfig.allowedOrigin,
     optionsSuccessStatus: 200
   }),
   bodyParser.json(),
@@ -155,6 +156,21 @@ router.post(
   authMiddleware.authErrorHandler,
   transactionController.createTransactionMiddlewares
 )
+
+/**
+ * Debug endpoint for agent
+ */
+
+if (!isEnvProduction) {
+  router.post(
+    [
+      '/agent/debug/change_transaction_status'
+    ],
+    authMiddleware.auth([auth.userTypes.AGENT]),
+    authMiddleware.authErrorHandler,
+    transactionController.changeStatusTransactionMiddlewares
+  )
+}
 
 /**
  * Merchant Staff related endpoints

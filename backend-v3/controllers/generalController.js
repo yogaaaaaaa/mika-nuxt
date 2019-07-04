@@ -1,7 +1,7 @@
 'use strict'
 
 const msg = require('../libs/msg')
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
 
 /**
  * Return 'not implemented' status code
@@ -15,7 +15,7 @@ module.exports.notImplemented = (req, res, next) => {
   )
 }
 
-module.exports.moved = (url, baseUrl = appConfig.baseUrl) => (req, res, next) => {
+module.exports.moved = (url, baseUrl = commonConfig.baseUrl) => (req, res, next) => {
   msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS_MOVED,

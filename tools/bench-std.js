@@ -8,7 +8,7 @@ const path = require('path')
 
 commander
   .description('Standard bench : autocannon benchmark with connections sweep')
-  .option('-c, --config <file>', 'Specify config file', 'bench-std-config.js')
+  .option('-c, --config <file>', 'Specify config file', 'configs/bench-std-config.js')
 commander.parse(process.argv)
 
 let baseConfig = {
@@ -28,7 +28,7 @@ let config = {}
 
 async function begin (config) {
   const timestamp = Date.now()
-  const benchResultDir = path.resolve('./.bench-result')
+  const benchResultDir = path.resolve('./_bench-result')
 
   if (!fs.existsSync(benchResultDir)) {
     fs.mkdirSync(benchResultDir)

@@ -8,7 +8,7 @@ const trxManager = require('../libs/trxManager')
 const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
-const { body, query } = require('express-validator/check')
+const { body, query } = require('express-validator')
 
 const extApiTrxCallback = require('../libs/extApiTrxCallback')
 

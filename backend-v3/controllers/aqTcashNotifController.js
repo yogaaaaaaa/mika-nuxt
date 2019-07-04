@@ -71,8 +71,8 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
         return
       }
     }
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
   }
 
   res.status(500).send(tcash.tcashErrorResponse())

@@ -1,10 +1,9 @@
 'use strict'
 
-const configName = 'extApiConfig'
-
 /**
  * Default config for ext Api Auth
  */
+
 let baseConfig = {
   tokenTimeout: 30000, // in milliseconds
 
@@ -25,9 +24,10 @@ let baseConfig = {
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) { }
+  console.log(`${configName} is mixed`)
+} catch (error) {}
 
 module.exports = baseConfig

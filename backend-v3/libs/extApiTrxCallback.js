@@ -15,7 +15,7 @@ const extApiObject = require('./extApiObject')
 const trxManager = require('./trxManager')
 
 const extApiConfig = require('../configs/extApiConfig')
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
 
 function trxRedisKey (transactionId) {
   return `extApiTrxCb:${transactionId}`
@@ -39,7 +39,7 @@ module.exports.addCallback = async (idKey, url, transactionId) => {
     }),
     'EX',
     Math.floor(
-      ((appConfig.transactionTimeoutSecond * 1000) * 1.5) +
+      ((commonConfig.transactionTimeoutSecond * 1000) * 1.5) +
       (extApiConfig.callBackDelay * (extApiConfig.callBackRetryCount * 2))
     )
   )

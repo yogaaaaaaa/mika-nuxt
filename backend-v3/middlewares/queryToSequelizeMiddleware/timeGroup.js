@@ -1,7 +1,8 @@
 'use strict'
 
-const { query } = require('express-validator/check')
-const { sanitizeQuery } = require('express-validator/filter')
+const { query, sanitizeQuery } = require('express-validator')
+
+const time = require('../../libs/time')
 
 const models = require('../../models')
 const Sequelize = models.Sequelize
@@ -25,7 +26,7 @@ module.exports.timeGroupValidator = (validModel) => [
     .isIn(['minute', 'hour', 'day', 'month', 'year'])
     .optional(),
   query('utc_offset')
-    .custom((val) => val.match(/[+-][0-2]\d:?[0-5]\d/))
+    .custom((val) => time.isUtcOffset(val))
     .optional()
 ]
 
@@ -33,11 +34,8 @@ module.exports.timeGroupValidator = (validModel) => [
  * Generate sequelize group (aggregation) by time query setting
  */
 module.exports.timeGroup = (req, res, next) => {
-  let offsetComponents = req.query.utc_offset.match(/([+-])([0-2]\d):?([0-5]\d)/)
-  let offsetMinutes = (parseInt(`${offsetComponents[1]}1`)) * (parseInt(offsetComponents[2]) * 60) + parseInt(offsetComponents[3])
-
+  let offsetMinutes = time.utcOffsetToMinutes(req.query.utc_offset)
   let fieldName = req.query.group.split('.').map(comp => `\`${comp}\``).join('.')
-
   let group
 
   if (req.query.group_time === 'minute') {

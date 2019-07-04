@@ -37,8 +37,8 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
     await transaction.save()
     trxManager.emitStatusChange(transaction)
     res.status(200).type('text').send('OK')
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
     res.status(500).type('text').send('ERROR')
   }
 }

@@ -5,15 +5,14 @@
  */
 
 const uid = require('../libs/uid')
-const appConfig = require('./appConfig')
-
-const dir = require('../libs/dir')
+const commonConfig = require('./commonConfig')
+const redisConfig = require('./redisConfig')
 
 const configName = 'dTimerConfig'
 
 let baseConfig = {
-  redisUrl: Array.isArray(appConfig.redisUrls) ? appConfig.redisUrls[0] : appConfig.redisUrls,
-  ns: `${appConfig.redisPrefix}dtimer`,
+  redisUrl: Array.isArray(redisConfig.urls) ? redisConfig.urls[0] : redisConfig.urls,
+  ns: `${commonConfig.name}:dtimer`,
   nodeName: null,
   confTimeout: 5,
   maxEvents: 8,
@@ -26,18 +25,11 @@ let baseConfig = {
 try {
   let extraConfig = require(`./_configs/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
+  console.log(`${configName} is mixed`)
 } catch (error) { }
 
 if (!baseConfig.nodename) {
-  const nodenameFile = 'dTimerNodeName'
-  let nodename = dir.readCacheFile(nodenameFile)
-  if (nodename) {
-    baseConfig.nodeName = nodename
-  } else {
-    baseConfig.nodeName = `${appConfig.namespace}${appConfig.name}-${uid.randomString()}`
-    dir.writeCacheFile(nodenameFile, baseConfig.nodeName)
-  }
+  baseConfig.nodeName = `${commonConfig.name}-${uid.randomString()}`
 }
 
 module.exports = baseConfig

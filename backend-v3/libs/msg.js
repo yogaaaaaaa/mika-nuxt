@@ -5,7 +5,7 @@
  * to generate message format for Internal API and External/Public API
  */
 
-const appConfig = require('../configs/appConfig')
+const commonConfig = require('../configs/commonConfig')
 
 const types = require('./types/msgTypes')
 module.exports.types = types
@@ -22,7 +22,7 @@ module.exports.createResponse = (
   toJSON = false
 ) => {
   let msg = {
-    version: appConfig.version || undefined,
+    version: commonConfig.version || undefined,
     status: messageType.status,
     message: messageType.message,
     isError: messageType.isError || false,
@@ -47,7 +47,7 @@ module.exports.createNotification = (
   toJSON = false
 ) => {
   let msg = {
-    version: appConfig.version,
+    version: commonConfig.version,
     eventType: eventType,
     meta,
     data

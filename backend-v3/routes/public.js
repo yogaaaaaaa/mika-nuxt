@@ -4,7 +4,9 @@ const express = require('../libs/express')
 const dirConfig = require('../configs/dirConfig')
 const router = express.Router()
 
-router.use('/thumbnails', express.static(dirConfig.thumbnailDir))
-router.use('/thumbnails/customs', express.static(dirConfig.customThumbnailDir))
+const commonConfig = require('../configs/commonConfig')
+
+router.use(`${commonConfig.thumbnailsEndpoint}`, express.static(dirConfig.thumbnailsDir))
+router.use(`${commonConfig.thumbnailsEndpoint}/customs`, express.static(dirConfig.customThumbnailsDir))
 
 module.exports = router

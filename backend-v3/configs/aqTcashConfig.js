@@ -1,10 +1,8 @@
 'use strict'
 
 /**
- * Default TCASH/LinkAja Acquirer config
+ * Default TCASH/LinkAja acquirer config
  */
-
-const configName = 'aqTcashConfig'
 
 let baseConfig = {
   inquiryEndpoint: '/payment/tcash/inquiry',
@@ -20,9 +18,10 @@ let baseConfig = {
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const configName = require('path').basename(__filename, '.js')
+  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`Config ${configName} is mixed`)
-} catch (error) { }
+  console.log(`${configName} is mixed`)
+} catch (err) {}
 
 module.exports = baseConfig

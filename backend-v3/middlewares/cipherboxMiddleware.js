@@ -4,10 +4,6 @@ const msg = require('../libs/msg')
 const cipherbox = require('../libs/cipherbox')
 const models = require('../models')
 
-const debug = {
-  processCipherbox: require('debug')('cipherboxMiddleware:processCipherbox')
-}
-
 /**
  * Middleware to transparently encrypt and decrypt any supported cipherbox.
  *
@@ -15,8 +11,6 @@ const debug = {
 */
 module.exports.processCipherbox = (mandatory = false) => async function (req, res, next) {
   if (req.body.cbx && req.body.id) {
-    debug.processCipherbox('detected')
-
     let whereCipherbox = {
       id: req.body.id
     }
@@ -31,23 +25,18 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
     })
 
     if (cipherboxKey) {
-      debug.processCipherbox(`key id ${cipherboxKey.id}, unboxing`)
       let keys = JSON.parse(cipherboxKey.keys)
       let unbox = null
 
       if (keys.cbx === cipherbox.cbType.cb0) {
-        debug.processCipherbox('type cb0')
         unbox = cipherbox.openCB0Box(req.body, Buffer.from(keys.key, 'base64'))
       } else if (keys.cbx === cipherbox.cbType.cb1) {
-        debug.processCipherbox('type cb1')
         unbox = cipherbox.openCB1Box(req.body, keys.key, keys.keyType)
       } else if (keys.cbx === cipherbox.cbType.cb3) {
-        debug.processCipherbox('type cb3')
         unbox = cipherbox.openCB3Box(req.body, Buffer.from(keys.key, 'base64'))
       }
 
       if (!unbox) {
-        debug.processCipherbox('unbox failed')
         msg.expressResponse(
           res,
           msg.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
@@ -68,19 +57,14 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
         req.body = unbox.data.toString()
       }
 
-      debug.processCipherbox('unbox done')
-
       // Hijack send function
       let send = res.send
       res.send = (body) => {
-        debug.processCipherbox('boxing reply')
         if (typeof body === 'object') {
           body = cipherbox.sealBoxWithCB0(JSON.stringify(body), unbox.key).box
         } else {
           body = cipherbox.sealBoxWithCB0(String(body), unbox.key).box
         }
-
-        debug.processCipherbox('box reply done')
 
         res.send = send
         return res.send(body)

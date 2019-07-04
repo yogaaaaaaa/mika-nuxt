@@ -1,4 +1,3 @@
-
 (SELECT
   `merchantStaff`.`merchantId` 
 FROM

@@ -26,8 +26,8 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
 
     if (agent) {
       if (agent.outlet.merchant.acquirers.length) {
-        acquirer = agent.outlet.merchant.acquirers[0]
-        acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler)
+        acquirer = agent.outlet.merchant.acquirers[0].toJSON()
+        acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler) || null
       }
     }
 
@@ -36,7 +36,7 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
       acquirer
     )
   } else {
-    let acquirers = null
+    let acquirers
 
     let agent = await models.agent.scope(
       'agentAcquirer'
@@ -50,11 +50,11 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
 
     msg.expressGetEntityResponse(
       res,
-      acquirers.map((acquirer) => {
+      acquirers ? acquirers.map((acquirer) => {
         acquirer = acquirer.toJSON()
-        acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler)
+        acquirer._handler = trxManager.getAcquirerInfo(acquirer.acquirerConfig.handler) || null
         return acquirer
-      })
+      }) : []
     )
   }
 }

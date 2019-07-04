@@ -25,7 +25,7 @@ function midtransRequestAgent (config) {
 module.exports.mixConfig = (config) => {
   let mixedConfig = Object.assign({}, exports.baseConfig, config)
   if (!mixedConfig.midtransServerAuth) {
-    mixedConfig.midtransServerAuth = `Basic ${Buffer.from(`${mixedConfig.midtransServerKey}:`)}`
+    mixedConfig.midtransServerAuth = `Basic ${Buffer.from(`${mixedConfig.midtransServerKey}:`).toString('base64')}`
   }
   return mixedConfig
 }

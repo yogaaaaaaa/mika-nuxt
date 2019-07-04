@@ -14,7 +14,7 @@ const models = require('../models')
 const config = require('../configs/notifConfig')
 
 module.exports.agentBrokerDetail = (agentId, genPassword = false) => {
-  const user = `${config.userPrefix}${agentId}`
+  const user = `${config.agentPrefix}${agentId}`
   const password = genPassword ? crypto.randomBytes(18).toString('base64') : null
   const clientId = user
   const cleanSession = false
@@ -80,14 +80,14 @@ module.exports.removeAgent = async (agentId) => {
 
 module.exports.notifToAgent = async (agentId, message) => {
   try {
-    await mqtt.publish(`${config.topicClientPrefix}/${config.userPrefix}${agentId}`, message)
+    await mqtt.publish(`${config.topicClientPrefix}/${config.agentPrefix}${agentId}`, message)
   } catch (err) {
     console.error(err)
   }
 }
 
 module.exports.agentExist = async (agentId) => {
-  return mqtt.getAuthUser(`${config.userPrefix}${agentId}`)
+  return mqtt.getAuthUser(`${config.agentPrefix}${agentId}`)
 }
 
 trxManager.listenStatusChange(async (event) => {

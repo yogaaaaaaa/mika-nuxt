@@ -1,7 +1,7 @@
 'use strict'
 
 const _ = require('lodash')
-const { query } = require('express-validator/check')
+const { query } = require('express-validator')
 
 const helper = require('./helper')
 const models = require('../../models')
