@@ -4,19 +4,19 @@ const Sequelize = require('sequelize')
 const ready = require('../libs/ready')
 
 const dbConfig = require('../configs/dbConfig')
-let selectedConfig
+let selectedDbConfig
 
 if (dbConfig[process.env.NODE_ENV]) {
-  selectedConfig = dbConfig[process.env.NODE_ENV]
+  selectedDbConfig = dbConfig[process.env.NODE_ENV]
 } else {
-  selectedConfig = dbConfig.development
+  selectedDbConfig = dbConfig.development
 }
 
 let sequelize = new Sequelize(
-  selectedConfig.database,
-  selectedConfig.username,
-  selectedConfig.password,
-  selectedConfig
+  selectedDbConfig.database,
+  selectedDbConfig.username,
+  selectedDbConfig.password,
+  selectedDbConfig
 )
 
 console.log('Database:', sequelize.getDatabaseName())

@@ -3,7 +3,8 @@
 const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
-  const Op = sequelize.Sequelize.Op
+  const Sequelize = sequelize.Sequelize
+  const Op = Sequelize.Op
 
   let agent = sequelize.define('agent', {
     name: DataTypes.STRING,

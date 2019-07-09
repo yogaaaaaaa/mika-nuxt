@@ -34,13 +34,6 @@ let baseConfig = {
     ...commonDbConfig
   },
   production: {
-    database: 'mika',
-    replication: {
-      write: { host: '127.0.0.1', username: 'mikadev', password: 'mikadev' },
-      read: [
-        { host: '127.0.0.1', username: 'mikadev', password: 'mikadev' }
-      ]
-    },
     logging: false,
     benchmark: false,
     ...commonDbConfig

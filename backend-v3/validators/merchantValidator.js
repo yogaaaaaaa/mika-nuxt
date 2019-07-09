@@ -5,7 +5,6 @@ const { body } = require('express-validator')
 const helper = require('./helper')
 
 const idAliasValidator = () => body('idAlias').isLength({ min: 1, max: 25 })
-const shortNameValidator = () => body('shortName').isLength({ min: 1, max: 25 })
 const nameValidator = () => body('name').not().isEmpty()
 const emailValidator = () => body('email').isEmail()
 const ownerEmailValidator = () => body('ownerEmail').isEmail()
@@ -26,13 +25,11 @@ const defaultValidator = [
 module.exports.bodyCreate = [
   defaultValidator,
   idAliasValidator().optional(), // TODO: Optional for now
-  shortNameValidator(),
   nameValidator()
 ]
 
 module.exports.bodyUpdate = [
   defaultValidator,
   idAliasValidator().optional(),
-  shortNameValidator().optional(),
   nameValidator().optional()
 ]

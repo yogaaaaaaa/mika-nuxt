@@ -3,7 +3,7 @@
 /**
  * Public/External API route handler
 */
-const express = require('express')
+const express = require('../libs/express')
 const bodyParser = require('body-parser')
 
 const router = express.Router()

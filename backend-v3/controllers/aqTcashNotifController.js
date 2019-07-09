@@ -8,7 +8,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
   try {
     const transaction = await models.transaction.findOne({
       where: {
-        id: req.body.acc_no
+        idAlias: req.body.acc_no
       },
       include: [{
         required: true,

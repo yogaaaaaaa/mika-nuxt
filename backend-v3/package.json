@@ -1,12 +1,13 @@
 {
   "name": "backend-v3",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "scripts": {
     "db-recreate": "sequelize db:drop --config configs/dbConfig.js && sequelize db:create --config configs/dbConfig.js",
     "db-drop": "sequelize db:drop --config configs/dbConfig.js",
     "db-create": "sequelize db:create --config configs/dbConfig.js",
     "db-migrate": "sequelize db:migrate --config configs/dbConfig.js",
+    "db-migrate-undo": "sequelize db:migrate:undo --config configs/dbConfig.js",
     "db-seed-development": "sequelize db:seed:all --config configs/dbConfig.js --seeders-path seeders/development",
     "db-seed-production": "sequelize db:seed:all --config configs/dbConfig.js --seeders-path seeders/production",
     "test-unit": "mocha --reporter spec ./tests/unit/*.js",
@@ -53,7 +54,7 @@
     "numeral": "^2.0.6",
     "puppeteer": "^1.18.1",
     "redis": "^2.8.0",
-    "sequelize": "^5.9.2",
+    "sequelize": "^5.9.4",
     "superagent": "^5.1.0",
     "uuid": "^3.3.2"
   },

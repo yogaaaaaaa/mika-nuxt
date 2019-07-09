@@ -4,7 +4,7 @@
  * Route to handle alto acquirer notification
  */
 
-const express = require('express')
+const express = require('../libs/express')
 const bodyParser = require('body-parser')
 const aqAltoNotifController = require('../controllers/aqAltoNotifController')
 const aqAltoConfig = require('../configs/aqAltoConfig')

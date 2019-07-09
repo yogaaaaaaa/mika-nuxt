@@ -56,9 +56,7 @@ module.exports.altoHandleNotification = [
         await models.sequelize.transaction(async t => {
           let transactionExtra = transaction.extra
           transactionExtra.out_refund_no = data.out_refund_no
-
           await models.transactionExtraKv.setKv(transaction.id, transactionExtra, t)
-
           transaction.changed('updatedAt', true)
           await transaction.save({ transaction: t })
         })

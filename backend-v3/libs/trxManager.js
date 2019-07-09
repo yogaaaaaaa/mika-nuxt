@@ -137,13 +137,16 @@ module.exports.listenStatusChange = (handler) => {
  */
 module.exports.forceStatus = async (transactionId, transactionStatus, agentId) => {
   if (transactionStatus) {
-    let transaction = await models.transaction.findOne({
-      where: {
-        id: transactionId,
-        agentId: agentId || undefined
-      }
-    })
+    let whereTransaction = {
+      id: transactionId
+    }
+    if (agentId) {
+      whereTransaction.agentId = agentId
+    }
 
+    const transaction = await models.transaction.findOne({
+      where: whereTransaction
+    })
     if (transaction) {
       transaction.status = transactionStatus
       await transaction.save()
@@ -244,7 +247,7 @@ module.exports.create = async (transaction, options) => {
     }
   }
 
-  let genId = uid.generateTransactionId(ctx.agent.outlet.merchant.shortName)
+  let genId = await uid.generateTransactionId()
   ctx.transaction.id = genId.id
   ctx.transaction.idAlias = genId.idAlias
   ctx.transaction.status = exports.transactionStatuses.CREATED

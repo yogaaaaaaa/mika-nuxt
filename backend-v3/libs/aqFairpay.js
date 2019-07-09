@@ -37,15 +37,13 @@ function getFairpayPassHash (timestamp, password) {
   ).digest('hex')
 }
 
-function fairpayRequestAgent (config) {
+function fairpayRequestAgent (ctx) {
   const request = superagent
     .agent()
     .set('Content-type', 'application/json')
     .set('Accept', 'application/json')
     .set('User-Agent', 'MIKA API')
-
-  if (config.token) request.set('Authorization', `${config.auth_code} ${config.token}`)
-
+  if (ctx.token) request.set('Authorization', `${ctx.auth_code} ${ctx.token}`)
   return request
 }
 
@@ -87,210 +85,210 @@ module.exports.isFairpayResponseCodeNotAuth = (resCode) => {
   if (notAuthCodes.includes(resCode)) return resCode
 }
 
-module.exports.getToken = async (config) => {
-  let token = await redis.get(redisKey(config.username, 'token'))
+module.exports.getToken = async (ctx) => {
+  let token = await redis.get(redisKey(ctx.username, 'token'))
   if (token) {
-    config.token = token
+    ctx.token = token
     return token
   }
 }
 
-module.exports.setToken = async (config) => {
-  return redis.set(redisKey(config.username, `token`), config.token)
+module.exports.setToken = async (ctx) => {
+  return redis.set(redisKey(ctx.username, `token`), ctx.token)
 }
 
-module.exports.clearToken = async (config) => {
-  config.token = null
-  return redis.del(redisKey(`token`, config))
+module.exports.clearToken = async (ctx) => {
+  ctx.token = null
+  return redis.del(redisKey(`token`, ctx))
 }
 
-module.exports.createSaleRequest = (config) => {
-  config.saleRequest = {}
+module.exports.createSaleRequest = (ctx) => {
+  ctx.saleRequest = {}
 
-  if (config.emvData) {
-    if (config.pinData && !config.signatureData) {
-      config.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_PIN
-    } else if (!config.pinData && config.signatureData) {
-      config.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_SIGNATURE
+  if (ctx.emvData) {
+    if (ctx.pinData && !ctx.signatureData) {
+      ctx.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_PIN
+    } else if (!ctx.pinData && ctx.signatureData) {
+      ctx.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_SIGNATURE
     } else {
-      config.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_OFFLINE_PIN
+      ctx.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_OFFLINE_PIN
     }
   } else {
-    if (config.track2Data && config.pinData && !config.signatureData) {
-      config.saleRequest.entry_mode = emv.posEntryMode.MAGSTRIPE_WITH_PIN
-    } else if (config.track2Data && !config.pinData && config.signatureData) {
-      config.saleRequest.entry_mode = emv.posEntryMode.MAGSTRIPE_WITH_SIGNATURE
+    if (ctx.track2Data && ctx.pinData && !ctx.signatureData) {
+      ctx.saleRequest.entry_mode = emv.posEntryMode.MAGSTRIPE_WITH_PIN
+    } else if (ctx.track2Data && !ctx.pinData && ctx.signatureData) {
+      ctx.saleRequest.entry_mode = emv.posEntryMode.MAGSTRIPE_WITH_SIGNATURE
     }
   }
 
-  if (!config.saleRequest.entry_mode || !config.amount) return
+  if (!ctx.saleRequest.entry_mode || !ctx.amount) return
 
-  config.saleRequest.device_timestamp = '0'
+  ctx.saleRequest.device_timestamp = '0'
 
-  config.saleRequest.base_amount = String(config.amount).padStart(10, '0')
-  config.saleRequest.tip_amount = '0'
-  config.saleRequest.device_id = config.device_id
+  ctx.saleRequest.base_amount = String(ctx.amount).padStart(10, '0')
+  ctx.saleRequest.tip_amount = '0'
+  ctx.saleRequest.device_id = ctx.device_id
 
   // randomize all counter
-  config.pin_ksn = emv.ksnCounterRandomize(config.pin_ksn)
-  config.emv_ksn = emv.ksnCounterRandomize(config.emv_ksn)
-  config.track_ksn = emv.ksnCounterRandomize(config.track_ksn)
+  ctx.pin_ksn = emv.ksnCounterRandomize(ctx.pin_ksn)
+  ctx.emv_ksn = emv.ksnCounterRandomize(ctx.emv_ksn)
+  ctx.track_ksn = emv.ksnCounterRandomize(ctx.track_ksn)
 
-  config.emvTags = null
+  ctx.emvTags = null
 
-  if (config.emvData) {
-    config.emvTags = emv.tlvDecode(config.emvData)
+  if (ctx.emvData) {
+    ctx.emvTags = emv.tlvDecode(ctx.emvData)
 
     // Verify base amount
     // let baseAmount = parseInt(common.tlvTagFind('9F02', emvTlv))
 
     // Encrypt EMV data
-    config.saleRequest.emv_ksn_index = emv.ksnCounterGet(config.emv_ksn)
-    config.saleRequest.emv_req_len = config.emvData.length
-    config.saleRequest.emv_req_enc = emv.encrypt3DESDataWithIPEK(
-      config.emv_ipek,
-      config.emv_ksn,
-      emv.evenAndPadHexstring(config.emvData)
+    ctx.saleRequest.emv_ksn_index = emv.ksnCounterGet(ctx.emv_ksn)
+    ctx.saleRequest.emv_req_len = ctx.emvData.length
+    ctx.saleRequest.emv_req_enc = emv.encrypt3DESDataWithIPEK(
+      ctx.emv_ipek,
+      ctx.emv_ksn,
+      emv.evenAndPadHexstring(ctx.emvData)
     )
     // Get track2 from emv
-    config.track2Data = emv.track2RemoveSymbol(emv.tlvTagFind(emv.emvTags.TRACK_2_EQUIVALENT_DATA, config.emvTags))
+    ctx.track2Data = emv.track2RemoveSymbol(emv.tlvTagFind(emv.emvTags.TRACK_2_EQUIVALENT_DATA, ctx.emvTags))
   } else {
     // Get track2 data
-    config.track2Data = emv.track2RemoveSymbol(config.track2Data)
+    ctx.track2Data = emv.track2RemoveSymbol(ctx.track2Data)
   }
 
-  config.cardPan = emv.track2GetPAN(config.track2Data)
-  let panComponent = config.cardPan.match(/(\d{6})(.*)(\d{4})/)
-  config.cardPanMasked = `${panComponent[1]}${'*'.repeat(panComponent[2].length)}${panComponent[3]}`
-  config.cardBin = panComponent[1]
+  ctx.cardPan = emv.track2GetPAN(ctx.track2Data)
+  let panComponent = ctx.cardPan.match(/(\d{6})(.*)(\d{4})/)
+  ctx.cardPanMasked = `${panComponent[1]}${'*'.repeat(panComponent[2].length)}${panComponent[3]}`
+  ctx.cardBin = panComponent[1]
   // TODO: WARNING ! INACCURATE ! Replace ASAP !
-  config.cardIssuer = null
-  if (config.cardBin[0] === '4') config.cardNetwork = 'visa'
-  if (config.cardBin[0] === '5') config.cardNetwork = 'mastercard'
+  ctx.cardIssuer = null
+  if (ctx.cardBin[0] === '4') ctx.cardNetwork = 'visa'
+  if (ctx.cardBin[0] === '5') ctx.cardNetwork = 'mastercard'
 
   // Encrypt pinblock (if exist)
-  if (config.pinData) {
-    config.saleRequest.pin_ksn_index = emv.ksnCounterGet(config.pin_ksn)
-    config.saleRequest.pinblock_enc = emv.encrypt3DESDataWithIPEK(
-      config.pin_ipek,
-      config.pin_ksn,
+  if (ctx.pinData) {
+    ctx.saleRequest.pin_ksn_index = emv.ksnCounterGet(ctx.pin_ksn)
+    ctx.saleRequest.pinblock_enc = emv.encrypt3DESDataWithIPEK(
+      ctx.pin_ipek,
+      ctx.pin_ksn,
       emv.generateISO0Pinblock(
-        config.cardPan,
-        config.pinData
+        ctx.cardPan,
+        ctx.pinData
       )
     )
   }
 
   // Encrypt track2 data
-  config.saleRequest.track_ksn_index = emv.ksnCounterGet(config.track_ksn)
-  config.saleRequest.track_2_len = String(config.track2Data.length)
-  config.saleRequest.track_2_hash = hashSHA512(config.track2Data)
-  config.saleRequest.track_2_enc = emv.encrypt3DESDataWithIPEK(config.track_ipek, config.track_ksn, emv.evenAndPadHexstring(config.track2Data))
-  return config.saleRequest
+  ctx.saleRequest.track_ksn_index = emv.ksnCounterGet(ctx.track_ksn)
+  ctx.saleRequest.track_2_len = String(ctx.track2Data.length)
+  ctx.saleRequest.track_2_hash = hashSHA512(ctx.track2Data)
+  ctx.saleRequest.track_2_enc = emv.encrypt3DESDataWithIPEK(ctx.track_ipek, ctx.track_ksn, emv.evenAndPadHexstring(ctx.track2Data))
+  return ctx.saleRequest
 }
 
-module.exports.processSaleResponse = async (config) => {
-  if (!config.saleResponse) return
+module.exports.processSaleResponse = async (ctx) => {
+  if (!ctx.saleResponse) return
 
-  if (config.saleResponse.emv_res_enc) {
-    config.emvDataResponse = emv.decrypt3DESDataWithIPEK(
-      config.emv_ipek,
-      emv.ksnCounterSet(config.emv_ksn, config.saleResponse.emv_ksn_index),
-      config.saleResponse.emv_res_enc
-    ).substring(0, config.saleResponse.emv_res_len)
+  if (ctx.saleResponse.emv_res_enc) {
+    ctx.emvDataResponse = emv.decrypt3DESDataWithIPEK(
+      ctx.emv_ipek,
+      emv.ksnCounterSet(ctx.emv_ksn, ctx.saleResponse.emv_ksn_index),
+      ctx.saleResponse.emv_res_enc
+    ).substring(0, ctx.saleResponse.emv_res_len)
   }
-  return config.emvDataResponse
+  return ctx.emvDataResponse
 }
 
-module.exports.apiLogin = async (config) => {
+module.exports.apiLogin = async (ctx) => {
   let timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(config))
-    .post(`${config.baseUrl}/MerchantMobAppHost/v1/login`)
+  let response = await (fairpayRequestAgent(ctx))
+    .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/login`)
     .send({
-      username: config.username,
-      pass_hash: getFairpayPassHash(timestamp, config.password),
+      username: ctx.username,
+      pass_hash: getFairpayPassHash(timestamp, ctx.password),
       device_timestamp: timestamp
     })
 
   if (response.body) {
     if (response.body.response_code === exports.fairpayResponseCodes.LOGIN_SUCCESS) {
-      config.token = response.body.token
-      await exports.setToken(config)
+      ctx.token = response.body.token
+      await exports.setToken(ctx)
     }
     return response.body
   }
 }
 
-module.exports.apiLogout = async (config) => {
-  if (!config.token) return
+module.exports.apiLogout = async (ctx) => {
+  if (!ctx.token) return
 
   let timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(config))
-    .post(`${config.baseUrl}/MerchantMobAppHost/v1/logout`)
+  let response = await (fairpayRequestAgent(ctx))
+    .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/logout`)
     .send({
-      username: config.username,
-      pass_hash: getFairpayPassHash(timestamp, config.password),
+      username: ctx.username,
+      pass_hash: getFairpayPassHash(timestamp, ctx.password),
       device_timestamp: timestamp
     })
 
   if (response.body) {
     if (response.body.response_code === exports.fairpayResponseCodes.LOGOUT_SUCCESS) {
-      config.token = response.body.token
-      await exports.clearToken(config)
+      ctx.token = response.body.token
+      await exports.clearToken(ctx)
     }
     return response.body
   }
 }
 
-module.exports.apiDebitCreditSale = async (config) => {
-  if (!config.token || !config.saleRequest) return
+module.exports.apiDebitCreditSale = async (ctx) => {
+  if (!ctx.token || !ctx.saleRequest) return
 
-  config.saleRequest.device_timestamp = getUnixTimestamp()
+  ctx.saleRequest.device_timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(config))
-    .post(`${config.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/sale_trx`)
-    .send(config.saleRequest)
+  let response = await (fairpayRequestAgent(ctx))
+    .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/sale_trx`)
+    .send(ctx.saleRequest)
 
   if (response.body) {
     if (response.body.response_code === exports.fairpayResponseCodes.SALE_APPROVED) {
-      config.saleResponse = response.body
+      ctx.saleResponse = response.body
     }
     return response.body
   }
 }
 
-module.exports.apiDebitCreditCheck = async (config) => {
-  if (!config.token || !config.saleRequest) return
+module.exports.apiDebitCreditCheck = async (ctx) => {
+  if (!ctx.token || !ctx.saleRequest) return
 
-  config.saleRequest.device_timestamp = getUnixTimestamp()
+  ctx.saleRequest.device_timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(config))
-    .post(`${config.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/is_debit_check`)
-    .send(config.saleRequest)
+  let response = await (fairpayRequestAgent(ctx))
+    .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/is_debit_check`)
+    .send(ctx.saleRequest)
 
   if (response.body) {
     if (response.body.response_code === exports.fairpayResponseCodes.CHECK_PROCESS_SUCCESS) {
-      config.cardType = response.body.is_debit_flag ? 'debit' : 'credit'
+      ctx.cardType = response.body.is_debit_flag ? 'debit' : 'credit'
     }
     return response.body
   }
 }
 
-module.exports.apiSaveSignature = async (config) => {
-  if (!config.saleResponse || !config.signatureData || !config.token) return
+module.exports.apiSaveSignature = async (ctx) => {
+  if (!ctx.saleResponse || !ctx.signatureData || !ctx.token) return
 
   let request = {
     device_timestamp: getUnixTimestamp(),
-    invoice_num: config.saleResponse.invoice_num,
-    approval_code: config.saleResponse.approval_code,
-    rrn: config.saleResponse.rrn,
-    customer_signature: config.signatureData
+    invoice_num: ctx.saleResponse.invoice_num,
+    approval_code: ctx.saleResponse.approval_code,
+    rrn: ctx.saleResponse.rrn,
+    customer_signature: ctx.signatureData
   }
 
-  let response = await (fairpayRequestAgent(config))
-    .post(`${config.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/save_customer_signature`)
+  let response = await (fairpayRequestAgent(ctx))
+    .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/save_customer_signature`)
     .send(request)
 
   if (response.body) {
@@ -298,19 +296,19 @@ module.exports.apiSaveSignature = async (config) => {
       response.body.response_code === exports.fairpayResponseCodes.RECEIPT_FIRST_COPY ||
       response.body.response_code === exports.fairpayResponseCodes.RECEIPT_DUPLICATE_COPY
     ) {
-      config.saveSignatureResponse = response.body
+      ctx.saveSignatureResponse = response.body
     }
     return response.body
   }
 }
 
-module.exports.processAuthAndApi = async (apiRequestFunction, config, apiNumTry = 2) => {
+module.exports.processAuthAndApi = async (apiRequestFunction, ctx, apiNumTry = 2) => {
   while (apiNumTry) {
-    let apiResponse = await apiRequestFunction(config)
+    let apiResponse = await apiRequestFunction(ctx)
     let apiResCode = exports.getFairpayResponseCode(apiResponse)
 
     if (exports.isFairpayResponseCodeNotAuth(apiResCode)) {
-      await exports.apiLogin(config)
+      await exports.apiLogin(ctx)
     } else {
       return apiResponse
     }

@@ -1,13 +1,12 @@
 'use strict'
 
 const kv = require('./helpers/kv')
-
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-
 const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
+  const Sequelize = sequelize.Sequelize
+  const Op = Sequelize.Op
+
   let transaction = sequelize.define('transaction', {
     id: {
       primaryKey: true,

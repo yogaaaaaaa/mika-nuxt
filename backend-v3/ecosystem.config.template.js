@@ -1,22 +1,23 @@
 'use strict'
 
-const ignoreWatchDev = [
+const ignoreWatch = [
   'node_modules',
   '*.log',
   'uploads',
   'cache'
 ]
 
-const developmentPm2 = {
+const developmentConfig = {
   apps: [
     {
       name: 'mika-v3-core-dev',
       script: 'apps/core.js',
       exec_mode: 'fork',
       watch: true,
-      ignore_watch: ignoreWatchDev,
+      ignore_watch: ignoreWatch,
       env: {
-        NODE_ENV: 'development'
+        NODE_ENV: 'development',
+        MIKA_CONFIG_GROUP: ''
       }
     },
     {
@@ -24,15 +25,16 @@ const developmentPm2 = {
       script: 'apps/report.js',
       exec_mode: 'fork',
       watch: true,
-      ignore_watch: ignoreWatchDev,
+      ignore_watch: ignoreWatch,
       env: {
-        NODE_ENV: 'development'
+        NODE_ENV: 'development',
+        MIKA_CONFIG_GROUP: ''
       }
     }
   ]
 }
 
-const productionPm2 = {
+const productionConfig = {
   apps: [
     {
       name: 'mika-v3-core',
@@ -59,10 +61,8 @@ const productionPm2 = {
   ]
 }
 
-if (!process.env.NODE_ENV) process.env.NODE_ENV = 'development'
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports = productionPm2
-} else if (process.env.NODE_ENV === 'development') {
-  module.exports = developmentPm2
+if (process.NODE_ENV === 'production') {
+  module.exports = productionConfig
+} else {
+  module.exports = developmentConfig
 }
