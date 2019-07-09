@@ -13,12 +13,21 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
 
     const transaction = await models.transaction.findOne({
       where: {
-        id: req.body.order_id,
+        idAlias: req.body.order_id,
         amount: req.body.gross_amount,
         referenceNumber: req.body.transaction_id,
         status: trxManager.transactionStatuses.CREATED
       },
-      include: [ models.acquirer.scope('acquirerConfig') ]
+      include: [{
+        required: true,
+        model: models.acquirer.scope('id'),
+        include: [
+          {
+            model: models.acquirerConfig.scope('acquirerConfigKv'),
+            where: { handler: midtrans.handlerName }
+          }
+        ]
+      }]
     })
 
     if (!transaction) {

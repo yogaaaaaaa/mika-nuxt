@@ -22,21 +22,13 @@ module.exports.base32CrfDecode = (str) => {
   return Buffer.from(base32Decode(str, 'Crockford'))
 }
 
-module.exports.generateTransactionId = (name) => {
-  let ksuid = exports.ksuid.randomSync()
-  let part = exports.base32CrfEncode(ksuid.raw).substring(0, 12).match(/.{1,6}/g)
+module.exports.generateTransactionId = async () => {
+  let ksuid = await exports.ksuid.random()
+  let ksuidBase32Crf = exports.base32CrfEncode(ksuid.raw)
   return {
     id: ksuid.string,
-    idAlias: `${name}-${part[0]}-${part[1]}`
-  }
-}
-
-module.exports.generateTransactionIdLongAlias = (name) => {
-  let ksuid = exports.ksuid.randomSync()
-  let part = exports.base32CrfEncode(ksuid.raw).substring(0, 18).match(/.{1,6}/g)
-  return {
-    id: ksuid.string,
-    idAlias: `${name}-${part[0]}-${part[1]}-${part[2]}`
+    idAlias: ksuidBase32Crf,
+    idAliasFormatted: ksuidBase32Crf.match(/.{1,8}/g).join('-')
   }
 }
 

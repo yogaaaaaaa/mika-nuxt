@@ -1,6 +1,6 @@
 'use strict'
 
-const express = require('express')
+const express = require('../libs/express')
 const bodyParser = require('body-parser')
 const urlBodyParser = bodyParser.urlencoded({ extended: false })
 const aqTcashNotifController = require('../controllers/aqTcashNotifController')

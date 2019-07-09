@@ -1,11 +1,11 @@
 'use strict'
 
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-
 const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
+  const Sequelize = sequelize.Sequelize
+  const Op = Sequelize.Op
+
   let acquirer = sequelize.define('acquirer', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,

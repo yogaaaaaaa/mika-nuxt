@@ -59,7 +59,7 @@ module.exports = (trxManager) => {
 
       if (
         response.transaction_status === 'settlement' &&
-        response.payment_type === 'gopay' &&
+        response.payment_type === midtrans.handlerName &&
         parseInt(ctx.transaction.amount) === parseInt(ctx.response.gross_amount)
       ) {
         if (response.transaction_status === 'settlement') {

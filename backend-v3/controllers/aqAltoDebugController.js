@@ -1,29 +1,54 @@
 'use strict'
 
+const { body } = require('express-validator')
+
 const models = require('../models')
 const alto = require('../libs/aqAlto')
 
-module.exports.queryTransaction = async (req, res, next) => {
-  let response = {}
+const errorMiddleware = require('../middlewares/errorMiddleware')
 
-  let acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
-    where: {
-      id: req.body.acquirerConfigId
+const msg = require('../libs/msg')
+
+module.exports.queryTransactionMiddlewares = [
+  module.exports.changeStatusTransactionValidator = [
+    body('acquirerConfigId').exists().optional({ nullable: true }),
+    body('out_refund_no').exists().optional({ nullable: true }),
+    body('out_trade_no').exists()
+  ],
+  errorMiddleware.validatorErrorHandler,
+  async (req, res, next) => {
+    let acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
+      where: {
+        id: req.body.acquirerConfigId
+      }
+    }) || { config: {} }
+    let altoConfig = alto.mixConfig(acquirerConfig.config)
+
+    let response = {}
+    response.payQuery = await alto.altoQueryPayment(
+      Object.assign(
+        {
+          out_trade_no: req.body.out_trade_no
+        },
+        altoConfig
+      )
+    )
+    if (req.body.out_refund_no) {
+      response.refundQuery = await alto.altoQueryRefundPayment(
+        Object.assign(
+          {
+            out_trade_no: req.body.out_trade_no,
+            out_refund_no: req.body.out_refund_no
+          },
+          altoConfig
+        )
+      )
     }
-  }) || { config: {} }
 
-  let altoConfig = alto.mixConfig(acquirerConfig.config)
-
-  response.payQuery = await alto.altoQueryPayment(Object.assign({
-    out_trade_no: req.body.out_trade_no
-  }, altoConfig))
-
-  if (req.body.out_refund_no) {
-    response.refundQuery = await alto.altoQueryRefundPayment(Object.assign({
-      out_trade_no: req.body.id,
-      out_refund_no: req.body.out_refund_no
-    }, altoConfig))
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS,
+      response
+    )
   }
-
-  res.send(response)
-}
+]

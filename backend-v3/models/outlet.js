@@ -1,11 +1,11 @@
 'use strict'
 
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-
 const script = require('../libs/script')
 
 module.exports = (sequelize, DataTypes) => {
+  const Sequelize = sequelize.Sequelize
+  const Op = Sequelize.Op
+
   let outlet = sequelize.define('outlet', {
     idAlias: DataTypes.CHAR(25),
 

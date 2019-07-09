@@ -21,7 +21,7 @@ module.exports.createTransactionValidator = [
   body('flags').isArray().optional()
 ]
 
-module.exports.changeStatusTransactionValidator = [
+module.exports.changeAgentTransactionStatusValidator = [
   body('transactionId').exists(),
   body('status').isIn(_.values(trxManager.transactionStatuses))
 ]
@@ -90,8 +90,12 @@ module.exports.createTransaction = async (req, res, next) => {
   }
 }
 
-module.exports.changeStatusTransaction = async (req, res, next) => {
-  let transaction = await trxManager.forceStatus(req.body.transactionId, req.body.status, req.auth.agentId)
+module.exports.changeAgentTransactionStatus = async (req, res, next) => {
+  let transaction = await trxManager.forceStatus(
+    req.body.transactionId,
+    req.body.status,
+    req.auth.agentId
+  )
 
   if (transaction) {
     msg.expressResponse(
@@ -271,10 +275,10 @@ module.exports.createTransactionMiddlewares = [
   exports.createTransaction
 ]
 
-module.exports.changeStatusTransactionMiddlewares = [
-  exports.changeStatusTransactionValidator,
+module.exports.changeAgentTransactionStatusMiddlewares = [
+  exports.changeAgentTransactionStatusValidator,
   errorMiddleware.validatorErrorHandler,
-  exports.changeStatusTransaction
+  exports.changeAgentTransactionStatus
 ]
 
 module.exports.getAgentTransactionsMiddlewares = [

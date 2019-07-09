@@ -12,13 +12,13 @@ module.exports.handlerClasses = ['gopay']
 
 module.exports.baseConfig = require('../configs/aqMidtransConfig')
 
-function midtransRequestAgent (config) {
+function midtransRequestAgent (ctx) {
   const request = superagent
     .agent()
     .set('Content-type', 'application/json')
     .set('Accept', 'application/json')
     .set('User-Agent', 'MIKA API')
-    .set('Authorization', config.midtransServerAuth)
+    .set('Authorization', ctx.midtransServerAuth)
   return request
 }
 
@@ -30,29 +30,29 @@ module.exports.mixConfig = (config) => {
   return mixedConfig
 }
 
-module.exports.gopayChargeRequest = async (config) => {
+module.exports.gopayChargeRequest = async (ctx) => {
   let requestBody = {
     payment_type: 'gopay',
     transaction_details: {
-      order_id: config.order_id,
-      gross_amount: config.gross_amount
+      order_id: ctx.order_id,
+      gross_amount: ctx.gross_amount
     }
   }
-  if (config.email && config.fullname) {
+  if (ctx.email && ctx.fullname) {
     requestBody.customer_details = {
-      fullname: config.fullname,
-      email: config.email
+      fullname: ctx.fullname,
+      email: ctx.email
     }
   }
 
   try {
-    let request = midtransRequestAgent(config)
-    if (config.notifUrl) {
-      request.set('X-Override-Notification', config.notifUrl)
+    let request = midtransRequestAgent(ctx)
+    if (ctx.notifUrl) {
+      request.set('X-Override-Notification', ctx.notifUrl)
     }
 
     let response = await request
-      .post(`${config.baseUrl}/v2/charge`)
+      .post(`${ctx.baseUrl}/v2/charge`)
       .send(requestBody)
 
     if (response.body) return response.body
@@ -61,37 +61,35 @@ module.exports.gopayChargeRequest = async (config) => {
   }
 }
 
-module.exports.expireTransaction = async (config) => {
+module.exports.expireTransaction = async (ctx) => {
   try {
-    let response = await midtransRequestAgent(config)
-      .post(`${config.baseUrl}/v2/${config.order_id || config.transactionId}/expire`)
+    let response = await midtransRequestAgent(ctx)
+      .post(`${ctx.baseUrl}/v2/${ctx.order_id || ctx.transactionId}/expire`)
       .send()
-
     if (response.body) return response.body
   } catch (err) {
     console.error(err)
   }
 }
 
-module.exports.statusTransaction = async (config) => {
+module.exports.statusTransaction = async (ctx) => {
   try {
-    let response = await midtransRequestAgent(config)
-      .get(`${config.baseUrl}/v2/${config.order_id}/status`)
+    let response = await midtransRequestAgent(ctx)
+      .get(`${ctx.baseUrl}/v2/${ctx.order_id}/status`)
       .send()
-
     if (response.body) return response.body
   } catch (err) {
     console.error(err)
   }
 }
 
-module.exports.checkNotificationSignature = (config) => {
+module.exports.checkNotificationSignature = (ctx) => {
   let generatedSignature = crypto
     .createHash('sha512')
-    .update(`${config.order_id}${config.status_code}${config.gross_amount}${config.midtransServerKey}`)
+    .update(`${ctx.order_id}${ctx.status_code}${ctx.gross_amount}${ctx.midtransServerKey}`)
     .digest('hex')
 
-  if (generatedSignature.toLowerCase() === config.signature_key.toLowerCase()) {
+  if (generatedSignature.toLowerCase() === ctx.signature_key.toLowerCase()) {
     return generatedSignature
   }
 }

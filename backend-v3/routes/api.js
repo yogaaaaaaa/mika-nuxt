@@ -168,7 +168,7 @@ if (!isEnvProduction) {
     ],
     authMiddleware.auth([auth.userTypes.AGENT]),
     authMiddleware.authErrorHandler,
-    transactionController.changeStatusTransactionMiddlewares
+    transactionController.changeAgentTransactionStatusMiddlewares
   )
 }
 
@@ -483,12 +483,11 @@ router.get(
   [
     '/back_office/transactions',
     '/back_office/transactions/:transactionId',
-    '/back_office/transactions/by_alias/:aliasId'
+    '/back_office/transactions/by_alias/:idAlias'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   transactionController.getTransactionsMiddlewares
-
 )
 
 /**

@@ -1,9 +1,11 @@
 'use strict'
 
+const uid = require('../libs/uid')
+
 const { validationResult } = require('express-validator')
 const msg = require('../libs/msg')
 
-const isEnvProduction = process.env.NODE_ENV === 'production'
+const commonConfig = require('../configs/commonConfig')
 
 /**
  * Not found handler middleware, place before errorHandler
@@ -20,14 +22,17 @@ module.exports.notFoundErrorHandler = (req, res, next) => {
  */
 module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
-    console.error(err.stack)
-
+    const errorRef = `${commonConfig.name}-error-${uid.ksuid.randomSync().string}`
+    const data = { errorRef }
     let msgTypes = msg.msgTypes.MSG_ERROR
-    let data = isEnvProduction ? undefined : err.stack.split('\n')
 
     if (err.status === 400) { // status assigned by body-parser when encounter parsing error
       msgTypes = msg.msgTypes.MSG_ERROR_BAD_REQUEST
     }
+
+    console.error('START errorRef :', errorRef)
+    console.error(err.stack)
+    console.error('END errorRef :', errorRef)
 
     msg.expressResponse(
       res,

@@ -64,6 +64,6 @@ module.exports.mixConfig = (config) => {
   return Object.assign({}, exports.baseConfig, config)
 }
 
-module.exports.createQrCode = (config) => {
-  return `TWALLET|O|${config.tcashUser}|${config.acc_no}`
+module.exports.createQrCode = (ctx) => {
+  return `TWALLET|O|${ctx.tcashUser}|${ctx.acc_no}`
 }

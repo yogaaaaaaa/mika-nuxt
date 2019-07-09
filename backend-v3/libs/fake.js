@@ -2,8 +2,7 @@
 
 const uid = require('./uid')
 
-module.exports.transactions = (
-  merchantShortName,
+module.exports.transactions = async (
   agentIds,
   acquirerIds,
   dateStart,
@@ -18,7 +17,7 @@ module.exports.transactions = (
   let timestampDiff = dateEnd.getTime() - dateStart.getTime()
 
   while (count) {
-    let genId = uid.generateTransactionId(merchantShortName)
+    let genId = await uid.generateTransactionId()
     let createdAtTimestamp = Math.round(dateStart.getTime() + (Math.random() * timestampDiff))
     let updatedAtTimestamp = Math.round(createdAtTimestamp + (Math.random() * (200 * 1000)))
 
