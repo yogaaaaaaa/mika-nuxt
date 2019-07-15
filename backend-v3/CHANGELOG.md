@@ -1,6 +1,6 @@
 # Version 3.0.0 (2019-07-04)
   - Initial release
-# Version 3.0.1
+# Version 3.0.1 (2019-07-09)
   - Package update
   - Changed `transaction.idAlias`
     - Case insensitive collation
@@ -15,3 +15,9 @@
   - Refactored debug controllers
   - Added debug endpoint to generate error
   - Other minors refactor
+# Version 3.0.2 (2019-07-15)
+  - Changed back `idAlias` to `id` as transaction reference in `midtrans` and `linkaja`
+  - Added message status code (e.g trx-400, sys-200) to Core app morgan logs
+  - Refactored message status code
+  - Changed default CORS config for production environment
+  - Changed default session token expiry

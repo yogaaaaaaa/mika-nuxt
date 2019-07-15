@@ -80,6 +80,7 @@ module.exports.expressResponse = (
   data,
   meta
 ) => {
+  res.msgStatus = messageType.status
   res
     .status(messageType.httpStatus)
     .send(exports.createResponse(messageType, data, meta))

@@ -25,7 +25,7 @@ module.exports = (trxManager) => {
       let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
       let response = await midtrans.gopayChargeRequest({
-        order_id: ctx.transaction.idAlias,
+        order_id: ctx.transaction.id,
         gross_amount: ctx.transaction.amount,
         ...midtransConfig
       })
@@ -48,7 +48,7 @@ module.exports = (trxManager) => {
       let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
       let response = await midtrans.statusTransaction({
-        order_id: ctx.transaction.idAlias,
+        order_id: ctx.transaction.id,
         gross_amount: ctx.transaction.amount,
         ...midtransConfig
       })
@@ -71,7 +71,7 @@ module.exports = (trxManager) => {
 
       if (ctx.transaction.status === trxManager.transactionStatuses.FAILED) {
         await midtrans.expireTransaction({
-          order_id: ctx.transaction.idAlias,
+          order_id: ctx.transaction.id,
           ...midtransConfig
         })
       }

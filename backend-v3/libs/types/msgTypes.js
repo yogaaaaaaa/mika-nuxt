@@ -63,7 +63,7 @@ module.exports.msgTypes = {
     isError: true,
     httpStatus: 400,
     status: 'sys-403',
-    message: 'Bad request, entity is still used by another entity'
+    message: 'Bad request, entity is still referenced by another entity'
   },
   MSG_ERROR_NOT_FOUND: {
     isError: true,

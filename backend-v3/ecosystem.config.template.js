@@ -15,6 +15,7 @@ const developmentConfig = {
       exec_mode: 'fork',
       watch: true,
       ignore_watch: ignoreWatch,
+      time: true,
       env: {
         NODE_ENV: 'development',
         MIKA_CONFIG_GROUP: ''
@@ -26,6 +27,7 @@ const developmentConfig = {
       exec_mode: 'fork',
       watch: true,
       ignore_watch: ignoreWatch,
+      time: true,
       env: {
         NODE_ENV: 'development',
         MIKA_CONFIG_GROUP: ''
@@ -43,6 +45,7 @@ const productionConfig = {
       instances: 0,
       instance_var: 'NODE_APP_INSTANCE',
       watch: false,
+      time: true,
       env: {
         NODE_ENV: 'production'
       }
@@ -54,6 +57,7 @@ const productionConfig = {
       instances: 2,
       instance_var: 'NODE_APP_INSTANCE',
       watch: false,
+      time: true,
       env: {
         NODE_ENV: 'production'
       }

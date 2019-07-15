@@ -38,7 +38,7 @@ const router = express.Router()
 
 router.use([
   cors({
-    origin: commonConfig.allowedOrigin,
+    origin: commonConfig.allowedOrigins,
     optionsSuccessStatus: 200
   }),
   bodyParser.json(),

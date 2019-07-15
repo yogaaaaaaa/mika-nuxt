@@ -16,8 +16,8 @@ module.exports.createTransactionValidator = [
   body('acquirerId').exists(),
   body('userToken').optional(),
   body('userTokenType').isString().optional(),
-  body('locationLong').isNumeric().optional(),
-  body('locationLat').isNumeric().optional(),
+  body('locationLong').isNumeric().optional({ nullable: true }),
+  body('locationLat').isNumeric().optional({ nullable: true }),
   body('flags').isArray().optional()
 ]
 
