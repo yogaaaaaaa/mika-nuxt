@@ -1,6 +1,6 @@
 {
   "name": "backend-v3",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "private": true,
   "scripts": {
     "db-recreate": "sequelize db:drop --config configs/dbConfig.js && sequelize db:create --config configs/dbConfig.js",

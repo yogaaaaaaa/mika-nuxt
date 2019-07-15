@@ -123,7 +123,7 @@ async function begin () {
             parseInt(tcashResponses[2]) >= 100
           ) {
             form.amount = parseInt(tcashResponses[2])
-            form.bill_ref = parseInt(tcashResponses[3])
+            form.bill_ref = tcashResponses[3]
             if (parameter.trx_id) {
               form.trx_id = parameter.trx_id
             } else {

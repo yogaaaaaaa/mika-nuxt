@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "a3ce63f1-0696-4979-95a0-626c15ac2a77",
 		"name": "backend-v3",
-		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `version`\nContain current revison of backend, with format \n```\n{{branch}}-{{commitHash}}-{{commitCount}} {{enviroment}} {{commitTime}}\n```\n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\n- `data`\nIf any data is included, it will be in `data`.\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints or unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header or included as bearer style token, `Authorization: Bearer <token>`.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token. \n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n\n### Filters\nMost plural endpoint provide capability to filter entities, including specific endpoint if noted. Filters is defined as array of query string in url that formatted with `f[field]=op,value` or `filters[field]=op,value`\n\nOperator supported by `filters[]`\n- `eq` (equal)\n- `eqnull` (equal to `null`)\n- `eqtrue` (equal to `true`)\n- `neq` (not equal)\n- `neqnull` (not equal to `null`)\n- `neqtrue` (not equal to `true`)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `f[status]=eq,succes`\n- `f[acquirer.name]=like,%tcash%`\n\nAll of filter will be **and**-ed together, from example above it will filter entities with `status` equal (`eq`) to `sucess` **and** `acquirer.name` `like` `%tcash%`.\n\nFor **or** operation on the same field, extra `,or` in field name can be use. For example to filter entities with value of amount from 500 to 1000, is equal to `f[amount,or]=gte,500&f[amount,or]=lte,1000` in filter query string.",
+		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\nOptionally, it will contain,\n- `version`\nContain current revison of backend, with format,\n\n```\nIn Development\n{{environment}} {{branch}}-{{commitHash}}-{{commitCount}} {{commitTime}}\n\nIn production\n{{version}}\n```\n\n- `data`\nReturned data from request or any information related to status message\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n## Common status code\nThese status code all common in all request\n\n## System Context\n\n- Success (Generic)\n\t- HTTP Status : 200\n\t- Status Code : sys-200\n- Bad request (e.g Malformed JSON Body)\n\t- HTTP Status : 400\n\t- Status Code : sys-400\n- URL Not Found\n\t- HTTP Status : 404\n\t- Status Code : sys-404\n- Internal Server Error (Unhandled Execption)\n\t- HTTP Status : 500\n\t- Status Code : sys-500\n- Bad Request, Validation error (e.g Invalid field)\n\t- HTTP Status : 400\n\t- Status Code : sys-401\n\n## Authentication Context\n\n- Not Authenticated (Invalid session token, User is not authenticated)\n\t- HTTP Status : 401\n\t- Status Code : auth-401\n- Forbidden (Authenticated User is not authorised to access endpoint)\n\t- HTTP Status : 403\n\t- Status Code : auth-403\n\n## Entity Context\n\n- One or more entity found\n\t- HTTP Status : 200\n\t- Status Code : ent-200\n- Request processed Sucessfuly but no Entity is Found\n\t- HTTP Status : 200\n\t- Status Code : ent-204\n- Single entity not found\n\t- HTTP Status : 404\n\t- Status Code : ent-404\n- Single Entity Created\n\t- HTTP Status : 200\n\t- Status Code : ent-201\n- Single Entity Updated\n\t- HTTP Status : 200\n\t- Status Code : ent-202\n- Single Entity Deleted\n\t- HTTP Status : 200\n\t- Status Code : ent-203\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints, unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header or included as bearer style token, `Authorization: Bearer <token>`.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token.\n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n\nBelow is an example of URL with pagination applied.\n```\nhttps://api.mikapp.id//api/agent/transactions?page=1&per_page=10&get_count=1&order=asc&order_by=createdAt\n```\n\n### Filters\nMost plural endpoint provide capability to filter entities. Filters is defined as array in URL query string, with format,\n`f[field]=operator,value` or `filters[field]=operator,value`.\n\nBelow is an example of URL with filters applied.\n```\nhttps://api.mikapp.id/api/agent/transactions?f[status]=eq,success&f[amount]=gt,5000\n```\n\nSupported operator\n- `eq` (equal)\n- `eqnull` (equal to `null`)\n- `eqtrue` (equal to `true`)\n- `neq` (not equal)\n- `neqnull` (not equal to `null`)\n- `neqtrue` (not equal to `true`)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `f[status]=eq,succes`\n- `f[acquirer.name]=like,%tcash%`\n\nAll of filter will be **and**-ed together, from example above it will filter entities with `status` equal (`eq`) to `sucess` **and** `acquirer.name` `like` `%tcash%`.\n\nFor **or** operation on the same field, extra `,or` in field name can be use. For example to filter entities with value of amount from 500 to 1000, is equal to `f[amount,or]=gte,500&f[amount,or]=lte,1000` in filter query string.\n",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -694,7 +694,7 @@
 								"login"
 							]
 						},
-						"description": "Login to mika backend, mandatory properties is \n`username` and `password`.\n\n`userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n"
+						"description": "Login to mika backend\n\n# Required Field\n- `username` (String)\n- `password` (String)\n\n# Optional Field\n- `userTypes` (array)\n\t- `userTypes` is an array of user type to enforce for login user. If user whom login is not in `userTypes`, login will simply fail.\n\n# Specific Status Code\n\n- Login Successful\n\t- HTTP Status : 200\n\t- Status Code : auth-200\n- Invalid Credential\n\t- HTTP Status : 400\n\t- Status Code : auth-400"
 					},
 					"response": []
 				},
@@ -732,7 +732,7 @@
 								"logout"
 							]
 						},
-						"description": "Logout from mika backend"
+						"description": "Logout from mika backend\n\n# Specific Status Code\n- Logout Successful\n\t- HTTP Status : 200\n\t- Status Code : auth-201\n"
 					},
 					"response": []
 				},
@@ -780,7 +780,7 @@
 								"change_password"
 							]
 						},
-						"description": "Change passwor of currently authenticated user (based on session token)"
+						"description": "Change password of currently authenticated user (based on session token)\n\n# Required Field\n - `oldPassword` (String)\n - `password` (String)\n\n# Specific Status Code\n- Password Change Succesful\n\t- HTTP Status : 200\n\t- Status Code : auth-203\n- Cannot Change Password\n\t- HTTP Status : 400\n\t- Status Code : auth-410"
 					},
 					"response": []
 				},
@@ -828,7 +828,7 @@
 								"check"
 							]
 						},
-						"description": "Check session token if its still valid and renew its expiry via `sessionToken` properties. This endpoint doesnt need authentication.\n"
+						"description": "Check session token if its still valid and renew its expiry via `sessionToken` properties. This endpoint doesnt need authentication.\n\n# Specific Status Code\n- Session Token Still Valid\n\t- HTTP Status : 200\n\t- Status Code : auth-202\n- Invalid Session Token\n\t- HTTP Status : 400\n\t- Status Code : auth-404\n\n# Required Field\n- `sessionToken` (String)"
 					},
 					"response": []
 				}
@@ -881,7 +881,7 @@
 								"agent"
 							]
 						},
-						"description": "Get current agent data"
+						"description": "Get current logged-in agent\n"
 					},
 					"response": []
 				},
@@ -940,7 +940,7 @@
 								}
 							]
 						},
-						"description": "Get one acquirers"
+						"description": "Get acquirers by id"
 					},
 					"response": []
 				},
@@ -1106,7 +1106,7 @@
 								}
 							]
 						},
-						"description": "Get transactions by alias id (friendly id)"
+						"description": "Get transactions by `idAlias` (friendly id) which is case insenstive."
 					},
 					"response": []
 				},
@@ -1142,7 +1142,7 @@
 								"transactions"
 							]
 						},
-						"description": "Create transaction"
+						"description": "Create new transaction with current logged-in agent.\n\n# Required Field\n- `amount` (String)\n- `acquirerId` (String)\n\n# Optional Field\n- `userToken` (Object, String)\n- `userTokenType` (String)\n- `locationLong` (Numeric)\n- `locationLat` (Numeric)\n- `flags` (Array)\n\n# Specific Status Code\n- Transaction Created\n\t- HTTP Status : 200\n\t- Status Code : trx-200\n- Transaction Created and Processed Successfully (`status` is `success`)\n\t- HTTP Status : 200\n\t- Status Code : trx-201\n- Invalid Acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-400\n- Acquirer need User Token\n\t- HTTP Status : 400\n\t- Status Code : trx-410\n- Invalid User Token\n\t- HTTP Status : 400\n\t- Status Code : trx-411\n- Acquirer doesn't support User Token (for Acquirer supporting more than one User Token Type)\n\t- HTTP Status : 400\n\t- Status Code : trx-412\n- Ambiguous User Token (for Acquirer supporting more than one User Token Type)\n\t- HTTP Status : 400\n\t- Status Code : trx-413\n- Amount too low\n\t- HTTP Status : 400\n\t- Status Code : trx-440\n- Amount too high\n\t- HTTP Status : 400\n\t- Status Code : trx-441\n- Remote acquirer is not responding\n\t- HTTP Status : 500\n\t- Status Code : trx-501\n- Invalid acquirer config\n\t- HTTP Status : 500\n\t- Status Code : trx-510"
 					},
 					"response": [
 						{
@@ -1217,7 +1217,7 @@
 								"change_transaction_status"
 							]
 						},
-						"description": "Create transaction"
+						"description": "Forcefully change transaction status in development environment.\n\n# Required Field\n- `transactionId` (String)\n- `status` (String)\n\n# Specific Status Code\n- Bad Request if transaction id cannot be found or processed\n\t- HTTP Status : 400\n\t- Status Code : sys-400"
 					},
 					"response": [
 						{
@@ -1285,7 +1285,7 @@
 								"merchant_staff"
 							]
 						},
-						"description": "Get current merchant staff"
+						"description": "Get current logged-in merchant staff"
 					},
 					"response": []
 				},
@@ -1437,7 +1437,7 @@
 								}
 							]
 						},
-						"description": "Get single acquirer under merchant's merchant staff"
+						"description": "Get single acquirer under merchant's merchant staff by id"
 					},
 					"response": []
 				},
@@ -1470,7 +1470,7 @@
 								}
 							]
 						},
-						"description": "Get single outlet under merchant staff"
+						"description": "Get single outlet under merchant staff by id"
 					},
 					"response": []
 				},
@@ -1596,7 +1596,7 @@
 								}
 							]
 						},
-						"description": "Get single agents under merchant staff"
+						"description": "Get single agents under merchant staff by id"
 					},
 					"response": []
 				},
@@ -1692,7 +1692,7 @@
 								}
 							]
 						},
-						"description": "Get agents under outlet under merchant staff"
+						"description": "Get agents under merchant staff outlet's"
 					},
 					"response": []
 				},
@@ -1823,7 +1823,7 @@
 								}
 							]
 						},
-						"description": "Get single transaction under merchant staff"
+						"description": "Get single transaction by id under merchant staff"
 					},
 					"response": []
 				},
@@ -1928,7 +1928,7 @@
 								}
 							]
 						},
-						"description": "Get transactions under outlets under merchant staff"
+						"description": "Get transactions under merchant staff outlet's id"
 					},
 					"response": []
 				},
@@ -7964,13 +7964,13 @@
 	],
 	"variable": [
 		{
-			"id": "af3d1d7a-965a-406a-be9b-12adc71dd966",
+			"id": "79e3c439-8858-40ad-9a2a-bc05569fb6f5",
 			"key": "baseUrl",
 			"value": "https://stg31api.mikaapp.id",
 			"type": "string"
 		},
 		{
-			"id": "4ccea12f-6c22-450b-9fcb-de794a42bb83",
+			"id": "e6b7ab9f-ecbd-4eaf-8eb4-7615354ef46b",
 			"key": "mikaDebugKey",
 			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
 			"type": "string"

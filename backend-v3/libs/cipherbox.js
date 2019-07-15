@@ -28,6 +28,8 @@
  * Authenticated Encryption, see here:
  * https://en.wikipedia.org/wiki/Authenticated_encryption
  *
+ * Timestamp in Hmac on every cipherbox is needed to prevent replay attack
+ *
  */
 
 const crypto = require('crypto')

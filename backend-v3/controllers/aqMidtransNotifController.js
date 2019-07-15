@@ -13,7 +13,7 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
 
     const transaction = await models.transaction.findOne({
       where: {
-        idAlias: req.body.order_id,
+        id: req.body.order_id,
         amount: req.body.gross_amount,
         referenceNumber: req.body.transaction_id,
         status: trxManager.transactionStatuses.CREATED

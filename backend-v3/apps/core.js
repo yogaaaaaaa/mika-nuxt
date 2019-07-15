@@ -28,12 +28,8 @@ const coreApp = express()
  */
 coreApp.disable('x-powered-by')
 coreApp.set('etag', false)
-if (isEnvProduction) {
-  coreApp.use(morgan('tiny'))
-} else {
-  coreApp.use(morgan('dev'))
-}
-
+morgan.token('mika-status', (req, res) => res.msgStatus)
+coreApp.use(morgan(':method :url :remote-addr :status :mika-status :res[content-length] bytes :response-time ms'))
 /**
  * Notification route for acquirer
  */

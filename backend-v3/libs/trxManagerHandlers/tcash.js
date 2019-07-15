@@ -24,7 +24,7 @@ module.exports = (trxManager) => {
     async handler (ctx) {
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ctx.transaction.token = tcash.createQrCode({
-        acc_no: ctx.transaction.idAlias,
+        acc_no: ctx.transaction.id,
         ...tcash.mixConfig(ctx.acquirer.acquirerConfig.config)
       })
     }
