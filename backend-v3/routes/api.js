@@ -36,25 +36,11 @@ const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const router = express.Router()
 
-let corsOptionsDelegate = function (req, callback) {
-  let corsOptions
-  const requestedOrigin = req.header('Origin')
-  if (commonConfig.allowedOrigins.indexOf(requestedOrigin) !== -1) {
-    // The requested origin is found among the allowed origins.
-    corsOptions = {
-      // Reflect (enable) the requested origin in the CORS response.
-      origin: true,
-      // Some legacy browsers (IE11, SmartTVs) cannot handle the default 204.
-      optionsSuccessStatus: 200
-    }
-  } else {
-    corsOptions = { origin: false } // Disable CORS for this request.
-  }
-  callback(null, corsOptions)
-}
-
 router.use([
-  cors(corsOptionsDelegate),
+  cors({
+    origin: commonConfig.allowedOrigin,
+    optionsSuccessStatus: 200
+  }),
   bodyParser.json(),
   cookieParser()
 ])

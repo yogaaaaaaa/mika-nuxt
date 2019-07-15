@@ -19,7 +19,7 @@ let baseConfig = {
   debugKeyHeader: 'x-mika-debug',
   debugKey: '1K24vDZGaGmJGCTTVIRyLxPPiHY',
 
-  allowedOrigins: isEnvProduction ? ['backoffice.mikaapp.id'] : '*',
+  allowedOrigin: isEnvProduction ? '*.mikaapp.id' : '*',
 
   authSessionTokenHeader: 'x-access-token',
   authSecretKey: '4FoC5uMLqAkoBMSw2sOLIF7M',
