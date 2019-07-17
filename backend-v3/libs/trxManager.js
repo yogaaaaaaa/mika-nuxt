@@ -268,8 +268,10 @@ module.exports.create = async (transaction, options) => {
     ctx.transaction.userToken = undefined
   }
 
-  await ctx.transaction.save()
-  await ctx.transaction.reload()
+  await models.sequelize.transaction(async t => {
+    await ctx.transaction.save({ transaction: t })
+    await ctx.transaction.reload({ transaction: t })
+  })
 
   // create expiry handler
   if (ctx.transaction.status === exports.transactionStatuses.CREATED) {
