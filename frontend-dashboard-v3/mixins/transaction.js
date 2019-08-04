@@ -20,7 +20,8 @@ export default {
 
     operator: null,
     filterValues: [],
-    filterValue: null
+    filterValue: null,
+    date: null
   }),
   methods: {
     catchError(e) {
@@ -44,7 +45,10 @@ export default {
       if (this.selectedFilterBy && this.filterValue) {
         query += `f[${this.selectedFilterBy.value}]=${this.operator.value},${
           this.filterValue.value ? this.filterValue.value : this.filterValue
-        }`;
+        }&`;
+      }
+      if (this.date && this.date.length > 0) {
+        query += `f[createdAt]=gte,${this.date[0].toISOString()}&f[createdAt]=lte,${this.date[1].toISOString()}&`;
       }
       return query;
     },
@@ -69,6 +73,9 @@ export default {
     },
     handleFilterValueChange(val) {
       this.filterValue = val;
+    },
+    handleDateChange(d) {
+      this.date = d;
     },
     getFilterValues(val) {
       this.filterValues = [];
@@ -95,6 +102,7 @@ export default {
       this.filterValues = [];
       this.selectedFilterBy = null;
       this.filterValue = null;
+      this.date = null;
       this.populateTable();
     }
   }

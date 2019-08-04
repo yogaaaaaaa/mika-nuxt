@@ -9,6 +9,7 @@
       @clearFilter="clearFilter"
       @applyFilter="populateTable"
       :loading="loading"
+      @dateChange="handleDateChange"
     />
     <v-card-text>
       <v-data-table
@@ -93,6 +94,7 @@ export default {
 
         const { sortBy, descending, page, itemsPerPage } = this.options;
         const queries = this.getQueries();
+        console.log(queries);
         const resp = await this.$axios.$get(TRANSACTION_URL + queries);
         let items = resp.data;
         this.total = resp.meta ? resp.meta.totalCount : 0;

@@ -9,7 +9,9 @@
     </v-app-bar>
     <v-container>
       <v-content>
-        <nuxt />
+        <no-ssr>
+          <nuxt />
+        </no-ssr>
       </v-content>
     </v-container>
   </v-app>

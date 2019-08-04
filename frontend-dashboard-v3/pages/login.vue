@@ -69,12 +69,13 @@ export default {
     async login() {
       try {
         if (this.email !== "" && this.password !== "") {
-          const resp = await this.$auth.loginWith("local", {
+          await this.$auth.loginWith("local", {
             data: {
               username: this.email,
               password: this.password
             }
           });
+          this.$router.push("/");
         }
       } catch (e) {
         console.log("e", e);

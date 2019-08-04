@@ -46,7 +46,7 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [],
+  plugins: [{ src: "~/plugins/datepicker", ssr: false }],
   /*
    ** Nuxt.js dev-modules
    */
@@ -70,7 +70,7 @@ export default {
             method: "post",
             propertyName: "data.sessionToken"
           },
-          logout: { url: `${process.env.API_URL}/auth/logout`, method: "post" },
+          logout: false,
           user: {
             url: `${process.env.API_URL}/merchant_staff`,
             method: "get",
