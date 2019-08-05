@@ -11,6 +11,7 @@
       <v-content>
         <no-ssr>
           <nuxt />
+          <snackbar></snackbar>
         </no-ssr>
       </v-content>
     </v-container>
@@ -18,7 +19,9 @@
 </template>
 
 <script>
+import snackbar from "../components/snackbar";
 export default {
+  components: { snackbar },
   methods: {
     async logout() {
       await this.$auth.logout();

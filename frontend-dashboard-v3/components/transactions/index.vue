@@ -51,6 +51,12 @@ export default {
         filterAs: "acquirerId"
       },
       {
+        text: "Outlet",
+        value: "agent.outlet.name",
+        sortable: false,
+        filterAs: "agent.outletId"
+      },
+      {
         text: "Amount",
         value: "amount"
       },
@@ -67,7 +73,8 @@ export default {
     filterSelectable: [
       { key: "agentId", value: "agent" },
       { key: "acquirerId", value: "acquirer" },
-      { key: "status", value: "status" }
+      { key: "status", value: "status" },
+      { key: "agent.outletId", value: "agent.outlet" }
     ]
   }),
   mounted() {
@@ -94,9 +101,9 @@ export default {
 
         const { sortBy, descending, page, itemsPerPage } = this.options;
         const queries = this.getQueries();
-        console.log(queries);
         const resp = await this.$axios.$get(TRANSACTION_URL + queries);
         let items = resp.data;
+        // console.log(items);
         this.total = resp.meta ? resp.meta.totalCount : 0;
         if (this.options.sortBy) {
           items = items.sort((a, b) => {

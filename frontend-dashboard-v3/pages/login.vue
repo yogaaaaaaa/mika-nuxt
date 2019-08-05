@@ -40,7 +40,14 @@
                   v-model="password"
                 ></v-text-field>
                 <div class="mt-2">
-                  <v-btn color="primary" rounded block x-large @click="login">Login</v-btn>
+                  <v-btn
+                    color="primary"
+                    rounded
+                    block
+                    x-large
+                    @click="login"
+                    :loading="loading"
+                  >Login</v-btn>
                 </div>
               </v-form>
             </div>
@@ -48,27 +55,25 @@
         </v-layout>
       </v-card>
     </v-layout>
-    <v-snackbar v-model="snackbar" top color="error">
-      {{ text }}
-      <v-btn text @click="snackbar = false">Close</v-btn>
-    </v-snackbar>
   </v-container>
 </template>
 
 <script>
+import { catchError } from "../mixins";
 export default {
   layout: "nonav",
+  mixins: [catchError],
   data: () => ({
     show1: false,
     email: "merchantStaff3",
     password: "merchantStaff3",
-    snackbar: false,
-    text: ""
+    loading: false
   }),
   methods: {
     async login() {
       try {
         if (this.email !== "" && this.password !== "") {
+          this.loading = true;
           await this.$auth.loginWith("local", {
             data: {
               username: this.email,
@@ -78,9 +83,8 @@ export default {
           this.$router.push("/");
         }
       } catch (e) {
-        console.log("e", e);
-        this.text = e.response.data.message;
-        this.snackbar = true;
+        this.catchError(e);
+        this.loading = false;
       }
     }
   }

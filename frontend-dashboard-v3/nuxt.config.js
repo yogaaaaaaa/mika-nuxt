@@ -76,9 +76,9 @@ export default {
             method: "get",
             propertyName: "data"
           }
-        }
-        // tokenRequired: true,
-        // tokenType: 'bearer'
+        },
+        tokenRequired: true,
+        tokenType: "bearer"
       }
     }
   },
@@ -97,7 +97,7 @@ export default {
         light: {
           primary: "#29A3DD",
           accent: colors.grey.darken3,
-          secondary: colors.amber.darken3,
+          secondary: colors.grey.darken2,
           info: colors.teal.lighten1,
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,

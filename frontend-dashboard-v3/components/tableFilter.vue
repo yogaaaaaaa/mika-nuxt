@@ -1,7 +1,6 @@
 <template>
   <v-card-title>
     <v-container grid-list-md>
-      <h3 class="subtitle-1">Column Filter</h3>
       <v-layout row wrap>
         <v-flex md3 sm6 xs12>
           <v-combobox v-model="selectedFilterBy" :items="filterBy" label="Filter by"></v-combobox>
@@ -27,23 +26,28 @@
         </v-flex>
       </v-layout>
 
-      <v-layout row wrap class="mt-3">
+      <v-toolbar flat>
         <v-spacer></v-spacer>
-        <v-btn :loading="loading" @click="clearFilter" class="mr-3">Clear filter</v-btn>
-        <v-btn
-          color="primary"
+        <Tbtn text tooltipTop icon="clear" tooltip-text="clear filter" @onClick="clearFilter" />
+        <Tbtn text tooltipTop icon="cloud_download" tooltip-text="export to csv" />
+        <Tbtn
+          text
+          tooltipTop
+          icon="check"
+          tooltip-text="apply filter"
           :disabled="btnDisabled"
-          :loading="loading"
-          @click="applyFilter"
-        >Apply filter</v-btn>
-      </v-layout>
+          @onClick="applyFilter"
+        />
+      </v-toolbar>
     </v-container>
   </v-card-title>
 </template>
 
 <script>
 import { datePickerShortcut } from "../mixins";
+import Tbtn from "./Tbtn";
 export default {
+  components: { Tbtn },
   mixins: [datePickerShortcut],
   props: {
     filterBy: {
@@ -72,12 +76,12 @@ export default {
       ],
       date1: null,
       shortcuts: [],
-      btnDisabled: true
+      btnDisabled: true,
+      elevation: 0
     };
   },
   watch: {
     selectedFilterBy() {
-      if (this.selectedFilterBy) this.btnDisabled = false;
       this.filterValue = null;
       this.$emit("selectedFilterBy", this.selectedFilterBy);
     },
@@ -85,6 +89,7 @@ export default {
       this.$emit("operatorChange", this.operator);
     },
     filterValue() {
+      if (this.filterValue) this.btnDisabled = false;
       this.$emit("filterValueChange", this.filterValue);
     },
     date1() {
@@ -119,4 +124,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.v-expansion-panels {
+  border: 0px !important;
+}
 </style>

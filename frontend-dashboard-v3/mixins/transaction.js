@@ -1,7 +1,8 @@
 import changeCase from "change-case";
 import moment from "moment";
-
+import { catchError } from "../mixins";
 export default {
+  mixins: [catchError],
   data: () => ({
     items: [],
     total: 0,
@@ -24,14 +25,6 @@ export default {
     date: null
   }),
   methods: {
-    catchError(e) {
-      console.log(e);
-      const status = e.response.status;
-      if (status && status === 401) {
-        this.$auth.logout();
-        this.$router.push("/login");
-      }
-    },
     getQueries() {
       let query = "?";
       this.options.perPage = this.options.itemsPerPage;
@@ -86,11 +79,29 @@ export default {
           if (val === f.key) filterKey = f.value;
         });
         if (filterKey) {
-          filters = this.items.map(i => {
-            if (typeof i[filterKey] !== "object")
-              return { text: i[filterKey], value: i[filterKey] };
-            return { text: i[filterKey].name, value: i[filterKey].id };
-          });
+          let arrayFilterKey = filterKey.split(".");
+          if (arrayFilterKey.length === 2) {
+            filters = this.items.map(i => {
+              return {
+                text: i[arrayFilterKey[0]][arrayFilterKey[1]].name,
+                value: i[arrayFilterKey[0]][arrayFilterKey[1]].id
+              };
+            });
+          } else if (arrayFilterKey.length === 1) {
+            filters = this.items.map(i => {
+              if (typeof i[arrayFilterKey[0]] === "object") {
+                return {
+                  text: i[arrayFilterKey[0]].name,
+                  value: i[arrayFilterKey[0]].id
+                };
+              } else {
+                return {
+                  text: i[arrayFilterKey[0]],
+                  value: i[arrayFilterKey[0]]
+                };
+              }
+            });
+          }
           filters = Array.from(new Set(filters.map(a => a.value))).map(value =>
             filters.find(a => a.value === value)
           );
