@@ -65,10 +65,17 @@ export default {
   mixins: [catchError],
   data: () => ({
     show1: false,
-    email: "merchantStaff3",
-    password: "merchantStaff3",
+    email: "",
+    password: "",
     loading: false
   }),
+  mounted() {
+    const NODE_ENV = process.env.NODE_ENV;
+    if (NODE_ENV === "development") {
+      this.email = "merchantStaff3";
+      this.password = "merchantStaff3";
+    }
+  },
   methods: {
     async login() {
       try {
