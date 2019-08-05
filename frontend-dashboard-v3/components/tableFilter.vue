@@ -29,7 +29,13 @@
       <v-toolbar flat>
         <v-spacer></v-spacer>
         <Tbtn text tooltipTop icon="clear" tooltip-text="clear filter" @onClick="clearFilter" />
-        <Tbtn text tooltipTop icon="cloud_download" tooltip-text="export to csv" />
+        <Tbtn
+          text
+          tooltipTop
+          icon="cloud_download"
+          tooltip-text="export to csv"
+          @onClick="showConfirmDialog = true"
+        />
         <Tbtn
           text
           tooltipTop
@@ -39,15 +45,22 @@
           @onClick="applyFilter"
         />
       </v-toolbar>
+      <downloadConfirm
+        :show="showConfirmDialog"
+        @onClose="showConfirmDialog = false"
+        @onConfirm="download"
+      ></downloadConfirm>
     </v-container>
   </v-card-title>
 </template>
 
 <script>
 import { datePickerShortcut } from "../mixins";
+import downloadConfirm from "./downloadConfirm";
 import Tbtn from "./Tbtn";
+import { ExportToCsv } from "export-to-csv";
 export default {
-  components: { Tbtn },
+  components: { Tbtn, downloadConfirm },
   mixins: [datePickerShortcut],
   props: {
     filterBy: {
@@ -61,6 +74,10 @@ export default {
     },
     loading: {
       type: Boolean,
+      required: true
+    },
+    dataToDownload: {
+      type: Array,
       required: true
     }
   },
@@ -77,7 +94,7 @@ export default {
       date1: null,
       shortcuts: [],
       btnDisabled: true,
-      elevation: 0
+      showConfirmDialog: false
     };
   },
   watch: {
@@ -118,13 +135,30 @@ export default {
       this.date1 = null;
       this.btnDisabled = true;
       this.$emit("clearFilter");
+    },
+    csvExport(title, data) {
+      const options = {
+        filename: title,
+        fieldSeparator: ",",
+        quoteStrings: '"',
+        decimalseparator: ".",
+        showLabels: true,
+        showTitle: true,
+        title: title,
+        useBom: true,
+        useKeysAsHeaders: true
+      };
+
+      if (data.length) {
+        const csvExporter = new ExportToCsv(options);
+        csvExporter.generateCsv(data);
+      }
+    },
+    download(type) {
+      this.showConfirmDialog = false;
+      this.csvExport("Transactions", this.dataToDownload);
     }
   }
 };
 </script>
 
-<style lang="scss" scoped>
-.v-expansion-panels {
-  border: 0px !important;
-}
-</style>

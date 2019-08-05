@@ -9,16 +9,15 @@ export default {
     loading: false,
     options: {
       getCount: 1,
-      itemsPerPage: 10,
+      itemsPerPage: 25,
       sortBy: ["createdAt"],
       sortDesc: [true]
     },
     footerProps: {
-      itemsPerPageOptions: [10, 25, 50, 100]
+      itemsPerPageOptions: [25, 50, 100, 250]
     },
     filterBy: [],
     selectedFilterBy: null,
-
     operator: null,
     filterValues: [],
     filterValue: null,

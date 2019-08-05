@@ -10,6 +10,7 @@
       @applyFilter="populateTable"
       :loading="loading"
       @dateChange="handleDateChange"
+      :data-to-download="dataToDownload"
     />
     <v-card-text>
       <v-data-table
@@ -31,6 +32,7 @@
 <script>
 import { transaction } from "../../mixins";
 import { TRANSACTION_URL } from "../../lib/apis";
+import parseDataToDownload from "../../lib/parseDataToDownload";
 import debounce from "lodash/debounce";
 import tableFilter from "../tableFilter";
 export default {
@@ -75,7 +77,8 @@ export default {
       { key: "acquirerId", value: "acquirer" },
       { key: "status", value: "status" },
       { key: "agent.outletId", value: "agent.outlet" }
-    ]
+    ],
+    dataToDownload: []
   }),
   mounted() {
     this.populateTable();
@@ -98,7 +101,6 @@ export default {
     async populateTable() {
       try {
         this.loading = true;
-
         const { sortBy, descending, page, itemsPerPage } = this.options;
         const queries = this.getQueries();
         const resp = await this.$axios.$get(TRANSACTION_URL + queries);
@@ -122,6 +124,8 @@ export default {
           });
         }
         this.items = items;
+        this.dataToDownload = parseDataToDownload("merchant", items);
+
         this.loading = false;
       } catch (e) {
         this.catchError(e);
