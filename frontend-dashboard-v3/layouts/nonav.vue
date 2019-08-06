@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import snackbar from "../components/snackbar";
+import snackbar from "~/components/commons/snackbar";
 export default {
   components: { snackbar }
 };

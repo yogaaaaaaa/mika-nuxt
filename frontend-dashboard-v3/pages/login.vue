@@ -72,8 +72,8 @@ export default {
   mounted() {
     const NODE_ENV = process.env.NODE_ENV;
     if (NODE_ENV === "development") {
-      this.email = "merchantStaff3";
-      this.password = "merchantStaff3";
+      this.email = "merchantStaff";
+      this.password = "merchantStaff";
     }
   },
   methods: {

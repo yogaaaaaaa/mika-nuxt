@@ -30,11 +30,11 @@
 </template>
 
 <script>
-import { transaction } from "../../mixins";
-import { TRANSACTION_URL } from "../../lib/apis";
-import parseDataToDownload from "../../lib/parseDataToDownload";
+import { transaction } from "~/mixins";
+import { TRANSACTION_URL } from "~/lib/apis";
+import parseDataToDownload from "~/lib/parseDataToDownload";
 import debounce from "lodash/debounce";
-import tableFilter from "../tableFilter";
+import tableFilter from "~/components/commons/tableFilter";
 export default {
   mixins: [transaction],
   components: { tableFilter },

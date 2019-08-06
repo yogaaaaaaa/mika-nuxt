@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import transactions from "../components/transactions";
+import transactions from "@/components/transactions";
 export default {
   components: { transactions }
 };

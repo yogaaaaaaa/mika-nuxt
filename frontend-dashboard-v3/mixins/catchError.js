@@ -11,13 +11,16 @@ export default {
         console.log(error.response.status);
         console.log(error.response.headers);
         if (error.response.status === 400 || error.response.status === 403) {
-          this.$store.commit("snackbarText", error.response.data.message);
-          this.$store.commit("snackbar", true);
+          this.showSnackbar("error", error.response.data.message);
+        }
+        if (error.response.status === 401) {
+          this.showSnackbar("error", error.response.data.message);
+          this.logout();
         }
       } else if (error.request) {
         console.log("request");
-        this.$store.commit("snackbarText", "Network Error");
-        this.$store.commit("snackbar", true);
+        this.showSnackbar("error", "Network Error");
+
         /*
          * The request was made but no response was received, `error.request`
          * is an instance of XMLHttpRequest in the browser and an instance
@@ -28,9 +31,17 @@ export default {
         console.log("message");
         // Something happened in setting up the request and triggered an Error
         console.log("Error", error.message);
-        this.$store.commit("snackbarText", error.message);
-        this.$store.commit("snackbar", true);
+        this.showSnackbar("error", error.message);
       }
+    },
+    logout() {
+      this.$auth.logout();
+      this.$router.push("/login");
+    },
+    showSnackbar(type, message) {
+      this.$store.commit("snackbarColor", type);
+      this.$store.commit("snackbarText", message);
+      this.$store.commit("snackbar", true);
     }
   }
 };

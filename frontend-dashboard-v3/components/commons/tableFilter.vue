@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { datePickerShortcut } from "../mixins";
+import { datePickerShortcut } from "~/mixins";
 import downloadConfirm from "./downloadConfirm";
 import Tbtn from "./Tbtn";
 import { ExportToCsv } from "export-to-csv";

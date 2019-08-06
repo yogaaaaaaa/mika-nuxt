@@ -1,7 +1,8 @@
 export const state = () => ({
   sidebar: false,
   snackbar: false,
-  snackbarText: ""
+  snackbarText: "",
+  snackbarColor: "error"
 });
 
 export const mutations = {
@@ -13,6 +14,9 @@ export const mutations = {
   },
   snackbarText(state, val) {
     state.snackbarText = val;
+  },
+  snackbarColor(state, val) {
+    state.snackbarColor = val;
   }
 };
 
