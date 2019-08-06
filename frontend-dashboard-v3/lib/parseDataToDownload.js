@@ -11,7 +11,7 @@ export default (type, items) => {
         paymentMethod: i.acquirer.acquirerType.name,
         amount: i.amount,
         status: i.status,
-        date: moment(i.createdAt).format("HH:mm:ss"),
+        date: moment(i.createdAt).format("YYYY-MM-DD"),
         time: moment(i.createdAt).format("HH:mm:ss")
       })
     );
