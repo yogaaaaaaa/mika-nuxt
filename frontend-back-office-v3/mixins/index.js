@@ -9,6 +9,9 @@ import exit from "./exit";
 import filterHeader from "./filterHeader";
 import logout from "./logout";
 import role from "./role.js";
+import fetchSingleData from "./fetchSingleData";
+import fetchData from "./fetchData";
+import setDatePicker from "./setDatePicker";
 
 export {
   toDetail,
@@ -21,5 +24,8 @@ export {
   fetchTransactions,
   filterHeader,
   logout,
-  role
+  role,
+  fetchSingleData,
+  fetchData,
+  setDatePicker
 };

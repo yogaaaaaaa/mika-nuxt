@@ -38,7 +38,11 @@ module.exports = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ["@/plugins/vuetify", "~/plugins/veeValidate.js"],
+  plugins: [
+    "@/plugins/vuetify",
+    "~/plugins/veeValidate.js",
+    { src: "~/plugins/datePicker.js", ssr: false }
+  ],
 
   /*
    ** Nuxt.js modules
@@ -78,7 +82,10 @@ module.exports = {
   },
   axios: {
     // baseURL: "https://stg12api.mikaapp.id/"
-    baseURL: "https://stg13api.mikaapp.id/"
+    baseURL: "https://stg31api.mikaapp.id/"
+  },
+  router: {
+    middleware: ["auth"]
   },
   auth: {
     strategies: {
@@ -94,7 +101,10 @@ module.exports = {
             method: "get",
             propertyName: "data"
           },
-          logout: false
+          logout: {
+            url: "/api/auth/logout",
+            method: "post"
+          }
         }
       }
     }

@@ -2,7 +2,7 @@
   <div id="sub-title">
     <div class="headline font-weight-light blue--text mb-2 mt-4">
       <v-icon color="blue" medium>{{ icon }}</v-icon>
-      {{ text }}
+      {{ text }} {{ name }}
     </div>
   </div>
 </template>
@@ -16,11 +16,19 @@ export default {
     },
     icon: {
       type: String
+    },
+    name: {
+      type: String,
+      default: ""
     }
+  },
+  data() {
+    return {
+      // name: "Maju tembak"
+    };
   }
-}
+};
 </script>
 
 <style>
-
 </style>
