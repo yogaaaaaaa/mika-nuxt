@@ -21,6 +21,7 @@
         :loading="loading"
         :footer-props="footerProps"
       >
+        <template v-slot:item.amount="{ item }">{{ formatNumber(item.amount) }}</template>
         <template v-slot:item.createdAt="{ item }">{{ dateFilter(item.createdAt) }}</template>
         <template v-slot:item.time="{ item }">{{ timeFilter(item.createdAt) }}</template>
       </v-data-table>
@@ -39,6 +40,12 @@ export default {
   components: { tableFilter },
   data: () => ({
     headers: [
+      {
+        text: "ID",
+        value: "id",
+        sortable: false,
+        filterAs: "id"
+      },
       {
         text: "Agent",
         value: "agent.name",
@@ -59,7 +66,8 @@ export default {
       },
       {
         text: "Amount",
-        value: "amount"
+        value: "amount",
+        align: "right"
       },
       {
         text: "Status",
@@ -109,7 +117,6 @@ export default {
         const queries = this.getQueries();
         const resp = await this.$axios.$get(TRANSACTION_URL + queries);
         let items = resp.data;
-        console.log(items);
         this.total = resp.meta ? resp.meta.totalCount : 0;
         if (this.options.sortBy) {
           items = items.sort((a, b) => {

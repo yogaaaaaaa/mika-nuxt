@@ -50,6 +50,9 @@ export default {
     timeFilter(date) {
       return moment(date).format("HH:mm:ss");
     },
+    formatNumber(num) {
+      return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+    },
     setFilterBy() {
       this.headers.map(h => {
         if (h.value !== "createdAt") {
