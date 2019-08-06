@@ -4,12 +4,15 @@ export default (type, items) => {
   if (type === "merchant") {
     Object.values(items).map(i =>
       output.push({
-        agent: i.agent.name,
-        acquirer: i.acquirer.name,
+        id: i.id,
+        referenceNumber: i.referenceNumber,
         outlet: i.agent.outlet.name,
+        agent: i.agent.name,
+        paymentMethod: i.acquirer.acquirerType.name,
         amount: i.amount,
         status: i.status,
-        date: moment(i.createdAt).toISOString()
+        date: moment(i.createdAt).format("HH:mm:ss"),
+        time: moment(i.createdAt).format("HH:mm:ss")
       })
     );
   }
