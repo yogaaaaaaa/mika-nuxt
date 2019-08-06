@@ -15,7 +15,7 @@
               <v-list-item-title>Change Password</v-list-item-title>
             </v-list-item>
             <v-divider></v-divider>
-            <v-list-item @click="logout">
+            <v-list-item @click="showConfirm = true">
               <v-list-item-title>Logout</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -31,6 +31,12 @@
             :show="showChangePasswordForm"
             @onClose="showChangePasswordForm = false"
           />
+          <confirmDialog
+            title="Logout"
+            :show="showConfirm"
+            @onClose="showConfirm = false"
+            @onConfirm="logout"
+          ></confirmDialog>
         </no-ssr>
       </v-content>
     </v-container>
@@ -38,13 +44,17 @@
 </template>
 
 <script>
-import snackbar from "@/components/commons/snackbar";
-import changePasswordForm from "@/components/commons/changePasswordForm";
+import {
+  snackbar,
+  changePasswordForm,
+  confirmDialog
+} from "@/components/commons";
 export default {
-  components: { snackbar, changePasswordForm },
+  components: { snackbar, changePasswordForm, confirmDialog },
   data() {
     return {
-      showChangePasswordForm: false
+      showChangePasswordForm: false,
+      showConfirm: false
     };
   },
   methods: {

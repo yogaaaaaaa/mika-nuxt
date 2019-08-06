@@ -45,22 +45,23 @@
           @onClick="applyFilter"
         />
       </v-toolbar>
-      <downloadConfirm
+      <confirmDialog
         :show="showConfirmDialog"
         @onClose="showConfirmDialog = false"
         @onConfirm="download"
-      ></downloadConfirm>
+        title="Export to CSV"
+      ></confirmDialog>
     </v-container>
   </v-card-title>
 </template>
 
 <script>
 import { datePickerShortcut } from "~/mixins";
-import downloadConfirm from "./downloadConfirm";
+import confirmDialog from "./confirmDialog";
 import Tbtn from "./Tbtn";
 import { ExportToCsv } from "export-to-csv";
 export default {
-  components: { Tbtn, downloadConfirm },
+  components: { Tbtn, confirmDialog },
   mixins: [datePickerShortcut],
   props: {
     filterBy: {

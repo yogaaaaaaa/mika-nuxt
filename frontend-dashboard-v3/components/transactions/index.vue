@@ -21,9 +21,8 @@
         :loading="loading"
         :footer-props="footerProps"
       >
-        <template v-slot:item.createdAt="{ item }">
-          <v-chip>{{ dateFilter(item.createdAt) }}</v-chip>
-        </template>
+        <template v-slot:item.createdAt="{ item }">{{ dateFilter(item.createdAt) }}</template>
+        <template v-slot:item.time="{ item }">{{ timeFilter(item.createdAt) }}</template>
       </v-data-table>
     </v-card-text>
   </v-card>
@@ -48,7 +47,7 @@ export default {
       },
       {
         text: "Acquirer",
-        value: "acquirer.name",
+        value: "acquirer.acquirerType.name",
         sortable: false,
         filterAs: "acquirerId"
       },
@@ -69,6 +68,11 @@ export default {
       {
         text: "Date",
         value: "createdAt"
+      },
+      {
+        text: "Time",
+        value: "time",
+        sortable: false
       }
     ],
 
@@ -105,7 +109,7 @@ export default {
         const queries = this.getQueries();
         const resp = await this.$axios.$get(TRANSACTION_URL + queries);
         let items = resp.data;
-        // console.log(items);
+        console.log(items);
         this.total = resp.meta ? resp.meta.totalCount : 0;
         if (this.options.sortBy) {
           items = items.sort((a, b) => {

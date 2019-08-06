@@ -45,7 +45,10 @@ export default {
       return query;
     },
     dateFilter(date) {
-      return moment(date).format("dddd, MMMM Do YYYY, h:mm:ss a");
+      return moment(date).format("YYYY-MM-DD");
+    },
+    timeFilter(date) {
+      return moment(date).format("HH:mm:ss");
     },
     setFilterBy() {
       this.headers.map(h => {

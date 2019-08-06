@@ -1,13 +1,13 @@
 <template>
   <v-dialog v-model="dialog" persistent width="500">
     <v-card>
-      <v-card-title class="light-blue white--text">Export to CSV</v-card-title>
+      <v-card-title class="light-blue white--text">{{ title }}</v-card-title>
 
       <v-divider></v-divider>
       <v-card-text>
         <h3 class="title">Are you sure ?</h3>
       </v-card-text>
-
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="close">No</v-btn>
@@ -32,6 +32,10 @@ export default {
   props: {
     show: {
       type: Boolean,
+      required: true
+    },
+    title: {
+      type: String,
       required: true
     }
   },
