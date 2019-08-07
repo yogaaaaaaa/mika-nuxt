@@ -85,10 +85,10 @@ export default {
     ],
 
     filterSelectable: [
-      { key: "agentId", value: "agent" },
-      { key: "acquirerId", value: "acquirer" },
+      { key: "agentId", value: "agents" },
+      { key: "acquirerId", value: "acquirers" },
       { key: "status", value: "status" },
-      { key: "agent.outletId", value: "agent.outlet" }
+      { key: "agent.outletId", value: "outlets" }
     ],
     dataToDownload: []
   }),

@@ -1,8 +1,9 @@
 import changeCase from "change-case";
 import moment from "moment";
-import { catchError } from "../mixins";
+import catchError from "./catchError";
+import transactionFilter from "./transactionFilter";
 export default {
-  mixins: [catchError],
+  mixins: [catchError, transactionFilter],
   data: () => ({
     items: [],
     total: 0,
@@ -75,7 +76,7 @@ export default {
     handleDateChange(d) {
       this.date = d;
     },
-    getFilterValues(val) {
+    async getFilterValues(val) {
       this.filterValues = [];
       let filters = [];
       let filterKey = null;
@@ -83,33 +84,18 @@ export default {
         this.filterSelectable.map(f => {
           if (val === f.key) filterKey = f.value;
         });
-        if (filterKey) {
-          let arrayFilterKey = filterKey.split(".");
-          if (arrayFilterKey.length === 2) {
-            filters = this.items.map(i => {
-              return {
-                text: i[arrayFilterKey[0]][arrayFilterKey[1]].name,
-                value: i[arrayFilterKey[0]][arrayFilterKey[1]].id
-              };
-            });
-          } else if (arrayFilterKey.length === 1) {
-            filters = this.items.map(i => {
-              if (typeof i[arrayFilterKey[0]] === "object") {
-                return {
-                  text: i[arrayFilterKey[0]].name,
-                  value: i[arrayFilterKey[0]].id
-                };
-              } else {
-                return {
-                  text: i[arrayFilterKey[0]],
-                  value: i[arrayFilterKey[0]]
-                };
-              }
-            });
-          }
+        if (filterKey === "status") {
+          filters = this.items.map(i => {
+            return {
+              text: i[filterKey],
+              value: i[filterKey]
+            };
+          });
           filters = Array.from(new Set(filters.map(a => a.value))).map(value =>
             filters.find(a => a.value === value)
           );
+        } else {
+          filters = await this.getTransactionFilter(filterKey);
         }
       }
       this.filterValues = filters;
