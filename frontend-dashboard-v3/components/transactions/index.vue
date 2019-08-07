@@ -116,26 +116,9 @@ export default {
         const { sortBy, descending, page, itemsPerPage } = this.options;
         const queries = this.getQueries();
         const resp = await this.$axios.$get(TRANSACTION_URL + queries);
-        let items = resp.data;
         this.total = resp.meta ? resp.meta.totalCount : 0;
-        if (this.options.sortBy) {
-          items = items.sort((a, b) => {
-            const sortA = a[sortBy];
-            const sortB = b[sortBy];
-
-            if (descending) {
-              if (sortA < sortB) return 1;
-              if (sortA > sortB) return -1;
-              return 0;
-            } else {
-              if (sortA < sortB) return -1;
-              if (sortA > sortB) return 1;
-              return 0;
-            }
-          });
-        }
-        this.items = items;
-        this.dataToDownload = parseDataToDownload("merchant", items);
+        this.items = resp.data;
+        this.dataToDownload = parseDataToDownload("merchant", this.items);
 
         this.loading = false;
       } catch (e) {

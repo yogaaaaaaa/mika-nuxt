@@ -1,47 +1,64 @@
 <template>
-  <v-dialog v-model="dialog" width="500" persistent>
-    <v-card>
-      <v-card-title class="light-blue white--text">Change Password</v-card-title>
-      <v-card-text>
-        <v-form ref="form" v-model="valid" lazy-validation class="mt-3 mb-3">
-          <v-text-field
-            v-model="oldPassword"
-            :rules="oldPasswordRules"
-            label="Old password"
-            required
-            :append-icon="show1 ? 'visibility' : 'visibility_off'"
-            :type="show1 ? 'text' : 'password'"
-            @click:append="show1 = !show1"
-          ></v-text-field>
-          <v-text-field
-            v-model="password"
-            :rules="passwordRules"
-            label="Password"
-            ref="passwordInput"
-            required
-            :append-icon="show2 ? 'visibility' : 'visibility_off'"
-            :type="show2 ? 'text' : 'password'"
-            @click:append="show2 = !show2"
-          ></v-text-field>
-          <v-text-field
-            v-model="passwordConfirmation"
-            :rules="passwordConfirmationRules"
-            label="Password confirmation"
-            required
-            :append-icon="show3 ? 'visibility' : 'visibility_off'"
-            :type="show3 ? 'text' : 'password'"
-            @click:append="show3 = !show3"
-          ></v-text-field>
-        </v-form>
-      </v-card-text>
-      <v-divider></v-divider>
-      <v-card-actions>
-        <v-btn @click="close" text color="secondary">Close</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn @click="validate" color="primary" :disabled="!valid" :loading="loading">Submit</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <div>
+    <v-dialog v-model="dialog" width="500" persistent>
+      <v-card>
+        <v-card-title class="light-blue white--text">Change Password</v-card-title>
+        <v-card-text>
+          <v-form ref="form" v-model="valid" lazy-validation class="mt-3 mb-3">
+            <v-text-field
+              v-model="oldPassword"
+              :rules="oldPasswordRules"
+              label="Old password"
+              required
+              :append-icon="show1 ? 'visibility' : 'visibility_off'"
+              :type="show1 ? 'text' : 'password'"
+              @click:append="show1 = !show1"
+            ></v-text-field>
+            <v-text-field
+              v-model="password"
+              :rules="passwordRules"
+              label="Password"
+              ref="passwordInput"
+              required
+              :append-icon="show2 ? 'visibility' : 'visibility_off'"
+              :type="show2 ? 'text' : 'password'"
+              @click:append="show2 = !show2"
+            ></v-text-field>
+            <v-text-field
+              v-model="passwordConfirmation"
+              :rules="passwordConfirmationRules"
+              label="Password confirmation"
+              required
+              :append-icon="show3 ? 'visibility' : 'visibility_off'"
+              :type="show3 ? 'text' : 'password'"
+              @click:append="show3 = !show3"
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn @click="close" text color="secondary">Close</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn @click="validate" color="primary" :disabled="!valid" :loading="loading">Submit</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialog2" width="500" persistent>
+      <v-card>
+        <v-card-title class="light-blue white--text">Change Password Success</v-card-title>
+        <v-card-text>
+          <p class="headline mt-5">
+            <v-icon large color="primary" class="mr-3">info</v-icon>You need to login to continue
+          </p>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="toLogin" text color="primary">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script>
@@ -52,6 +69,8 @@ export default {
   data() {
     return {
       dialog: false,
+      dialog2: false,
+
       oldPassword: "",
       oldPasswordRules: [v => !!v || "Old password is required"],
       password: "",
@@ -99,8 +118,7 @@ export default {
             password: this.password
           });
           this.close();
-          this.showSnackbar("success", resp.message);
-          this.logout();
+          this.dialog2 = true;
           this.loading = false;
         }
       } catch (e) {
@@ -111,6 +129,10 @@ export default {
     reset() {
       this.$refs.form.reset();
       this.$refs.form.resetValidation();
+    },
+    toLogin() {
+      this.dialog2 = false;
+      this.logout();
     }
   }
 };

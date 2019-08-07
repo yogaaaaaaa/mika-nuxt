@@ -3,10 +3,16 @@
     <v-container grid-list-md>
       <v-layout row wrap>
         <v-flex md3 sm6 xs12>
-          <v-combobox v-model="selectedFilterBy" :items="filterBy" label="Filter by"></v-combobox>
+          <v-combobox
+            v-model="selectedFilterBy"
+            :items="filterBy"
+            label="Filter by"
+            cache-items
+            type="button"
+          ></v-combobox>
         </v-flex>
         <v-flex md3 sm6 xs12>
-          <v-combobox v-model="operator" :items="operators" label="Operator"></v-combobox>
+          <v-combobox v-model="operator" :items="operators" label="Operator" type="button"></v-combobox>
         </v-flex>
         <v-flex md3 sm6 xs12>
           <span v-if="filterValues.length > 0">
@@ -162,4 +168,10 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+.v-menu input[type="button"][role="combobox"] {
+  text-align: left;
+}
+</style>
+
 
