@@ -2,21 +2,11 @@
 
 > Mika Merchant and Acquirer Dashboard
 
-## Build Setup
+### How to Update Repo
 
-``` bash
-# install dependencies
-$ yarn install
-
-# serve with hot reload at localhost:3000
-$ yarn dev
-
-# build for production and launch server
-$ yarn build
-$ yarn start
-
-# generate static project
-$ yarn generate
-```
-
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+- Ssh to the server (`ssh -p 12320 user@stg31api.mikaapp.id`)
+- Cd in to folder (`cd staging31/dani.mika/frontend-dashboard-v3`)
+- Pull the repo ex: `git pull origin feature/dashboard`
+- Run `npm run build` and wait until it completed
+- Run `npm run prod`
+- Open your browser and go to [https://stg31dashboard.mikaapp.id](https://stg31dashboard.mikaapp.id "https://stg31dashboard.mikaapp.id")
