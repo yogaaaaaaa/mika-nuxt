@@ -104,6 +104,9 @@ module.exports = (sequelize, DataTypes) => {
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       {
         model: sequelize.models.agent.scope('excludeTimestamp'),
+        include: [
+          sequelize.models.outlet.scope('excludeBusiness', 'excludeTimestamp')
+        ],
         where: {
           [Op.and]: [
             {

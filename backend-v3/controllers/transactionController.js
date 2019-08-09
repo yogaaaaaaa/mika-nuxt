@@ -296,7 +296,7 @@ module.exports.getAgentTransactionsMiddlewares = [
 module.exports.getMerchantStaffTransactionsMiddlewares = [
   queryToSequelizeMiddleware.paginationValidator(['transaction']),
   queryToSequelizeMiddleware.filterValidator(
-    ['transaction', 'agent', 'acquirer', 'acquirer', 'acquirerType', 'acquirerConfig'],
+    ['transaction', 'agent', 'outlet', 'acquirer', 'acquirer', 'acquirerType', 'acquirerConfig'],
     ['*archivedAt']
   ),
   errorMiddleware.validatorErrorHandler,

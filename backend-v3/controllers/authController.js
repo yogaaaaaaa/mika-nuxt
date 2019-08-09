@@ -106,7 +106,7 @@ module.exports.changePassword = async (req, res, next) => {
 
   msg.expressResponse(
     res,
-    msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
+    msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD_INVALID_OLD_PASSWORD
   )
 }
 

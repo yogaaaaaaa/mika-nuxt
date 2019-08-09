@@ -192,10 +192,10 @@ module.exports.msgTypes = {
     status: 'auth-404',
     message: 'Invalid session token'
   },
-  MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD: {
+  MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD_INVALID_OLD_PASSWORD: {
     httpStatus: 400,
     status: 'auth-410',
-    message: 'Cannot change password'
+    message: 'Cannot change password, invalid old password'
   },
   MSG_ERROR_AUTH_CIPHERBOX_INVALID: {
     isError: true,
