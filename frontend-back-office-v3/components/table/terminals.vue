@@ -1,15 +1,22 @@
 <template>
   <div id="table-terminals" style="margin:2em">
-    <v-data-table :headers="terminalHeader" :items="terminals" item-key="name">
-      <template slot="items" slot-scope="props">
-        <td>{{ props.item.name }}</td>
-        <td>{{ props.item.serial_number }}</td>
-        <td>{{ props.item.imei }}</td>
-        <td>{{ props.item.merchant_name }}</td>
-        <td>{{ props.item.created_at }}</td>
-        <td>{{ props.item.updated_at }}</td>
-      </template>
-    </v-data-table>
+    <v-container text-xs-center v-if="loading">
+      <v-flex>
+        <v-progress-circular :size="60" color="blue" indeterminate/>
+      </v-flex>
+    </v-container>
+    <div v-if="!loading">
+      <v-data-table :headers="terminalHeader" :items="terminals" item-key="name">
+        <template slot="items" slot-scope="props">
+          <td>{{ props.item.name }}</td>
+          <td>{{ props.item.serial_number }}</td>
+          <td>{{ props.item.imei }}</td>
+          <td>{{ props.item.merchant_name }}</td>
+          <td>{{ props.item.created_at }}</td>
+          <td>{{ props.item.updated_at }}</td>
+        </template>
+      </v-data-table>
+    </div>
   </div>
 </template>
 
@@ -19,6 +26,10 @@ export default {
     terminals: {
       type: Array,
       required: true
+    },
+    loading: {
+      type: Boolean,
+      default: true
     }
   },
   data() {

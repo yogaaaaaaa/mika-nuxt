@@ -2,8 +2,12 @@
   <div id="transaction-page">
     <sub-title :text="'List Transaction'" :icon="'confirmation_number'"/>
     <v-card class="pa-3">
-      <table-transaction :transactions="transactions"/>
-      <download :data="transactions" :filter="filterTransaction"/>
+      <table-transaction
+        :showMerchant="showMerchant"
+        :loading="loading"
+        :filter="filterTransaction"
+        @close="loading = !loading"
+      />
     </v-card>
   </div>
 </template>
@@ -11,35 +15,30 @@
 <script>
 import transactionTable from "~/components/table/transactions.vue";
 import subTitle from "~/components/subtitle.vue";
-import download from "~/components/download.vue";
-import { filterHeader } from "~/mixins";
+import { filterHeader, fetchData, setDatePicker } from "~/mixins";
+import moment from "moment-mini";
 
 export default {
   layout: "marketing-layouut",
-  middleware: "auth",
+  // middleware: "auth",
   components: {
     "table-transaction": transactionTable,
-    "sub-title": subTitle,
-    download: download
+    "sub-title": subTitle
   },
-  mixins: [filterHeader],
+  mixins: [filterHeader, fetchData, setDatePicker],
   data() {
     return {
-      transactions: []
+      transactions: [],
+      page: 1,
+      perPage: [30],
+      totalPage: 0,
+      merchantId: "",
+      value1: "",
+      totalTransactions: 0,
+      showMerchant: true,
+      allTransaction: [],
+      loading: true
     };
-  },
-  mounted() {
-    this.getMerchants();
-  },
-  methods: {
-    async getMerchants() {
-      await this.$axios
-        .get("/api/back_office/transactions?page=1")
-        .then(r => {
-          this.transactions = r.data.data;
-        })
-        .catch(e => console.log(e));
-    }
   }
 };
 </script>

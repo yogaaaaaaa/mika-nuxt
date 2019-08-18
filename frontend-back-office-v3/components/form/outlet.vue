@@ -6,10 +6,12 @@
         <v-spacer/>
         <v-icon @click="close">close</v-icon>
       </v-card-title>
-      <v-form @submit.prevent="submit" class="pa-3">
+      <v-form @submit.prevent="postOutlet" class="pa-3">
         <v-card-text>
-          <v-text-field v-model="name" label="Name"/>
-          <v-text-field v-model="email" label="Email" name="email" v-validate="'email'"/>
+          <v-text-field v-model="name" label="Name" name="name" v-validate="'required'"/>
+          <span class="message-form">{{ errors.first('name') }}</span>
+          <v-text-field v-model="email" label="Email" name="email" v-validate="'email|required'"/>
+          <span class="message-form">{{ errors.first('email') }}</span>
           <v-text-field v-model="website" label="Website"/>
           <v-text-field v-model="phoneNumber" label="Phone Number"/>
           <v-text-field v-model="ownershipType" label="Ownership Type"/>
@@ -25,13 +27,7 @@
           <v-text-field v-model="businessType" label="Business Type"/>
           <v-text-field v-model="businessDurationMonth" label="Business Duration Month"/>
           <v-text-field v-model="businessMonthlyTurnover" label="Business Monthly Turn Over"/>
-          <v-select
-            :items="merchantItems"
-            v-model="merchantId"
-            label="Merchant Name"
-            item-text="name"
-            item-value="id"
-          />
+          <v-text-field v-model="merchant.name" label="Merchant Name" readonly/>
         </v-card-text>
         <v-card-actions>
           <v-btn type="submit" class="mb-3">Submit</v-btn>
@@ -46,6 +42,12 @@
 import { exit } from "~/mixins";
 
 export default {
+  props: {
+    merchant: {
+      type: Object,
+      required: true
+    }
+  },
   mixins: [exit],
   data() {
     return {
@@ -55,14 +57,13 @@ export default {
       website: "",
       phoneNumber: "",
       ownershipType: "",
-      rentStartDate: "",
-      rentDurationMonth: "",
+      rentStartDate: null,
+      rentDurationMonth: null,
       otherPaymentSystem: "",
       outletPhotoResourceId: "",
       businessType: "",
-      businessDurationMonth: "",
-      businessMonthlyTurnover: "",
-      merchantId: "",
+      businessDurationMonth: null,
+      businessMonthlyTurnover: null,
       merchantItems: []
     };
   },
@@ -80,30 +81,34 @@ export default {
       console.log(merchant);
     },
     async postOutlet() {
-      await this.$validate.validateAll().then(() => {
-        this.$axios
-          .$post("/marketing/outlets", {
-            name: this.name,
-            description: this.description,
-            email: this.email,
-            website: this.website,
-            phoneNumber: this.phoneNumber,
-            ownershipType: this.ownershipType,
-            rentStartDate: this.rentStartDate,
-            rentDurationMonth: this.rentDurationMonth,
-            otherPaymentSystem: this.otherPaymentSystem,
-            outletPhotoResourceId: this.outletPhotoResourceId,
-            businessType: this.businessType,
-            businessDurationMonth: this.businessDurationMonth,
-            businessMonthlyTurnover: this.businessMonthlyTurnover,
-            merchantId: this.merchantId
-          })
-          .then(response => {
-            alert(response);
-          })
-          .catch(error => {
-            alert(error);
-          });
+      await this.$validator.validateAll().then(() => {
+        if (!this.errors.any()) {
+          this.$axios
+            .$post("/api/back_office/outlets", {
+              name: this.name,
+              description: this.description,
+              email: this.email,
+              website: this.website,
+              phoneNumber: this.phoneNumber,
+              ownershipType: this.ownershipType,
+              rentStartDate: this.rentStartDate,
+              rentDurationMonth: this.rentDurationMonth,
+              otherPaymentSystem: this.otherPaymentSystem,
+              outletPhotoResourceId: this.outletPhotoResourceId,
+              businessType: this.businessType,
+              businessDurationMonth: this.businessDurationMonth,
+              businessMonthlyTurnover: this.businessMonthlyTurnover,
+              merchantId: this.merchant.id
+            })
+            .then(response => {
+              alert(response.message);
+              this.refresh();
+              this.close();
+            })
+            .catch(error => {
+              alert(error.response.data.message);
+            });
+        }
       });
     }
   }

@@ -1,15 +1,10 @@
 <template>
-  <no-ssr id="login">
+  <div id="login">
     <v-content class="pa-4">
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
           <v-flex xs10 sm8 md4>
             <v-card class="pa-4">
-              <v-card-title>
-                <div class="logo">
-                  <!-- <v-img src="/logo-crop.png" style="width:100px;"/> -->
-                </div>
-              </v-card-title>
               <v-form @submit.prevent="login">
                 <v-text-field prepend-icon="person" label="Username" v-model="username" box/>
                 <v-text-field
@@ -28,11 +23,10 @@
         </v-layout>
       </v-container>
     </v-content>
-  </no-ssr>
+  </div>
 </template>
 
 <script>
-// import cookie from "js-cookie";
 import { mapGetters, mapState } from "vuex";
 
 export default {
@@ -51,18 +45,15 @@ export default {
   methods: {
     async login() {
       try {
-        this.info = await this.$auth
-          .loginWith("local", {
-            data: {
-              username: this.username,
-              password: this.password
-            }
-          })
-          .then(r => {
-            console.log("isi info", this.info);
-          });
+        await this.$auth.loginWith("local", {
+          data: {
+            username: this.username,
+            password: this.password
+          }
+        });
+        this.$router.push("/");
       } catch (e) {
-        console.log("error login ", e);
+        alert(e.response.data.message);
       }
     }
   }

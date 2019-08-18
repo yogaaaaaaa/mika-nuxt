@@ -48,6 +48,11 @@ export default {
         text: "Acquirer Configs",
         to: "/acquirerConfigs"
       },
+      {
+        icon: "settings_input_antenna",
+        text: "Acquirer Type",
+        to: "/acquirerTypes"
+      },
       // {
       //   icon: "system_update",
       //   text: "Terminal",
@@ -84,7 +89,7 @@ export default {
   },
   methods: {
     setUser() {
-      this.username = localStorage.username;
+      // this.username = localStorage.username;
     }
   }
 };
@@ -102,5 +107,9 @@ export default {
 }
 .admin {
   margin-bottom: 25px;
+}
+.message-form {
+  color: red;
+  font-style: italic;
 }
 </style>

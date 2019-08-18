@@ -1,8 +1,7 @@
 <template>
   <div id="download">
-    <v-btn color="yellow" @click="toCSV(data);">
-      <v-icon left dark> save_alt </v-icon>
-      Download CSV
+    <v-btn @click="toCSV(data);" class="blue--text elevation-5">
+      <v-icon left dark>save_alt</v-icon>Download per Page as CSV
     </v-btn>
   </div>
 </template>

@@ -11,30 +11,22 @@
         app
       >
         <v-toolbar flat class="transparent" dense>
-          <v-list
-            :class="{ 'list-border-bottom': miniVariant }"
-            class="pt-1 mb-1"
-          >
+          <v-list :class="{ 'list-border-bottom': miniVariant }" class="pt-1 mb-1">
             <v-list-tile>
-              <v-list-tile-content
-                v-if="!miniVariant"
-                style="margin-left: 50px"
-              >
+              <v-list-tile-content v-if="!miniVariant" style="margin-left: 50px">
                 <a href="/">
-                  <v-img src="/mika-logo.png" style="width:100px;" />
+                  <v-img src="/mika-logo.png" style="width:100px;"/>
                 </a>
               </v-list-tile-content>
               <v-list-tile-action>
                 <v-btn icon @click.stop="miniVariant = !miniVariant;">
-                  <v-icon
-                    v-html="miniVariant ? 'chevron_right' : 'chevron_left'"
-                  />
+                  <v-icon v-html="miniVariant ? 'chevron_right' : 'chevron_left'"/>
                 </v-btn>
               </v-list-tile-action>
             </v-list-tile>
           </v-list>
         </v-toolbar>
-        <v-divider />
+        <v-divider/>
         <v-list :class="{ 'list-border-bottom': miniVariant }" subheader>
           <template v-for="item in items">
             <v-tooltip :disabled="!miniVariant" :key="item._text" right>
@@ -46,23 +38,20 @@
                 active-class="yellow--text"
               >
                 <v-list-tile-action v-if="!miniVariant" class="ml-3">
-                  <v-icon v-html="item.icon" />
+                  <v-icon v-html="item.icon"/>
                 </v-list-tile-action>
                 <v-list-tile-action v-if="miniVariant">
-                  <v-icon v-html="item.icon" />
+                  <v-icon v-html="item.icon"/>
                 </v-list-tile-action>
                 <v-list-tile-content style="margin-left: -10px">
-                  <v-list-tile-title v-text="item.text" />
+                  <v-list-tile-title v-text="item.text"/>
                 </v-list-tile-content>
               </v-list-tile>
-              <span v-text="item.text" />
+              <span v-text="item.text"/>
             </v-tooltip>
           </template>
         </v-list>
-        <v-list-tile 
-          class="logout" 
-          @click="dialogConfirm = true"
-        >
+        <v-list-tile class="logout" @click="dialogConfirm = true">
           <v-list-tile-action class="ml-3" v-if="!miniVariant">
             <v-icon>logout</v-icon>
           </v-list-tile-action>
@@ -75,27 +64,23 @@
         </v-list-tile>
       </v-navigation-drawer>
       <v-toolbar app flat dense style="background-color: rgb(248, 248, 248)">
-        <v-toolbar-side-icon
-          class="hidden-lg-and-up"
-          @click.stop="drawer = !drawer;"
-        />
+        <v-toolbar-side-icon class="hidden-lg-and-up" @click.stop="drawer = !drawer;"/>
         <div :v-if="isAuthenticated" class="hidden-sm-and-down blue--text">
           <!-- <h2>{{ username }}</h2> -->
         </div>
-        <v-spacer />
+        <v-spacer/>
         <div class="hidden-lg-and-up">
           <a href="/admin">
-            <v-img
-              :src="`/mika-blue.png`"
-              style="width:120px; margin-top: 10px;"
-            />
+            <v-img :src="`/mika-blue.png`" style="width:120px; margin-top: 10px;"/>
           </a>
         </div>
-        <v-spacer />
+        <v-spacer/>
       </v-toolbar>
-      <admin-button />
+      <admin-button/>
       <v-content class="back">
-        <v-container fluid> <nuxt /> </v-container>
+        <v-container fluid>
+          <nuxt/>
+        </v-container>
       </v-content>
       <!-- <confirm 
         :show="dialogConfirm"
@@ -103,14 +88,14 @@
         :scndBtn="btnConfirm"
         @close="dialogConfirm = false"
         @confirm="logout" 
-      /> -->
+      />-->
     </v-app>
   </no-ssr>
 </template>
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import adminButton from "~/components/admin.vue"
+import adminButton from "~/components/admin.vue";
 // import confirm from "~/components/confirm.vue";
 
 export default {
@@ -133,7 +118,7 @@ export default {
       { icon: "domain", text: "Merchant", to: "/merchants" },
       { icon: "store", text: "Merchant Terminal", to: "/merchant-terminal" },
       { icon: "payment", text: "Payment Gateway", to: "/payment-gateway" },
-      { icon: "monetization_on", text: "Transactions", to: "/transactions" },
+      { icon: "monetization_on", text: "Transactions", to: "/transactions" }
       // {
       //   icon: "bubble_chart",
       //   text: "Settlement Report",
@@ -155,17 +140,15 @@ export default {
     ...mapGetters(["isAuthenticated", "loggedInUser"])
   },
   async mounted() {
-    await this.setUser()
+    await this.setUser();
   },
   methods: {
     setUser() {
-      this.username = localStorage.username
+      // this.username = localStorage.username
     },
     async logout() {
-      await this.$auth.logout()
-      localStorage.username = false;
-      this.$axios.setHeader('Authorization', null);
-      this.$router.push('/login')
+      await this.$auth.logout();
+      this.$router.push("/login");
     }
   }
 };
