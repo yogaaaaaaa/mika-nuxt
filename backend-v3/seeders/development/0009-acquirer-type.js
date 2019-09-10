@@ -50,6 +50,22 @@ module.exports = {
         thumbnail: 'card.png',
         thumbnailGray: 'card-gray.png',
         chartColor: '#192061'
+      },
+      {
+        id: 7,
+        class: 'qris',
+        name: 'QR Nasional (QRIS)',
+        thumbnail: 'bi.png',
+        thumbnailGray: 'bi-gray.png',
+        chartColor: '#0A4678'
+      },
+      {
+        id: 100,
+        class: 'kumapay',
+        name: 'Kuma Pay',
+        thumbnail: 'kumapay.png',
+        thumbnailGray: 'kumapay-gray.png',
+        chartColor: '#808080'
       }
     ]
     , {})

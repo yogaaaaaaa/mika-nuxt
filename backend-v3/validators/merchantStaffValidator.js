@@ -17,8 +17,8 @@ const merchantIdValidator = () => body('merchantId').not().isEmpty()
 const defaultValidator = [
   helper.bodyRemove('userId'),
   helper.archivedAtValidator,
-  locationLatValidator().optional(),
-  locationLongValidator().optional()
+  locationLatValidator().optional({ nullable: true }),
+  locationLongValidator().optional({ nullable: true })
 ]
 
 module.exports.bodyCreate = [

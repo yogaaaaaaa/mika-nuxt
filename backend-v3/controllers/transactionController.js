@@ -7,12 +7,22 @@ const msg = require('../libs/msg')
 const trxManager = require('../libs/trxManager')
 const models = require('../models')
 
+const trxManagerError = require('./helpers/trxManagerError')
+
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 
+const amountPositiveIntegerValidator = (value) => {
+  value = parseFloat(value)
+  if (Number.isInteger(value)) {
+    if (value > 0 && value <= Number.MAX_SAFE_INTEGER) return true
+  }
+  return false
+}
+
 module.exports.createTransactionValidator = [
-  body('amount').isNumeric(),
+  body('amount').custom(amountPositiveIntegerValidator),
   body('acquirerId').exists(),
   body('userToken').optional(),
   body('userTokenType').isString().optional(),
@@ -21,14 +31,20 @@ module.exports.createTransactionValidator = [
   body('flags').isArray().optional()
 ]
 
+module.exports.refundTransactionValidator = [
+  body('amount').custom(amountPositiveIntegerValidator).optional({ nullable: true }),
+  body('reason').isString().optional({ nullable: true })
+]
+
 module.exports.changeAgentTransactionStatusValidator = [
   body('transactionId').exists(),
-  body('status').isIn(_.values(trxManager.transactionStatuses))
+  body('status').isIn(_.values(trxManager.transactionStatuses)),
+  body('syncWithAcquirerHost').isBoolean().optional()
 ]
 
 module.exports.createTransaction = async (req, res, next) => {
   try {
-    const createTrxResult = await trxManager.create(
+    const trxCreateResult = await trxManager.create(
       {
         agentId: req.auth.agentId,
         terminalId: req.auth.terminalId,
@@ -45,29 +61,29 @@ module.exports.createTransaction = async (req, res, next) => {
       }
     )
 
-    if (createTrxResult.redirectTo) {
+    if (trxCreateResult.redirectTo) {
       msg.expressResponse(
         res,
         msg.msgTypes.MSG_SUCCESS_TRANSACTION_REDIRECTED,
-        createTrxResult
+        trxCreateResult
       )
       return
     }
 
-    if (createTrxResult.followUpType) {
+    if (trxCreateResult.followUpType) {
       msg.expressResponse(
         res,
-        msg.msgTypes.MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP,
-        createTrxResult
+        msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_NEED_FOLLOW_UP,
+        trxCreateResult
       )
       return
     }
 
-    if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+    if (trxCreateResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
       msg.expressResponse(
         res,
         msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
-        createTrxResult
+        trxCreateResult
       )
       return
     }
@@ -75,38 +91,71 @@ module.exports.createTransaction = async (req, res, next) => {
     msg.expressResponse(
       res,
       msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
-      createTrxResult
+      trxCreateResult
     )
   } catch (err) {
-    let msgType = trxManager.errorToMsgTypes(err)
-    if (msgType) {
+    trxManagerError.handleError(err, res)
+  }
+}
+
+module.exports.cancelTransaction = async (req, res, next) => {
+  try {
+    const trxCancelResult = await trxManager.cancel(req.params.transactionId)
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_CANCELED,
+      trxCancelResult
+    )
+  } catch (err) {
+    trxManagerError.handleError(err, res)
+  }
+}
+
+module.exports.refundTransaction = async (req, res, next) => {
+  try {
+    const trxRefundResult = await trxManager.refund({
+      transactionId: req.params.transactionId,
+      amount: req.body.amount,
+      reason: req.body.reason
+    })
+
+    if (trxRefundResult.transactionStatus === trxManager.transactionStatuses.REFUNDED_PARTIAL) {
       msg.expressResponse(
         res,
-        msgType
+        msg.msgTypes.MSG_SUCCESS_TRANSACTION_PARTIALLY_REFUNDED,
+        trxRefundResult
       )
-    } else {
-      throw err
+      return
     }
+
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_REFUNDED,
+      trxRefundResult
+    )
+  } catch (err) {
+    trxManagerError.handleError(err, res)
   }
 }
 
 module.exports.changeAgentTransactionStatus = async (req, res, next) => {
-  let transaction = await trxManager.forceStatus(
-    req.body.transactionId,
-    req.body.status,
-    req.auth.agentId
-  )
+  try {
+    let trxForceUpdateResult = await trxManager.forceStatusUpdate(
+      req.body.transactionId,
+      req.body.status,
+      {
+        agentId: req.auth.agentId,
+        syncWithAcquirerHost: req.body.syncWithAcquirerHost
+      }
+    )
 
-  if (transaction) {
     msg.expressResponse(
       res,
-      msg.msgTypes.MSG_SUCCESS
+      msg.msgTypes.MSG_SUCCESS,
+      trxForceUpdateResult
     )
-  } else {
-    msg.expressResponse(
-      res,
-      msg.msgTypes.MSG_ERROR_BAD_REQUEST
-    )
+  } catch (err) {
+    trxManagerError.handleError(err, res)
   }
 }
 
@@ -275,6 +324,17 @@ module.exports.createTransactionMiddlewares = [
   exports.createTransaction
 ]
 
+module.exports.cancelTransactionMiddlewares = [
+  cipherboxMiddleware.processCipherbox(true),
+  exports.cancelTransaction
+]
+
+module.exports.refundTransactionMiddlewares = [
+  cipherboxMiddleware.processCipherbox(true),
+  exports.refundTransactionValidator,
+  exports.refundTransaction
+]
+
 module.exports.changeAgentTransactionStatusMiddlewares = [
   exports.changeAgentTransactionStatusValidator,
   errorMiddleware.validatorErrorHandler,
@@ -296,7 +356,7 @@ module.exports.getAgentTransactionsMiddlewares = [
 module.exports.getMerchantStaffTransactionsMiddlewares = [
   queryToSequelizeMiddleware.paginationValidator(['transaction']),
   queryToSequelizeMiddleware.filterValidator(
-    ['transaction', 'agent', 'outlet', 'acquirer', 'acquirer', 'acquirerType', 'acquirerConfig'],
+    ['transaction', 'agent', 'outlet', 'acquirer', 'acquirerType', 'acquirerConfig'],
     ['*archivedAt']
   ),
   errorMiddleware.validatorErrorHandler,

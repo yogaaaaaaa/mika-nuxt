@@ -81,6 +81,32 @@ module.exports = {
         acquirerConfigId: 10,
         merchantId: 1
       },
+      {
+        id: 7,
+        name: 'Kuma Pay Maju Tembak',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 100,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 100,
+        acquirerConfigId: 100,
+        merchantId: 1
+      },
+      {
+        id: 8,
+        name: 'QR Nasional Maju Tembak',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 1000,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 7,
+        acquirerConfigId: 4,
+        merchantId: 1
+      },
 
       {
         id: 11,
@@ -132,6 +158,32 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 4,
         acquirerConfigId: 3,
+        merchantId: 2
+      },
+      {
+        id: 15,
+        name: 'Kuma Pay Super Moe',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 100,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 100,
+        acquirerConfigId: 100,
+        merchantId: 2
+      },
+      {
+        id: 16,
+        name: 'QR Nasional Super Moe',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 1000,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 7,
+        acquirerConfigId: 4,
         merchantId: 2
       },
 
@@ -293,6 +345,19 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 6,
         acquirerConfigId: 10,
+        merchantId: 5
+      },
+      {
+        id: 97,
+        name: 'QR Nasional Mika',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 1000,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 7,
+        acquirerConfigId: 4,
         merchantId: 5
       }
     ]

@@ -1,16 +1,20 @@
 'use strict'
 
-const currency = require('currency.js')
-const numeral = require('numeral')
+module.exports.accounting = require('accounting')
 
-module.exports.createCurrencyIDR = (value) => {
-  return currency(value || '0', {
-    formatWithSymbol: true,
-    symbol: 'Rp ',
-    decimal: ',',
-    separator: '.'
-  })
+module.exports.decimalAmountPadded = (amount, length = 12) => {
+  amount = String(amount || 0)
+  amount = amount.split('.')
+
+  const amountIntegerPart = amount[0]
+  let amountFractionalPart = amount[1] || '00'
+
+  if (amountFractionalPart.length > 2) {
+    amountFractionalPart = amountFractionalPart.slice(0, 2)
+  }
+
+  return `${amountIntegerPart}${amountFractionalPart}`.padStart(length, '0')
 }
 
-module.exports.numeral = numeral
-module.exports.currency = currency
+module.exports.formatCurrencyIDR = (value) =>
+  exports.accounting.formatMoney(value || 0, 'Rp ', 2, '.', ',')

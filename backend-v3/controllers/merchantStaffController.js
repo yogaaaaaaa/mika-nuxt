@@ -30,13 +30,14 @@ module.exports.createMerchantStaff = async (req, res, next) => {
       include: [ models.user ],
       transaction: t
     })
+    merchantStaff = await models.merchantStaff
+      .scope('admin')
+      .findByPk(merchantStaff.id, { transaction: t })
   })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.merchantStaff
-      .scope('admin')
-      .findByPk(merchantStaff.id)
+    merchantStaff
   )
 }
 
@@ -103,13 +104,13 @@ module.exports.updateMerchantStaff = async (req, res, next) => {
 
       if (merchantStaff.changed()) updated = true
       await merchantStaff.save({ transaction: t })
+
+      if (updated) {
+        merchantStaff = await scopedMerchantStaff.findByPk(merchantStaff.id, { transaction: t })
+        await auth.removeAuthByUserId(merchantStaff.userId)
+      }
     }
   })
-
-  if (updated) {
-    merchantStaff = await scopedMerchantStaff.findByPk(req.params.merchantStaffId)
-    await auth.removeAuthByUserId(merchantStaff.userId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,
@@ -130,10 +131,9 @@ module.exports.deleteMerchantStaff = async (req, res, next) => {
       if (merchantStaff.user) {
         await merchantStaff.user.destroy({ force: true, transaction: t })
       }
+      await auth.removeAuthByUserId(merchantStaff.userId)
     }
   })
-
-  if (merchantStaff) await auth.removeAuthByUserId(merchantStaff.userId)
 
   msg.expressDeleteEntityResponse(
     res,
@@ -157,7 +157,7 @@ module.exports.updateMerchantStaffMiddlewares = [
 
 module.exports.getMerchantStaffsMiddlewares = [
   queryToSequelizeMiddleware.commonValidator,
-  queryToSequelizeMiddleware.paginationValidator('merchantStaff'),
+  queryToSequelizeMiddleware.paginationValidator(['merchantStaff']),
   queryToSequelizeMiddleware.filterValidator(['merchantStaff', 'user']),
   errorMiddleware.validatorErrorHandler,
   queryToSequelizeMiddleware.common,

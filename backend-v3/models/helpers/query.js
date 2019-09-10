@@ -1,13 +1,7 @@
 'use strict'
 
-/**
- * Automatically load scripts as map
- */
-
 const path = require('path')
 const fs = require('fs')
-
-const scriptsDir = path.resolve(path.join(__dirname, '..', 'scripts'))
 
 function stringTransform (string, newLineToSpace, singleSpace) {
   if (newLineToSpace) {
@@ -26,6 +20,7 @@ function processScript (filepath, script) {
       script = stringTransform(script, true, true)
       break
     default:
+      script = null
       break
   }
   return script
@@ -42,16 +37,18 @@ function loadScripts (dirPath, map, rootPath) {
     } else if (nodeStats.isFile()) {
       let scriptPath = path.relative(rootPath, nodePath)
       let processedScript = processScript(scriptPath, fs.readFileSync(nodePath).toString('utf8'))
-      map.set(
-        scriptPath,
-        processedScript
-      )
+      if (processedScript) {
+        map.set(
+          scriptPath,
+          processedScript
+        )
+      }
     }
   }
   return map
 }
 
-module.exports.map = loadScripts(scriptsDir, new Map())
+module.exports.map = loadScripts(path.resolve(path.join(__dirname, '..', 'queries')), new Map())
 
 module.exports.get = (name, replacements) => {
   let script = exports.map.get(name)

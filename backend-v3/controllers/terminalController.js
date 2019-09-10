@@ -40,12 +40,14 @@ module.exports.generateTerminalCbKey = async (req, res, next) => {
 module.exports.createTerminal = async (req, res, next) => {
   let terminal
 
-  terminal = await models.terminal.create(req.body)
+  await models.sequelize.transaction(async t => {
+    terminal = await models.terminal.create(req.body, { transaction: t })
+    terminal = await models.terminal.findByPk(terminal.id, { transaction: t })
+  })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.terminal
-      .findByPk(terminal.id)
+    terminal
   )
 }
 
@@ -104,12 +106,12 @@ module.exports.updateTerminal = async (req, res, next) => {
 
       if (terminal.changed()) updated = true
       await terminal.save({ transaction: t })
+
+      if (updated) {
+        terminal = await scopedTerminal.findByPk(terminal.id, { transaction: t })
+      }
     }
   })
-
-  if (updated) {
-    terminal = await scopedTerminal.findByPk(req.params.terminalId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,

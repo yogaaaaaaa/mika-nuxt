@@ -28,13 +28,14 @@ module.exports.createAdmin = async (req, res, next) => {
       include: [ models.user ],
       transaction: t
     })
+    admin = await models.admin
+      .scope('admin')
+      .findByPk(admin.id, { transaction: t })
   })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.admin
-      .scope('admin')
-      .findByPk(admin.id)
+    admin
   )
 }
 
@@ -101,13 +102,13 @@ module.exports.updateAdmin = async (req, res, next) => {
 
       if (admin.changed()) updated = true
       await admin.save({ transaction: t })
+
+      if (updated) {
+        admin = await scopedAdmin.findByPk(admin.id, { transaction: t })
+        await auth.removeAuthByUserId(admin.userId)
+      }
     }
   })
-
-  if (updated) {
-    admin = await scopedAdmin.findByPk(req.params.adminId)
-    await auth.removeAuthByUserId(admin.userId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,
@@ -128,10 +129,9 @@ module.exports.deleteAdmin = async (req, res, next) => {
       if (admin.user) {
         await admin.user.destroy({ force: true, transaction: t })
       }
+      await auth.removeAuthByUserId(admin.userId)
     }
   })
-
-  if (admin) await auth.removeAuthByUserId(admin.userId)
 
   msg.expressDeleteEntityResponse(
     res,
@@ -155,7 +155,7 @@ module.exports.updateAdminMiddlewares = [
 
 module.exports.getAdminsMiddlewares = [
   queryToSequelizeMiddleware.commonValidator,
-  queryToSequelizeMiddleware.paginationValidator('admin'),
+  queryToSequelizeMiddleware.paginationValidator(['admin']),
   queryToSequelizeMiddleware.filterValidator(['admin', 'user']),
   errorMiddleware.validatorErrorHandler,
   queryToSequelizeMiddleware.common,

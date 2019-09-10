@@ -11,12 +11,14 @@ const terminalModelValidator = require('../validators/terminalModelValidator')
 module.exports.createTerminalModel = async (req, res, next) => {
   let terminalModel
 
-  terminalModel = await models.terminalModel.create(req.body)
+  await models.sequelize.transaction(async t => {
+    terminalModel = await models.terminalModel.create(req.body, { transaction: t })
+    terminalModel = await models.terminalModel.findByPk(terminalModel.id, { transaction: t })
+  })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.terminalModel
-      .findByPk(terminalModel.id)
+    terminalModel
   )
 }
 
@@ -75,12 +77,12 @@ module.exports.updateTerminalModel = async (req, res, next) => {
 
       if (terminalModel.changed()) updated = true
       await terminalModel.save({ transaction: t })
+
+      if (updated) {
+        terminalModel = await scopedTerminalModel.findByPk(terminalModel.id, { transaction: t })
+      }
     }
   })
-
-  if (updated) {
-    terminalModel = await scopedTerminalModel.findByPk(req.params.terminalModelId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,

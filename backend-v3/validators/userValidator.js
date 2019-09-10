@@ -20,8 +20,8 @@ module.exports.bodyNestedCreate = (defaultUserType, validUserRoles) => [
     .not()
     .isEmpty(),
   body('user.password')
-    .not()
-    .isEmpty(),
+    .isString()
+    .isLength({ min: 8 }),
   helper.bodyDefault('user.userType', defaultUserType),
   userRolesValidator(validUserRoles)
 ]
@@ -32,8 +32,8 @@ module.exports.bodyNestedUpdate = (defaultUserType, validUserRoles) => [
     .isEmpty()
     .optional(),
   body('user.password')
-    .not()
-    .isEmpty()
+    .isString()
+    .isLength({ min: 8 })
     .optional(),
   helper.bodyDefaultExist('user.userType', defaultUserType),
   userRolesValidator(validUserRoles).optional()

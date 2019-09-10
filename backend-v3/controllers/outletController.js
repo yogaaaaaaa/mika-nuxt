@@ -55,13 +55,12 @@ module.exports.createOutlet = async (req, res, next) => {
 
   await models.sequelize.transaction(async t => {
     outlet = await models.outlet.createWithResources(req.body, { transaction: t })
+    outlet = await models.outlet.findByPk(outlet.id, { transaction: t })
   })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.outlet
-      .scope('admin')
-      .findByPk(outlet.id)
+    outlet
   )
 }
 
@@ -129,12 +128,12 @@ module.exports.updateOutlet = async (req, res, next) => {
 
       if (outlet.changed()) updated = true
       await outlet.save({ transaction: t })
+
+      if (updated) {
+        outlet = await scopedOutlet.findByPk(outlet.id, { transaction: t })
+      }
     }
   })
-
-  if (updated) {
-    outlet = await scopedOutlet.findByPk(req.params.outletId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,

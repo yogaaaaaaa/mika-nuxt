@@ -115,20 +115,20 @@ async function altoRequest (url, request, config) {
  }
  ```
  */
-module.exports.altoMakeQrCodePayment = async function (ctx) {
+module.exports.altoMakeQrCodePayment = async function (config) {
   let request = {}
-  request.mch_id = ctx.mch_id
+  request.mch_id = config.mch_id
   request.trade_type = 'QR_CODE'
-  request.currency = ctx.currency
-  request.out_trade_no = ctx.out_trade_no
-  request.amount = ctx.amount
-  request.subject = ctx.subject
-  if (ctx.operator_id) { // Optional parameter
-    request.operator_id = ctx.operator_id
+  request.currency = config.currency
+  request.out_trade_no = config.out_trade_no
+  request.amount = config.amount
+  request.subject = config.subject
+  if (config.operator_id) { // Optional parameter
+    request.operator_id = config.operator_id
   }
-  request.notify_url = ctx.notify_url // notify_url is optional parameter, but required for obvious reason
+  request.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
 
-  return altoRequest(`${ctx.baseUrl}/mapi/pay/order`, request, ctx)
+  return altoRequest(`${config.baseUrl}/mapi/pay/order`, request, config)
 }
 
 /**
@@ -156,16 +156,16 @@ module.exports.altoMakeQrCodePayment = async function (ctx) {
  }
  ```
  */
-module.exports.altoQueryPayment = async function (ctx) {
+module.exports.altoQueryPayment = async function (config) {
   let request = {}
-  request.mch_id = ctx.mch_id
-  if (ctx.out_trade_no) {
-    request.out_trade_no = ctx.out_trade_no
-  } else if (ctx.trade_no) {
-    request.trade_no = ctx.trade_no
+  request.mch_id = config.mch_id
+  if (config.out_trade_no) {
+    request.out_trade_no = config.out_trade_no
+  } else if (config.trade_no) {
+    request.trade_no = config.trade_no
   }
 
-  return altoRequest(`${ctx.baseUrl}/mapi/pay/query`, request, ctx)
+  return altoRequest(`${config.baseUrl}/mapi/pay/query`, request, config)
 }
 
 /**
@@ -192,20 +192,20 @@ module.exports.altoQueryPayment = async function (ctx) {
  }
  ```
  */
-module.exports.altoRefundPayment = async function (ctx) {
+module.exports.altoRefundPayment = async function (config) {
   let request = {}
-  request.mch_id = ctx.mch_id
-  if (ctx.out_trade_no) {
-    request.out_trade_no = ctx.out_trade_no
-  } else if (ctx.trade_no) {
-    request.trade_no = ctx.trade_no
+  request.mch_id = config.mch_id
+  if (config.out_trade_no) {
+    request.out_trade_no = config.out_trade_no
+  } else if (config.trade_no) {
+    request.trade_no = config.trade_no
   }
-  request.out_refund_no = ctx.out_refund_no
-  request.refund_amount = ctx.refund_amount
-  request.amount = ctx.amount
-  request.notify_url = ctx.notify_url // notify_url is optional parameter, but required for obvious reason
+  request.out_refund_no = config.out_refund_no
+  request.refund_amount = config.refund_amount
+  request.amount = config.amount
+  request.notify_url = config.notify_url // notify_url is optional parameter, but required for obvious reason
 
-  return altoRequest(`${ctx.baseUrl}/mapi/pay/refund`, request, ctx)
+  return altoRequest(`${config.baseUrl}/mapi/pay/refund`, request, config)
 }
 
 /**
@@ -225,17 +225,17 @@ module.exports.altoRefundPayment = async function (ctx) {
   }
  ```
  */
-module.exports.altoQueryRefundPayment = async function (ctx) {
+module.exports.altoQueryRefundPayment = async function (config) {
   let request = {}
-  request.mch_id = ctx.mch_id
-  if (ctx.out_trade_no) {
-    request.out_trade_no = ctx.out_trade_no
-  } else if (ctx.trade_no) {
-    request.trade_no = ctx.trade_no
+  request.mch_id = config.mch_id
+  if (config.out_trade_no) {
+    request.out_trade_no = config.out_trade_no
+  } else if (config.trade_no) {
+    request.trade_no = config.trade_no
   }
-  request.out_refund_no = ctx.out_refund_no
-  request.refund_amount = ctx.refund_amount
-  request.amount = ctx.amount
+  request.out_refund_no = config.out_refund_no
+  request.refund_amount = config.refund_amount
+  request.amount = config.amount
 
-  return altoRequest(`${ctx.baseUrl}/mapi/pay/refund_query`, request, ctx)
+  return altoRequest(`${config.baseUrl}/mapi/pay/refund_query`, request, config)
 }

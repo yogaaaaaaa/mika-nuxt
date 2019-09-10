@@ -18,8 +18,7 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
   }
 
   if (req.params.acquirerId) {
-    let acquirer = null
-
+    let acquirer
     let agent = await models.agent.scope(
       { method: ['agentAcquirer', req.params.acquirerId] }
     ).findOne(query)
@@ -37,7 +36,6 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
     )
   } else {
     let acquirers
-
     let agent = await models.agent.scope(
       'agentAcquirer'
     ).findOne(query)
@@ -107,13 +105,17 @@ module.exports.createAcquirer = async (req, res, next) => {
     req.body.merchantId = req.params.merchantId
   }
 
-  let acquirer = await models.acquirer.create(req.body)
+  let acquirer
+  await models.sequelize.transaction(async t => {
+    acquirer = await models.acquirer.create(req.body, { transaction: t })
+    acquirer = await models.acquirer
+      .scope('admin')
+      .findByPk(acquirer.id, { transaction: t })
+  })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.acquirer
-      .scope('admin')
-      .findByPk(acquirer.id)
+    acquirer
   )
 }
 
@@ -172,12 +174,12 @@ module.exports.updateAcquirer = async (req, res, next) => {
 
       if (acquirer.changed()) updated = true
       await acquirer.save({ transaction: t })
+
+      if (updated) {
+        acquirer = await scopedAcquirer.findByPk(acquirer.id, { transaction: t })
+      }
     }
   })
-
-  if (updated) {
-    acquirer = await scopedAcquirer.findByPk(req.params.acquirerId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,

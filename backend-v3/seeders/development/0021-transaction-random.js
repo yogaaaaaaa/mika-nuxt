@@ -9,7 +9,7 @@ module.exports = {
 
     const generateMerchant1 = async (count = 100) => fake.transactions(
       [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      [1, 2, 3, 4],
+      [1, 2, 3, 4, 7, 8],
       startDate,
       endDate,
       count
@@ -17,7 +17,7 @@ module.exports = {
 
     const generateMerchant2 = async (count = 100) => fake.transactions(
       [21, 22, 23, 24, 25],
-      [11, 12, 13, 14],
+      [11, 12, 13, 14, 15, 16],
       startDate,
       endDate,
       count
@@ -25,7 +25,7 @@ module.exports = {
 
     const generateMerchant5 = async (count = 100) => fake.transactions(
       [91, 92, 93, 94, 95, 96],
-      [91, 92, 93, 94, 95, 96],
+      [91, 92, 93, 94, 95, 96, 97],
       startDate,
       endDate,
       count

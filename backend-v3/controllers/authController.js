@@ -11,8 +11,8 @@ const { body } = require('express-validator')
 const commonConfig = require('../configs/commonConfig')
 
 module.exports.loginValidator = [
-  body('username').exists(),
-  body('password').exists(),
+  body('username').isString(),
+  body('password').isString(),
   body('userTypes').isArray().optional()
 ]
 
@@ -26,8 +26,11 @@ module.exports.sessionTokenCheckValidator = [
 ]
 
 module.exports.changePasswordValidator = [
-  body('oldPassword').isString().isLength({ min: 8, max: 250 }),
-  body('password').isString().isLength({ min: 8, max: 250 })
+  body('oldPassword')
+    .isString(),
+  body('password')
+    .isString()
+    .isLength({ min: 8 })
 ]
 
 module.exports.login = async (req, res, next) => {
@@ -101,13 +104,12 @@ module.exports.changePassword = async (req, res, next) => {
       res,
       msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
     )
-    return
+  } else {
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD_INVALID_OLD_PASSWORD
+    )
   }
-
-  msg.expressResponse(
-    res,
-    msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD_INVALID_OLD_PASSWORD
-  )
 }
 
 module.exports.resetPassword = async (req, res, next) => {

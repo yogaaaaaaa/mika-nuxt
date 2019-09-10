@@ -14,7 +14,7 @@ module.exports = (trxManager) => {
     defaultMaximumAmount: 20000000,
     properties: {
       flows: [
-        trxManager.transactionFlows.GET_TOKEN
+        trxManager.transactionFlows.PROVIDE_TOKEN
       ],
       tokenTypes: [
         trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
@@ -32,7 +32,7 @@ module.exports = (trxManager) => {
         ...altoConfig
       })
 
-      if (!response) throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
+      if (!response) throw trxManager.error(trxManager.errorTypes.ACQUIRER_HOST_UNAVAILABLE)
 
       ctx.transaction.token = response.uri
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT

@@ -28,7 +28,7 @@ module.exports.dukptData = dukptData
 module.exports.berTlv = berTlv
 module.exports.berTlvAnnotations = berTlvAnnotations
 
-// Entry Mode, see : https://en.wikipedia.org/wiki/ISO_8583
+// Entry Mode, see : https://en.wikipedia.org/wiki/ISO_8583#Point_of_service_entry_modes
 module.exports.posEntryMode = {
   MAGSTRIPE_WITH_PIN: '021',
   MAGSTRIPE_WITH_SIGNATURE: '022',
@@ -316,7 +316,7 @@ module.exports.evenAndPadHexstring = (hsData) => {
 
 /**
  * Generate Format 0 (ISO-0) Pinblock
- * For more information see: https://www.eftlab.co.uk/index.php/site-map/knowledge-base/261-complete-list-of-pin-blocks-in-payments
+ * For more information see: https://www.eftlab.com/knowledge-base/261-complete-list-of-pin-blocks-in-payments/
  */
 module.exports.generateISO0Pinblock = (hsPan, hsPin) => {
   let pinBlockPAN = `0000${hsPan.substring(3, 15)}`

@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Generic acquirer handler
+ * Sample acquirer handler
  * Provided as example and template
 */
 
@@ -20,11 +20,14 @@ module.exports = (trxManager) => {
     // Used mostly by frontend
     classes: ['generic', 'berkumapay'],
 
-    // properties sub property contain comma delimited list that define various things like
-    // what kind of token this Acquirer wants or generate
+    // Contain array of acquirer flows, supported token types and userTokenTypes
     properties: {
-      flows: [trxManager.transactionFlows.PROVIDE_TOKEN],
-      tokenTypes: [trxManager.tokenTypes.TOKEN_QRCODE_CONTENT],
+      flows: [
+        trxManager.transactionFlows.PROVIDE_TOKEN
+      ],
+      tokenTypes: [
+        trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
+      ],
       userTokenTypes: []
     },
 
@@ -36,13 +39,22 @@ module.exports = (trxManager) => {
       ctx.transaction.token = 'QRCODE-GENERIC'
     },
 
-    // This handler will be called when transaction is timed out
     async expiryHandler (ctx) {
+    },
+
+    async cancelHandler (ctx) {
+    },
+
+    async voidHandler (ctx) {
+    },
+
+    async checkHandler (ctx) {
     },
 
     async followUpHandler (ctx) {
     },
-    async checkHandler (ctx) {
+
+    async forceUpdateHandler (ctx) {
     }
   })
 }

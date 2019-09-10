@@ -14,6 +14,7 @@ const developmentConfig = {
       script: 'apps/core.js',
       exec_mode: 'fork',
       watch: true,
+      node_args: ['--inspect=127.0.0.1:9991'],
       ignore_watch: ignoreWatch,
       time: true,
       env: {
@@ -26,6 +27,7 @@ const developmentConfig = {
       script: 'apps/report.js',
       exec_mode: 'fork',
       watch: true,
+      node_args: ['--inspect=127.0.0.1:9992'],
       ignore_watch: ignoreWatch,
       time: true,
       env: {

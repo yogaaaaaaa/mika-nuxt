@@ -1,6 +1,6 @@
 'use strict'
 
-const script = require('../libs/script')
+const query = require('./helpers/query')
 
 module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         {
           outletId: {
             [Op.in]: Sequelize.literal(
-              script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+              query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
             )
           }
         }
@@ -99,7 +99,7 @@ module.exports = (sequelize, DataTypes) => {
   agent.addScope('trxManager', (acquirerId) => ({
     include: [
       {
-        model: sequelize.models.outlet.scope('id'),
+        model: sequelize.models.outlet,
         required: true,
         include: [
           {

@@ -30,13 +30,18 @@ module.exports.altoHandleNotification = [
       if (parseInt(data.trade_status) === 1) {
         if (transaction.status === trxManager.transactionStatuses.CREATED) {
           transaction.status = trxManager.transactionStatuses.SUCCESS
-          await transaction.save()
 
-          trxManager.emitStatusChange(transaction)
+          await models.sequelize.transaction(async t => {
+            await transaction.save({ transaction: t })
+            await trxManager.emitStatusChange(transaction, t)
+          })
 
           res.status(200).type('text').send('SUCCESS')
           return
-        } else if (transaction.status === trxManager.transactionStatuses.FAILED) {
+        } else if (
+          transaction.status === trxManager.transactionStatuses.FAILED ||
+          transaction.status === trxManager.transactionStatuses.EXPIRED
+        ) {
           // Invalid transaction, we need to refund
           let response = await alto.altoRefundPayment(Object.assign({
             out_trade_no: data.out_trade_no,

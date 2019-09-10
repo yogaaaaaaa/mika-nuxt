@@ -2,10 +2,6 @@
 
 const hash = require('../../libs/hash')
 
-/**
- * Note: all password is the same as username
- */
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     queryInterface.bulkInsert('user', [

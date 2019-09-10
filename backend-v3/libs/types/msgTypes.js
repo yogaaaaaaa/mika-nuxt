@@ -53,23 +53,23 @@ module.exports.msgTypes = {
     status: 'sys-402',
     message: 'Bad request, invalid entity identifier'
   },
-  MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT: {
-    isError: true,
-    httpStatus: 409,
-    status: 'sys-403',
-    message: 'Bad request, unique constraint violation'
-  },
   MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_PARENT: {
     isError: true,
     httpStatus: 400,
     status: 'sys-403',
-    message: 'Bad request, entity is still referenced by another entity'
+    message: 'Bad request, this entity is still referred by another entity'
   },
   MSG_ERROR_NOT_FOUND: {
     isError: true,
     httpStatus: 404,
     status: 'sys-404',
     message: 'URL not found'
+  },
+  MSG_ERROR_BAD_REQUEST_UNIQUE_CONSTRAINT: {
+    isError: true,
+    httpStatus: 409,
+    status: 'sys-409',
+    message: 'Bad request, unique constraint error'
   },
   MSG_SUCCESS_MOVED: {
     httpStatus: 301,
@@ -220,10 +220,30 @@ module.exports.msgTypes = {
     status: 'trx-201',
     message: 'Transaction created and processed successfully'
   },
-  MSG_SUCCESS_TRANSACTION_PENDING_NEED_FOLLOW_UP: {
+  MSG_SUCCESS_TRANSACTION_CREATED_AND_NEED_FOLLOW_UP: {
     httpStatus: 200,
     status: 'trx-202',
-    message: 'Transaction pending, follow up action is needed'
+    message: 'Transaction created, follow up action is needed'
+  },
+  MSG_SUCCESS_TRANSACTION_CANCELED: {
+    httpStatus: 200,
+    status: 'trx-203',
+    message: 'Transaction canceled'
+  },
+  MSG_SUCCESS_TRANSACTION_VOIDED: {
+    httpStatus: 200,
+    status: 'trx-204',
+    message: 'Transaction voided'
+  },
+  MSG_SUCCESS_TRANSACTION_REFUNDED: {
+    httpStatus: 200,
+    status: 'trx-205',
+    message: 'Transaction refunded'
+  },
+  MSG_SUCCESS_TRANSACTION_PARTIALLY_REFUNDED: {
+    httpStatus: 200,
+    status: 'trx-206',
+    message: 'Transaction partially refunded'
   },
   MSG_SUCCESS_TRANSACTION_REDIRECTED: {
     httpStatus: 303,
@@ -231,39 +251,70 @@ module.exports.msgTypes = {
     message: 'Redirect transaction to another acquirer'
   },
   MSG_ERROR_TRANSACTION_INVALID_ACQUIRER: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-400',
     message: 'Invalid acquirer'
   },
   MSG_ERROR_TRANSACTION_INVALID_AGENT: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-401',
     message: 'Invalid agent for transaction'
   },
   MSG_ERROR_TRANSACTION_INVALID: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-404',
     message: 'Invalid transaction'
   },
   MSG_ERROR_TRANSACTION_NEED_USER_TOKEN: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-410',
     message: 'User token needed'
   },
   MSG_ERROR_TRANSACTION_INVALID_USER_TOKEN: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-411',
     message: 'Invalid User token'
   },
   MSG_ERROR_TRANSACTION_USER_TOKEN_NOT_SUPPORTED: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-412',
     message: 'User token type is not supported'
   },
   MSG_ERROR_TRANSACTION_NEED_USER_TOKEN_TYPE: {
+    isError: true,
     httpStatus: 400,
     status: 'trx-413',
     message: 'Ambiguous user token. Please include user token type'
+  },
+  MSG_ERROR_TRANSACTION_VOID_NOT_SUPPORTED: {
+    isError: true,
+    httpStatus: 400,
+    status: 'trx-414',
+    message: 'Void is not supported for this acquirer'
+  },
+  MSG_ERROR_TRANSACTION_REFUND_NOT_SUPPORTED: {
+    isError: true,
+    httpStatus: 400,
+    status: 'trx-415',
+    message: 'Refund is not supported for this acquirer'
+  },
+  MSG_ERROR_TRANSACTION_PARTIAL_REFUND_NOT_SUPPORTED: {
+    isError: true,
+    httpStatus: 400,
+    status: 'trx-416',
+    message: 'Partial refund is not supported for this acquirer'
+  },
+  MSG_ERROR_TRANSACTION_REFUND_INVALID_AMOUNT: {
+    isError: true,
+    httpStatus: 400,
+    status: 'trx-417',
+    message: 'Invalid amount for refund'
   },
   MSG_ERROR_TRANSACTION_AMOUNT_TOO_LOW: {
     isError: true,
@@ -277,23 +328,29 @@ module.exports.msgTypes = {
     status: 'trx-441',
     message: 'Transaction amount is too high'
   },
-  MSG_ERROR_TRANSACTION_UNSUPPORTED_ACQUIRER: {
-    isError: true,
-    httpStatus: 500,
-    status: 'trx-500',
-    message: 'Acquirer is not currently supported'
-  },
-  MSG_ERROR_TRANSACTION_ACQUIRER_NOT_RESPONDING: {
-    isError: true,
-    httpStatus: 500,
-    status: 'trx-501',
-    message: 'Cannot process transaction, acquirer is not responding'
-  },
   MSG_ERROR_TRANSACTION_INVALID_ACQUIRER_CONFIG: {
     isError: true,
     httpStatus: 500,
+    status: 'trx-500',
+    message: 'Invalid acquirer configuration'
+  },
+  MSG_ERROR_TRANSACTION_ACQUIRER_HOST_UNAVAILABLE: {
+    isError: true,
+    httpStatus: 500,
     status: 'trx-510',
-    message: 'Cannot create transaction, invalid acquirer configuration'
+    message: 'Cannot process transaction due to acquirer host response error, please try again later'
+  },
+  MSG_ERROR_TRANSACTION_ACQUIRER_HOST_UNABLE_TO_PROCESS: {
+    isError: true,
+    httpStatus: 500,
+    status: 'trx-511',
+    message: 'Acquirer host is unable to process transaction, please try again'
+  },
+  MSG_ERROR_TRANSACTION_INVALID_ON_ACQUIRER_HOST: {
+    isError: true,
+    httpStatus: 500,
+    status: 'trx-512',
+    message: 'Invalid transaction on acquirer host, please report this error to MIKA'
   }
 }
 
@@ -303,5 +360,6 @@ module.exports.msgTypes = {
 module.exports.eventTypes = {
   EVENT_GENERIC: 'generic',
   EVENT_TRANSACTION_SUCCESS: 'transactionSuccess',
-  EVENT_TRANSACTION_FAILED: 'transactionFailed'
+  EVENT_TRANSACTION_FAILED: 'transactionFailed',
+  EVENT_TRANSACTION_EXPIRED: 'transactionExpired'
 }

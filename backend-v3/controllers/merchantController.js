@@ -12,12 +12,12 @@ module.exports.createMerchant = async (req, res, next) => {
   let merchant
   await models.sequelize.transaction(async t => {
     merchant = await models.merchant.createWithResources(req.body, { transaction: t })
+    merchant = await models.merchant.findByPk(merchant.id, { transaction: t })
   })
+
   msg.expressCreateEntityResponse(
     res,
-    await models.merchant
-      .scope('admin')
-      .findByPk(merchant.id)
+    merchant
   )
 }
 
@@ -77,11 +77,11 @@ module.exports.updateMerchant = async (req, res, next) => {
       if (merchant.changed()) updated = true
       await merchant.save({ transaction: t })
     }
-  })
 
-  if (updated) {
-    merchant = await scopedMerchant.findByPk(req.params.merchantId)
-  }
+    if (updated) {
+      merchant = await scopedMerchant.findByPk(merchant.id, { transaction: t })
+    }
+  })
 
   msg.expressUpdateEntityResponse(
     res,

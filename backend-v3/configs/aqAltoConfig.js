@@ -28,7 +28,7 @@ Vw/qVE3t7QIDAQAB
 
 let baseConfig = {
   baseUrl: 'https://pay.altopay.co.id',
-  notifEndpoint: '/payment/alto/notif',
+  notifEndpoint: '/acquirer_notif/alto',
   notify_url: null,
   currency: 'IDR',
 

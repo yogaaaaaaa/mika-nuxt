@@ -1,6 +1,6 @@
 'use strict'
 
-const script = require('../libs/script')
+const query = require('./helpers/query')
 
 module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
     where: {
       id: {
         [Op.notIn]: Sequelize.literal(
-          script.get('subquery/getAcquirerExclusionByAgent.sql', [ agentId ])
+          query.get('sub/getAcquirerExclusionByAgent.sql', [ agentId ])
         )
       }
     }
@@ -87,7 +87,9 @@ module.exports = (sequelize, DataTypes) => {
 
   acquirer.addScope('admin', () => ({
     include: [
-      sequelize.models.acquirerType
+      sequelize.models.acquirerConfig,
+      sequelize.models.acquirerType,
+      sequelize.models.merchant.scope('id', 'name')
     ]
   }))
 

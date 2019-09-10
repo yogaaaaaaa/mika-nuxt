@@ -1,7 +1,7 @@
 'use strict'
 
 const kv = require('./helpers/kv')
-const script = require('../libs/script')
+const query = require('./helpers/query')
 
 module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
@@ -81,6 +81,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
+      sequelize.models.transactionRefund.scope('excludeTransactionId'),
       {
         required: true,
         model: sequelize.models.acquirer.scope(
@@ -102,6 +103,7 @@ module.exports = (sequelize, DataTypes) => {
   transaction.addScope('merchantStaff', (merchantStaffId, outletId) => ({
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
+      sequelize.models.transactionRefund.scope('excludeTransactionId'),
       {
         model: sequelize.models.agent.scope('excludeTimestamp'),
         include: [
@@ -112,7 +114,7 @@ module.exports = (sequelize, DataTypes) => {
             {
               outletId: {
                 [Op.in]: Sequelize.literal(
-                  script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                  query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
                 )
               }
             },
@@ -122,18 +124,43 @@ module.exports = (sequelize, DataTypes) => {
       },
       {
         required: true,
-        model: sequelize.models.acquirer.scope('excludeShare', 'excludeTimestamp'),
+        model: sequelize.models.acquirer.scope('excludeTimestamp'),
         include: [
           sequelize.models.acquirerType.scope('excludeTimestamp')
         ]
       }
     ]
   }))
+  // TODO: This query is HORRIBLE, please fix ASAP
   transaction.addScope('merchantStaffAcquirerTransactionStats', (merchantStaffId) => ({
     attributes: [
       'acquirerId',
-      [Sequelize.literal('SUM(`transaction`.`amount`)'), 'amount'],
-      [Sequelize.literal('SUM( (`transaction`.`amount` * IFNULL(`acquirer`.`shareMerchant`, 1)) - IFNULL(`acquirer`.`processFee`, 0))'), 'nettAmount'],
+      [
+        Sequelize.literal(
+          'SUM(`transaction`.`amount`)'
+        ),
+        'totalAmountNoRefund'
+      ],
+      [
+        Sequelize.literal(
+          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0) ) `
+        ),
+        'totalAmount'
+      ],
+      [
+        Sequelize.literal(
+          'SUM(' +
+            'GREATEST(' +
+              '(' +
+                `(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0)` +
+                ' * IFNULL(`acquirer`.`shareMerchant`, 1))' +
+              ')' +
+              ' - IFNULL(`acquirer`.`processFee`, 0)' +
+            ', 0)' +
+          ')'
+        ),
+        'totalNettAmount'
+      ],
       [Sequelize.fn('COUNT', Sequelize.col('transaction.id')), 'transactionCount']
     ],
     group: [
@@ -158,7 +185,7 @@ module.exports = (sequelize, DataTypes) => {
           [Op.and]: {
             outletId: {
               [Op.in]: Sequelize.literal(
-                script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
               )
             }
           }
@@ -179,7 +206,7 @@ module.exports = (sequelize, DataTypes) => {
             {
               outletId: {
                 [Op.in]: Sequelize.literal(
-                  script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                  query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
                 )
               }
             }
@@ -189,10 +216,35 @@ module.exports = (sequelize, DataTypes) => {
     ]
   }))
 
+  // TODO: This query is HORRIBLE, please fix ASAP
   transaction.addScope('merchantStaffReportOutletTransactionStats', (merchantStaffId) => ({
     attributes: [
-      [Sequelize.literal('SUM(`transaction`.`amount`)'), 'amount'],
-      [Sequelize.literal('SUM( (`transaction`.`amount` * IFNULL(`acquirer`.`shareMerchant`, 1)) - IFNULL(`acquirer`.`processFee`, 0))'), 'nettAmount'],
+      [
+        Sequelize.literal(
+          'SUM(`transaction`.`amount`)'
+        ),
+        'totalAmountNoRefund'
+      ],
+      [
+        Sequelize.literal(
+          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0) ) `
+        ),
+        'totalAmount'
+      ],
+      [
+        Sequelize.literal(
+          'SUM(' +
+            'GREATEST(' +
+              '(' +
+                `(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0)` +
+                ' * IFNULL(`acquirer`.`shareMerchant`, 1))' +
+              ')' +
+              ' - IFNULL(`acquirer`.`processFee`, 0)' +
+            ', 0)' +
+          ')'
+        ),
+        'totalNettAmount'
+      ],
       [Sequelize.fn('COUNT', Sequelize.col('transaction.id')), 'transactionCount']
     ],
     group: [
@@ -212,7 +264,7 @@ module.exports = (sequelize, DataTypes) => {
           [Op.and]: {
             outletId: {
               [Op.in]: Sequelize.literal(
-                script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
               )
             }
           }
@@ -230,7 +282,7 @@ module.exports = (sequelize, DataTypes) => {
             {
               outletId: {
                 [Op.in]: Sequelize.literal(
-                  script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+                  query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
                 )
               }
             }
@@ -291,23 +343,11 @@ module.exports = (sequelize, DataTypes) => {
     ]
   }))
   transaction.addScope('trxManager', () => ({
-    include: [
-      {
-        model: sequelize.models.agent,
-        include: [
-          {
-            model: sequelize.models.outlet,
-            include: sequelize.models.merchant
-          }
-        ]
-      },
-      {
-        model: sequelize.models.acquirer.scope(
-          'acquirerType',
-          'acquirerConfig'
-        )
-      }
-    ]
+    attributes: {
+      include: [
+        [ Sequelize.literal(query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])), 'totalRefundAmount' ]
+      ]
+    }
   }))
 
   transaction.addScope('admin', () => ({

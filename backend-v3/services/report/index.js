@@ -28,7 +28,7 @@ module.exports = {
           type: 'object',
           optional: true,
           props: {
-            date: { type: 'date', optional: true },
+            date: { type: 'date', optional: true, convert: true },
             email: { type: 'email', optional: true },
             locale: { type: 'string', optional: true },
             utcOffset: { type: 'string', optional: true }
@@ -39,8 +39,15 @@ module.exports = {
         let idReport = await uid.ksuid.random()
 
         generate.createMerchantStaffDailyReport(ctx.params.merchantStaffId, ctx.params.options)
-          .catch(err => this.broker.emit(eventTypes.REPORT_ERROR, err))
-          .then(result => this.broker.emit(eventTypes.REPORT_DONE, result))
+          .catch(err => {
+            this.broker.emit(eventTypes.REPORT_ERROR, err)
+            console.error(err)
+          })
+          .then(result => {
+            if (result) {
+              this.broker.emit(eventTypes.REPORT_DONE, result)
+            }
+          })
 
         return {
           idReport: idReport.string

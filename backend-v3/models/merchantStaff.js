@@ -54,6 +54,7 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       {
         model: sequelize.models.merchant.scope('id'),
+        required: true,
         include: [
           {
             where: acquirerId ? { id: acquirerId } : undefined,

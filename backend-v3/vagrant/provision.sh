@@ -6,7 +6,7 @@ cd /
 
 # Installing epel and common depedency
 yum -y update
-yum -y install wget unzip epel-release gcc gcc-c++ make
+yum -y install nano unzip epel-release gcc gcc-c++ make
 yum -y update
 
 # mariadb repo herdocs
@@ -18,6 +18,10 @@ cat <<-MARIADBREPO > /etc/yum.repos.d/MariaDB.repo
 	gpgcheck=1
 MARIADBREPO
 
+# arangodb repo
+cd /etc/yum.repos.d/
+curl -s -OL https://download.arangodb.com/arangodb34/RPM/arangodb.repo
+
 # nodesource repo
 curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 
@@ -25,17 +29,17 @@ curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 yum -y install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
 
 # Installation of mariadb, nodejs and redis
-yum -y install nodejs MariaDB-server MariaDB-client
+yum -y update
+yum -y install nodejs MariaDB-server MariaDB-client arangodb3-3.4.7-1.0
 yum -y --enablerepo=remi install redis
-npm install pm2 -gt
 
-# Configuring and enabling redis
+## Configuring and enabling redis
 sed -i 's/bind 127.0.0.1/#bind 127.0.0.1/' /etc/redis.conf
 sed -i 's/protected-mode yes/protected-mode no/' /etc/redis.conf
 systemctl enable redis
 systemctl start redis
 
-## Configure and enabling mariadb ##
+## Configure and enabling mariadb
 sed -i 's/#bind-address=0.0.0.0/bind-address=0.0.0.0/' /etc/my.cnf.d/server.cnf
 systemctl enable mariadb
 systemctl start mariadb
@@ -47,13 +51,33 @@ mysql <<-MARIADBUSERQUERY
 	FLUSH PRIVILEGES;
 MARIADBUSERQUERY
 
-## Mosquitto build preparation ##
+## Configure and enabling arrangodb
+
+function waitArango {
+	while :; do
+		curl -sI 'http://localhost:8529/' | grep 'HTTP/1.1 301' > /dev/null 2>&1 && break
+		sleep 1
+	done
+}
+
+sed -i 's|endpoint =.*|endpoint = tcp://0.0.0.0:8529|' /etc/arangodb3/arangod.conf
+sed -i 's/authentication =.*/authentication = false/' /etc/arangodb3/arangod.conf
+systemctl enable arangodb3.service
+systemctl start arangodb3.service
+waitArango
+cat <<-ARANGOINIT | arangosh  --quiet --server.username "root" --server.password "" --server.database "_system"
+	require("org/arangodb/users").save("mikadev", "mikadev")
+ARANGOINIT
+sed -i 's/authentication =.*/authentication = true/' /etc/arangodb3/arangod.conf
+systemctl restart arangodb3.service
+
+## Mosquitto build preparation
 yum install -y c-ares-devel libwebsockets-devel openssl-devel libuuid-devel libcurl-devel libwebsockets hiredis-devel
 mkdir -p /opt/mosquitto_build
 
-## Build and Install mosquitto ##
+## Build and Install mosquitto
 cd /opt/mosquitto_build
-wget --quiet 'http://mosquitto.org/files/source/mosquitto-1.4.15.tar.gz'
+curl -s -OL http://mosquitto.org/files/source/mosquitto-1.4.15.tar.gz
 tar -xzf mosquitto-1.4.15.tar.gz
 chown -R root:root mosquitto-1.4.15
 cd mosquitto-1.4.15
@@ -61,9 +85,9 @@ sed -i 's/WITH_WEBSOCKETS:=no/WITH_WEBSOCKETS:=yes/' config.mk
 make
 make install
 
-## Build mosquitto-auth-plugin ##
+## Build mosquitto-auth-plugin
 cd /opt/mosquitto_build
-wget --quiet 'https://github.com/jpmens/mosquitto-auth-plug/archive/0.1.1.zip'
+curl -s -OL https://github.com/jpmens/mosquitto-auth-plug/archive/0.1.1.zip
 unzip 0.1.1.zip
 cd mosquitto-auth-plug-0.1.1
 cp config.mk.in config.mk
@@ -77,7 +101,7 @@ cp auth-plug.so /opt/mosquitto_build
 
 cd /
 
-## Adding ld config path ##
+## Adding ld config path
 echo "/usr/local/lib" >> /etc/ld.so.conf.d/usrlocallib.conf
 ldconfig
 
@@ -169,13 +193,13 @@ cat <<-MOSQUITTOMSCONFIG > /etc/mosquitto/mosquitto-ms.conf
 	# password_file /etc/mosquitto/mspwfile
 MOSQUITTOMSCONFIG
 
-## Adding mosquitto superuser ##
+## Adding mosquitto superuser
 echo "set mika-v3-dev:mosq:superuser $(/opt/mosquitto_build/np -p superuser)" | redis-cli
 
 ## Adding user mosquitto
 useradd mosquitto -M -d /etc/mosquitto
 
-## Adding service for mosquitto ##
+## Adding service for mosquitto
 cat <<-MOSQUITTOSYSTEMDSERVICE > /etc/systemd/system/mosquitto.service
 	[Unit]
 	Description=Mosquitto MQTT v3.1/v3.1.1 Broker
@@ -209,5 +233,6 @@ MOSQUITTOMSSYSTEMDSERVICE
 systemctl daemon-reload
 systemctl enable mosquitto mosquitto-ms
 systemctl start mosquitto mosquitto-ms
+
 
 echo "backend-v3 development provisioning done"

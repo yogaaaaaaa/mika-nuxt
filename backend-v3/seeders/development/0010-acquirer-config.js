@@ -19,9 +19,19 @@ module.exports = {
         handler: 'alto'
       },
       {
+        id: 4,
+        name: 'QR Nasional (QRIS) via Tcash QRN Default Configuration',
+        handler: 'tcashqrn'
+      },
+      {
         id: 10,
         name: 'Fairpay Default Configuration',
         handler: 'fairpay'
+      },
+      {
+        id: 100,
+        name: 'Kuma Pay Default configuration',
+        handler: 'kumapay'
       }
     ]
     , {})

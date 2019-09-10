@@ -19,13 +19,11 @@ let baseConfig = {
   debugKeyHeader: 'x-mika-debug',
   debugKey: '1K24vDZGaGmJGCTTVIRyLxPPiHY',
 
-  allowedOrigins: isEnvProduction ? [ 'https://backoffice.mikaapp.id' ] : '*',
+  allowedOrigins: isEnvProduction ? [ 'https://backoffice.mikaapp.id', 'https://dashboard.mikaapp.id' ] : '*',
 
   authSessionTokenHeader: 'x-access-token',
   authSecretKey: '4FoC5uMLqAkoBMSw2sOLIF7M',
   authExpirySecond: 4 * 24 * 3600,
-
-  transactionExpirySecond: 3 * 60,
 
   thumbnailsEndpoint: '/thumbnails'
 }

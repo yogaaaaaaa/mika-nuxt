@@ -7,7 +7,6 @@
 const express = require('../libs/express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const cookieParser = require('cookie-parser')
 
 const auth = require('../libs/auth')
 
@@ -41,8 +40,7 @@ router.use([
     origin: commonConfig.allowedOrigins,
     optionsSuccessStatus: 200
   }),
-  bodyParser.json(),
-  cookieParser()
+  bodyParser.json()
 ])
 
 /**
@@ -155,6 +153,16 @@ router.post(
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   transactionController.createTransactionMiddlewares
+)
+router.post('/agent/transactions/:transactionId/cancel',
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  transactionController.cancelTransactionMiddlewares
+)
+router.post('/agent/transactions/:transactionId/refund',
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  transactionController.refundTransactionMiddlewares
 )
 
 /**

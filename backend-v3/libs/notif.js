@@ -19,12 +19,14 @@ module.exports.agentBrokerDetail = (agentId, genPassword = false) => {
   const clientId = user
   const cleanSession = false
   const brokerUrl = config.brokerUrl
+  const brokerUrlAlt = config.brokerUrlAlt
   const clientTopic = `${config.topicClientPrefix}/${user}`
   const serverTopic = `${config.topicServerPrefix}/${user}`
   const broadcastTopic = `${config.topicBroadcastPrefix}`
 
   return {
     brokerUrl,
+    brokerUrlAlt,
     user,
     password,
     clientId,
@@ -92,18 +94,24 @@ module.exports.agentExist = async (agentId) => {
 
 trxManager.listenStatusChange(async (event) => {
   if (await exports.agentExist(event.agentId)) {
-    let eventType = null
+    let eventType
 
     if (event.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
       eventType = msg.eventTypes.EVENT_TRANSACTION_SUCCESS
-    }
-
-    if (event.transactionStatus === trxManager.transactionStatuses.FAILED) {
+    } else if (event.transactionStatus === trxManager.transactionStatuses.FAILED) {
       eventType = msg.eventTypes.EVENT_TRANSACTION_FAILED
+    } else if (event.transactionStatus === trxManager.transactionStatuses.EXPIRED) {
+      eventType = msg.eventTypes.EVENT_TRANSACTION_EXPIRED
     }
 
     if (eventType) {
-      let transaction = await models.transaction.scope('agent').findByPk(event.transactionId)
+      let findOptions = {}
+      if (event.t) findOptions.transaction = event.t
+
+      let transaction = await models.transaction
+        .scope('agent')
+        .findByPk(event.transactionId, findOptions)
+
       await exports.notifToAgent(
         event.agentId,
         msg.createNotification(

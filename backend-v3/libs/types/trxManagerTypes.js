@@ -13,13 +13,14 @@ module.exports.eventTypes = {
  * Enumeration of transaction status in mika system
  */
 module.exports.transactionStatuses = {
-  SUCCESS: 'success',
-  FAILED: 'failed',
-  VOIDED: 'voided',
   CREATED: 'created',
+  CANCELED: 'canceled',
   EXPIRED: 'expired',
-  PENDING: 'pending',
-  ERROR: 'error'
+  FAILED: 'failed',
+  SUCCESS: 'success',
+  VOIDED: 'voided',
+  REFUNDED_PARTIAL: 'refundedPartial',
+  REFUNDED: 'refunded'
 }
 
 /**
@@ -28,8 +29,7 @@ module.exports.transactionStatuses = {
 module.exports.transactionSettlementStatuses = {
   UNSETTLED: 'unsettled',
   SETTLED_IN: 'settledIn',
-  SETTLED: 'settled',
-  ERROR: 'error'
+  SETTLED: 'settled'
 }
 
 /**
@@ -56,7 +56,10 @@ module.exports.userTokenTypes = {
 module.exports.transactionFlows = {
   PROVIDE_TOKEN: 'flowProvideToken',
   GET_TOKEN: 'flowGetToken',
-  GATEWAY: 'flowGateway'
+  GATEWAY: 'flowGateway',
+  REFUND: 'flowRefund',
+  PARTIAL_REFUND: 'flowPartialRefund',
+  VOID: 'flowVoid'
 }
 
 /**
@@ -66,32 +69,33 @@ module.exports.transactionFlags = {
 }
 
 /**
- * Definition of payment flow accepted by acquirer
- */
-module.exports.transactionFlows = {
-  PROVIDE_TOKEN: 'flowProvideToken',
-  GET_TOKEN: 'flowGetToken',
-  GATEWAY: 'flowGateway'
-}
-
-/**
  * Shared error code used in trxManager function and
  * acquirer handler
  */
 module.exports.errorTypes = {
-  INVALID_TRANSACTION: 'trxManagerTransactionNotFound',
-  INVALID_AGENT: 'trxManagerAgentNotFound',
-  AMOUNT_TOO_LOW: 'trxManagerAmountATooLow',
-  AMOUNT_TOO_HIGH: 'trxManagerAmountATooHigh',
+  INVALID_TRANSACTION: 'trxManagerInvalidTransaction',
+  INVALID_AGENT: 'trxManagerInvalidAgent',
   INVALID_ACQUIRER: 'trxManagerInvalidAcquirer',
+
   INVALID_ACQUIRER_HANDLER: 'trxManagerInvalidAcquirerHandler',
   INVALID_ACQUIRER_CONFIG: 'trxManagerInvalidAcquirerConfig',
-  ACQUIRER_NOT_RESPONDING: 'trxManagerAcquirerNotResponding',
-  NEED_EXTRA_CONFIG: 'trxManagerExtraConfigNeeded',
+
+  AMOUNT_TOO_LOW: 'trxManagerAmountATooLow',
+  AMOUNT_TOO_HIGH: 'trxManagerAmountATooHigh',
   NEED_USER_TOKEN: 'trxManagerUserTokenNeeded',
   NEED_USER_TOKEN_TYPE: 'trxManagerUserTokenTypeNeeded',
   INVALID_USER_TOKEN: 'trxManagerUserTokenInvalid',
-  USER_TOKEN_TYPE_NOT_SUPPORTED: 'trxManagerUserTokenTypeInvalid',
-  ID_ALIAS_GENERATION_ERROR: 'trxManagerIdAliasGenerationError',
+  INVALID_USER_TOKEN_TYPE: 'trxManagerUserTokenTypeInvalid',
+
+  REFUND_NOT_SUPPORTED: 'trxManagerRefundNotSupported',
+  PARTIAL_REFUND_NOT_SUPPORTED: 'trxManagerPartialRefundNotSupported',
+  INVALID_REFUND_AMOUNT: 'trxManagerInvalidRefundAmount',
+
+  VOID_NOT_SUPPORTED: 'trxManagerVoidNotSupported',
+
+  INVALID_TRANSACTION_ON_ACQUIRER_HOST: 'trxManagerInvalidTransactionOnAcquirerHost',
+  ACQUIRER_HOST_UNAVAILABLE: 'trxManagerAcquirerHostUnavailable',
+  ACQUIRER_HOST_UNABLE_TO_PROCESS: 'trxManagerAcquirerUnableToProcess',
+
   JUST_ERROR: 'trxManagerUnknownError'
 }
