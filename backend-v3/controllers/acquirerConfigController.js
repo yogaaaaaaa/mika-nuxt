@@ -21,13 +21,14 @@ module.exports.createAcquirerConfig = async (req, res, next) => {
     if (_.isPlainObject(req.body.config)) {
       await models.acquirerConfigKv.setKv(acquirerConfig.id, req.body.config, t)
     }
+    acquirerConfig = await models.acquirerConfig
+      .scope('admin')
+      .findByPk(acquirerConfig.id, { transaction: t })
   })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.acquirerConfig
-      .scope('admin')
-      .findByPk(acquirerConfig.id)
+    acquirerConfig
   )
 }
 
@@ -91,12 +92,14 @@ module.exports.updateAcquirerConfig = async (req, res, next) => {
         await models.acquirerConfigKv.setKv(acquirerConfig.id, req.body.config, t)
         updated = true
       }
+
+      if (updated) {
+        acquirerConfig = await scopedAcquirerConfig
+          .scope('admin')
+          .findByPk(acquirerConfig.id, { transaction: t })
+      }
     }
   })
-
-  if (updated) {
-    acquirerConfig = await scopedAcquirerConfig.scope('admin').findByPk(req.params.acquirerConfigId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,

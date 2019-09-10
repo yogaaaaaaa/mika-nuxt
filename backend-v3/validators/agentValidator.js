@@ -17,9 +17,9 @@ const outletIdValidator = () => body('outletId').not().isEmpty()
 const defaultValidator = [
   helper.bodyRemove('userId'),
   helper.archivedAtValidator,
-  generalLocationLatValidator().optional(),
-  generalLocationLongValidator().optional(),
-  generalLocationRadiusMeterValidator().optional()
+  generalLocationLatValidator().optional({ nullable: true }),
+  generalLocationLongValidator().optional({ nullable: true }),
+  generalLocationRadiusMeterValidator().optional({ nullable: true })
 ]
 
 module.exports.bodyCreate = [

@@ -66,13 +66,14 @@ module.exports.createAgent = async (req, res, next) => {
       include: [ models.user ],
       transaction: t
     })
+    agent = await models.agent
+      .scope('admin')
+      .findByPk(agent.id, { transaction: t })
   })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.agent
-      .scope('admin')
-      .findByPk(agent.id)
+    agent
   )
 }
 
@@ -139,13 +140,13 @@ module.exports.updateAgent = async (req, res, next) => {
 
       if (agent.changed()) updated = true
       await agent.save({ transaction: t })
+
+      if (updated) {
+        agent = await scopedAgent.findByPk(agent.id, { transaction: t })
+        await auth.removeAuthByUserId(agent.userId)
+      }
     }
   })
-
-  if (updated) {
-    agent = await scopedAgent.findByPk(req.params.agentId)
-    await auth.removeAuthByUserId(agent.userId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,
@@ -166,10 +167,9 @@ module.exports.deleteAgent = async (req, res, next) => {
       if (agent.user) {
         await agent.user.destroy({ force: true, transaction: t })
       }
+      await auth.removeAuthByUserId(agent.userId)
     }
   })
-
-  if (agent) await auth.removeAuthByUserId(agent.userId)
 
   msg.expressDeleteEntityResponse(
     res,

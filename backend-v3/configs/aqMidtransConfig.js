@@ -6,9 +6,12 @@
 
 const commonConfig = require('./commonConfig')
 
+const isEnvProduction = process.NODE_ENV === 'production'
+
 let baseConfig = {
-  notifEndpoint: '/payment/midtrans/notif',
-  baseUrl: 'https://api.sandbox.midtrans.com',
+  notifEndpoint: '/acquirer_notif/midtrans',
+  baseUrl: isEnvProduction ? 'https://api.midtrans.com' : 'https://api.sandbox.midtrans.com',
+  sandboxBaseUrl: 'https://simulator.sandbox.midtrans.com',
 
   midtransClientKey: 'SB-Mid-client-VsVCzQXfi43aq964',
   midtransServerKey: 'SB-Mid-server-ohKRhnChkUctCWyKvWHubiVF',

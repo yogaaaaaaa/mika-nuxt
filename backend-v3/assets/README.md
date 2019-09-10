@@ -9,4 +9,7 @@ NOTE: Please include any external assets used in here
 
 - __Visa Logo__ Adapted from wikipedia SVG image : (https://en.wikipedia.org/wiki/File:Visa_2014_logo_detail.svg)
 
+- __Kuma Pay__ Adapted from https://www.svgrepo.com/svg/71831/bear
+
+- __Bank Indonesia__ Adapted from https://jurnalpolisi.com/wp-content/uploads/2017/12/BankIndonesia.jpg
 

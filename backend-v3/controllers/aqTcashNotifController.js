@@ -58,9 +58,11 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
         transaction.referenceNumberName = 'trx_id'
         transaction.customerReference = req.body.msisdn
         transaction.customerReferenceName = 'msisdn'
-        await transaction.save()
 
-        trxManager.emitStatusChange(transaction)
+        await models.sequelize.transaction(async t => {
+          await transaction.save({ transaction: t })
+          await trxManager.emitStatusChange(transaction, t)
+        })
 
         res
           .status(200)

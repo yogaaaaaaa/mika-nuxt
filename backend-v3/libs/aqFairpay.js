@@ -106,17 +106,17 @@ module.exports.createSaleRequest = (ctx) => {
   ctx.saleRequest = {}
 
   if (ctx.emvData) {
-    if (ctx.pinData && !ctx.signatureData) {
+    if ((ctx.pinData || ctx.pinblockData) && !ctx.signatureData) {
       ctx.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_PIN
-    } else if (!ctx.pinData && ctx.signatureData) {
+    } else if (!(ctx.pinData || ctx.pinblockData) && ctx.signatureData) {
       ctx.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_SIGNATURE
     } else {
       ctx.saleRequest.entry_mode = emv.posEntryMode.CHIP_WITH_OFFLINE_PIN
     }
   } else {
-    if (ctx.track2Data && ctx.pinData && !ctx.signatureData) {
+    if (ctx.track2Data && (ctx.pinData || ctx.pinblockData) && !ctx.signatureData) {
       ctx.saleRequest.entry_mode = emv.posEntryMode.MAGSTRIPE_WITH_PIN
-    } else if (ctx.track2Data && !ctx.pinData && ctx.signatureData) {
+    } else if (ctx.track2Data && !(ctx.pinData || ctx.pinblockData) && ctx.signatureData) {
       ctx.saleRequest.entry_mode = emv.posEntryMode.MAGSTRIPE_WITH_SIGNATURE
     }
   }
@@ -166,16 +166,19 @@ module.exports.createSaleRequest = (ctx) => {
   if (ctx.cardBin[0] === '4') ctx.cardNetwork = 'visa'
   if (ctx.cardBin[0] === '5') ctx.cardNetwork = 'mastercard'
 
-  // Encrypt pinblock (if exist)
-  if (ctx.pinData) {
+  // Encrypt pin data (if exist)
+  if (ctx.pinData || ctx.pinblockData) {
+    if (ctx.pinData) {
+      ctx.pinblockData = emv.generateISO0Pinblock(
+        ctx.cardPan,
+        ctx.pinData
+      )
+    }
     ctx.saleRequest.pin_ksn_index = emv.ksnCounterGet(ctx.pin_ksn)
     ctx.saleRequest.pinblock_enc = emv.encrypt3DESDataWithIPEK(
       ctx.pin_ipek,
       ctx.pin_ksn,
-      emv.generateISO0Pinblock(
-        ctx.cardPan,
-        ctx.pinData
-      )
+      ctx.pinblockData
     )
   }
 

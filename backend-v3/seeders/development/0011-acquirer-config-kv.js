@@ -39,11 +39,6 @@ module.exports = {
         name: 'midtransServerKey',
         value: 'SB-Mid-server-ohKRhnChkUctCWyKvWHubiVF'
       },
-      {
-        acquirerConfigId: 2,
-        name: 'midtransServerAuth',
-        value: 'Basic U0ItTWlkLXNlcnZlci1vaEtSaG5DaGtVY3RDV3lLdldIdWJpVkY6Og=='
-      },
 
       {
         acquirerConfigId: 3,
@@ -59,7 +54,19 @@ module.exports = {
         acquirerConfigId: 3,
         name: 'altoPemPublicKey',
         value: '-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFl1/W6zIMQwkSzPUUKzyklYo5q0EhI3U129MtLugc9lmPique9UVSEt+ouLooJEdQ+0cA0gBAWRpb4E6MmCdZa8w9dKbOETBUfv72E1jTkQYtK/lCrQhbAEW9yJIOoqmCg+c/+ma612udql5VliTz8sPnsZp9wzEKVw/qVE3t7QIDAQAB\n-----END PUBLIC KEY-----\n'
+      },
+
+      {
+        acquirerConfigId: 4,
+        name: 'tcashQrnMerchantID',
+        value: '190717011155001'
+      },
+      {
+        acquirerConfigId: 4,
+        name: 'tcashQrnMerchantCriteria',
+        value: 'UMI'
       }
+
     ]
     , {})
   },

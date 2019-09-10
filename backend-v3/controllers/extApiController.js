@@ -5,6 +5,8 @@ const extApiObject = require('../libs/extApiObject')
 const msg = require('../libs/msg')
 const trxManager = require('../libs/trxManager')
 
+const trxManagerError = require('./helpers/trxManagerError')
+
 const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
@@ -85,15 +87,7 @@ module.exports.createTransaction = async (req, res, next) => {
       mappedTransaction
     )
   } catch (err) {
-    let msgType = trxManager.errorToMsgTypes(err)
-    if (msgType) {
-      msg.expressResponse(
-        res,
-        msgType
-      )
-    } else {
-      throw err
-    }
+    trxManagerError.handleError(res, err)
   }
 }
 

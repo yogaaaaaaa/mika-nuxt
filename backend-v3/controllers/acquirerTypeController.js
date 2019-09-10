@@ -11,12 +11,15 @@ const acquirerTypeValidator = require('../validators/acquirerTypeValidator')
 module.exports.createAcquirerType = async (req, res, next) => {
   let acquirerType
 
-  acquirerType = await models.acquirerType.create(req.body)
+  await models.sequelize.transaction(async t => {
+    acquirerType = await models.acquirerType.create(req.body, { transaction: t })
+    acquirerType = await models.acquirerType
+      .findByPk(acquirerType.id, { transaction: t })
+  })
 
   msg.expressCreateEntityResponse(
     res,
-    await models.acquirerType
-      .findByPk(acquirerType.id)
+    acquirerType
   )
 }
 
@@ -75,12 +78,12 @@ module.exports.updateAcquirerType = async (req, res, next) => {
 
       if (acquirerType.changed()) updated = true
       await acquirerType.save({ transaction: t })
+
+      if (updated) {
+        acquirerType = await scopedAcquirerType.findByPk(acquirerType.id, { transaction: t })
+      }
     }
   })
-
-  if (updated) {
-    acquirerType = await scopedAcquirerType.findByPk(req.params.acquirerTypeId)
-  }
 
   msg.expressUpdateEntityResponse(
     res,

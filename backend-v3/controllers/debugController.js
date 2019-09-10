@@ -4,6 +4,7 @@ const _ = require('lodash')
 const { body } = require('express-validator')
 
 const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
+const trxManagerError = require('./helpers/trxManagerError')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 const trxManager = require('../libs/trxManager')
 const msg = require('../libs/msg')
@@ -22,22 +23,27 @@ module.exports.echoMiddlewares = [
 module.exports.changeStatusTransactionMiddlewares = [
   module.exports.changeStatusTransactionValidator = [
     body('transactionId').exists(),
-    body('status').isIn(_.values(trxManager.transactionStatuses))
+    body('status').isIn(_.values(trxManager.transactionStatuses)),
+    body('syncWithAcquirerHost').isBoolean().optional()
   ],
   errorMiddleware.validatorErrorHandler,
   async (req, res, next) => {
-    let transaction = await trxManager.forceStatus(req.body.transactionId, req.body.status)
-    if (transaction) {
+    try {
+      let trxForceUpdateResult = await trxManager.forceStatusUpdate(
+        req.body.transactionId,
+        req.body.status,
+        {
+          syncWithAcquirerHost: req.body.syncWithAcquirerHost
+        }
+      )
+
       msg.expressResponse(
         res,
         msg.msgTypes.MSG_SUCCESS,
-        transaction
+        trxForceUpdateResult
       )
-    } else {
-      msg.expressResponse(
-        res,
-        msg.msgTypes.MSG_ERROR_BAD_REQUEST
-      )
+    } catch (err) {
+      trxManagerError.handleError(err, res)
     }
   }
 ]

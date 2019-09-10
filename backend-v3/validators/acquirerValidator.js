@@ -17,7 +17,7 @@ const acquirerTypeIdValidator = () => body('acquirerTypeId').not().isEmpty()
 
 const defaultValidator = [
   helper.archivedAtValidator,
-  minimumAmountValidator(),
+  minimumAmountValidator().optional({ nullable: true }),
   maximumAmountValidator().optional({ nullable: true }),
   processFeeValidator().optional({ nullable: true }),
   shareAcquirerValidator().optional({ nullable: true }),

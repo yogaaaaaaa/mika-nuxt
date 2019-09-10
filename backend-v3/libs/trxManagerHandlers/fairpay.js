@@ -62,7 +62,7 @@ module.exports = (trxManager) => {
         // TODO: rollback need to decided when saving signature fail
         await fairpay.apiSaveSignature(fpCtx)
       } else {
-        throw trxManager.error(trxManager.errorTypes.ACQUIRER_NOT_RESPONDING)
+        throw trxManager.error(trxManager.errorTypes.ACQUIRER_HOST_UNAVAILABLE)
       }
     }
   })

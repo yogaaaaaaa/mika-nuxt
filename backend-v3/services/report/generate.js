@@ -83,7 +83,13 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
         }
       }
     ],
-    status: trxManagerTypes.transactionStatuses.SUCCESS
+    status: {
+      [Op.In]: [
+        trxManagerTypes.transactionStatuses.SUCCESS,
+        trxManagerTypes.transactionStatuses.REFUNDED,
+        trxManagerTypes.transactionStatuses.REFUNDED_PARTIAL
+      ]
+    }
   }
 
   let transactions = await models.transaction
@@ -148,14 +154,16 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
 
   let transactionStats = {
     count: 0,
-    amount: format.createCurrencyIDR('0'),
-    nettAmount: format.createCurrencyIDR('0')
+    totalAmount: 0,
+    totalNettAmount: 0
   }
   acquirerTransactionStats.forEach(acquirerTransactionStat => {
     transactionStats.count += parseInt(acquirerTransactionStat.transactionCount)
-    transactionStats.amount = transactionStats.amount.add(acquirerTransactionStat.amount.replace('.', ','))
-    transactionStats.nettAmount = transactionStats.nettAmount.add(acquirerTransactionStat.nettAmount.replace('.', ','))
+    transactionStats.totalAmount += acquirerTransactionStat.totalAmount
+    transactionStats.totalNettAmount += acquirerTransactionStat.totalNettAmount
   })
+  transactionStats.totalAmount = format.formatCurrencyIDR(transactionStats.totalAmount)
+  transactionStats.totalNettAmount = format.formatCurrencyIDR(transactionStats.totalNettAmount)
 
   let transactionCountHoursMap = new Map()
   transactionCountHours.forEach(transactionCountHour =>
@@ -181,20 +189,23 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     merchantStaffName: `${merchantStaff.name} (${options.email})`,
     reportDate: startMoment.locale(options.locale).format('DD MMMM YYYY'),
     reportCreationDate: creationMoment.locale(options.locale).format('DD MMMM YYYY HH:mm:ss'),
-    transactionAmount: transactionStats.amount.format(),
-    transactionNettAmount: transactionStats.nettAmount.format(),
+    transactionAmount: transactionStats.totalAmount.format(),
+    transactionNettAmount: transactionStats.totalNettAmount.format(),
     transactionCount: transactionStats.count,
     highestTransactionCountHour: highestTransactionCountHour,
     highestTransactionCount: highestTransactionCount,
     acquirers: await Promise.all(acquirers.map(async acquirer => {
       let acquirerStat = acquirerTransactionStats.find((acquirerTransactionStat) => acquirerTransactionStat.acquirer.id === acquirer.id) || {}
+      acquirerStat.totalNettAmount = acquirerStat.totalNettAmount ? acquirerStat.totalNettAmount : '0'
+      acquirerStat.totalAmount = acquirerStat.totalAmount ? acquirerStat.totalAmount : '0'
+      acquirerStat.transactionCount = acquirerStat.transactionCount ? acquirerStat.transactionCount : '0'
       return {
         acquirerTypeName: acquirer.acquirerType.name,
         acquirerTypeColor: acquirer.acquirerType.chartColor,
         acquirerTypeThumbnailImg: await getImageBase64(path.join(dirConfig.thumbnailsDir, acquirer.acquirerType.thumbnail)),
-        acquirerTransactionNettAmount: format.createCurrencyIDR(acquirerStat.nettAmount.replace('.', ',') || '0').format(),
-        acquirerTransactionAmount: format.createCurrencyIDR(acquirerStat.amount.replace('.', ',') || '0').format(),
-        acquirerTransactionCount: acquirerStat.transactionCount || '0'
+        acquirerTransactionNettAmount: format.formatCurrencyIDR(acquirerStat.totalNettAmount),
+        acquirerTransactionAmount: format.formatCurrencyIDR(acquirerStat.totalAmount),
+        acquirerTransactionCount: acquirerStat.transactionCount
       }
     })),
     transactions: transactions.map(transaction => {
@@ -204,13 +215,13 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
         transactionOutletName: transaction.agent.outlet.name,
         transactionAcquirerTypeName: transaction.acquirer.acquirerType.name,
         transactionReferenceNum: transaction.referenceNumber,
-        transactionAmount: format.createCurrencyIDR(transaction.amount.replace('.', ',') || '0').format()
+        transactionAmount: format.formatCurrencyIDR(transaction.amount)
       }
     }),
     outlets: outletTransactionStats.map(outletTransactionStat => {
       return {
         outletName: outletTransactionStat.agent.outlet.name,
-        outletTransactionAmount: format.createCurrencyIDR(outletTransactionStat.amount.replace('.', ',') || '0').format()
+        outletTransactionAmount: format.formatCurrencyIDR(outletTransactionStat.totalAmount)
       }
     }),
     trxLineChartParam: JSON.stringify({
@@ -254,7 +265,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
         // labels: acquirerTransactionStats.map(acquirerTransactionStat => acquirerTransactionStat.acquirer.acquirerType.name),
         datasets: [{
           label: '',
-          data: acquirerTransactionStats.map(acquirerTransactionStat => acquirerTransactionStat.amount),
+          data: acquirerTransactionStats.map(acquirerTransactionStat => acquirerTransactionStat.totalAmount),
           backgroundColor: acquirerTransactionStats.map(acquirerTransactionStat => acquirerTransactionStat.acquirer.acquirerType.chartColor)
         }]
       },

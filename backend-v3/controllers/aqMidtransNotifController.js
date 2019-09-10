@@ -1,13 +1,18 @@
 'use strict'
 
+const bodyParser = require('body-parser')
+
 const midtrans = require('../libs/aqMidtrans')
 const trxManager = require('../libs/trxManager')
 const models = require('../models')
 
-module.exports.midtransHandleNotification = async function (req, res, next) {
+module.exports.midtransNotifHandle = async function (req, res, next) {
   try {
-    if (req.body.transaction_status !== 'settlement' || req.body.payment_type !== 'gopay') {
-      res.status(200).type('text').send('NOT INTERESTED, BUT OK')
+    if (req.body.transaction_status !== 'settlement') {
+      res
+        .status(200)
+        .type('text')
+        .send('NOT INTERESTED, BUT OK')
       return
     }
 
@@ -31,23 +36,44 @@ module.exports.midtransHandleNotification = async function (req, res, next) {
     })
 
     if (!transaction) {
-      res.status(400).type('text').send('TRANSACTION NOT FOUND')
+      res
+        .status(400)
+        .type('text')
+        .send('TRANSACTION NOT FOUND')
       return
     }
 
     let midtransConfig = midtrans.mixConfig(transaction.acquirer.acquirerConfig.config)
 
     if (!midtrans.checkNotificationSignature(Object.assign(req.body, midtransConfig))) {
-      res.status(401).type('text').send('UNAUTHORIZED')
+      res
+        .status(401)
+        .type('text')
+        .send('UNAUTHORIZED')
       return
     }
 
     transaction.status = trxManager.transactionStatuses.SUCCESS
-    await transaction.save()
-    trxManager.emitStatusChange(transaction)
-    res.status(200).type('text').send('OK')
+
+    await models.sequelize.transaction(async t => {
+      await transaction.save({ transaction: t })
+      await trxManager.emitStatusChange(transaction, t)
+    })
+
+    res
+      .status(200)
+      .type('text')
+      .send('OK')
   } catch (err) {
     console.error(err)
-    res.status(500).type('text').send('ERROR')
+    res
+      .status(503)
+      .type('text')
+      .send('ERROR')
   }
 }
+
+module.exports.midtransNotifHandleMiddlewares = [
+  bodyParser.json(),
+  exports.midtransNotifHandle
+]

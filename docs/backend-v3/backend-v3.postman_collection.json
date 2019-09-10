@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "a3ce63f1-0696-4979-95a0-626c15ac2a77",
 		"name": "backend-v3",
-		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\nOptionally, it will contain,\n- `version`\nContain current revison of backend, with format,\n\n```\nIn Development\n{{environment}} {{branch}}-{{commitHash}}-{{commitCount}} {{commitTime}}\n\nIn production\n{{version}}\n```\n\n- `data`\nReturned data from request or any information related to status message\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n## Common status code\nThese status code all common in all request\n\n## System Context\n\n- Success (Generic)\n\t- HTTP Status : 200\n\t- Status Code : sys-200\n- Bad request (e.g Malformed JSON Body)\n\t- HTTP Status : 400\n\t- Status Code : sys-400\n- URL Not Found\n\t- HTTP Status : 404\n\t- Status Code : sys-404\n- Internal Server Error (Unhandled Execption)\n\t- HTTP Status : 500\n\t- Status Code : sys-500\n- Bad Request, Validation error (e.g Invalid field)\n\t- HTTP Status : 400\n\t- Status Code : sys-401\n\n## Authentication Context\n\n- Not Authenticated (Invalid session token, User is not authenticated)\n\t- HTTP Status : 401\n\t- Status Code : auth-401\n- Forbidden (Authenticated User is not authorised to access endpoint)\n\t- HTTP Status : 403\n\t- Status Code : auth-403\n\n## Entity Context\n\n- One or more entity found\n\t- HTTP Status : 200\n\t- Status Code : ent-200\n- Request processed Sucessfuly but no Entity is Found\n\t- HTTP Status : 200\n\t- Status Code : ent-204\n- Single entity not found\n\t- HTTP Status : 404\n\t- Status Code : ent-404\n- Single Entity Created\n\t- HTTP Status : 200\n\t- Status Code : ent-201\n- Single Entity Updated\n\t- HTTP Status : 200\n\t- Status Code : ent-202\n- Single Entity Deleted\n\t- HTTP Status : 200\n\t- Status Code : ent-203\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints, unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header or included as bearer style token, `Authorization: Bearer <token>`.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token.\n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n\nBelow is an example of URL with pagination applied.\n```\nhttps://api.mikapp.id//api/agent/transactions?page=1&per_page=10&get_count=1&order=asc&order_by=createdAt\n```\n\n### Filters\nMost plural endpoint provide capability to filter entities. Filters is defined as array in URL query string, with format,\n`f[field]=operator,value` or `filters[field]=operator,value`.\n\nBelow is an example of URL with filters applied.\n```\nhttps://api.mikapp.id/api/agent/transactions?f[status]=eq,success&f[amount]=gt,5000\n```\n\nSupported operator\n- `eq` (equal)\n- `eqnull` (equal to `null`)\n- `eqtrue` (equal to `true`)\n- `neq` (not equal)\n- `neqnull` (not equal to `null`)\n- `neqtrue` (not equal to `true`)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `f[status]=eq,succes`\n- `f[acquirer.name]=like,%tcash%`\n\nAll of filter will be **and**-ed together, from example above it will filter entities with `status` equal (`eq`) to `sucess` **and** `acquirer.name` `like` `%tcash%`.\n\nFor **or** operation on the same field, extra `,or` in field name can be use. For example to filter entities with value of amount from 500 to 1000, is equal to `f[amount,or]=gte,500&f[amount,or]=lte,1000` in filter query string.\n",
+		"description": "Mika backend version 3 - ongoing development\n\n## Content-type\nMika backend api **ONLY** accept and response in `application/json` media type\n\n## Response structure\n```json\n{\n    \"version\": \"master-29ad0b0-35 development 2019-04-25T11:02:25.000Z\",\n    \"status\": \"sys-200\",\n    \"message\": \"Success\",\n    \"isError\": false,\n    \"data\": \"Welcome to backend-v3\"\n}\n```\n\nAll response in mika backend, will contain, \n\n- `status`\nContain machine friendly error status code. It complement HTTP status code.\n\n- `message`\nContain human friendly error status code.\n\n- `isError`\nTelling wheter this type of response is an error or not\n\nOptionally, it will contain,\n- `version`\nContain current revison of backend, with format,\n\n```\nIn Development\n{{environment}} {{branch}}-{{commitHash}}-{{commitCount}} {{commitTime}}\n\nIn production\n{{version}}\n```\n\n- `data`\nReturned data from request or any information related to status message\n\n- `meta`\nSometime `meta` could be included to complement `data`\n\n## Common status code\nThese status code all common in all request\n\n## System Context\n\n- Success (Generic)\n\t- HTTP Status : 200\n\t- Status Code : sys-200\n- Bad request (e.g Malformed JSON Body)\n\t- HTTP Status : 400\n\t- Status Code : sys-400\n- URL Not Found\n\t- HTTP Status : 404\n\t- Status Code : sys-404\n- Internal Server Error (Unhandled Execption)\n\t- HTTP Status : 500\n\t- Status Code : sys-500\n- Bad Request, Validation error (e.g Invalid field)\n\t- HTTP Status : 400\n\t- Status Code : sys-401\n\n## Authentication Context\n\n- Not Authenticated (Invalid session token, User is not authenticated)\n\t- HTTP Status : 401\n\t- Status Code : auth-401\n- Forbidden (Authenticated User is not authorised to access endpoint)\n\t- HTTP Status : 403\n\t- Status Code : auth-403\n\n## Entity Context\n\n- One or more entity found\n\t- HTTP Status : 200\n\t- Status Code : ent-200\n- Request processed Sucessfuly but no Entity is Found\n\t- HTTP Status : 200\n\t- Status Code : ent-204\n- Single entity not found\n\t- HTTP Status : 404\n\t- Status Code : ent-404\n- Single Entity Created\n\t- HTTP Status : 200\n\t- Status Code : ent-201\n- Single Entity Updated\n\t- HTTP Status : 200\n\t- Status Code : ent-202\n- Single Entity Deleted\n\t- HTTP Status : 200\n\t- Status Code : ent-203\n\n## Transaction context\n\n- Invalid transaction\n\t- HTTP Status : 400\n\t- Status Code : trx-404\n- Invalid acquirer configuration\n\t- HTTP Status : 500\n\t- Status Code : trx-500\n- Acquirer host unavailable (retryable)\n\t- HTTP Status : 500\n\t- Status Code : trx-510\n- Acquirer host unable to process (retryable)\n\t- HTTP Status : 500\n\t- Status Code : trx-511\n\n\n## Authentication\nAuthentication is needed for all non-debug endpoints, unless noted in individual endpoints. To authenticate, please login via respective endpoint in **Authentication** collection.\n\nIn every request, session token needs to be included in `x-access-token` HTTP header or included as bearer style token, `Authorization: Bearer <token>`.\n\nMika backend uses session with long expiry (at least 3 days). Expiry will renewed on every request made to aunthenticated endpoint. \n\nOnly one session token valid for one login user. Any login to same user will invalidate last session token.\n\n## Debug\nDebug endpoint is only available in development or staging enviroment. To authenticate, please include debug key in `x-mika-debug` http header.\n\n## Common Query\n### Prequisites : Attributes/Fields\nAttributes name in `filters` and `order_by` is one to one to entity model, for example simplified `transaction` entity under agent will have,\n```json\n{\n  \"id\": \"1LGN6V6a7b4YGBVK5kqt3D7u8iM\",\n  \"idAlias\": \"agromesupermoe-15MRA6-NCMPW5\",\n  \"amount\": 1000,\n  \"status\": \"created\",\n  \"settlementStatus\": \"\",\n  \"createdAt\": \"2019-05-15T08:51:39.000Z\",\n  \"updatedAt\": \"2019-05-15T08:51:39.000Z\",\n  \"transactionExtraKvs\": [],\n  \"acquirer\": {\n    \"id\": 8,\n    \"name\": \"WeChat Pay Super Moe\",\n    \"acquirerConfigId\": 3,\n    \"acquirerTypeId\": 4,\n    \"acquirerType\": {\n      \"id\": 4,\n      \"class\": \"alipay\",\n      \"thumbnailGray\": \"alipay-gray.png\",\n      \"chartColor\": \"#01AAEE\"\n    },\n    \"acquirerConfig\": {\n      \"id\": 3,\n      \"sandbox\": true,\n      \"merchantId\": null\n    }\n  }\n}\n```\nto select `class` under `acquirerType`, attributes name `acquirer.acquirerType.class`can be used\n\n### Pagination and Ordering\nPagination and ordering is supported for plural words endpoint (e.g `/api/agent/transactions`). With Exception when resource identifier is explicitly written in endpoint (e.g `/api/agent/transactions/sdjkflnas12389d`).\n\nQuery parameter for pagination and ordering :\n - `page` : current page\n - `per_page` : entities per page\n - `get_count` : get total count of entites, placed in `meta`\n - `order` : order direction, `asc` for ascending and `desc` for descending\n - `order_by`: attributes in entities as order parameter\n\nBelow is an example of URL with pagination applied.\n```\nhttps://api.mikapp.id//api/agent/transactions?page=1&per_page=10&get_count=1&order=asc&order_by=createdAt\n```\n\n### Filters\nMost plural endpoint provide capability to filter entities. Filters is defined as array in URL query string, with format,\n`f[field]=operator,value` or `filters[field]=operator,value`.\n\nBelow is an example of URL with filters applied.\n```\nhttps://api.mikapp.id/api/agent/transactions?f[status]=eq,success&f[amount]=gt,5000\n```\n\nSupported operator\n- `eq` (equal)\n- `eqnull` (equal to `null`)\n- `eqtrue` (equal to `true`)\n- `neq` (not equal)\n- `neqnull` (not equal to `null`)\n- `neqtrue` (not equal to `true`)\n- `lt`, `lte` (less than, less than equal)\n- `gt`, `gte` (greater that, greater than equal)\n- `like` (like wildcard)\n\nExample: \n- `f[status]=eq,succes`\n- `f[acquirer.name]=like,%tcash%`\n\nAll of filter will be **and**-ed together, from example above it will filter entities with `status` equal (`eq`) to `sucess` **and** `acquirer.name` `like` `%tcash%`.\n\nFor **or** operation on the same field, extra `,or` in field name can be use. For example to filter entities with value of amount from 500 to 1000, is equal to `f[amount,or]=gte,500&f[amount,or]=lte,1000` in filter query string.\n",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -1129,7 +1129,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"acquirerId\": 1,\n\t\"amount\": 25000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+							"raw": "{\n\t\"acquirerId\": 92,\n\t\"amount\": 25000,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/agent/transactions",
@@ -1142,7 +1142,167 @@
 								"transactions"
 							]
 						},
-						"description": "Create new transaction with current logged-in agent.\n\n# Required Field\n- `amount` (String)\n- `acquirerId` (String)\n\n# Optional Field\n- `userToken` (Object, String)\n- `userTokenType` (String)\n- `locationLong` (Numeric)\n- `locationLat` (Numeric)\n- `flags` (Array)\n\n# Specific Status Code\n- Transaction Created\n\t- HTTP Status : 200\n\t- Status Code : trx-200\n- Transaction Created and Processed Successfully (`status` is `success`)\n\t- HTTP Status : 200\n\t- Status Code : trx-201\n- Invalid Acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-400\n- Acquirer need User Token\n\t- HTTP Status : 400\n\t- Status Code : trx-410\n- Invalid User Token\n\t- HTTP Status : 400\n\t- Status Code : trx-411\n- Acquirer doesn't support User Token (for Acquirer supporting more than one User Token Type)\n\t- HTTP Status : 400\n\t- Status Code : trx-412\n- Ambiguous User Token (for Acquirer supporting more than one User Token Type)\n\t- HTTP Status : 400\n\t- Status Code : trx-413\n- Amount too low\n\t- HTTP Status : 400\n\t- Status Code : trx-440\n- Amount too high\n\t- HTTP Status : 400\n\t- Status Code : trx-441\n- Remote acquirer is not responding\n\t- HTTP Status : 500\n\t- Status Code : trx-501\n- Invalid acquirer config\n\t- HTTP Status : 500\n\t- Status Code : trx-510"
+						"description": "Create new transaction with current logged-in agent.\n\n# Required Field\n- `amount` (String)\n- `acquirerId` (String)\n\n# Optional Field\n- `userToken` (Object, String)\n- `userTokenType` (String)\n- `locationLong` (Numeric)\n- `locationLat` (Numeric)\n- `flags` (Array)\n\n# Specific Status Code\n- Transaction Created\n\t- HTTP Status : 200\n\t- Status Code : trx-200\n- Transaction Created and Processed Successfully (`status` is `success`)\n\t- HTTP Status : 200\n\t- Status Code : trx-201\n- Invalid Acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-400\n- Acquirer need User Token\n\t- HTTP Status : 400\n\t- Status Code : trx-410\n- Invalid User Token\n\t- HTTP Status : 400\n\t- Status Code : trx-411\n- Acquirer doesn't support User Token (for Acquirer supporting more than one User Token Type)\n\t- HTTP Status : 400\n\t- Status Code : trx-412\n- Ambiguous User Token (for Acquirer supporting more than one User Token Type)\n\t- HTTP Status : 400\n\t- Status Code : trx-413\n- Amount too low\n\t- HTTP Status : 400\n\t- Status Code : trx-440\n- Amount too high\n\t- HTTP Status : 400\n\t- Status Code : trx-441"
+					},
+					"response": [
+						{
+							"name": "{{baseUrl}}/agent/transaction with user token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/javascript",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/agent/transaction",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"agent",
+										"transaction"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+						}
+					]
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions/:transactionId/cancel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions/:transactionId/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions",
+								":transactionId",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "1O8NhkO3uGh21vzjHr8FyAIAwi8"
+								}
+							]
+						},
+						"description": "Cancel created transaction\n\n# Specific Status Code\n- Transaction Canceled\n\t- HTTP Status : 200\n\t- Status Code : trx-203"
+					},
+					"response": [
+						{
+							"name": "{{baseUrl}}/agent/transaction with user token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/javascript",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/agent/transaction",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"agent",
+										"transaction"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+						}
+					]
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions/:transactionId/refund",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"amount\": null,\n\t\"reason\" : null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions/:transactionId/refund",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions",
+								":transactionId",
+								"refund"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "1O8NJeNvL9OCKw6uQUZ1cZHg6JX"
+								}
+							]
+						},
+						"description": "Refund specified transaction.\n\n\n# Optional Field\n- `amount` (Numeric, nullable)\n\t- If `undefined` or `null` will refund to fully possible amount\n- `reason` (String, nullable)\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-205\n- Transaction Partially Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-206\n- Refund not supported by transaction acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-415\n- Partial Refund not supported by transaction acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-416\n- Invalid amount for refund (too low or too high)\n\t- HTTP Status : 400\n\t- Status Code : trx-417\n"
 					},
 					"response": [
 						{
@@ -1203,7 +1363,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"transactionId\": \"1NGIO4uEkmvL1c1mkQXkO7s5HVN\",\n\t\"status\": \"success\"\n}"
+							"raw": "{\n\t\"transactionId\": \"1NGIO4uEkmvL1c1mkQXkO7s5HVN\",\n\t\"status\": \"success\",\n\t\"syncWithAcquirerHost\": false\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/agent/debug/change_transaction_status",
@@ -1217,7 +1377,7 @@
 								"change_transaction_status"
 							]
 						},
-						"description": "Forcefully change transaction status in development environment.\n\n# Required Field\n- `transactionId` (String)\n- `status` (String)\n\n# Specific Status Code\n- Bad Request if transaction id cannot be found or processed\n\t- HTTP Status : 400\n\t- Status Code : sys-400"
+						"description": "Forcefully change transaction status in development environment.\n\n# Required Field\n- `transactionId` (String)\n- `status` (String)\n\n# Optional Field\n- `syncWithAcquirerHost` (Boolean, default false) \n"
 					},
 					"response": [
 						{
@@ -1839,15 +1999,16 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/merchant_staff/transactions/:transactionId",
+							"raw": "{{baseUrl}}/api/merchant_staff/outlets/:outletId/transactions",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"merchant_staff",
-								"transactions",
-								":transactionId"
+								"outlets",
+								":outletId",
+								"transactions"
 							],
 							"query": [
 								{
@@ -1923,8 +2084,8 @@
 							],
 							"variable": [
 								{
-									"key": "transactionId",
-									"value": ""
+									"key": "outletId",
+									"value": "93"
 								}
 							]
 						},
@@ -2537,7 +2698,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\":\"Agent\",\n\t\"email\": \"merchantstaff100@mikaapp.id\",\n\t\"outletId\": 1,\n\t\"user\": {\n\t\t\"username\": \"newagent4\",\n\t\t\"password\": \"newagent4\"\n\t}\n}"
+									"raw": "{\n\t\"name\":\"Agent\",\n\t\"email\": \"merchantstaff100@mikaapp.id\",\n\t\"generalLocationLong\": null,\n\t\"generalLocationLat\": null,\n\t\"outletId\": 1,\n\t\"user\": {\n\t\t\"username\": \"newagent4\",\n\t\t\"password\": \"newagent4\"\n\t}\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/agents",
@@ -2610,7 +2771,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\":\"Merchant Staff\",\n\t\"email\": \"merchantstaff100@mikaapp.id\",\n\t\"merchantId\": 1,\n\t\"user\": {\n\t\t\"username\":\"merchantstaff400\",\n\t\t\"password\":\"merchantstaff400\"\n\t}\n}"
+									"raw": "{\n\t\"name\":\"Merchant Staff 1\",\n\t\"email\": \"merchantstaff100@mikaapp.id\",\n\t\"merchantId\": 1,\n\t\"user\": {\n\t\t\"username\":\"merchantstaff4002\",\n\t\t\"password\":\"merchantstaff400\"\n\t}\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/merchant_staffs",
@@ -3084,7 +3245,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"class\": \"linkaja\",\n\t\"name\": \"linkaja Super\",\n\t\"thumbnail\": \"linkaja.png\",\n\t\"chartColor\":\"#123122\"\n}"
+									"raw": "{\n\t\"class\": \"kumapay\",\n\t\"name\": \"Kuma Pay\",\n\t\"thumbnail\": \"kumapay.png\",\n\t\"thumbnailGray\": \"kumapay-gray.png\",\n\t\"chartColor\":\"#808080\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/acquirer_types",
@@ -3264,7 +3425,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": "{\n\t\"idAlias\": \"321-AFDG\",\n\t\"shortName\": \"merchantcool\",\n\t\"name\": \"merchant Test 2\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/merchants/:merchantId",
@@ -3280,7 +3441,7 @@
 									"variable": [
 										{
 											"key": "merchantId",
-											"value": ""
+											"value": "1001"
 										}
 									]
 								},
@@ -3345,7 +3506,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": "{\n\t\"idAlias\": \"321-AKLD\",\n\t\"shortName\": \"merchantcool\",\n\t\"name\": \"Outlet Cool\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/outlets/:outletId",
@@ -3361,7 +3522,7 @@
 									"variable": [
 										{
 											"key": "outletId",
-											"value": ""
+											"value": "1001"
 										}
 									]
 								},
@@ -3426,7 +3587,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Agent Gorbachev\",\n\t\"user\": {\n\t\t\"password\": \"newpassword\"\n\t}\n}"
+									"raw": "{\n\t\"name\": \"Agent Gorbachev\",\n\t\"generalLocationLong\": null,\n\t\"generalLocationLat\": null,\n\t\"user\": {\n\t\t\"password\": \"newpassword\"\n\t}\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/agents/:agentId",
@@ -3442,7 +3603,7 @@
 									"variable": [
 										{
 											"key": "agentId",
-											"value": "1014"
+											"value": "1002"
 										}
 									]
 								},
@@ -3507,7 +3668,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": "{\n\t\"name\": \"Merchant Staff Theresa\",\n\t\"user\": {\n\t\t\"password\": \"newpassword\"\n\t}\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/merchant_staffs/:merchantStaffId",
@@ -3523,7 +3684,7 @@
 									"variable": [
 										{
 											"key": "merchantStaffId",
-											"value": ""
+											"value": "97"
 										}
 									]
 								},
@@ -3588,7 +3749,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"aliasId\": \"321-AFDG\",\n\t\"shortname\": \"merchantcool\",\n\t\"name\": \"merchant Test\"\n}"
+									"raw": "{\n    \"name\": \"Midtrans Production\",\n    \"description\": null,\n    \"minimumAmount\": 100.0,\n    \"maximumAmount\": null,\n    \"processFee\": 200,\n    \"shareAcquirer\": 0.01,\n    \"shareMerchant\": 0.98,\n    \"shareMerchantWithPartner\": null,\n    \"sharePartner\": null,\n    \"directSettlement\": false,\n    \"gateway\": false,\n    \"hidden\": false,\n    \"merchantId\": 1,\n    \"acquirerConfigId\": 13,\n    \"acquirerTypeId\": 1\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/back_office/acquirers/:acquirerId",
@@ -3604,7 +3765,7 @@
 									"variable": [
 										{
 											"key": "acquirerId",
-											"value": ""
+											"value": "1012"
 										}
 									]
 								},
@@ -6758,7 +6919,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"transactionId\": \"1NaQn9GuoI9XSEQ0PO2PlpbsAff\",\n\t\"status\": \"success\"\n}"
+							"raw": "{\n\t\"transactionId\": \"1NGIO4uEkmvL1c1mkQXkO7s5HVN\",\n\t\"status\": \"success\",\n\t\"syncWithAcquirerHost\": false\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/debug/transaction/change_status",
@@ -7964,13 +8125,13 @@
 	],
 	"variable": [
 		{
-			"id": "79e3c439-8858-40ad-9a2a-bc05569fb6f5",
+			"id": "36e477c0-b099-42bb-9837-dc504ba082c0",
 			"key": "baseUrl",
 			"value": "https://stg31api.mikaapp.id",
 			"type": "string"
 		},
 		{
-			"id": "e6b7ab9f-ecbd-4eaf-8eb4-7615354ef46b",
+			"id": "88272c93-68e4-43e5-a6d6-485c724e1ec0",
 			"key": "mikaDebugKey",
 			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
 			"type": "string"

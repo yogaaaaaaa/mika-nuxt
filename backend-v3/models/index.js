@@ -29,6 +29,9 @@ for (const modelName of Object.keys(models)) {
   models[modelName].addScope('id', {
     attributes: ['id']
   })
+  models[modelName].addScope('name', {
+    attributes: ['name']
+  })
   models[modelName].addScope('paranoid', {
     paranoid: false
   })

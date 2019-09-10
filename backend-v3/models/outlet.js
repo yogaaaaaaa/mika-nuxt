@@ -1,6 +1,6 @@
 'use strict'
 
-const script = require('../libs/script')
+const query = require('./helpers/query')
 
 module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
         {
           id: {
             [Op.in]: Sequelize.literal(
-              script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+              query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
             )
           }
         }
@@ -86,6 +86,7 @@ module.exports = (sequelize, DataTypes) => {
         [Op.and]: []
       },
       include: [
+        sequelize.models.merchant.scope('id', 'name'),
         {
           model: sequelize.models.resource,
           as: 'outletPhotoResource'
@@ -101,14 +102,14 @@ module.exports = (sequelize, DataTypes) => {
       scope.where[Op.and].push({
         id: {
           [excludeByMerchantStaffId ? Op.notIn : Op.in]: Sequelize.literal(
-            script.get('subquery/getOutletByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+            query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
           )
         }
       })
       scope.where[Op.and].push({
         merchantId: {
           [Op.in]: Sequelize.literal(
-            script.get('subquery/getMerchantByMerchantStaff.sql', [ parseInt(merchantStaffId) || null ])
+            query.get('sub/getMerchantByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
           )
         }
       })

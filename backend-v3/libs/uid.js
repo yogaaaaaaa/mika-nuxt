@@ -5,14 +5,17 @@
  *
  * Note :
  * - About KSUID : https://segment.com/blog/a-brief-history-of-the-uuid/
+ * - About ULID: https://github.com/ulid/spec
  */
 
 const base32Encode = require('base32-encode')
 const base32Decode = require('base32-decode')
 
+const baseX = require('base-x')
+const base62Mika = baseX('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
+
+exports.ulid = require('id128').Ulid
 exports.ksuid = require('ksuid')
-exports.uuidv4 = require('uuid/v4')
-exports.bufferBn = require('bigint-buffer')
 
 module.exports.base32CrfEncode = (buffer) => {
   return base32Encode(buffer, 'Crockford')
@@ -22,22 +25,53 @@ module.exports.base32CrfDecode = (str) => {
   return Buffer.from(base32Decode(str, 'Crockford'))
 }
 
+module.exports.base62MikaEncode = (buffer) => {
+  return base62Mika.encode(buffer)
+}
+
+module.exports.base62MikaDecode = (str) => {
+  return base62Mika.decode(str)
+}
+
 module.exports.generateTransactionId = async () => {
-  let ksuid = await exports.ksuid.random()
-  let ksuidBase32Crf = exports.base32CrfEncode(ksuid.raw)
+  let ulid = exports.ulid.generate()
+
+  let ulidCanonical = ulid.toCanonical()
+  let ulidBase62Mika = exports.base62MikaEncode(ulid.bytes)
+
+  let ulidCanonicalTime = ulidCanonical.substring(0, 10)
+  let ulidCanonicalRandom = ulidCanonical.slice(-16).match(/.{1,8}/g).join('-')
+  let ulidCanonicalFormatted = `${ulidCanonicalTime}-${ulidCanonicalRandom}`
+
   return {
-    id: ksuid.string,
-    idAlias: ksuidBase32Crf,
-    idAliasFormatted: ksuidBase32Crf.match(/.{1,8}/g).join('-')
+    id: ulidBase62Mika,
+    idAlias: ulidCanonical,
+    idAliasFormatted: ulidCanonicalFormatted
   }
 }
 
-module.exports.ksuidTo64Int = (ksuid) => {
-  return exports.bufferBn.toBigIntBE(Buffer.concat([ksuid.raw.slice(0, 4), ksuid.raw.slice(ksuid.raw.length - 4, ksuid.raw.length)]))
+module.exports.generateUlid = () => {
+  let ulid = exports.ulid.generate()
+
+  return {
+    ulid: ulid,
+    buffer: ulid.bytes,
+    canonical: ulid.toCanonical(),
+    base62mika: exports.base62MikaEncode(ulid.bytes),
+    base32crf: exports.base32CrfEncode(ulid.bytes)
+  }
 }
 
-module.exports.ksuidToBigInt = (ksuid) => {
-  return exports.bufferBn.toBigIntBE(ksuid.raw)
+module.exports.generateKsuid = async () => {
+  let ksuid = await exports.ksuid.random()
+
+  return {
+    ksuid: ksuid,
+    buffer: ksuid.raw,
+    canonical: ksuid.string,
+    base62mika: exports.base62MikaEncode(ksuid.raw),
+    base32crf: exports.base32CrfEncode(ksuid.raw)
+  }
 }
 
 /**

@@ -22,17 +22,18 @@ module.exports.notFoundErrorHandler = (req, res, next) => {
  */
 module.exports.errorHandler = (err, req, res, next) => {
   if (err) {
-    const errorRef = `${commonConfig.name}-error-${uid.ksuid.randomSync().string}`
-    const data = { errorRef }
     let msgTypes = msg.msgTypes.MSG_ERROR
+    let data
 
     if (err.status === 400) { // status assigned by body-parser when encounter parsing error
       msgTypes = msg.msgTypes.MSG_ERROR_BAD_REQUEST
+    } else {
+      const errorRef = `${commonConfig.name}-error-${uid.ksuid.randomSync().string}`
+      data = { errorRef }
+      console.error('START errorRef :', errorRef)
+      console.error(err.stack)
+      console.error('END errorRef :', errorRef)
     }
-
-    console.error('START errorRef :', errorRef)
-    console.error(err.stack)
-    console.error('END errorRef :', errorRef)
 
     msg.expressResponse(
       res,

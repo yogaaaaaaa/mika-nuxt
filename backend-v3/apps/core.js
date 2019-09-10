@@ -29,13 +29,16 @@ const coreApp = express()
 coreApp.disable('x-powered-by')
 coreApp.set('etag', false)
 morgan.token('mika-status', (req, res) => res.msgStatus)
-coreApp.use(morgan(':method :url :remote-addr :status :mika-status :res[content-length] bytes :response-time ms'))
+morgan.token('ip-addr', (req, res) => req.headers['x-real-ip'] || req.ip)
+coreApp.use(morgan(':method :url :ip-addr :status :mika-status :res[content-length] bytes :response-time ms'))
+
 /**
  * Notification route for acquirer
  */
 coreApp.use(require('../routes/notifTcash'))
 coreApp.use(require('../routes/notifAlto'))
 coreApp.use(require('../routes/notifMidtrans'))
+coreApp.use(require('../routes/notifTcashQrn'))
 
 /**
  * Debug Route
