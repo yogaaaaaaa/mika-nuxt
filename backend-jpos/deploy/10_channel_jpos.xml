@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+
+<!--
+<channel-adaptor name='jpos-channel' class="org.jpos.q2.iso.ChannelAdaptor" logger="Q2">
+    <channel class="org.jpos.iso.channel.XMLChannel" packager="org.jpos.iso.packager.XMLPackager">
+        <property name="host" value="isobridge.jpos.org" />
+        <property name="port" value="9000" />
+    </channel>
+    <in>jpos-send</in>
+    <out>jpos-receive</out>
+    <reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>
+-->
+
+<!--
+<channel-adaptor name='jpos-channel' class="org.jpos.q2.iso.ChannelAdaptor" logger="Q2">
+    <channel class="org.jpos.iso.channel.NACChannel" packager="org.jpos.iso.packager.ISO87BPackager">
+        <property name="host" value="localhost" />
+        <property name="port" value="9000" />
+    </channel>
+    <in>jpos-send</in>
+    <out>jpos-receive</out>
+    <reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>
+-->
+
+<!--
+<channel-adaptor name='jpos-channel' class="org.jpos.q2.iso.ChannelAdaptor" logger="Q2">
+    <channel class="org.jpos.iso.channel.NACChannel" packager="org.jpos.iso.packager.GenericPackager">
+        <property name="host" value="localhost" />
+        <property name="port" value="9000" />
+        <property name="packager-config" value="cfg/packager/bnidebit.xml" /> 
+    </channel>
+    <in>jpos-send</in>
+    <out>jpos-receive</out>
+    <reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>
+-->
+
+<channel-adaptor name='jpos-channel' class="org.jpos.q2.iso.ChannelAdaptor" logger="Q2">
+    <channel class="org.jpos.iso.channel.PostChannel" packager="org.jpos.iso.packager.GenericPackager">
+        <property name="host" value="localhost" />
+        <property name="port" value="9000" />
+        <property name="packager-config" value="cfg/packager/bni.xml" /> 
+        <property name="override-header" value="true" />
+    </channel>
+    <in>jpos-send</in>
+    <out>jpos-receive</out>
+    <reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>
