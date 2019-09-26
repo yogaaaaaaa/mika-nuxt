@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let terminalModel = sequelize.define('terminalModel', {
+  const terminalModel = sequelize.define('terminalModel', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     terminalModel.hasMany(models.terminal, { foreignKey: 'terminalModelId' })
     terminalModel.hasMany(models.terminalProcurement, { foreignKey: 'terminalModelId' })
   }
+
+  terminalModel.addScope('admin', {
+    paranoid: false
+  })
 
   return terminalModel
 }

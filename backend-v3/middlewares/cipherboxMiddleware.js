@@ -11,7 +11,7 @@ const models = require('../models')
 */
 module.exports.processCipherbox = (mandatory = false) => async function (req, res, next) {
   if (req.body.cbx && req.body.id) {
-    let whereCipherbox = {
+    const whereCipherbox = {
       id: req.body.id
     }
     if (req.auth) {
@@ -20,12 +20,12 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
       }
     }
 
-    let cipherboxKey = await models.cipherboxKey.scope('active').findOne({
+    const cipherboxKey = await models.cipherboxKey.scope('active').findOne({
       where: whereCipherbox
     })
 
     if (cipherboxKey) {
-      let keys = JSON.parse(cipherboxKey.keys)
+      const keys = JSON.parse(cipherboxKey.keys)
       let unbox = null
 
       if (keys.cbx === cipherbox.cbType.cb0) {
@@ -58,7 +58,7 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
       }
 
       // Hijack send function
-      let send = res.send
+      const send = res.send
       res.send = (body) => {
         if (typeof body === 'object') {
           body = cipherbox.sealBoxWithCB0(JSON.stringify(body), unbox.key).box

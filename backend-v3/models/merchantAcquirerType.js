@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let merchantAcquirerType = sequelize.define('merchantAcquirerType', {
+  const merchantAcquirerType = sequelize.define('merchantAcquirerType', {
     merchantId: DataTypes.INTEGER,
     acquirerTypeId: DataTypes.INTEGER
   }, {

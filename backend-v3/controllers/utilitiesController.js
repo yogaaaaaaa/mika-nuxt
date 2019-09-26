@@ -47,7 +47,7 @@ module.exports.listThumbnails = async (req, res, next) => {
   msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS,
-    await (new Promise(async (resolve, reject) => {
+    await (new Promise((resolve, reject) => {
       fs.readdir(dirConfig.thumbnailsDir, {
         withFileTypes: true
       }, (err, files) => {

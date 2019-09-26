@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let apiKey = sequelize.define('apiKey', {
+  const apiKey = sequelize.define('apiKey', {
     idKey: DataTypes.STRING,
     secretKey: DataTypes.STRING,
     sharedKey: DataTypes.STRING,

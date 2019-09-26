@@ -37,8 +37,8 @@ module.exports.pagination = (req, res, next) => {
   req.query.order = req.query.order || 'desc'
   req.query.order_by = req.query.order_by || 'createdAt'
 
-  let fieldComponents = req.query.order_by.split('.')
-  let orderBy = fieldComponents.map((fieldComponent) => {
+  const fieldComponents = req.query.order_by.split('.')
+  const orderBy = fieldComponents.map((fieldComponent) => {
     if (models[fieldComponent]) {
       return models[fieldComponent]
     } else {
@@ -53,7 +53,8 @@ module.exports.pagination = (req, res, next) => {
         offset: (req.query.page - 1) * req.query.per_page,
         limit: req.query.per_page,
         order: [
-          orderBy
+          orderBy,
+          ['id', req.query.order] // default order
         ]
       }))
     }

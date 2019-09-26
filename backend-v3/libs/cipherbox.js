@@ -58,16 +58,16 @@ module.exports.keyStatuses = {
  */
 module.exports.sealBoxWithCB0 = (data, key, id = null) => {
   try {
-    let iv = crypto.randomBytes(16)
-    let cipherData = crypto.createCipheriv('aes-256-cbc', key, iv)
-    let dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
+    const iv = crypto.randomBytes(16)
+    const cipherData = crypto.createCipheriv('aes-256-cbc', key, iv)
+    const dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
 
-    let timestamp = getUnixTimestamp()
+    const timestamp = getUnixTimestamp()
 
-    let hmacKey = crypto.createHash('sha256').update(Buffer.concat([key, Buffer.from(timestamp)])).digest()
-    let dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
+    const hmacKey = crypto.createHash('sha256').update(Buffer.concat([key, Buffer.from(timestamp)])).digest()
+    const dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
 
-    let cipherBox = {
+    const cipherBox = {
       cbx: exports.cbType.cb0,
       ts: timestamp,
       iv: iv.toString('base64'),
@@ -107,16 +107,16 @@ module.exports.sealBoxWithCB1 = (data, key, keyType = 'public', id = null) => {
       return null
     }
 
-    let iv = crypto.randomBytes(16)
-    let cipherData = crypto.createCipheriv('aes-256-cbc', sessionKey, iv)
-    let dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
+    const iv = crypto.randomBytes(16)
+    const cipherData = crypto.createCipheriv('aes-256-cbc', sessionKey, iv)
+    const dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
 
-    let timestamp = getUnixTimestamp()
+    const timestamp = getUnixTimestamp()
 
-    let hmacKey = crypto.createHash('sha256').update(Buffer.concat([sessionKey, Buffer.from(timestamp)])).digest()
-    let dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
+    const hmacKey = crypto.createHash('sha256').update(Buffer.concat([sessionKey, Buffer.from(timestamp)])).digest()
+    const dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
 
-    let cipherBox = {
+    const cipherBox = {
       cbx: exports.cbType.cb1,
       ts: timestamp,
       pk: keyType,
@@ -153,19 +153,19 @@ module.exports.sealBoxWithCB2 = (data, ipek, baseKSN, id = null) => {
  */
 module.exports.sealBoxWithCB3 = (data, key, id = null, iter = 100) => {
   try {
-    let salt = crypto.randomBytes(64)
-    let sessionKey = crypto.createHmac('sha256', key).update(salt).digest()
+    const salt = crypto.randomBytes(64)
+    const sessionKey = crypto.createHmac('sha256', key).update(salt).digest()
 
-    let iv = crypto.randomBytes(16)
-    let cipherData = crypto.createCipheriv('aes-256-cbc', sessionKey, iv)
-    let dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
+    const iv = crypto.randomBytes(16)
+    const cipherData = crypto.createCipheriv('aes-256-cbc', sessionKey, iv)
+    const dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
 
-    let timestamp = getUnixTimestamp()
+    const timestamp = getUnixTimestamp()
 
-    let hmacKey = crypto.createHash('sha256').update(Buffer.concat([sessionKey, Buffer.from(timestamp)])).digest()
-    let dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
+    const hmacKey = crypto.createHash('sha256').update(Buffer.concat([sessionKey, Buffer.from(timestamp)])).digest()
+    const dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
 
-    let cipherBox = {
+    const cipherBox = {
       cbx: exports.cbType.cb3,
       ts: timestamp,
       salt: salt.toString('base64'),
@@ -195,16 +195,16 @@ module.exports.openCB0Box = (box, key, tsCheck = true) => {
     }
 
     if (box.cbx === exports.cbType.cb0 && Math.abs(getUnixTimestamp() - parseInt(box.ts)) < timestampTolerance) {
-      let encryptedData = Buffer.from(box.data, 'base64')
-      let hmacKey = crypto.createHash('sha256')
+      const encryptedData = Buffer.from(box.data, 'base64')
+      const hmacKey = crypto.createHash('sha256')
         .update(
           Buffer.concat([key, Buffer.from(String(box.ts))])
         )
         .digest()
-      let encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
+      const encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
 
       if (crypto.timingSafeEqual(encryptedDataHMAC, Buffer.from(box.hmac, 'hex'))) {
-        let dataDecipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(box.iv, 'base64'))
+        const dataDecipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(box.iv, 'base64'))
         return {
           key: key,
           data: Buffer.concat([dataDecipher.update(encryptedData), dataDecipher.final()])
@@ -225,7 +225,7 @@ module.exports.openCB1Box = (box, key, keyType = 'private', tsCheck = true) => {
     }
 
     if (box.cbx === exports.cbType.cb1 && Math.abs(getUnixTimestamp() - parseInt(box.ts)) < timestampTolerance) {
-      let encryptedSessionKey = Buffer.from(box.key, 'base64')
+      const encryptedSessionKey = Buffer.from(box.key, 'base64')
       let sessionKey = null
       if ((box.pk === 'private' && keyType === 'public')) {
         sessionKey = crypto.publicDecrypt(key, encryptedSessionKey)
@@ -235,17 +235,17 @@ module.exports.openCB1Box = (box, key, keyType = 'private', tsCheck = true) => {
         return null
       }
 
-      let encryptedData = Buffer.from(box.data, 'base64')
+      const encryptedData = Buffer.from(box.data, 'base64')
 
-      let hmacKey = crypto.createHash('sha256')
+      const hmacKey = crypto.createHash('sha256')
         .update(
           Buffer.concat([sessionKey, Buffer.from(String(box.ts))])
         )
         .digest()
-      let encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
+      const encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
 
       if (crypto.timingSafeEqual(encryptedDataHMAC, Buffer.from(box.hmac, 'hex'))) {
-        let dataDecipher = crypto.createDecipheriv('aes-256-cbc', sessionKey, Buffer.from(box.iv, 'base64'))
+        const dataDecipher = crypto.createDecipheriv('aes-256-cbc', sessionKey, Buffer.from(box.iv, 'base64'))
         return {
           key: sessionKey,
           data: Buffer.concat([dataDecipher.update(encryptedData), dataDecipher.final()])
@@ -270,19 +270,19 @@ module.exports.openCB3Box = (box, key) => {
     }
 
     if (box.cbx === exports.cbType.cb3 && Math.abs(getUnixTimestamp() - parseInt(box.ts)) < timestampTolerance) {
-      let sessionKey = crypto.createHmac('sha256', key).update(Buffer.from(box.salt, 'base64')).digest()
+      const sessionKey = crypto.createHmac('sha256', key).update(Buffer.from(box.salt, 'base64')).digest()
 
-      let encryptedData = Buffer.from(box.data, 'base64')
+      const encryptedData = Buffer.from(box.data, 'base64')
 
-      let hmacKey = crypto.createHash('sha256')
+      const hmacKey = crypto.createHash('sha256')
         .update(
           Buffer.concat([sessionKey, Buffer.from(String(box.ts))])
         )
         .digest()
-      let encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
+      const encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
 
       if (crypto.timingSafeEqual(encryptedDataHMAC, Buffer.from(box.hmac, 'hex'))) {
-        let dataDecipher = crypto.createDecipheriv('aes-256-cbc', sessionKey, Buffer.from(box.iv, 'base64'))
+        const dataDecipher = crypto.createDecipheriv('aes-256-cbc', sessionKey, Buffer.from(box.iv, 'base64'))
         return {
           key: sessionKey,
           data: Buffer.concat([dataDecipher.update(encryptedData), dataDecipher.final()])

@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let agentAcquirerExclusion = sequelize.define('agentAcquirerExclusion', {
+  const agentAcquirerExclusion = sequelize.define('agentAcquirerExclusion', {
     agentId: DataTypes.INTEGER,
     acquirerId: DataTypes.INTEGER
   }, {

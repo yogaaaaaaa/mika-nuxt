@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
   const Op = Sequelize.Op
 
-  let outlet = sequelize.define('outlet', {
+  const outlet = sequelize.define('outlet', {
     idAlias: DataTypes.CHAR(25),
 
     name: DataTypes.STRING,
@@ -48,45 +48,64 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   outlet.addScope('excludeBusiness', {
-    attributes: { exclude: [
-      'ownershipType',
-      'rentStartDate',
-      'rentDurationMonth',
-      'otherPaymentSystems',
-      'outletPhotoResourceId',
-      'cashierDeskPhotoResourceId',
-      'businessDurationMonth',
-      'businessMonthlyTurnover'
-    ] }
-  })
-  outlet.addScope('excludeMerchant', {
-    attributes: { exclude: [
-      'merchantId'
-    ] }
-  })
-  outlet.addScope('merchantStaff', (merchantStaffId) => ({
     attributes: {
-      exclude: ['archivedAt']
-    },
+      exclude: [
+        'ownershipType',
+        'rentStartDate',
+        'rentDurationMonth',
+        'otherPaymentSystems',
+        'outletPhotoResourceId',
+        'cashierDeskPhotoResourceId',
+        'businessDurationMonth',
+        'businessMonthlyTurnover'
+      ]
+    }
+  })
+  outlet.addScope('excludeMerchantId', {
+    attributes: {
+      exclude: [
+        'merchantId'
+      ]
+    }
+  })
+
+  outlet.addScope('merchantStaff', (merchantStaffId) => ({
+    paranoid: false,
     where: {
       [Op.and]: [
         {
           id: {
             [Op.in]: Sequelize.literal(
-              query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+              query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
             )
           }
         }
       ]
     }
   }))
+  outlet.addScope('acquirerStaff', (acquirerCompanyId) => ({
+    paranoid: false,
+    where: {
+      [Op.and]: [
+        {
+          id: {
+            [Op.in]: Sequelize.literal(
+              query.get('sub/getOutletByAcquirerCompany.sql', [sequelize.escape(acquirerCompanyId)])
+            )
+          }
+        }
+      ]
+    }
+  }))
+
   outlet.addScope('admin', (merchantStaffId, excludeByMerchantStaffId) => {
-    let scope = {
+    const scope = {
+      paranoid: false,
       where: {
         [Op.and]: []
       },
       include: [
-        sequelize.models.merchant.scope('id', 'name'),
+        sequelize.models.merchant.scope('id', 'name', 'paranoid'),
         {
           model: sequelize.models.resource,
           as: 'outletPhotoResource'
@@ -102,14 +121,14 @@ module.exports = (sequelize, DataTypes) => {
       scope.where[Op.and].push({
         id: {
           [excludeByMerchantStaffId ? Op.notIn : Op.in]: Sequelize.literal(
-            query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+            query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
           )
         }
       })
       scope.where[Op.and].push({
         merchantId: {
           [Op.in]: Sequelize.literal(
-            query.get('sub/getMerchantByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+            query.get('sub/getMerchantByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
           )
         }
       })
@@ -132,13 +151,13 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   outlet.createWithResources = async (value, options) => {
-    let resources = Array(2)
+    const resources = Array(2)
     for (let i = 0; i < resources.length; i++) {
       resources[i] = sequelize.models.resource.buildWithId()
       await resources[i].save(options)
     }
 
-    let outletInstance = outlet.build(value, options)
+    const outletInstance = outlet.build(value, options)
     outletInstance.outletPhotoResourceId = resources[0].id
     outletInstance.cashierDeskPhotoResourceId = resources[1].id
 

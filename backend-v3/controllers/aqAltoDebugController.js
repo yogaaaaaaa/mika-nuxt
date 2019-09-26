@@ -17,14 +17,14 @@ module.exports.queryTransactionMiddlewares = [
   ],
   errorMiddleware.validatorErrorHandler,
   async (req, res, next) => {
-    let acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
+    const acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
       where: {
         id: req.body.acquirerConfigId
       }
     }) || { config: {} }
-    let altoConfig = alto.mixConfig(acquirerConfig.config)
+    const altoConfig = alto.mixConfig(acquirerConfig.config)
 
-    let response = {}
+    const response = {}
     response.payQuery = await alto.altoQueryPayment(
       Object.assign(
         {

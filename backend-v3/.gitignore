@@ -1,2 +1,5 @@
 # Runtime specific
 ecosystem.config.js
+
+# Exclusion for vagrant config
+!_configs.vagrant

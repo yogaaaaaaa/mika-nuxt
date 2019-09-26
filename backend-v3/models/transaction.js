@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
   const Op = Sequelize.Op
 
-  let transaction = sequelize.define('transaction', {
+  const transaction = sequelize.define('transaction', {
     id: {
       primaryKey: true,
       type: DataTypes.CHAR(27)
@@ -50,6 +50,10 @@ module.exports = (sequelize, DataTypes) => {
     terminalId: DataTypes.INTEGER,
     acquirerId: DataTypes.INTEGER,
 
+    processFee: DataTypes.DECIMAL(28, 2),
+    shareAcquirer: DataTypes.DECIMAL(5, 4),
+    shareMerchant: DataTypes.DECIMAL(5, 4),
+
     extra: {
       type: DataTypes.VIRTUAL,
       get: kv.selfKvGetter('transactionExtraKvs')
@@ -77,25 +81,30 @@ module.exports = (sequelize, DataTypes) => {
 
   transaction.addScope('agent', () => ({
     attributes: {
-      exclude: ['token', 'userToken', 'ipAddress']
+      exclude: [
+        'token',
+        'userToken',
+        'ipAddress',
+        'processFee',
+        'shareAcquirer',
+        'shareMerchant'
+      ]
     },
     include: [
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       sequelize.models.transactionRefund.scope('excludeTransactionId'),
       {
-        required: true,
-        model: sequelize.models.acquirer.scope(
-          'excludeShare',
-          'excludeTimestamp'
-        ),
+        model: sequelize.models.acquirer.scope('excludeShare'),
+        paranoid: false,
         include: [
-          sequelize.models.acquirerType.scope(
-            'excludeTimestamp'
-          ),
-          sequelize.models.acquirerConfig.scope(
-            'excludeTimestamp',
-            'excludeConfig'
-          )
+          {
+            model: sequelize.models.acquirerType,
+            paranoid: false
+          },
+          {
+            model: sequelize.models.acquirerConfig.scope('excludeConfig'),
+            paranoid: false
+          }
         ]
       }
     ]
@@ -105,28 +114,68 @@ module.exports = (sequelize, DataTypes) => {
       sequelize.models.transactionExtraKv.scope('excludeEntity'),
       sequelize.models.transactionRefund.scope('excludeTransactionId'),
       {
-        model: sequelize.models.agent.scope('excludeTimestamp'),
-        include: [
-          sequelize.models.outlet.scope('excludeBusiness', 'excludeTimestamp')
-        ],
+        model: sequelize.models.agent,
+        paranoid: false,
         where: {
           [Op.and]: [
+            outletId ? { outletId } : undefined,
             {
               outletId: {
                 [Op.in]: Sequelize.literal(
-                  query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+                  query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
                 )
               }
-            },
-            outletId ? { outletId } : undefined
+            }
           ]
-        }
+        },
+        include: [
+          {
+            model: sequelize.models.outlet.scope('excludeBusiness'),
+            paranoid: false
+          }
+        ]
       },
       {
-        required: true,
-        model: sequelize.models.acquirer.scope('excludeTimestamp'),
+        model: sequelize.models.acquirer,
+        paranoid: false,
         include: [
-          sequelize.models.acquirerType.scope('excludeTimestamp')
+          {
+            model: sequelize.models.acquirerType,
+            paranoid: false
+          }
+        ]
+      }
+    ]
+  }))
+  transaction.addScope('acquirerStaff', acquirerCompanyId => ({
+    include: [
+      sequelize.models.transactionExtraKv.scope('excludeEntity'),
+      sequelize.models.transactionRefund.scope('excludeTransactionId'),
+      {
+        model: sequelize.models.acquirer,
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.acquirerType,
+            paranoid: false
+          },
+          {
+            model: sequelize.models.acquirerCompany,
+            paranoid: false,
+            where: {
+              id: acquirerCompanyId
+            }
+          }
+        ]
+      },
+      {
+        model: sequelize.models.agent,
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.outlet.scope('excludeBusiness'),
+            paranoid: false
+          }
         ]
       }
     ]
@@ -143,7 +192,7 @@ module.exports = (sequelize, DataTypes) => {
       ],
       [
         Sequelize.literal(
-          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0) ) `
+          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0) ) `
         ),
         'totalAmount'
       ],
@@ -152,10 +201,10 @@ module.exports = (sequelize, DataTypes) => {
           'SUM(' +
             'GREATEST(' +
               '(' +
-                `(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0)` +
-                ' * IFNULL(`acquirer`.`shareMerchant`, 1))' +
+                `((\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0))` +
+                ' * IFNULL(`transaction`.`shareMerchant`, 1))' +
               ')' +
-              ' - IFNULL(`acquirer`.`processFee`, 0)' +
+              ' - IFNULL(`transaction`.`processFee`, 0)' +
             ', 0)' +
           ')'
         ),
@@ -168,24 +217,26 @@ module.exports = (sequelize, DataTypes) => {
     ],
     include: [
       {
-        required: true,
         model: sequelize.models.acquirer,
-        attributes: [ 'id', 'name', 'description', 'shareMerchant', 'merchantId', 'acquirerTypeId' ],
+        paranoid: false,
+        attributes: ['id', 'name', 'description', 'shareMerchant', 'merchantId', 'acquirerTypeId'],
         include: [
           {
             model: sequelize.models.acquirerType,
-            attributes: [ 'id', 'class', 'name', 'description', 'thumbnail', 'thumbnailGray', 'chartColor' ]
+            paranoid: false,
+            attributes: ['id', 'class', 'name', 'description', 'thumbnail', 'thumbnailGray', 'chartColor']
           }
         ]
       },
       {
         model: sequelize.models.agent,
-        attributes: [ 'id', 'outletId' ],
+        paranoid: false,
+        attributes: ['id', 'outletId'],
         where: {
           [Op.and]: {
             outletId: {
               [Op.in]: Sequelize.literal(
-                query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+                query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
               )
             }
           }
@@ -200,13 +251,14 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       {
         model: sequelize.models.agent,
+        paranoid: false,
         attributes: ['outletId'],
         where: {
           [Op.and]: [
             {
               outletId: {
                 [Op.in]: Sequelize.literal(
-                  query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+                  query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
                 )
               }
             }
@@ -227,7 +279,7 @@ module.exports = (sequelize, DataTypes) => {
       ],
       [
         Sequelize.literal(
-          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0) ) `
+          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0) ) `
         ),
         'totalAmount'
       ],
@@ -236,10 +288,10 @@ module.exports = (sequelize, DataTypes) => {
           'SUM(' +
             'GREATEST(' +
               '(' +
-                `(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])}, 0)` +
-                ' * IFNULL(`acquirer`.`shareMerchant`, 1))' +
+                `((\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0))` +
+                ' * IFNULL(`transaction`.`shareMerchant`, 1))' +
               ')' +
-              ' - IFNULL(`acquirer`.`processFee`, 0)' +
+              ' - IFNULL(`transaction`.`processFee`, 0)' +
             ', 0)' +
           ')'
         ),
@@ -252,19 +304,20 @@ module.exports = (sequelize, DataTypes) => {
     ],
     include: [
       {
-        required: true,
         model: sequelize.models.acquirer,
-        attributes: [ 'id' ]
+        paranoid: false,
+        attributes: ['id']
       },
       {
         model: sequelize.models.agent,
-        attributes: [ 'id', 'outletId' ],
+        paranoid: false,
+        attributes: ['id', 'outletId'],
         include: [sequelize.models.outlet],
         where: {
           [Op.and]: {
             outletId: {
               [Op.in]: Sequelize.literal(
-                query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+                query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
               )
             }
           }
@@ -276,31 +329,40 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       {
         model: sequelize.models.agent,
-        include: [ sequelize.models.outlet ],
+        paranoid: false,
         where: {
           [Op.and]: [
             {
               outletId: {
                 [Op.in]: Sequelize.literal(
-                  query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+                  query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
                 )
               }
             }
           ]
-        }
+        },
+        include: [
+          {
+            model: sequelize.models.outlet,
+            paranoid: false
+          }
+        ]
       },
       {
-        required: true,
         model: sequelize.models.acquirer,
+        paranoid: false,
         include: [
-          sequelize.models.acquirerType
+          {
+            model: sequelize.models.acquirerType,
+            paranoid: false
+          }
         ]
       }
     ]
   }))
 
   transaction.addScope('partner', (partnerId, merchantId) => {
-    let whereMerchant = {}
+    const whereMerchant = {}
     if (partnerId) {
       whereMerchant.partnerId = partnerId
     }
@@ -342,10 +404,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
-  transaction.addScope('trxManager', () => ({
+  transaction.addScope('totalRefundAmount', () => ({
     attributes: {
       include: [
-        [ Sequelize.literal(query.get('sub/getTransactionRefundSum.sql', [ '`transaction`.`id`' ])), 'totalRefundAmount' ]
+        [Sequelize.literal(query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])), 'totalRefundAmount']
       ]
     }
   }))
@@ -354,6 +416,7 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       {
         model: sequelize.models.agent,
+        paranoid: false,
         attributes: [
           'id',
           'name',
@@ -362,16 +425,30 @@ module.exports = (sequelize, DataTypes) => {
         include: [
           {
             model: sequelize.models.outlet,
+            paranoid: false,
             attributes: [
               'id',
               'name',
               'merchantId'
+            ],
+            include: [
+              {
+                model: sequelize.models.merchant.scope('id', 'name'),
+                paranoid: false
+              }
             ]
           }
         ]
       },
       {
-        model: sequelize.models.acquirer.scope('acquirerType')
+        model: sequelize.models.acquirer,
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.acquirerType,
+            paranoid: false
+          }
+        ]
       }
     ]
   }))

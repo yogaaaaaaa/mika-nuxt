@@ -6,7 +6,7 @@
 
 module.exports.selfKvGetter = (kvsParamName) => {
   return function () {
-    let config = {}
+    const config = {}
     if (Array.isArray(this[kvsParamName])) {
       for (const data of this[kvsParamName]) {
         config[data.name] = data.value
@@ -17,7 +17,7 @@ module.exports.selfKvGetter = (kvsParamName) => {
 }
 
 module.exports.selfKvLoad = (kvsParamName) => {
-  let getName = `get${kvsParamName}`
+  const getName = `get${kvsParamName}`
   return async function (t) {
     this[kvsParamName] = await this[getName](t ? { transaction: t } : undefined)
   }
@@ -42,7 +42,7 @@ module.exports.setKvMethod = (entityIdName) => {
       transaction: t
     })
     for (const key in objectKv) {
-      if (objectKv.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(objectKv, key)) {
         await this.create({
           [entityIdName]: entityId,
           name: key,

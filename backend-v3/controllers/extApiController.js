@@ -46,7 +46,7 @@ module.exports.createTransaction = async (req, res, next) => {
   }
 
   try {
-    let createTrxResult = await trxManager.create({
+    const createTrxResult = await trxManager.create({
       agentId: req.body.agentId,
       acquirerId: req.body.acquirerId,
       amount: req.body.amount,
@@ -70,7 +70,7 @@ module.exports.createTransaction = async (req, res, next) => {
         createTrxResult.transactionId)
     }
 
-    let mappedTransaction = extApiObject.mapCreatedTransaction(createTrxResult)
+    const mappedTransaction = extApiObject.mapCreatedTransaction(createTrxResult)
 
     if (createTrxResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
       msg.expressResponse(
@@ -118,14 +118,14 @@ module.exports.getTransactionsValidator = [
 ]
 
 module.exports.getTransactions = async (req, res, next) => {
-  let query = {
+  const query = {
     where: {}
   }
   req.applyPaginationSequelize(query)
 
   if (req.params.transactionId) {
     query.where.id = req.params.transactionId
-    let transaction = await models.transaction.scope({ method: ['partner', req.auth.partnerId] }).findOne(query)
+    const transaction = await models.transaction.scope({ method: ['partner', req.auth.partnerId] }).findOne(query)
     msg.expressResponse(
       res,
       transaction
@@ -138,15 +138,15 @@ module.exports.getTransactions = async (req, res, next) => {
     if (req.params.agentId) {
       query.where.agentId = req.params.agentId
       transactions = await models.transaction
-        .scope({ method: [ 'partner', req.auth.partnerId ] })
+        .scope({ method: ['partner', req.auth.partnerId] })
         .findAll(query)
     } else if (req.params.merchantId) {
       transactions = await models.transaction
-        .scope({ method: [ 'partner', req.auth.partnerId, req.params.merchantId ] })
+        .scope({ method: ['partner', req.auth.partnerId, req.params.merchantId] })
         .findAll(query)
     } else {
       transactions = await models.transaction
-        .scope({ method: [ 'partner', req.auth.partnerId ] })
+        .scope({ method: ['partner', req.auth.partnerId] })
         .findAll(query)
     }
 
@@ -193,13 +193,13 @@ module.exports.getAgentsValidator = [
 ]
 
 module.exports.getAgents = async (req, res, next) => {
-  let query = {
+  const query = {
     where: {}
   }
   req.applyPaginationSequelize(query)
   if (req.params.agentId) {
     query.where.id = req.params.agentId
-    let agent = await models.agent
+    const agent = await models.agent
       .scope({ method: ['partner', req.auth.partnerId] })
       .findOne(query)
     msg.expressResponse(
@@ -213,7 +213,7 @@ module.exports.getAgents = async (req, res, next) => {
     let agents = null
     if (req.params.merchantId) {
       agents = await models.agent
-        .scope({ method: [ 'partner', req.auth.partnerId, req.params.merchantId ] })
+        .scope({ method: ['partner', req.auth.partnerId, req.params.merchantId] })
         .findAll(query)
     } else {
       agents = await models.agent
@@ -260,13 +260,13 @@ module.exports.getMerchantsValidator = [
 ]
 
 module.exports.getMerchants = async (req, res, next) => {
-  let query = {
+  const query = {
     where: {}
   }
   req.applyPaginationSequelize(query)
   if (req.params.merchantId) {
     query.where.id = req.params.merchantId
-    let merchant = await models.merchant
+    const merchant = await models.merchant
       .scope({ method: ['partner', req.auth.partnerId] })
       .findOne(query)
 
@@ -278,7 +278,7 @@ module.exports.getMerchants = async (req, res, next) => {
       extApiObject.mapMerchant(merchant) || undefined
     )
   } else {
-    let merchants = await models.merchant
+    const merchants = await models.merchant
       .scope({ method: ['partner', req.auth.partnerId] })
       .findAll(query)
 

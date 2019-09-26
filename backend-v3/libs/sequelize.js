@@ -12,7 +12,7 @@ if (dbConfig[process.env.NODE_ENV]) {
   selectedDbConfig = dbConfig.development
 }
 
-let sequelize = new Sequelize(
+const sequelize = new Sequelize(
   selectedDbConfig.database,
   selectedDbConfig.username,
   selectedDbConfig.password,

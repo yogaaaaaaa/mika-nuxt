@@ -24,7 +24,7 @@ module.exports.compareString = (dataA, dataB) => {
 }
 
 module.exports.compareHash = (dataHashed, data) => {
-  let dataHashA = crypto.createHash('sha256').update(data).digest()
-  let dataHashB = Buffer.from(dataHashed, 'hex')
+  const dataHashA = crypto.createHash('sha256').update(data).digest()
+  const dataHashB = Buffer.from(dataHashed, 'hex')
   return crypto.timingSafeEqual(dataHashA, dataHashB)
 }

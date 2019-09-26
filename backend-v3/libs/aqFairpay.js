@@ -76,7 +76,7 @@ module.exports.getFairpayResponseCode = (response) => {
 }
 
 module.exports.isFairpayResponseCodeNotAuth = (resCode) => {
-  let notAuthCodes = [
+  const notAuthCodes = [
     exports.fairpayResponseCodes.AUTH_NOT_LOGIN,
     exports.fairpayResponseCodes.AUTH_VALIDATION_FAILED,
     exports.fairpayResponseCodes.AUTH_BAD_TOKEN
@@ -86,7 +86,7 @@ module.exports.isFairpayResponseCodeNotAuth = (resCode) => {
 }
 
 module.exports.getToken = async (ctx) => {
-  let token = await redis.get(redisKey(ctx.username, 'token'))
+  const token = await redis.get(redisKey(ctx.username, 'token'))
   if (token) {
     ctx.token = token
     return token
@@ -94,12 +94,12 @@ module.exports.getToken = async (ctx) => {
 }
 
 module.exports.setToken = async (ctx) => {
-  return redis.set(redisKey(ctx.username, `token`), ctx.token)
+  return redis.set(redisKey(ctx.username, 'token'), ctx.token)
 }
 
 module.exports.clearToken = async (ctx) => {
   ctx.token = null
-  return redis.del(redisKey(`token`, ctx))
+  return redis.del(redisKey('token', ctx))
 }
 
 module.exports.createSaleRequest = (ctx) => {
@@ -158,7 +158,7 @@ module.exports.createSaleRequest = (ctx) => {
   }
 
   ctx.cardPan = emv.track2GetPAN(ctx.track2Data)
-  let panComponent = ctx.cardPan.match(/(\d{6})(.*)(\d{4})/)
+  const panComponent = ctx.cardPan.match(/(\d{6})(.*)(\d{4})/)
   ctx.cardPanMasked = `${panComponent[1]}${'*'.repeat(panComponent[2].length)}${panComponent[3]}`
   ctx.cardBin = panComponent[1]
   // TODO: WARNING ! INACCURATE ! Replace ASAP !
@@ -204,9 +204,9 @@ module.exports.processSaleResponse = async (ctx) => {
 }
 
 module.exports.apiLogin = async (ctx) => {
-  let timestamp = getUnixTimestamp()
+  const timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(ctx))
+  const response = await (fairpayRequestAgent(ctx))
     .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/login`)
     .send({
       username: ctx.username,
@@ -226,9 +226,9 @@ module.exports.apiLogin = async (ctx) => {
 module.exports.apiLogout = async (ctx) => {
   if (!ctx.token) return
 
-  let timestamp = getUnixTimestamp()
+  const timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(ctx))
+  const response = await (fairpayRequestAgent(ctx))
     .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/logout`)
     .send({
       username: ctx.username,
@@ -250,7 +250,7 @@ module.exports.apiDebitCreditSale = async (ctx) => {
 
   ctx.saleRequest.device_timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(ctx))
+  const response = await (fairpayRequestAgent(ctx))
     .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/sale_trx`)
     .send(ctx.saleRequest)
 
@@ -267,7 +267,7 @@ module.exports.apiDebitCreditCheck = async (ctx) => {
 
   ctx.saleRequest.device_timestamp = getUnixTimestamp()
 
-  let response = await (fairpayRequestAgent(ctx))
+  const response = await (fairpayRequestAgent(ctx))
     .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/is_debit_check`)
     .send(ctx.saleRequest)
 
@@ -282,7 +282,7 @@ module.exports.apiDebitCreditCheck = async (ctx) => {
 module.exports.apiSaveSignature = async (ctx) => {
   if (!ctx.saleResponse || !ctx.signatureData || !ctx.token) return
 
-  let request = {
+  const request = {
     device_timestamp: getUnixTimestamp(),
     invoice_num: ctx.saleResponse.invoice_num,
     approval_code: ctx.saleResponse.approval_code,
@@ -290,7 +290,7 @@ module.exports.apiSaveSignature = async (ctx) => {
     customer_signature: ctx.signatureData
   }
 
-  let response = await (fairpayRequestAgent(ctx))
+  const response = await (fairpayRequestAgent(ctx))
     .post(`${ctx.baseUrl}/MerchantMobAppHost/v1/debit_credit/sale/save_customer_signature`)
     .send(request)
 
@@ -307,8 +307,8 @@ module.exports.apiSaveSignature = async (ctx) => {
 
 module.exports.processAuthAndApi = async (apiRequestFunction, ctx, apiNumTry = 2) => {
   while (apiNumTry) {
-    let apiResponse = await apiRequestFunction(ctx)
-    let apiResCode = exports.getFairpayResponseCode(apiResponse)
+    const apiResponse = await apiRequestFunction(ctx)
+    const apiResCode = exports.getFairpayResponseCode(apiResponse)
 
     if (exports.isFairpayResponseCodeNotAuth(apiResCode)) {
       await exports.apiLogin(ctx)

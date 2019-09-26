@@ -9,6 +9,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const auth = require('../libs/auth')
+const errorMap = require('../libs/constants/errorMap')
 
 const commonConfig = require('../configs/commonConfig')
 const isEnvProduction = process.env.NODE_ENV === 'production'
@@ -22,13 +23,16 @@ const authController = require('../controllers/authController')
 const generalController = require('../controllers/generalController')
 const merchantController = require('../controllers/merchantController')
 const merchantStaffController = require('../controllers/merchantStaffController')
+const merchantStaffOutletController = require('../controllers/merchantStaffOutletController')
 const outletController = require('../controllers/outletController')
 const partnerController = require('../controllers/partnerController')
 const terminalController = require('../controllers/terminalController')
 const terminalModelController = require('../controllers/terminalModelController')
 const transactionController = require('../controllers/transactionController')
 const utilitiesController = require('../controllers/utilitiesController')
-const merchantStaffOutletController = require('../controllers/merchantStaffOutletController')
+const userController = require('../controllers/userController')
+const acquirerCompanyController = require('../controllers/acquirerCompanyController')
+const acquirerStaffController = require('../controllers/acquirerStaffController')
 
 const authMiddleware = require('../middlewares/authMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
@@ -66,6 +70,9 @@ router.post('/auth/change_password',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
   authController.changePasswordMiddlewares
+)
+router.post('/auth/change_expired_password',
+  authController.changeExpiredPasswordMiddlewares
 )
 
 /**
@@ -133,7 +140,7 @@ router.get(
   ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  acquirerController.getAgentAcquirers
+  acquirerController.getAgentAcquirersMiddlewares
 )
 router.get(
   [
@@ -189,7 +196,6 @@ router.get('/merchant_staff',
   authMiddleware.authErrorHandler,
   merchantStaffController.getMerchantStaff
 )
-
 router.get(
   [
     '/merchant_staff/acquirers',
@@ -246,6 +252,44 @@ router.get(
 )
 
 /**
+ * Acquirer Staff related endpoints
+ */
+
+router.get(
+  '/acquirer_staff',
+  authMiddleware.auth([auth.userTypes.ACQUIRER_STAFF]),
+  authMiddleware.authErrorHandler,
+  acquirerStaffController.getAcquirerStaff
+)
+router.get(
+  [
+    '/acquirer_staff/transactions',
+    '/acquirer_staff/transactions/:transactionId'
+  ],
+  authMiddleware.auth([auth.userTypes.ACQUIRER_STAFF]),
+  authMiddleware.authErrorHandler,
+  transactionController.getAcquirerStaffTransactionsMiddlewares
+)
+router.get(
+  [
+    '/acquirer_staff/agents',
+    '/acquirer_staff/agents/:agentId'
+  ],
+  authMiddleware.auth([auth.userTypes.ACQUIRER_STAFF]),
+  authMiddleware.authErrorHandler,
+  agentController.getAcquirerStaffAgentsMiddlewares
+)
+router.get(
+  [
+    '/acquirer_staff/outlets',
+    '/acquirer_staff/outlets/:outletId'
+  ],
+  authMiddleware.auth([auth.userTypes.ACQUIRER_STAFF]),
+  authMiddleware.authErrorHandler,
+  outletController.getAcquirerStaffOutletsMiddlewares
+)
+
+/**
  * Collection of Back-office Endpoint
  */
 
@@ -256,6 +300,15 @@ router.get('/back_office/admin',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
   adminController.getAdmin
+)
+
+/**
+ * Users entity
+ */
+router.post('/back_office/users/:userId/check_password',
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  userController.checkUserPasswordMiddlewares
 )
 
 /**
@@ -284,6 +337,11 @@ router.delete('/back_office/admins/:adminId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
   adminController.deleteAdmin
+)
+router.post('/back_office/admins/:adminId/reset_password',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  adminController.resetAdminPassword
 )
 
 /**
@@ -371,6 +429,11 @@ router.delete('/back_office/agents/:agentId',
   authMiddleware.authErrorHandler,
   agentController.deleteAgent
 )
+router.post('/back_office/agents/:agentId/reset_password',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  agentController.resetAgentPassword
+)
 
 /**
  * Merchant Staff entity
@@ -399,7 +462,79 @@ router.delete('/back_office/merchant_staffs/:merchantStaffId',
   authMiddleware.authErrorHandler,
   merchantStaffController.deleteMerchantStaff
 )
+router.post('/back_office/merchant_staffs/:merchantStaffId/reset_password',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  merchantStaffController.resetMerchantStaffPassword
+)
 
+/**
+ * Acquirer Staff entity
+ */
+router.get(
+  [
+    '/back_office/acquirer_staffs',
+    '/back_office/acquirer_staffs/:acquirerStaffId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  acquirerStaffController.getAcquirerStaffsMiddlewares
+)
+router.post(
+  '/back_office/acquirer_staffs',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerStaffController.createAcquirerStaffMiddlewares
+)
+router.put(
+  '/back_office/acquirer_staffs/:acquirerStaffId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerStaffController.updateAcquirerStaffMiddlewares
+)
+router.delete(
+  '/back_office/acquirer_staffs/:acquirerStaffId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerStaffController.deleteAcquirerStaffMiddlewares
+)
+router.post(
+  '/back_office/acquirer_staffs/:acquirerStaffId/reset_password',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.authErrorHandler,
+  acquirerStaffController.resetAcquirerStaffPassword
+)
+
+/**
+ * Acquirer Companies entity
+ */
+router.get(
+  [
+    '/back_office/acquirer_companies',
+    '/back_office/acquirer_companies/:acquirerCompanyId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN, auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerCompanyController.getAcquirerCompaniesMiddlewares
+)
+router.post(
+  '/back_office/acquirer_companies',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerCompanyController.createAcquirerCompanyMiddlewares
+)
+router.put(
+  '/back_office/acquirer_companies/:acquirerCompanyId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerCompanyController.updateAcquirerCompanyMiddlewares
+)
+router.delete(
+  '/back_office/acquirer_companies/:acquirerCompanyId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerCompanyController.deleteAcquirerCompanyMiddlewares
+)
 /**
  * Acquirer entity
  */
@@ -569,7 +704,7 @@ router.delete('/back_office/terminal/:terminalId',
 )
 
 router.use(errorMiddleware.notFoundErrorHandler)
-router.use(errorMiddleware.errorHandler)
+router.use(errorMiddleware.errorHandler(errorMap))
 
 const apiRouter = express.Router()
 apiRouter.use('/api', router)

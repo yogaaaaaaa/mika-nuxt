@@ -7,10 +7,9 @@
 
 const commonConfig = require('../configs/commonConfig')
 
-const types = require('./types/msgTypes')
-module.exports.types = types
-module.exports.eventTypes = types.eventTypes
-module.exports.msgTypes = types.msgTypes
+const constants = require('./constants/msg')
+module.exports.eventTypes = constants.eventTypes
+module.exports.msgTypes = constants.msgTypes
 
 /**
  * Generate API response message
@@ -21,7 +20,7 @@ module.exports.createResponse = (
   meta,
   toJSON = false
 ) => {
-  let msg = {
+  const msg = {
     version: commonConfig.version || undefined,
     status: messageType.status,
     message: messageType.message,
@@ -46,7 +45,7 @@ module.exports.createNotification = (
   meta,
   toJSON = false
 ) => {
-  let msg = {
+  const msg = {
     version: commonConfig.version,
     eventType: eventType,
     meta,
@@ -84,6 +83,16 @@ module.exports.expressResponse = (
   res
     .status(messageType.httpStatus)
     .send(exports.createResponse(messageType, data, meta))
+}
+
+/**
+ * Get error and response with appropriate msgTypes defined in
+ * errorMap. If error is not found, it will re-throw the error
+ */
+module.exports.expressResponseError = (res, err, errorMap) => {
+  const msgType = errorMap(err)
+  if (!msgType) throw err
+  exports.expressResponse(res, msgType, err.data)
 }
 
 /**

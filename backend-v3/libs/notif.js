@@ -105,10 +105,10 @@ trxManager.listenStatusChange(async (event) => {
     }
 
     if (eventType) {
-      let findOptions = {}
+      const findOptions = {}
       if (event.t) findOptions.transaction = event.t
 
-      let transaction = await models.transaction
+      const transaction = await models.transaction
         .scope('agent')
         .findByPk(event.transactionId, findOptions)
 

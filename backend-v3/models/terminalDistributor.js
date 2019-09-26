@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let terminalDistributor = sequelize.define('terminalDistributor', {
+  const terminalDistributor = sequelize.define('terminalDistributor', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 

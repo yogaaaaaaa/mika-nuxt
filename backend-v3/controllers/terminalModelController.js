@@ -23,8 +23,8 @@ module.exports.createTerminalModel = async (req, res, next) => {
 }
 
 module.exports.getTerminalModels = async (req, res, next) => {
-  let scopedTerminalModel = req.applySequelizeCommonScope(models.terminalModel.scope())
-  let query = { where: {} }
+  let scopedTerminalModel = req.applySequelizeCommonScope(models.terminalModel.scope('admin'))
+  const query = { where: {} }
 
   if (req.params.terminalModelId) {
     query.where.id = req.params.terminalModelId
@@ -40,7 +40,7 @@ module.exports.getTerminalModels = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let terminalModels = await scopedTerminalModel.findAndCountAll(query)
+      const terminalModels = await scopedTerminalModel.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         terminalModels.rows,
@@ -58,7 +58,7 @@ module.exports.getTerminalModels = async (req, res, next) => {
 }
 
 module.exports.updateTerminalModel = async (req, res, next) => {
-  let scopedTerminalModel = models.terminalModel.scope('paranoid')
+  const scopedTerminalModel = models.terminalModel.scope('paranoid')
   let terminalModel
 
   let updated = false
@@ -93,7 +93,7 @@ module.exports.updateTerminalModel = async (req, res, next) => {
 }
 
 module.exports.deleteTerminalModel = async (req, res, next) => {
-  let scopedTerminalModel = models.terminalModel.scope('paranoid')
+  const scopedTerminalModel = models.terminalModel.scope('paranoid')
   let terminalModel
 
   await models.sequelize.transaction(async t => {

@@ -12,11 +12,11 @@
 const crypto = require('crypto')
 
 const dukpt = require('dukpt')
-const dukptData = require('dukpt/lib/data.lib')
+const dukptData = require('dukpt/dist/lib/data.lib')
 
 const berTlv = require('ber-tlv')
 const berTlvAnnotations = require('ber-tlv-annotations')
-let berTlvRegistry = new berTlvAnnotations.AnnotationRegistry()
+const berTlvRegistry = new berTlvAnnotations.AnnotationRegistry()
 berTlvRegistry.registerPackagedProviders()
 
 /**
@@ -220,7 +220,7 @@ module.exports.tlvAnnotate = (tlvAnnotate) => {
  * Does exactly what it says on the tin
  */
 module.exports.getRandomHexString = (length = 5) => {
-  let randomHexString = crypto.randomBytes(Math.ceil((length / 2))).toString('hex')
+  const randomHexString = crypto.randomBytes(Math.ceil((length / 2))).toString('hex')
   return randomHexString.slice(-length)
 }
 
@@ -269,7 +269,7 @@ module.exports.ksnCounterSet = (hsKSN, hsKSNCounter) => {
  * Increase KSN Counter (20 bit LSB of KSN)
  */
 module.exports.ksnCounterIncrement = (hsKSN, increment = 1) => {
-  let ksnCounterBuffer = (Buffer.from(exports.ksnCounterGet(hsKSN).padStart(8, '0'), 'hex'))
+  const ksnCounterBuffer = (Buffer.from(exports.ksnCounterGet(hsKSN).padStart(8, '0'), 'hex'))
   ksnCounterBuffer.writeUInt32BE(ksnCounterBuffer.readUInt32BE(0) + increment)
 
   return exports.ksnCounterSet(hsKSN, ksnCounterBuffer.toString('hex'))
@@ -297,7 +297,7 @@ module.exports.evenHexStringData = (hsData) => {
  * Pad hex string data to multiple of n byte
  */
 module.exports.padHexStringData = (hsData, n = 8) => {
-  let modulus = Math.round(hsData.length / 2) % n
+  const modulus = Math.round(hsData.length / 2) % n
   if (modulus !== 0) {
     for (let i = 0; i < n - modulus; i++) {
       hsData += '00'
@@ -319,13 +319,13 @@ module.exports.evenAndPadHexstring = (hsData) => {
  * For more information see: https://www.eftlab.com/knowledge-base/261-complete-list-of-pin-blocks-in-payments/
  */
 module.exports.generateISO0Pinblock = (hsPan, hsPin) => {
-  let pinBlockPAN = `0000${hsPan.substring(3, 15)}`
-  let pinBlockPIN = (`${String(hsPin.length).padStart(2, '0')}${hsPin}`).padEnd(16, 'f')
+  const pinBlockPAN = `0000${hsPan.substring(3, 15)}`
+  const pinBlockPIN = (`${String(hsPin.length).padStart(2, '0')}${hsPin}`).padEnd(16, 'f')
 
-  let pinBlockPINBuffer = Buffer.from(pinBlockPIN, 'hex')
-  let pinBlockPANBuffer = Buffer.from(pinBlockPAN, 'hex')
+  const pinBlockPINBuffer = Buffer.from(pinBlockPIN, 'hex')
+  const pinBlockPANBuffer = Buffer.from(pinBlockPAN, 'hex')
 
-  let pinBlockBuffer = Buffer.alloc(pinBlockPINBuffer.length)
+  const pinBlockBuffer = Buffer.alloc(pinBlockPINBuffer.length)
 
   for (let i = 0; i < pinBlockBuffer.length; i++) {
     pinBlockBuffer[i] = pinBlockPANBuffer[i] ^ pinBlockPINBuffer[i]

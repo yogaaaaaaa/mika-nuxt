@@ -3,21 +3,13 @@
 const path = require('path')
 const fs = require('fs')
 
-function stringTransform (string, newLineToSpace, singleSpace) {
-  if (newLineToSpace) {
-    string = string.replace(/[\n\r]+/g, ' ')
-  }
-  if (singleSpace) {
-    string = string.replace(/ {1,}/g, ' ')
-  }
-  return string
-}
+const string = require('../../libs/string')
 
 function processScript (filepath, script) {
-  let extension = path.extname(filepath).toLowerCase()
+  const extension = path.extname(filepath).toLowerCase()
   switch (extension) {
     case '.sql':
-      script = stringTransform(script, true, true)
+      script = string.whitespaceTrim(script, true, true)
       break
     default:
       script = null
@@ -28,15 +20,15 @@ function processScript (filepath, script) {
 
 function loadScripts (dirPath, map, rootPath) {
   if (!rootPath) rootPath = dirPath
-  let nodes = fs.readdirSync(dirPath)
+  const nodes = fs.readdirSync(dirPath)
   for (const node of nodes) {
-    let nodePath = path.join(dirPath, node)
-    let nodeStats = fs.statSync(nodePath)
+    const nodePath = path.join(dirPath, node)
+    const nodeStats = fs.statSync(nodePath)
     if (nodeStats.isDirectory()) {
       loadScripts(nodePath, map, rootPath)
     } else if (nodeStats.isFile()) {
-      let scriptPath = path.relative(rootPath, nodePath)
-      let processedScript = processScript(scriptPath, fs.readFileSync(nodePath).toString('utf8'))
+      const scriptPath = path.relative(rootPath, nodePath)
+      const processedScript = processScript(scriptPath, fs.readFileSync(nodePath).toString('utf8'))
       if (processedScript) {
         map.set(
           scriptPath,
@@ -55,7 +47,7 @@ module.exports.get = (name, replacements) => {
   if (Array.isArray(replacements)) {
     let i = 0
     script = script.split('?').reduce((acc, v) => {
-      let retval = `${acc}${replacements[i]}${v}`
+      const retval = `${acc}${replacements[i]}${v}`
       i++
       return retval
     })

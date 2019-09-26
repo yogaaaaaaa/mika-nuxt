@@ -31,7 +31,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
       return
     }
 
-    let config = tcash.mixConfig(transaction.acquirer.acquirerConfig.config)
+    const config = tcash.mixConfig(transaction.acquirer.acquirerConfig.config)
 
     if (
       (req.body.terminal === config.tcashTerminal) &&

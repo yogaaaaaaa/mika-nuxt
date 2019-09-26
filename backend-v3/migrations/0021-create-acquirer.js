@@ -64,6 +64,7 @@ module.exports = {
         }
       },
       acquirerConfigId: {
+        allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'acquirerConfig',

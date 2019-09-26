@@ -15,7 +15,7 @@ module.exports.getCachesDirPath = (...bases) => {
 
 module.exports.createCacheDir = (dirName) => {
   return new Promise((resolve, reject) => {
-    let dirPath = exports.getCachesDirPath(dirName)
+    const dirPath = exports.getCachesDirPath(dirName)
     fs.mkdir(dirPath, (err) => {
       if (err) return reject(err)
       resolve(dirPath)
@@ -30,7 +30,7 @@ module.exports.createCacheDir = (dirName) => {
  */
 module.exports.readCacheFile = (filename, toString = true) => {
   try {
-    let bufferRead = fs.readFileSync(exports.getCachesDirPath(filename))
+    const bufferRead = fs.readFileSync(exports.getCachesDirPath(filename))
     return (toString ? bufferRead.toString('utf8') : bufferRead)
   } catch (err) {}
 }
@@ -57,16 +57,16 @@ module.exports.writeCacheFile = (filename, data) => {
 module.exports.loadFiles = (dirPath, callback) => {
   async function searchFiles (dirPath, callback, rootPath) {
     if (!rootPath) rootPath = dirPath
-    let nodes = fs.readdirSync(dirPath)
+    const nodes = fs.readdirSync(dirPath)
     for (const node of nodes) {
-      let nodePath = path.join(dirPath, node)
-      let nodeStats = fs.statSync(nodePath)
+      const nodePath = path.join(dirPath, node)
+      const nodeStats = fs.statSync(nodePath)
       if (nodeStats.isDirectory()) {
         searchFiles(nodePath, callback, rootPath)
       } else if (nodeStats.isFile()) {
         if (typeof callback === 'function') {
-          let filePath = path.relative(rootPath, nodePath)
-          let data = fs.readFileSync(nodePath).toString('utf8')
+          const filePath = path.relative(rootPath, nodePath)
+          const data = fs.readFileSync(nodePath).toString('utf8')
           await callback(filePath, data)
         }
       }

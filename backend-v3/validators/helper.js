@@ -2,6 +2,8 @@
 
 const _ = require('lodash')
 
+const passwd = require('../libs/passwd')
+
 module.exports.default = (object, path, value) => {
   _.set(object, path, value)
 }
@@ -20,7 +22,7 @@ module.exports.defaultNotExist = (object, path, value) => {
 
 module.exports.defaultExistConditional = (object, path, truthyValue, falsyValue) => {
   if (_.has(object, path)) {
-    let value = _.get(object, path)
+    const value = _.get(object, path)
     if (value) {
       _.set(object, path, truthyValue)
     } else {
@@ -70,13 +72,24 @@ module.exports.bodyDefaultExistConditional = (field, truthyValue, falsyValue) =>
 }
 
 /**
- * Return a middleware to remove property/field to certain value
- * if exist in `req.body`
+ * Return a middleware to remove property/field if exist in `req.body`
  */
 module.exports.bodyRemove = (field) => (req, res, next) => {
   exports.removeExist(req.body, field)
   next()
 }
 
+/**
+ * Custom validator whether password is Valid to mika standard
+ */
+module.exports.isStandardPassword = (password) => {
+  if (password) {
+    return passwd.standardPasswordValidator.validate(password)
+  } else {
+    return false
+  }
+}
+
 module.exports.archivedAtValidator = exports.bodyDefaultExistConditional('archivedAt', true, false)
 module.exports.idValidator = exports.bodyRemove('id')
+module.exports.createdAtValidator = exports.bodyRemove('createdAt')

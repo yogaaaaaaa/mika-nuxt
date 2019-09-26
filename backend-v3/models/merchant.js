@@ -3,7 +3,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Op = sequelize.Sequelize.Op
 
-  let merchant = sequelize.define('merchant', {
+  const merchant = sequelize.define('merchant', {
     idAlias: DataTypes.CHAR(25),
 
     name: DataTypes.STRING,
@@ -108,33 +108,39 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   merchant.addScope('excludeLegal', {
-    attributes: { exclude: [
-      'taxCardNumber',
-      'scannedTaxCardResourceId',
-      'scannedBankStatementResourceId',
-      'scannedSkmenkumhamResourceId',
-      'scannedSiupResourceId',
-      'scannedTdpResourceId',
-      'scannedSkdpResourceId',
-      'ownerIdCardNumber',
-      'ownerIdCardType',
-      'ownerTaxCardNumber',
-      'ownerScannedIdCardResourceId',
-      'ownerScannedTaxCardResourceId'
-    ] }
+    attributes: {
+      exclude: [
+        'taxCardNumber',
+        'scannedTaxCardResourceId',
+        'scannedBankStatementResourceId',
+        'scannedSkmenkumhamResourceId',
+        'scannedSiupResourceId',
+        'scannedTdpResourceId',
+        'scannedSkdpResourceId',
+        'ownerIdCardNumber',
+        'ownerIdCardType',
+        'ownerTaxCardNumber',
+        'ownerScannedIdCardResourceId',
+        'ownerScannedTaxCardResourceId'
+      ]
+    }
   })
   merchant.addScope('excludeBank', {
-    attributes: { exclude: [
-      'bankName',
-      'bankBranchName',
-      'bankAccountName',
-      'bankAccountNumber'
-    ] }
+    attributes: {
+      exclude: [
+        'bankName',
+        'bankBranchName',
+        'bankAccountName',
+        'bankAccountNumber'
+      ]
+    }
   })
   merchant.addScope('excludePartner', {
-    attributes: { exclude: [
-      'partnerId'
-    ] }
+    attributes: {
+      exclude: [
+        'partnerId'
+      ]
+    }
   })
   merchant.addScope('acquirerConfig', {
     include: [
@@ -157,6 +163,7 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   merchant.addScope('admin', () => ({
+    paranoid: false,
     include: [
       {
         model: sequelize.models.resource,
@@ -194,13 +201,13 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   merchant.createWithResources = async (value, options) => {
-    let resources = Array(8)
+    const resources = Array(8)
     for (let i = 0; i < resources.length; i++) {
       resources[i] = sequelize.models.resource.buildWithId()
       await resources[i].save(options)
     }
 
-    let merchantInstance = merchant.build(value, options)
+    const merchantInstance = merchant.build(value, options)
     merchantInstance.scannedTaxCardResourceId = resources[0].id
     merchantInstance.scannedBankStatementResourceId = resources[1].id
     merchantInstance.scannedSkmenkumhamResourceId = resources[2].id

@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let terminal = sequelize.define('terminal', {
+  const terminal = sequelize.define('terminal', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -40,15 +40,19 @@ module.exports = (sequelize, DataTypes) => {
       }
     )
 
-    terminal.addScope('excludeMerchant', {
-      attributes: { exclude: [
-        'merchantId'
-      ] }
+    terminal.addScope('excludeMerchantId', {
+      attributes: {
+        exclude: [
+          'merchantId'
+        ]
+      }
     })
     terminal.addScope('excludeBatch', {
-      attributes: { exclude: [
-        'terminalBatchId'
-      ] }
+      attributes: {
+        exclude: [
+          'terminalBatchId'
+        ]
+      }
     })
     terminal.addScope('agent', () => ({
       attributes: { exclude: ['archivedAt'] },
@@ -57,8 +61,9 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }))
     terminal.addScope('admin', () => ({
+      paranoid: false,
       include: [
-        models.terminalModel
+        models.terminalModel.scope('paranoid')
       ]
     }))
   }

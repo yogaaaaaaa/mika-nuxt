@@ -16,14 +16,14 @@ module.exports.queryTransactionMiddlewares = [
   ],
   errorMiddleware.validatorErrorHandler,
   async (req, res, next) => {
-    let acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
+    const acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
       where: {
         id: req.body.acquirerConfigId
       }
     }) || { config: {} }
-    let midtransConfig = midtrans.mixConfig(acquirerConfig.config)
+    const midtransConfig = midtrans.mixConfig(acquirerConfig.config)
 
-    let response = {}
+    const response = {}
     response.transactionStatus = await midtrans.statusTransaction(
       Object.assign(
         { order_id: req.body.order_id },

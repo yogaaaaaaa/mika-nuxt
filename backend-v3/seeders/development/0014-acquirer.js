@@ -14,6 +14,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 1,
         acquirerConfigId: 1,
+        acquirerCompanyId: 1,
         merchantId: 1
       },
       {
@@ -27,6 +28,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 2,
         acquirerConfigId: 2,
+        acquirerCompanyId: 2,
         merchantId: 1
       },
       {
@@ -119,6 +121,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 1,
         acquirerConfigId: 1,
+        acquirerCompanyId: 1,
         merchantId: 2
       },
       {
@@ -132,6 +135,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 2,
         acquirerConfigId: 2,
+        acquirerCompanyId: 2,
         merchantId: 2
       },
       {
@@ -198,6 +202,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 1,
         acquirerConfigId: 1,
+        acquirerCompanyId: 1,
         merchantId: 3
       },
       {
@@ -211,6 +216,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 2,
         acquirerConfigId: 2,
+        acquirerCompanyId: 2,
         merchantId: 3
       },
       {
@@ -251,6 +257,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 1,
         acquirerConfigId: 1,
+        acquirerCompanyId: 1,
         merchantId: 4
       },
       {
@@ -264,6 +271,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 2,
         acquirerConfigId: 2,
+        acquirerCompanyId: 2,
         merchantId: 4
       },
 
@@ -278,6 +286,7 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 1,
         acquirerConfigId: 1,
+        acquirerCompanyId: 1,
         merchantId: 5
       },
       {
@@ -293,6 +302,7 @@ module.exports = {
         sharePartner: 0.01,
         acquirerTypeId: 2,
         acquirerConfigId: 2,
+        acquirerCompanyId: 2,
         merchantId: 5
       },
       {

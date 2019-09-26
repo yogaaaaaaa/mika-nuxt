@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let merchantStaffOutlet = sequelize.define('merchantStaffOutlet', {
+  const merchantStaffOutlet = sequelize.define('merchantStaffOutlet', {
     merchantStaffId: DataTypes.INTEGER,
     outletId: DataTypes.INTEGER
   }, {

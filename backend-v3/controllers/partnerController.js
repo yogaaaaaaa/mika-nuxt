@@ -7,7 +7,7 @@ const extApiAuth = require('../libs/extApiAuth')
 const models = require('../models')
 
 module.exports.generatePartnerApiKey = async (req, res, next) => {
-  let key = await extApiAuth.createKey(req.params.partnerId)
+  const key = await extApiAuth.createKey(req.params.partnerId)
 
   await models.sequelize.transaction(async t => {
     await models.apiKey.destroy({

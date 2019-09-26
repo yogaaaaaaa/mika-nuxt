@@ -25,7 +25,7 @@ let baseConfig = {
  */
 try {
   const configName = require('path').basename(__filename, '.js')
-  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
+  const extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
   console.log(`${configName} is mixed`)
 } catch (error) {}

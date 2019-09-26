@@ -27,7 +27,7 @@ module.exports.msgTypes = {
     isError: true,
     httpStatus: 500,
     status: 'sys-500',
-    message: 'Internal server error'
+    message: 'Internal server error. Please report this error to Mika'
   },
   MSG_ERROR_NOT_IMPLEMENTED: {
     isError: true,
@@ -104,8 +104,8 @@ module.exports.msgTypes = {
   },
 
   MSG_ERROR_ENTITY_NOT_FOUND: {
-    httpStatus: 404,
     isError: true,
+    httpStatus: 404,
     status: 'ent-404',
     message: 'Entity not found'
   },
@@ -136,14 +136,14 @@ module.exports.msgTypes = {
     message: 'Cannot dissociate some Entity(s)'
   },
   MSG_ERROR_NO_ENTITY_ASSOCIATED: {
-    httpStatus: 400,
     isError: true,
+    httpStatus: 400,
     status: 'ent-410',
     message: 'Cannot associate Entity(s)'
   },
   MSG_ERROR_NO_ENTITY_DISSOCIATED: {
-    httpStatus: 400,
     isError: true,
+    httpStatus: 400,
     status: 'ent-411',
     message: 'Cannot dissociate Entity(s)'
   },
@@ -167,6 +167,11 @@ module.exports.msgTypes = {
     httpStatus: 200,
     status: 'auth-203',
     message: 'Password changed successfully'
+  },
+  MSG_SUCCESS_AUTH_PASSWORD_RESET: {
+    httpStatus: 200,
+    status: 'auth-204',
+    message: 'Password reset successfully'
   },
   MSG_ERROR_AUTH_INVALID_CREDENTIAL: {
     isError: true,
@@ -192,22 +197,59 @@ module.exports.msgTypes = {
     status: 'auth-404',
     message: 'Invalid session token'
   },
-  MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD_INVALID_OLD_PASSWORD: {
+  MSG_ERROR_AUTH_INVALID_OLD_PASSWORD: {
+    isError: true,
     httpStatus: 400,
     status: 'auth-410',
-    message: 'Cannot change password, invalid old password'
+    message: 'Invalid old password'
+  },
+  MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD: {
+    isError: true,
+    httpStatus: 400,
+    status: 'auth-411',
+    message: 'Cannot change password'
+  },
+  MSG_ERROR_AUTH_CANNOT_CHANGE_TO_USED_PASSWORD: {
+    isError: true,
+    httpStatus: 400,
+    status: 'auth-412',
+    message: 'Cannot change password to last used password'
+  },
+  MSG_ERROR_AUTH_INVALID_EXPIRED_PASSWORD: {
+    isError: true,
+    httpStatus: 401,
+    status: 'auth-420',
+    message: 'Cannot authenticate, password expired'
+  },
+  MSG_ERROR_AUTH_FAILED_LOGIN_ATTEMPT_EXCEEDED: {
+    isError: true,
+    httpStatus: 401,
+    status: 'auth-421',
+    message: 'Too many failed authentication, please try again later'
   },
   MSG_ERROR_AUTH_CIPHERBOX_INVALID: {
     isError: true,
     httpStatus: 400,
-    status: 'auth-420',
+    status: 'auth-430',
     message: 'Cannot open cipherbox'
   },
   MSG_ERROR_AUTH_CIPHERBOX_MANDATORY: {
     isError: true,
     httpStatus: 403,
-    status: 'auth-421',
+    status: 'auth-431',
     message: 'Cipherbox is mandatory for this endpoint'
+  },
+  MSG_ERROR_AUTH_PASSWORD_CHECK_FAILED_BAD_FORMAT: {
+    isError: true,
+    httpStatus: 400,
+    status: 'auth-440',
+    message: 'Password check failed, bad password format'
+  },
+  MSG_ERROR_AUTH_PASSWORD_CHECK_FAILED_ALREADY_USED: {
+    isError: true,
+    httpStatus: 400,
+    status: 'auth-441',
+    message: 'Password check failed, password is already used'
   },
 
   MSG_SUCCESS_TRANSACTION_CREATED: {

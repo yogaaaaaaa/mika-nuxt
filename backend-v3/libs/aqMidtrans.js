@@ -24,7 +24,7 @@ function midtransRequestAgent (config) {
 }
 
 module.exports.mixConfig = (config) => {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  const mixedConfig = Object.assign({}, exports.baseConfig, config)
   if (!mixedConfig.midtransServerAuth) {
     mixedConfig.midtransServerAuth = `Basic ${Buffer.from(`${mixedConfig.midtransServerKey}:`).toString('base64')}`
   }
@@ -37,7 +37,7 @@ module.exports.mixConfig = (config) => {
  * See: https://api-docs.midtrans.com/#charge-features
  */
 module.exports.gopayChargeRequest = async (config) => {
-  let requestBody = {
+  const requestBody = {
     payment_type: 'gopay',
     transaction_details: {
       order_id: config.order_id,
@@ -52,12 +52,12 @@ module.exports.gopayChargeRequest = async (config) => {
   }
 
   try {
-    let request = midtransRequestAgent(config)
+    const request = midtransRequestAgent(config)
     if (config.notifUrl) {
       request.set('X-Override-Notification', config.notifUrl)
     }
 
-    let response = await request
+    const response = await request
       .post(`${config.baseUrl}/v2/charge`)
       .send(requestBody)
 
@@ -74,7 +74,7 @@ module.exports.gopayChargeRequest = async (config) => {
  */
 module.exports.cancelTransaction = async (config) => {
   try {
-    let response = await midtransRequestAgent(config)
+    const response = await midtransRequestAgent(config)
       .post(`${config.baseUrl}/v2/${config.order_id}/cancel`)
       .send()
     if (response.body) return response.body
@@ -90,7 +90,7 @@ module.exports.cancelTransaction = async (config) => {
  */
 module.exports.directRefundTransaction = async (config) => {
   try {
-    let requestBody = {
+    const requestBody = {
       amount: config.amount
     }
     if (config.reason) {
@@ -100,7 +100,7 @@ module.exports.directRefundTransaction = async (config) => {
       requestBody.refund_key = config.refund_key
     }
 
-    let response = await midtransRequestAgent(config)
+    const response = await midtransRequestAgent(config)
       .post(`${config.baseUrl}/v2/${config.order_id}/refund/online/direct`)
       .send(requestBody)
     if (response.body) return response.body
@@ -116,7 +116,7 @@ module.exports.directRefundTransaction = async (config) => {
  */
 module.exports.expireTransaction = async (config) => {
   try {
-    let response = await midtransRequestAgent(config)
+    const response = await midtransRequestAgent(config)
       .post(`${config.baseUrl}/v2/${config.order_id}/expire`)
       .send()
     if (response.body) return response.body
@@ -132,7 +132,7 @@ module.exports.expireTransaction = async (config) => {
  */
 module.exports.statusTransaction = async (config) => {
   try {
-    let response = await midtransRequestAgent(config)
+    const response = await midtransRequestAgent(config)
       .get(`${config.baseUrl}/v2/${config.order_id}/status`)
       .send()
     if (response.body) return response.body
@@ -147,7 +147,7 @@ module.exports.statusTransaction = async (config) => {
  * See: https://api-docs.midtrans.com/#receiving-notifications
  */
 module.exports.checkNotificationSignature = (config) => {
-  let generatedSignature = crypto
+  const generatedSignature = crypto
     .createHash('sha512')
     .update(`${config.order_id}${config.status_code}${config.gross_amount}${config.midtransServerKey}`)
     .digest('hex')
@@ -163,7 +163,7 @@ module.exports.checkNotificationSignature = (config) => {
  */
 module.exports.gopaySandboxPay = async (config) => {
   try {
-    let parseResponse = await superagent
+    const parseResponse = await superagent
       .post(`${config.sandboxBaseUrl}/gopay/ui/parse`)
       .type('form')
       .send({
@@ -171,7 +171,7 @@ module.exports.gopaySandboxPay = async (config) => {
       })
     const htmlParseResponse = htmlParser.parse(parseResponse.text)
 
-    let payResponse = await superagent
+    const payResponse = await superagent
       .post(`${config.sandboxBaseUrl}/gopay/ui/payment`)
       .type('form')
       .send({

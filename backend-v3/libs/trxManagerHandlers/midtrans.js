@@ -46,9 +46,9 @@ module.exports = (trxManager) => {
       userTokenTypes: []
     },
     async handler (ctx) {
-      let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
+      const midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await midtrans.gopayChargeRequest({
+      const response = await midtrans.gopayChargeRequest({
         order_id: ctx.transaction.id,
         gross_amount: ctx.transaction.amount,
 
@@ -60,7 +60,7 @@ module.exports = (trxManager) => {
       })
       checkResponse(response)
 
-      for (let action of response.actions) {
+      for (const action of response.actions) {
         if (action.name === 'generate-qr-code') {
           ctx.transaction.token = action.url
           ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_URL_IMAGE
@@ -71,9 +71,9 @@ module.exports = (trxManager) => {
       ctx.transaction.referenceNumberName = 'transaction_id'
     },
     async expiryHandler (ctx) {
-      let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
+      const midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await midtrans.statusTransaction({
+      const response = await midtrans.statusTransaction({
         order_id: ctx.transaction.id,
         ...midtransConfig
       })
@@ -92,18 +92,18 @@ module.exports = (trxManager) => {
       }
     },
     async cancelHandler (ctx) {
-      let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
+      const midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await midtrans.cancelTransaction({
+      const response = await midtrans.cancelTransaction({
         order_id: ctx.transaction.id,
         ...midtransConfig
       })
       checkResponse(response)
     },
     async refundHandler (ctx) {
-      let midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
+      const midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await midtrans.directRefundTransaction({
+      const response = await midtrans.directRefundTransaction({
         order_id: ctx.transaction.id,
         amount: ctx.transactionRefund.amount,
         reason: ctx.transactionRefund.reason,
@@ -122,7 +122,7 @@ module.exports = (trxManager) => {
 
       const midtransConfig = midtrans.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let sandboxPaySuccess = await midtrans.gopaySandboxPay({
+      const sandboxPaySuccess = await midtrans.gopaySandboxPay({
         qrCodeUrl: ctx.transaction.token,
         ...midtransConfig
       })

@@ -25,9 +25,8 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      dateArrived: {
-        allowNull: false,
-        type: 'TIMESTAMP'
+      arrivedAt: {
+        type: Sequelize.DATE
       },
 
       archivedAt: {

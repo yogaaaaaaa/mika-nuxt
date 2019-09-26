@@ -30,8 +30,11 @@ router.post('/midtrans/query_transaction', midtransDebugController.queryTransact
 
 router.post('/alto/query_transaction', altoDebugController.queryTransactionMiddlewares)
 
+router.post('/user/change_password_policy_follow', debugController.changePasswordPolicyFollowMiddlewares)
+router.post('/user/change_password_policy_state', debugController.changePasswordPolicyStateMiddlewares)
+
 router.use(errorMiddleware.notFoundErrorHandler)
-router.use(errorMiddleware.errorHandler)
+router.use(errorMiddleware.errorHandler())
 
 const debugRouter = express.Router()
 debugRouter.use('/debug', router)

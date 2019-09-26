@@ -5,9 +5,9 @@ echo "backend-v3 development - Centos provisioning"
 cd /
 
 # Installing epel and common depedency
-yum -y update
-yum -y install nano unzip epel-release gcc gcc-c++ make
-yum -y update
+yum -y -q update
+yum -y -q install nano net-tools unzip epel-release gcc gcc-c++ make
+yum -y -q update
 
 # mariadb repo herdocs
 cat <<-MARIADBREPO > /etc/yum.repos.d/MariaDB.repo
@@ -26,12 +26,17 @@ curl -s -OL https://download.arangodb.com/arangodb34/RPM/arangodb.repo
 curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 
 # yumi repo
-yum -y install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum -y -q install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+# postgres repo
+yum -y -q install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
 # Installation of mariadb, nodejs and redis
-yum -y update
-yum -y install nodejs MariaDB-server MariaDB-client arangodb3-3.4.7-1.0
-yum -y --enablerepo=remi install redis
+yum -y -q update
+yum -y -q install nodejs MariaDB-server MariaDB-client arangodb3-3.4.7-1.0
+yum -y -q --enablerepo=remi install redis
+yum -y -q install postgresql11
+yum -y -q install postgresql11-server
 
 ## Configuring and enabling redis
 sed -i 's/bind 127.0.0.1/#bind 127.0.0.1/' /etc/redis.conf
@@ -51,15 +56,34 @@ mysql <<-MARIADBUSERQUERY
 	FLUSH PRIVILEGES;
 MARIADBUSERQUERY
 
-## Configure and enabling arrangodb
+## Configure and enabling postgres
+/usr/pgsql-11/bin/postgresql-11-setup initdb
+sed -i "s/#listen_addresses =.*/listen_addresses = '*'/" /var/lib/pgsql/11/data/postgresql.conf
+mv /var/lib/pgsql/11/data/pg_hba.conf /var/lib/pgsql/11/data/pg_hba.conf.bak
+cat <<-POSTGRESHBA > /var/lib/pgsql/11/data/pg_hba.conf
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             all                                     trust
+# local   replication     all                                     trust
+host    all             all             0.0.0.0/0               md5
+host    all             all             ::/0                    md5
+# host    replication     all             127.0.0.1/32            ident
+# host    replication     all             ::1/128                 ident
+# host    all             all             127.0.0.1/32            ident
+POSTGRESHBA
+systemctl enable postgresql-11
+systemctl start postgresql-11
+cat <<-POSTGRESSETUP | su - postgres -c psql
+	CREATE ROLE mikadev LOGIN SUPERUSER CREATEROLE CREATEDB  BYPASSRLS REPLICATION PASSWORD 'mikadev';
+	CREATE DATABASE mikadev OWNER mikadev
+POSTGRESSETUP
 
+## Configure and enabling arrangodb
 function waitArango {
 	while :; do
 		curl -sI 'http://localhost:8529/' | grep 'HTTP/1.1 301' > /dev/null 2>&1 && break
 		sleep 1
 	done
 }
-
 sed -i 's|endpoint =.*|endpoint = tcp://0.0.0.0:8529|' /etc/arangodb3/arangod.conf
 sed -i 's/authentication =.*/authentication = false/' /etc/arangodb3/arangod.conf
 systemctl enable arangodb3.service
@@ -72,7 +96,7 @@ sed -i 's/authentication =.*/authentication = true/' /etc/arangodb3/arangod.conf
 systemctl restart arangodb3.service
 
 ## Mosquitto build preparation
-yum install -y c-ares-devel libwebsockets-devel openssl-devel libuuid-devel libcurl-devel libwebsockets hiredis-devel
+yum -y -q install c-ares-devel libwebsockets-devel openssl-devel libuuid-devel libcurl-devel libwebsockets hiredis-devel
 mkdir -p /opt/mosquitto_build
 
 ## Build and Install mosquitto
@@ -235,4 +259,4 @@ systemctl enable mosquitto mosquitto-ms
 systemctl start mosquitto mosquitto-ms
 
 
-echo "backend-v3 development provisioning done"
+echo "backend-v3 development - Centos provisioning done"

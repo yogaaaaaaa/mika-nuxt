@@ -1,12 +1,12 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let terminalBatch = sequelize.define('terminalBatch', {
+  const terminalBatch = sequelize.define('terminalBatch', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
     batchStatus: DataTypes.STRING,
-    dateArrived: DataTypes.DATE
+    arrivedAt: DataTypes.DATE
   }, {
     timestamps: true,
     freezeTableName: true,

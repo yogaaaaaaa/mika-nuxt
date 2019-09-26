@@ -12,8 +12,8 @@ const extAuth = require('./extApiAuth')
 const extApiConfig = require('../configs/extApiConfig')
 
 module.exports.createCallback = async (idKey, url, body, callback = () => {}) => {
-  let bodyString = JSON.stringify(body)
-  let serverToken = await extAuth.createServerToken(idKey, bodyString)
+  const bodyString = JSON.stringify(body)
+  const serverToken = await extAuth.createServerToken(idKey, bodyString)
 
   const makeRequest = async (retryLeft) => {
     let response = null

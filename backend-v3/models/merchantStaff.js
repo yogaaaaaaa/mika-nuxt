@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let merchantStaff = sequelize.define('merchantStaff', {
+  const merchantStaff = sequelize.define('merchantStaff', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -54,17 +54,21 @@ module.exports = (sequelize, DataTypes) => {
     include: [
       {
         model: sequelize.models.merchant.scope('id'),
-        required: true,
+        paranoid: false,
         include: [
           {
+            model: sequelize.models.acquirer.scope('excludeShare'),
+            paranoid: false,
             where: acquirerId ? { id: acquirerId } : undefined,
-            model: sequelize.models.acquirer.scope(
-              'excludeTimestamp',
-              'excludeShare'
-            ),
             include: [
-              sequelize.models.acquirerType.scope('excludeTimestamp'),
-              sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
+              {
+                model: sequelize.models.acquirerType,
+                paranoid: false
+              },
+              {
+                model: sequelize.models.acquirerConfig.scope('excludeConfig'),
+                paranoid: false
+              }
             ]
           }
         ]
@@ -72,8 +76,15 @@ module.exports = (sequelize, DataTypes) => {
     ]
   }))
   merchantStaff.addScope('admin', () => ({
+    paranoid: false,
     include: [
       sequelize.models.user.scope('excludePassword')
+    ]
+  }))
+  merchantStaff.addScope('adminUpdate', () => ({
+    paranoid: false,
+    include: [
+      sequelize.models.user
     ]
   }))
 

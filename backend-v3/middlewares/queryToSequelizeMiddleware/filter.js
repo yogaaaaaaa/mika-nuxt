@@ -46,7 +46,7 @@ const translateOp = {
 
 /**
  * Validator for filter middleware,
- * `validModels` is included as parameter to check whether field name in `filters` is valid
+ * `validModels` is included as parameter to check whether field name in `filters[]`/`f[]` is valid
  *
  * NOTE: first index of `validModels` must be the top model
  */
@@ -63,11 +63,11 @@ module.exports.filterValidator = (validModels, bannedFields = null, acceptedFiel
     .custom((filters) => {
       if (!_.isPlainObject(filters)) return false
       for (const filterKey of Object.keys(filters)) {
-        let field = filterKey.split(',')[0]
+        const field = filterKey.split(',')[0]
         if (!helper.matchFieldPatterns(field, bannedFields, acceptedFields)) return false
         if (!helper.validateFieldComponents(validModels, field.split('.'))) return false
 
-        let validOps = Object.keys(translateOp)
+        const validOps = Object.keys(translateOp)
         if (Array.isArray(filters[filterKey])) {
           for (const filterContent of filters[filterKey]) {
             if (typeof filterContent !== 'string') return false
@@ -108,10 +108,10 @@ module.exports.filter = (req, res, next) => {
     eagerFilters = {}
 
     Object.keys(req.query.filters).forEach((filterKey) => {
-      let filterKeySplit = filterKey.split(',')
+      const filterKeySplit = filterKey.split(',')
 
-      let field = filterKeySplit[0]
-      let fieldProperty = field.split('.').pop()
+      const field = filterKeySplit[0]
+      const fieldProperty = field.split('.').pop()
       let groupOp = (filterKeySplit[1] || 'and').toLowerCase()
       if (groupOp === 'or') {
         groupOp = Op.or
@@ -119,16 +119,16 @@ module.exports.filter = (req, res, next) => {
         groupOp = Op.and
       }
 
-      let filterContents = Array.isArray(req.query.filters[filterKey]) ? req.query.filters[filterKey] : [req.query.filters[filterKey]]
+      const filterContents = Array.isArray(req.query.filters[filterKey]) ? req.query.filters[filterKey] : [req.query.filters[filterKey]]
 
       filterContents.forEach((filterContent) => {
-        let filterContentSplit = filterContent.split(',')
-        let op = filterContentSplit[0]
-        let value = filterContentSplit.length > 1 ? filterContentSplit.slice(1, filterContentSplit.length).join(',') : ''
+        const filterContentSplit = filterContent.split(',')
+        const op = filterContentSplit[0]
+        const value = filterContentSplit.length > 1 ? filterContentSplit.slice(1, filterContentSplit.length).join(',') : ''
 
-        let targetFilters = field.indexOf('.') > 0 ? eagerFilters : filters
+        const targetFilters = field.indexOf('.') > 0 ? eagerFilters : filters
 
-        let translatedOp = translateOp[op](fieldProperty, value)
+        const translatedOp = translateOp[op](fieldProperty, value)
         if (!targetFilters[field]) targetFilters[field] = {}
         if (targetFilters[field][groupOp]) {
           targetFilters[field][groupOp].push(translatedOp)
@@ -148,7 +148,7 @@ module.exports.filter = (req, res, next) => {
         if (!query.where) query.where = {}
         if (!query.where[Op.and]) query.where[Op.and] = []
         if (_.isPlainObject(query.where[Op.and])) {
-          query.where[Op.and] = [ query.where[Op.and] ]
+          query.where[Op.and] = [query.where[Op.and]]
         }
         query.where[Op.and].push(where)
         return
@@ -179,12 +179,12 @@ module.exports.filter = (req, res, next) => {
     if (!filters && !eagerFilters) return model
 
     if (model) {
-      let prevScope = model._scope
+      const prevScope = model._scope
 
       if (!prevScope.where) prevScope.where = {}
       if (!prevScope.where[Op.and]) prevScope.where[Op.and] = []
       if (_.isPlainObject(prevScope.where[Op.and])) {
-        prevScope.where[Op.and] = [ prevScope.where[Op.and] ]
+        prevScope.where[Op.and] = [prevScope.where[Op.and]]
       }
       Object.keys(filters).forEach(field => prevScope.where[Op.and].push(filters[field]))
 

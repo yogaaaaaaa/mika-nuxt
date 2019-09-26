@@ -3,7 +3,7 @@
 const kv = require('./helpers/kv')
 
 module.exports = (sequelize, DataTypes) => {
-  let transactionExtraKv = sequelize.define('transactionExtraKv', {
+  const transactionExtraKv = sequelize.define('transactionExtraKv', {
     transactionId: DataTypes.CHAR(27),
     name: DataTypes.STRING,
     value: DataTypes.STRING

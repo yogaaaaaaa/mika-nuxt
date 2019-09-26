@@ -34,14 +34,14 @@ module.exports.base62MikaDecode = (str) => {
 }
 
 module.exports.generateTransactionId = async () => {
-  let ulid = exports.ulid.generate()
+  const ulid = exports.ulid.generate()
 
-  let ulidCanonical = ulid.toCanonical()
-  let ulidBase62Mika = exports.base62MikaEncode(ulid.bytes)
+  const ulidCanonical = ulid.toCanonical()
+  const ulidBase62Mika = exports.base62MikaEncode(ulid.bytes)
 
-  let ulidCanonicalTime = ulidCanonical.substring(0, 10)
-  let ulidCanonicalRandom = ulidCanonical.slice(-16).match(/.{1,8}/g).join('-')
-  let ulidCanonicalFormatted = `${ulidCanonicalTime}-${ulidCanonicalRandom}`
+  const ulidCanonicalTime = ulidCanonical.substring(0, 10)
+  const ulidCanonicalRandom = ulidCanonical.slice(-16).match(/.{1,8}/g).join('-')
+  const ulidCanonicalFormatted = `${ulidCanonicalTime}-${ulidCanonicalRandom}`
 
   return {
     id: ulidBase62Mika,
@@ -51,7 +51,7 @@ module.exports.generateTransactionId = async () => {
 }
 
 module.exports.generateUlid = () => {
-  let ulid = exports.ulid.generate()
+  const ulid = exports.ulid.generate()
 
   return {
     ulid: ulid,
@@ -63,7 +63,7 @@ module.exports.generateUlid = () => {
 }
 
 module.exports.generateKsuid = async () => {
-  let ksuid = await exports.ksuid.random()
+  const ksuid = await exports.ksuid.random()
 
   return {
     ksuid: ksuid,
@@ -88,7 +88,7 @@ module.exports.randomString = (length = 16) => {
 
   let random = Date.now().toString(36)
 
-  let startLength = random.length
+  const startLength = random.length
 
   for (let i = 0; i < length - startLength; i++) {
     random += charset.charAt(Math.floor(Math.random() * charset.length))

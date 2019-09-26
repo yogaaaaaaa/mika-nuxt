@@ -23,7 +23,7 @@ module.exports.createMerchant = async (req, res, next) => {
 
 module.exports.getMerchants = async (req, res, next) => {
   let scopedMerchant = req.applySequelizeCommonScope(models.merchant.scope('admin'))
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.merchantId) {
     query.where.id = req.params.merchantId
@@ -39,7 +39,7 @@ module.exports.getMerchants = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let merchants = await scopedMerchant.findAndCountAll(query)
+      const merchants = await scopedMerchant.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         merchants.rows,
@@ -57,7 +57,7 @@ module.exports.getMerchants = async (req, res, next) => {
 }
 
 module.exports.updateMerchant = async (req, res, next) => {
-  let scopedMerchant = models.merchant.scope('paranoid')
+  const scopedMerchant = models.merchant.scope('paranoid')
   let merchant
 
   let updated = false

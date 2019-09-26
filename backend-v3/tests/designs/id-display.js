@@ -3,8 +3,8 @@
 const uid = require('../../libs/uid')
 
 function generateTransactionId () {
-  let ksuid = uid.ksuid.randomSync()
-  let ksuidBase32Crf = uid.base32CrfEncode(ksuid.raw)
+  const ksuid = uid.ksuid.randomSync()
+  const ksuidBase32Crf = uid.base32CrfEncode(ksuid.raw)
   return {
     id: ksuid.string,
     idAlias: ksuidBase32Crf,
@@ -18,7 +18,7 @@ setInterval(() => {
   console.log()
   let genCount = 10
   while (genCount) {
-    let genId = generateTransactionId()
+    const genId = generateTransactionId()
     console.log(genId.id, genId.idAlias, genId.idAliasFormatted)
     genCount--
   }

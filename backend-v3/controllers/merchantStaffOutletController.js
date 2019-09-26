@@ -17,13 +17,13 @@ const defaultValidator = [
 
 module.exports.associateOutlets = async (req, res, next) => {
   let merchantStaff
-  let failedOutletIds = []
+  const failedOutletIds = []
 
   await models.sequelize.transaction(async t => {
     merchantStaff = await models.merchantStaff.findByPk(req.params.merchantStaffId, { transaction: t })
     if (merchantStaff) {
       for (const outletId of req.body.outletIds) {
-        let outlet = await models.outlet.findByPk(outletId, { transaction: t })
+        const outlet = await models.outlet.findByPk(outletId, { transaction: t })
         if (outlet && (merchantStaff.merchantId === outlet.merchantId)) {
           try {
             await models.merchantStaffOutlet.create({
@@ -48,7 +48,7 @@ module.exports.associateOutlets = async (req, res, next) => {
 
 module.exports.dissociateOutlets = async (req, res, next) => {
   let merchantStaff
-  let failedOutletIds = []
+  const failedOutletIds = []
 
   await models.sequelize.transaction(async t => {
     merchantStaff = await models.merchantStaff.findByPk(req.params.merchantStaffId, { transaction: t })

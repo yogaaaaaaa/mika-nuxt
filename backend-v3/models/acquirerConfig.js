@@ -3,7 +3,7 @@
 const kv = require('./helpers/kv')
 
 module.exports = (sequelize, DataTypes) => {
-  let acquirerConfig = sequelize.define('acquirerConfig', {
+  const acquirerConfig = sequelize.define('acquirerConfig', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   })
   acquirerConfig.addScope('admin', () => ({
+    paranoid: false,
     include: [
       sequelize.models.acquirerConfigKv.scope('excludeEntity')
     ]

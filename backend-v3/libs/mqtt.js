@@ -77,15 +77,15 @@ module.exports.publish = async (topic, message, options = {}) => {
 }
 
 module.exports.hashPassword = (password, iter = config.passwordHashIter) => {
-  let digest = 'sha256'
-  let keyLength = 24
-  let salt = crypto.randomBytes(18).toString('base64')
+  const digest = 'sha256'
+  const keyLength = 24
+  const salt = crypto.randomBytes(18).toString('base64')
 
   if (iter === null) {
     iter = 100
   }
 
-  let keyPromise = new Promise((resolve, reject) => {
+  const keyPromise = new Promise((resolve, reject) => {
     crypto.pbkdf2(password, salt, iter, keyLength, digest, (err, key) => {
       if (err) {
         console.error(err)
@@ -130,7 +130,7 @@ module.exports.removeAuthUser = async (username) => {
 
 module.exports.addAuthTopics = async (user, topicObjects, expirySecond) => {
   if (Array.isArray(topicObjects)) {
-    let pipeline = redis.pipeline()
+    const pipeline = redis.pipeline()
     for (const topic of topicObjects) {
       pipeline.setex(
         exports.getAuthAclKey(user, topic.topic),
@@ -144,7 +144,7 @@ module.exports.addAuthTopics = async (user, topicObjects, expirySecond) => {
 
 module.exports.refreshAuthTopics = async (user, topics, expirySecond) => {
   if (Array.isArray(topics)) {
-    let pipeline = redis.pipeline()
+    const pipeline = redis.pipeline()
     for (const topic of topics) {
       pipeline.expire(
         exports.getAuthAclKey(user, topic),
@@ -157,7 +157,7 @@ module.exports.refreshAuthTopics = async (user, topics, expirySecond) => {
 
 module.exports.removeAuthTopics = async (user, topics) => {
   if (Array.isArray(topics)) {
-    let pipeline = redis.pipeline()
+    const pipeline = redis.pipeline()
     for (const topic of topics) {
       pipeline.del(
         exports.getAuthAclKey(user, topic)

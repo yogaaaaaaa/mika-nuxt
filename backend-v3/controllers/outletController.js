@@ -9,7 +9,9 @@ const errorMiddleware = require('../middlewares/errorMiddleware')
 const outletValidator = require('../validators/outletValidator')
 
 module.exports.getMerchantStaffOutlets = async (req, res, next) => {
-  let query = { where: {} }
+  const query = { where: {} }
+
+  const scopedOutlet = models.outlet.scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
 
   if (req.params.outletId) query.where.id = req.params.outletId
   if (req.params.idAlias) query.where.idAlias = req.params.idAlias
@@ -17,20 +19,18 @@ module.exports.getMerchantStaffOutlets = async (req, res, next) => {
   if (req.params.outletId || req.params.idAlias) {
     msg.expressGetEntityResponse(
       res,
-      await models.outlet
-        .scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
-        .findOne(query)
+      await scopedOutlet.findOne(query)
     )
   } else {
-    let scopedOutlet =
+    const localScopedOutlet =
       req.applySequelizeFilterScope(
         req.applySequelizePaginationScope(
-          models.outlet.scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
+          scopedOutlet
         )
       )
 
     if (req.query.get_count) {
-      let outlets = await scopedOutlet.findAndCountAll(query)
+      const outlets = await localScopedOutlet.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         outlets.rows,
@@ -41,7 +41,44 @@ module.exports.getMerchantStaffOutlets = async (req, res, next) => {
     } else {
       msg.expressGetEntityResponse(
         res,
-        await scopedOutlet.findAll(query)
+        await localScopedOutlet.findAll(query)
+      )
+    }
+  }
+}
+
+module.exports.getAcquirerStaffOutlets = async (req, res, next) => {
+  const query = { where: {} }
+
+  const scopedOutlet = models.outlet.scope({ method: ['acquirerStaff', req.auth.acquirerCompanyId] })
+
+  if (req.params.outletId) {
+    query.where.id = req.params.outletId
+    msg.expressGetEntityResponse(
+      res,
+      await scopedOutlet.findOne(query)
+    )
+  } else {
+    const localScopedOutlet =
+      req.applySequelizeFilterScope(
+        req.applySequelizePaginationScope(
+          scopedOutlet
+        )
+      )
+
+    if (req.query.get_count) {
+      const outlets = await localScopedOutlet.findAndCountAll(query)
+      msg.expressGetEntityResponse(
+        res,
+        outlets.rows,
+        outlets.count,
+        req.query.page,
+        req.query.per_page
+      )
+    } else {
+      msg.expressGetEntityResponse(
+        res,
+        await localScopedOutlet.findAll(query)
       )
     }
   }
@@ -65,10 +102,10 @@ module.exports.createOutlet = async (req, res, next) => {
 }
 
 module.exports.getOutlets = async (req, res, next) => {
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.outletId) {
-    let scopedOutlet = req.applySequelizeCommonScope(models.outlet.scope('admin'))
+    const scopedOutlet = req.applySequelizeCommonScope(models.outlet.scope('admin'))
     query.where.id = req.params.outletId
     msg.expressGetEntityResponse(
       res,
@@ -91,7 +128,7 @@ module.exports.getOutlets = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let outlets = await scopedOutlet.findAndCountAll(query)
+      const outlets = await scopedOutlet.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         outlets.rows,
@@ -109,7 +146,7 @@ module.exports.getOutlets = async (req, res, next) => {
 }
 
 module.exports.updateOutlet = async (req, res, next) => {
-  let scopedOutlet = models.outlet.scope('paranoid')
+  const scopedOutlet = models.outlet.scope('paranoid')
   let outlet
 
   let updated = false
@@ -170,9 +207,18 @@ module.exports.getOutletsMiddlewares = [
 
 module.exports.getMerchantStaffOutletsMiddlewares = [
   queryToSequelizeMiddleware.paginationValidator(['outlet']),
-  queryToSequelizeMiddleware.filterValidator(['outlet'], ['*archivedAt']),
+  queryToSequelizeMiddleware.filterValidator(['outlet']),
   errorMiddleware.validatorErrorHandler,
   queryToSequelizeMiddleware.pagination,
   queryToSequelizeMiddleware.filter,
   module.exports.getMerchantStaffOutlets
+]
+
+module.exports.getAcquirerStaffOutletsMiddlewares = [
+  queryToSequelizeMiddleware.paginationValidator(['outlet']),
+  queryToSequelizeMiddleware.filterValidator(['outlet']),
+  errorMiddleware.validatorErrorHandler,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
+  module.exports.getAcquirerStaffOutlets
 ]

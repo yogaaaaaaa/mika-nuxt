@@ -4,12 +4,13 @@
 * Kuma Pay Acquirer Handler - a test payment provider for development environment
 */
 
+const timer = require('../timer')
 const uid = require('../uid')
 
 module.exports = (trxManager) => {
   trxManager.acquirerHandlers.push({
     name: 'kumapay',
-    classes: [ 'kumapay' ],
+    classes: ['kumapay'],
     defaultMinimumAmount: 1,
     defaultMaximumAmount: null,
     properties: {
@@ -24,6 +25,8 @@ module.exports = (trxManager) => {
       userTokenTypes: []
     },
     async handler (ctx) {
+      // Random delay
+      await timer.delay(100 + Math.random() * 3000)
       ctx.transaction.tokenType = trxManager.tokenTypes.TOKEN_QRCODE_CONTENT
       ctx.transaction.token = `berkuma-${ctx.transaction.amount}-${(await uid.ksuid.random()).string}`
     },
@@ -32,6 +35,8 @@ module.exports = (trxManager) => {
     async cancelHandler (ctx) {
     },
     async refundHandler (ctx) {
+      // Random delay
+      await timer.delay(100 + Math.random() * 3000)
       ctx.transactionRefund.reference = `ref-${ctx.transactionRefund.id}`
       ctx.transactionRefund.referenceName = 'refund_key'
       // Throw probability of error

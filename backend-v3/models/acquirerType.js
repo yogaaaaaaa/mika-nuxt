@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let acquirerType = sequelize.define('acquirerType', {
+  const acquirerType = sequelize.define('acquirerType', {
     class: DataTypes.STRING,
 
     name: DataTypes.STRING,
@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
   acquirerType.associate = (models) => {
     acquirerType.hasMany(models.acquirer, { foreignKey: 'acquirerTypeId' })
   }
+
+  acquirerType.addScope('admin', {
+    paranoid: false
+  })
 
   return acquirerType
 }

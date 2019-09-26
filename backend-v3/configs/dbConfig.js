@@ -11,9 +11,6 @@ const commonDbConfig = {
   password: null,
   database: null,
   dialect: 'mysql',
-  dialectOptions: {
-    timezone: 'Etc/GMT'
-  },
   freezeTableName: true,
   pool: {
     max: 5,
@@ -22,7 +19,7 @@ const commonDbConfig = {
   }
 }
 
-let baseConfig = {
+const baseConfig = {
   development: {
     username: 'mikadev',
     password: 'mikadev',
@@ -45,7 +42,7 @@ let baseConfig = {
  */
 try {
   const configName = require('path').basename(__filename, '.js')
-  let extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
+  const extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
   _.merge(baseConfig, extraConfig)
   console.log(`${configName} is mixed`)
 } catch (err) {}

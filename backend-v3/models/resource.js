@@ -3,7 +3,7 @@
 const uid = require('../libs/uid')
 
 module.exports = (sequelize, DataTypes) => {
-  let resource = sequelize.define('resource', {
+  const resource = sequelize.define('resource', {
     id: {
       primaryKey: true,
       type: DataTypes.CHAR(27)

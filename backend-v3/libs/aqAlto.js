@@ -13,7 +13,7 @@ module.exports.handlerClasses = ['wechatpay', 'alipay']
 module.exports.baseConfig = require('../configs/aqAltoConfig')
 
 module.exports.mixConfig = (config) => {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  const mixedConfig = Object.assign({}, exports.baseConfig, config)
   if (mixedConfig.altoMchId) {
     mixedConfig.mch_id = mixedConfig.altoMchId
   }
@@ -24,8 +24,8 @@ module.exports.mixConfig = (config) => {
  * Convert object to uriEncoded string, doesn't support nested object
  */
 function objectToUriEncoded (object) {
-  let component = []
-  for (let property in object) {
+  const component = []
+  for (const property in object) {
     component.push(encodeURIComponent(`${property}=${object[property]}`))
   }
   return component.join('&')
@@ -33,12 +33,12 @@ function objectToUriEncoded (object) {
 
 function altoCreateContainer (altoPemPrivateKey, data, encode = false) {
   const signType = 'RSA'
-  let sign = crypto.createSign('md5WithRSAEncryption')
+  const sign = crypto.createSign('md5WithRSAEncryption')
     .update(Buffer.from(data, 'utf8'))
     .sign(altoPemPrivateKey)
     .toString('base64')
 
-  let container = {
+  const container = {
     sign_type: signType,
     sign: sign,
     data: data
@@ -79,7 +79,7 @@ function altoResponseCodeCorrect (code) {
  * Make common alto request, used in all alto API request
  */
 async function altoRequest (url, request, config) {
-  let response = await superagent.post(url)
+  const response = await superagent.post(url)
     .type('application/x-www-form-urlencoded')
     .send(altoCreateContainer(config.altoPemPrivateKey, JSON.stringify(request)))
 
@@ -116,7 +116,7 @@ async function altoRequest (url, request, config) {
  ```
  */
 module.exports.altoMakeQrCodePayment = async function (config) {
-  let request = {}
+  const request = {}
   request.mch_id = config.mch_id
   request.trade_type = 'QR_CODE'
   request.currency = config.currency
@@ -157,7 +157,7 @@ module.exports.altoMakeQrCodePayment = async function (config) {
  ```
  */
 module.exports.altoQueryPayment = async function (config) {
-  let request = {}
+  const request = {}
   request.mch_id = config.mch_id
   if (config.out_trade_no) {
     request.out_trade_no = config.out_trade_no
@@ -193,7 +193,7 @@ module.exports.altoQueryPayment = async function (config) {
  ```
  */
 module.exports.altoRefundPayment = async function (config) {
-  let request = {}
+  const request = {}
   request.mch_id = config.mch_id
   if (config.out_trade_no) {
     request.out_trade_no = config.out_trade_no
@@ -226,7 +226,7 @@ module.exports.altoRefundPayment = async function (config) {
  ```
  */
 module.exports.altoQueryRefundPayment = async function (config) {
-  let request = {}
+  const request = {}
   request.mch_id = config.mch_id
   if (config.out_trade_no) {
     request.out_trade_no = config.out_trade_no

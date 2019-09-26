@@ -4,15 +4,16 @@ const { body } = require('express-validator')
 
 const helper = require('./helper')
 
-const minimumAmountValidator = () => body('minimumAmount').isNumeric()
-const maximumAmountValidator = () => body('maximumAmount').isNumeric()
-const processFeeValidator = () => body('processFee').isNumeric()
-const shareAcquirerValidator = () => body('shareAcquirer').isNumeric()
-const shareMerchantValidator = () => body('shareMerchant').isNumeric()
-const shareMerchantWithPartnerValidator = () => body('shareMerchantWithPartner').isNumeric()
-const sharePartnerValidator = () => body('sharePartner').isNumeric()
+const minimumAmountValidator = () => body('minimumAmount').isFloat({ min: 0 })
+const maximumAmountValidator = () => body('maximumAmount').isFloat({ min: 0 })
+const processFeeValidator = () => body('processFee').isFloat({ min: 0 })
+const shareAcquirerValidator = () => body('shareAcquirer').isFloat({ min: 0, max: 1.0 })
+const shareMerchantValidator = () => body('shareMerchant').isFloat({ min: 0, max: 1.0 })
+const shareMerchantWithPartnerValidator = () => body('shareMerchantWithPartner').isFloat({ min: 0, max: 1.0 })
+const sharePartnerValidator = () => body('sharePartner').isFloat({ min: 0, max: 1.0 })
 
 const merchantIdValidator = () => body('merchantId').not().isEmpty()
+const acquirerConfigIdValidator = () => body('acquirerConfigId').not().isEmpty()
 const acquirerTypeIdValidator = () => body('acquirerTypeId').not().isEmpty()
 
 const defaultValidator = [
@@ -29,11 +30,13 @@ const defaultValidator = [
 module.exports.bodyCreate = [
   defaultValidator,
   merchantIdValidator(),
-  acquirerTypeIdValidator()
+  acquirerTypeIdValidator(),
+  acquirerConfigIdValidator()
 ]
 
 module.exports.bodyUpdate = [
   defaultValidator,
   merchantIdValidator().optional(),
-  acquirerTypeIdValidator().optional()
+  acquirerTypeIdValidator().optional(),
+  acquirerConfigIdValidator().optional()
 ]

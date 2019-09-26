@@ -4,13 +4,15 @@ const msg = require('../libs/msg')
 const auth = require('../libs/auth')
 const models = require('../models')
 
+const userHelper = require('./helpers/userHelper')
+
 const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const merchantStaffValidator = require('../validators/merchantStaffValidator')
 
 module.exports.getMerchantStaff = async (req, res, next) => {
-  let merchantStaff = await models.merchantStaff
+  const merchantStaff = await models.merchantStaff
     .scope('merchantStaff')
     .findByPk(req.auth.merchantStaffId)
 
@@ -23,27 +25,36 @@ module.exports.getMerchantStaff = async (req, res, next) => {
 }
 
 module.exports.createMerchantStaff = async (req, res, next) => {
+  let user
   let merchantStaff
 
+  let createdMerchantStaff
+  let generatedPassword
+
   await models.sequelize.transaction(async t => {
-    merchantStaff = await models.merchantStaff.create(req.body, {
-      include: [ models.user ],
-      transaction: t
-    })
-    merchantStaff = await models.merchantStaff
+    user = models.user.build(req.body.user)
+    generatedPassword = await auth.resetPassword(user, req.query.humane_password)
+    await user.save({ transaction: t })
+
+    merchantStaff = models.merchantStaff.build(req.body)
+    merchantStaff.userId = user.id
+    await merchantStaff.save({ transaction: t })
+
+    createdMerchantStaff = await models.merchantStaff
       .scope('admin')
       .findByPk(merchantStaff.id, { transaction: t })
+    createdMerchantStaff = createdMerchantStaff.toJSON()
+    createdMerchantStaff.user.password = generatedPassword
   })
-
   msg.expressCreateEntityResponse(
     res,
-    merchantStaff
+    createdMerchantStaff
   )
 }
 
 module.exports.getMerchantStaffs = async (req, res, next) => {
   let scopedMerchantStaff = req.applySequelizeCommonScope(models.merchantStaff.scope('admin'))
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.merchantStaffId) {
     query.where.id = req.params.merchantStaffId
@@ -59,7 +70,7 @@ module.exports.getMerchantStaffs = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let merchantStaffs = await scopedMerchantStaff.findAndCountAll(query)
+      const merchantStaffs = await scopedMerchantStaff.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         merchantStaffs.rows,
@@ -77,7 +88,7 @@ module.exports.getMerchantStaffs = async (req, res, next) => {
 }
 
 module.exports.updateMerchantStaff = async (req, res, next) => {
-  let scopedMerchantStaff = models.merchantStaff.scope('admin', 'paranoid')
+  const scopedMerchantStaff = models.merchantStaff.scope('adminUpdate')
   let merchantStaff
 
   let updated = false
@@ -90,6 +101,7 @@ module.exports.updateMerchantStaff = async (req, res, next) => {
 
       if (req.body.user) {
         Object.assign(merchantStaff.user, req.body.user)
+        await auth.checkPasswordUpdate(merchantStaff.user)
         delete req.body.user
 
         if (merchantStaff.user.changed()) updated = true
@@ -106,7 +118,7 @@ module.exports.updateMerchantStaff = async (req, res, next) => {
       await merchantStaff.save({ transaction: t })
 
       if (updated) {
-        merchantStaff = await scopedMerchantStaff.findByPk(merchantStaff.id, { transaction: t })
+        merchantStaff = await models.merchantStaff.scope('admin').findByPk(merchantStaff.id, { transaction: t })
         await auth.removeAuthByUserId(merchantStaff.userId)
       }
     }
@@ -121,7 +133,7 @@ module.exports.updateMerchantStaff = async (req, res, next) => {
 }
 
 module.exports.deleteMerchantStaff = async (req, res, next) => {
-  let scopedMerchantStaff = models.merchantStaff.scope('admin', 'paranoid')
+  const scopedMerchantStaff = models.merchantStaff.scope('admin', 'paranoid')
   let merchantStaff
 
   await models.sequelize.transaction(async t => {
@@ -140,6 +152,9 @@ module.exports.deleteMerchantStaff = async (req, res, next) => {
     merchantStaff
   )
 }
+
+module.exports.resetMerchantStaffPassword =
+  userHelper.createResetUserPasswordHandler('merchantStaff')
 
 module.exports.createMerchantStaffMiddlewares = [
   merchantStaffValidator.bodyCreate,

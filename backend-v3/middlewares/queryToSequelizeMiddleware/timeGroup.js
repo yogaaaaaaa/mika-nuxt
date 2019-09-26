@@ -34,8 +34,8 @@ module.exports.timeGroupValidator = (validModel) => [
  * Generate sequelize group (aggregation) by time query setting
  */
 module.exports.timeGroup = (req, res, next) => {
-  let offsetMinutes = time.utcOffsetToMinutes(req.query.utc_offset)
-  let fieldName = req.query.group.split('.').map(comp => `\`${comp}\``).join('.')
+  const offsetMinutes = time.utcOffsetToMinutes(req.query.utc_offset)
+  const fieldName = req.query.group.split('.').map(comp => `\`${comp}\``).join('.')
   let group
 
   if (req.query.group_time === 'minute') {
@@ -84,7 +84,7 @@ module.exports.timeGroup = (req, res, next) => {
 
   req.applySequelizeTimeGroupScope = (model) => {
     if (model) {
-      let prevScope = model._scope
+      const prevScope = model._scope
 
       if (Array.isArray(prevScope.group)) {
         prevScope.group.push(group)
@@ -97,7 +97,7 @@ module.exports.timeGroup = (req, res, next) => {
       if (Array.isArray(prevScope.attributes)) {
         prevScope.attributes.push(req.query.group.split('.').pop())
       } else {
-        prevScope.attributes = [ req.query.group.split('.').pop() ]
+        prevScope.attributes = [req.query.group.split('.').pop()]
       }
 
       return models[model.name].scope(prevScope)

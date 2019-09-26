@@ -23,9 +23,9 @@ module.exports = (trxManager) => {
       ]
     },
     async handler (ctx) {
-      let altoConfig = alto.mixConfig(ctx.acquirer.acquirerConfig.config)
+      const altoConfig = alto.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await alto.altoMakeQrCodePayment({
+      const response = await alto.altoMakeQrCodePayment({
         out_trade_no: ctx.transaction.id,
         subject: 'MIKA Payment',
         amount: ctx.transaction.amount,

@@ -17,7 +17,7 @@ const commonConfig = require('../configs/commonConfig')
  *
  * example:
  ```js
- apiAuthMiddleware.auth([auth.userType.ADMIN, auth.userType.AGENT], [auth.userRoles.ADMIN_HR])
+ authMiddleware.auth([auth.userType.ADMIN, auth.userType.AGENT], [auth.userRoles.ADMIN_HR])
  ```
  *
  */
@@ -27,15 +27,15 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
 
   if (req.headers[commonConfig.authSessionTokenHeader]) {
     req.sessionToken = req.headers[commonConfig.authSessionTokenHeader]
-  } else if (req.headers['authorization']) {
-    let authComponent = req.headers['authorization'].split(' ')
+  } else if (req.headers.authorization) {
+    const authComponent = req.headers.authorization.split(' ')
     if (authComponent[0].toLowerCase() === 'bearer') {
       req.sessionToken = authComponent[1]
     }
   }
 
   if (req.sessionToken) {
-    let checkAuth = await auth.checkAuth(req.sessionToken)
+    const checkAuth = await auth.checkAuth(req.sessionToken)
     if (checkAuth) {
       req.auth = checkAuth
       if (Array.isArray(allowedUserTypes)) {

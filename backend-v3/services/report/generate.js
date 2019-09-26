@@ -5,7 +5,7 @@ const puppeteer = require('puppeteer')
 const excel = require('exceljs')
 const base64img = require('base64-img')
 
-const trxManagerTypes = require('../../libs/types/trxManagerTypes')
+const trxManager = require('../../libs/trxManager')
 const time = require('../../libs/time')
 const format = require('../../libs/format')
 const template = require('../../libs/template')
@@ -46,11 +46,11 @@ module.exports.checkMerchantStaffId = async (merchantStaffId) => {
 }
 
 module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options) => {
-  let merchantStaff = await models.merchantStaff.findOne({
+  const merchantStaff = await models.merchantStaff.findOne({
     where: {
       id: merchantStaffId
     },
-    include: [ models.merchant ]
+    include: [models.merchant]
   })
 
   options = Object.assign({
@@ -61,9 +61,9 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
   }, options)
 
   const utcOffsetMinutes = time.utcOffsetToMinutes(options.utcOffset)
-  let creationTimestamp = Date.now()
-  let creationMoment = time.moment.unix(creationTimestamp / 1000).utcOffset(options.utcOffset)
-  let startMoment = time.moment(options.date).utcOffset(options.utcOffset).startOf('day')
+  const creationTimestamp = Date.now()
+  const creationMoment = time.moment.unix(creationTimestamp / 1000).utcOffset(options.utcOffset)
+  const startMoment = time.moment(options.date).utcOffset(options.utcOffset).startOf('day')
   let endMoment = time.moment(options.date).utcOffset(options.utcOffset).endOf('day')
 
   if (endMoment.unix() > creationMoment.unix()) {
@@ -75,7 +75,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
   const reportPdfPath = path.join(reportWorkDir, `report-${startMoment.format('DD-MMM-YYYY')}-generated-${creationMoment.format('YYYY-MM-DD-HH_mm_ss')}.pdf`)
   const reportExcelPath = path.join(reportWorkDir, `report-${startMoment.format('DD-MMM-YYYY')}-generated--${creationMoment.format('YYYY-MM-DD-HH_mm_ss')}.xlsx`)
 
-  let commonWhere = {
+  const commonWhere = {
     [Op.and]: [
       {
         createdAt: {
@@ -85,15 +85,15 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     ],
     status: {
       [Op.In]: [
-        trxManagerTypes.transactionStatuses.SUCCESS,
-        trxManagerTypes.transactionStatuses.REFUNDED,
-        trxManagerTypes.transactionStatuses.REFUNDED_PARTIAL
+        trxManager.transactionStatuses.SUCCESS,
+        trxManager.transactionStatuses.REFUNDED,
+        trxManager.transactionStatuses.REFUNDED_PARTIAL
       ]
     }
   }
 
-  let transactions = await models.transaction
-    .scope({ method: [ 'merchantStaffReport', merchantStaffId ] })
+  const transactions = await models.transaction
+    .scope({ method: ['merchantStaffReport', merchantStaffId] })
     .findAll({
       order: [
         ['createdAt', 'asc']
@@ -110,20 +110,20 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     })
   }
 
-  let acquirers = await models.acquirer.findAll({
-    include: [ models.acquirerType ],
+  const acquirers = await models.acquirer.findAll({
+    include: [models.acquirerType],
     where: {
       merchantId: merchantStaff.merchantId
     }
   })
 
-  let acquirerTransactionStats = await models.transaction
-    .scope({ method: [ 'merchantStaffAcquirerTransactionStats', merchantStaffId ] })
+  const acquirerTransactionStats = await models.transaction
+    .scope({ method: ['merchantStaffAcquirerTransactionStats', merchantStaffId] })
     .findAll({ where: commonWhere })
     .map(transactionStatistic => transactionStatistic.toJSON())
 
-  let outletTransactionStats = await models.transaction
-    .scope({ method: [ 'merchantStaffReportOutletTransactionStats', merchantStaffId ] })
+  const outletTransactionStats = await models.transaction
+    .scope({ method: ['merchantStaffReportOutletTransactionStats', merchantStaffId] })
     .findAll({
       order: [
         [Sequelize.literal('`amount`'), 'desc']
@@ -132,8 +132,8 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     })
     .map(transactionStatistic => transactionStatistic.toJSON())
 
-  let transactionCountHours = await models.transaction
-    .scope({ method: [ 'merchantStaffTransactionTimeGroupCount', merchantStaffId ] })
+  const transactionCountHours = await models.transaction
+    .scope({ method: ['merchantStaffTransactionTimeGroupCount', merchantStaffId] })
     .findAll({
       attributes: [
         'createdAt'
@@ -152,7 +152,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     })
     .map(transactionCount => transactionCount.toJSON())
 
-  let transactionStats = {
+  const transactionStats = {
     count: 0,
     totalAmount: 0,
     totalNettAmount: 0
@@ -165,17 +165,17 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
   transactionStats.totalAmount = format.formatCurrencyIDR(transactionStats.totalAmount)
   transactionStats.totalNettAmount = format.formatCurrencyIDR(transactionStats.totalNettAmount)
 
-  let transactionCountHoursMap = new Map()
+  const transactionCountHoursMap = new Map()
   transactionCountHours.forEach(transactionCountHour =>
     transactionCountHoursMap.set(time.moment(transactionCountHour.createdAt).utcOffset(options.utcOffset).startOf('hour').format('HH:mm'), transactionCountHour.transactionCount)
   )
   let highestTransactionCount = 0
   let highestTransactionCountHour
-  let transactionCountHourLabels = []
-  let transactionCountHourValues = []
+  const transactionCountHourLabels = []
+  const transactionCountHourValues = []
   for (const hour of time.moment.range(startMoment, endMoment).by('hour')) {
-    let key = hour.format('HH:mm')
-    let value = transactionCountHoursMap.get(key) || 0
+    const key = hour.format('HH:mm')
+    const value = transactionCountHoursMap.get(key) || 0
     if (value > highestTransactionCount) {
       highestTransactionCountHour = key
       highestTransactionCount = value
@@ -184,7 +184,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     transactionCountHourValues.push(value)
   }
 
-  let reportCtx = {
+  const reportCtx = {
     mikaLogoImg: await getImageBase64(path.join(dirConfig.thumbnailsDir, 'mika.png')),
     merchantStaffName: `${merchantStaff.name} (${options.email})`,
     reportDate: startMoment.locale(options.locale).format('DD MMMM YYYY'),
@@ -195,7 +195,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     highestTransactionCountHour: highestTransactionCountHour,
     highestTransactionCount: highestTransactionCount,
     acquirers: await Promise.all(acquirers.map(async acquirer => {
-      let acquirerStat = acquirerTransactionStats.find((acquirerTransactionStat) => acquirerTransactionStat.acquirer.id === acquirer.id) || {}
+      const acquirerStat = acquirerTransactionStats.find((acquirerTransactionStat) => acquirerTransactionStat.acquirer.id === acquirer.id) || {}
       acquirerStat.totalNettAmount = acquirerStat.totalNettAmount ? acquirerStat.totalNettAmount : '0'
       acquirerStat.totalAmount = acquirerStat.totalAmount ? acquirerStat.totalAmount : '0'
       acquirerStat.transactionCount = acquirerStat.transactionCount ? acquirerStat.transactionCount : '0'
@@ -314,7 +314,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
     })
   }
 
-  let reportHtml = reportTemplate(reportCtx)
+  const reportHtml = reportTemplate(reportCtx)
 
   await Promise.all([
     (async () => {

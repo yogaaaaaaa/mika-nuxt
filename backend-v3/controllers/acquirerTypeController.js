@@ -24,8 +24,8 @@ module.exports.createAcquirerType = async (req, res, next) => {
 }
 
 module.exports.getAcquirerTypes = async (req, res, next) => {
-  let scopedAcquirerType = req.applySequelizeCommonScope(models.acquirerType.scope())
-  let query = { where: {} }
+  let scopedAcquirerType = req.applySequelizeCommonScope(models.acquirerType.scope('admin'))
+  const query = { where: {} }
 
   if (req.params.acquirerTypeId) {
     query.where.id = req.params.acquirerTypeId
@@ -41,7 +41,7 @@ module.exports.getAcquirerTypes = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let acquirerTypes = await scopedAcquirerType.findAndCountAll(query)
+      const acquirerTypes = await scopedAcquirerType.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         acquirerTypes.rows,
@@ -59,7 +59,7 @@ module.exports.getAcquirerTypes = async (req, res, next) => {
 }
 
 module.exports.updateAcquirerType = async (req, res, next) => {
-  let scopedAcquirerType = models.acquirerType.scope('paranoid')
+  const scopedAcquirerType = models.acquirerType.scope('paranoid')
   let acquirerType
 
   let updated = false
@@ -94,7 +94,7 @@ module.exports.updateAcquirerType = async (req, res, next) => {
 }
 
 module.exports.deleteAcquirerType = async (req, res, next) => {
-  let scopedAcquirerType = models.acquirerType.scope('paranoid')
+  const scopedAcquirerType = models.acquirerType.scope('paranoid')
   let acquirerType
 
   await models.sequelize.transaction(async t => {

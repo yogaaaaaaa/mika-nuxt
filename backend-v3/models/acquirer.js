@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
   const Op = Sequelize.Op
 
-  let acquirer = sequelize.define('acquirer', {
+  const acquirer = sequelize.define('acquirer', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -25,6 +25,8 @@ module.exports = (sequelize, DataTypes) => {
     hidden: DataTypes.BOOLEAN,
 
     merchantId: DataTypes.INTEGER,
+    acquirerCompanyId: DataTypes.INTEGER,
+
     acquirerConfigId: DataTypes.INTEGER,
     acquirerTypeId: DataTypes.INTEGER
   }, {
@@ -36,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
 
   acquirer.associate = (models) => {
     acquirer.belongsTo(models.merchant, { foreignKey: 'merchantId' })
+    acquirer.belongsTo(models.acquirerCompany, { foreignKey: 'acquirerCompanyId' })
     acquirer.belongsTo(models.acquirerConfig, { foreignKey: 'acquirerConfigId' })
     acquirer.belongsTo(models.acquirerType, { foreignKey: 'acquirerTypeId' })
 
@@ -79,17 +82,19 @@ module.exports = (sequelize, DataTypes) => {
     where: {
       id: {
         [Op.notIn]: Sequelize.literal(
-          query.get('sub/getAcquirerExclusionByAgent.sql', [ agentId ])
+          query.get('sub/getAcquirerExclusionByAgent.sql', [agentId])
         )
       }
     }
   }))
 
   acquirer.addScope('admin', () => ({
+    paranoid: false,
     include: [
-      sequelize.models.acquirerConfig,
-      sequelize.models.acquirerType,
-      sequelize.models.merchant.scope('id', 'name')
+      sequelize.models.acquirerConfig.scope('paranoid'),
+      sequelize.models.acquirerType.scope('paranoid'),
+      sequelize.models.merchant.scope('id', 'name', 'paranoid'),
+      sequelize.models.acquirerCompany.scope('paranoid')
     ]
   }))
 

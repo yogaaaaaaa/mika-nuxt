@@ -46,11 +46,11 @@ module.exports.addCallback = async (idKey, url, transactionId) => {
 }
 
 trxManager.listenStatusChange(async (event) => {
-  let activeTrx = await getActiveTrx(event.transactionId)
+  const activeTrx = await getActiveTrx(event.transactionId)
   if (activeTrx) {
-    let transaction = models.transaction.scope('partner').findByPk(event.transactionId)
+    const transaction = models.transaction.scope('partner').findByPk(event.transactionId)
 
-    let mappedTransaction = extApiObject.mapTransaction(transaction)
+    const mappedTransaction = extApiObject.mapTransaction(transaction)
 
     let eventType = null
     if (event.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
@@ -59,7 +59,7 @@ trxManager.listenStatusChange(async (event) => {
       eventType = msg.eventTypes.EVENT_TRANSACTION_FAILED
     }
 
-    let callbackPayload = msg.createNotification(
+    const callbackPayload = msg.createNotification(
       eventType,
       mappedTransaction
     )

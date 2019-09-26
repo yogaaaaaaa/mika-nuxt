@@ -27,7 +27,7 @@ module.exports = (trxManager) => {
     handler: async (ctx) => {
       if (!_.isPlainObject(ctx.transaction.userToken)) throw trxManager.error(trxManager.errorTypes.INVALID_USER_TOKEN)
 
-      let fpCtx = fairpay.mixConfig(Object.assign(
+      const fpCtx = fairpay.mixConfig(Object.assign(
         {
           amount: ctx.transaction.amount
         },

@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let file = sequelize.define('file', {
+  const file = sequelize.define('file', {
     id: {
       primaryKey: true,
       type: DataTypes.CHAR(27)

@@ -23,7 +23,7 @@ let baseConfig = {
  * Load external config file
  */
 try {
-  let extraConfig = require(`./_configs/${configName}`)
+  const extraConfig = require(`./_configs/${configName}`)
   baseConfig = Object.assign({}, baseConfig, extraConfig)
   console.log(`${configName} is mixed`)
 } catch (error) { }

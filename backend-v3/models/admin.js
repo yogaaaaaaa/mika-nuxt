@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let admin = sequelize.define('admin', {
+  const admin = sequelize.define('admin', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -16,8 +16,16 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   admin.addScope('admin', () => ({
+    paranoid: false,
     include: [
       sequelize.models.user.scope('excludePassword')
+    ]
+  }))
+
+  admin.addScope('adminUpdate', () => ({
+    paranoid: false,
+    include: [
+      sequelize.models.user
     ]
   }))
 

@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  let cipherboxKey = sequelize.define('cipherboxKey', {
+  const cipherboxKey = sequelize.define('cipherboxKey', {
     id: {
       primaryKey: true,
       type: DataTypes.CHAR(27)

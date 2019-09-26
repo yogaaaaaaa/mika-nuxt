@@ -63,12 +63,12 @@ module.exports.notifResponseMsg = {
 }
 
 module.exports.mixConfig = (config) => {
-  let mixedConfig = Object.assign({}, exports.baseConfig, config)
+  const mixedConfig = Object.assign({}, exports.baseConfig, config)
   return mixedConfig
 }
 
 module.exports.generateTcashNationalQr = async (config) => {
-  let requestBody = {
+  const requestBody = {
     fee: format.decimalAmountPadded(config.fee, 12),
     amount: format.decimalAmountPadded(config.amount, 12),
 
@@ -86,12 +86,12 @@ module.exports.generateTcashNationalQr = async (config) => {
   }
 
   try {
-    let agent = tcashQrnGetAgent(config)
+    const agent = tcashQrnGetAgent(config)
       .post(`${config.baseUrl}/api/v1/trx/qr/generate`)
       .send(requestBody)
     tcashQrnSetAuthOnAgent(agent, config)
 
-    let response = await agent
+    const response = await agent
 
     if (response.body) return response.body
   } catch (err) {

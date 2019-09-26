@@ -11,18 +11,19 @@ const errorMiddleware = require('../middlewares/errorMiddleware')
 const acquirerValidator = require('../validators/acquirerValidator')
 
 module.exports.getAgentAcquirers = async (req, res, next) => {
-  let query = {
+  const query = {
     where: {
       id: req.auth.agentId
     }
   }
 
   if (req.params.acquirerId) {
-    let acquirer
-    let agent = await models.agent.scope(
-      { method: ['agentAcquirer', req.params.acquirerId] }
-    ).findOne(query)
+    const scopedAgent = req.applySequelizeCommonScope(
+      models.agent.scope({ method: ['agentAcquirer', req.params.acquirerId] })
+    )
 
+    let acquirer
+    const agent = await scopedAgent.findOne(query)
     if (agent) {
       if (agent.outlet.merchant.acquirers.length) {
         acquirer = agent.outlet.merchant.acquirers[0].toJSON()
@@ -35,11 +36,12 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
       acquirer
     )
   } else {
-    let acquirers
-    let agent = await models.agent.scope(
-      'agentAcquirer'
-    ).findOne(query)
+    const scopedAgent = req.applySequelizeCommonScope(
+      models.agent.scope('agentAcquirer')
+    )
 
+    let acquirers
+    const agent = await scopedAgent.findOne(query)
     if (agent) {
       if (agent.outlet.merchant.acquirers.length) {
         acquirers = agent.outlet.merchant.acquirers
@@ -58,7 +60,7 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
 }
 
 module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
-  let query = {
+  const query = {
     where: {
       id: req.auth.merchantStaffId
     }
@@ -67,7 +69,7 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
   if (req.params.acquirerId) {
     let acquirer = null
 
-    let merchantStaff = await models.merchantStaff.scope(
+    const merchantStaff = await models.merchantStaff.scope(
       { method: ['merchantStaffAcquirer', req.params.acquirerId] }
     ).findOne(query)
 
@@ -83,7 +85,7 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
   } else {
     let acquirers = null
 
-    let merchantStaff = await models.merchantStaff.scope(
+    const merchantStaff = await models.merchantStaff.scope(
       'merchantStaffAcquirer'
     ).findOne(query)
 
@@ -121,7 +123,7 @@ module.exports.createAcquirer = async (req, res, next) => {
 
 module.exports.getAcquirers = async (req, res, next) => {
   let scopedAcquirer = req.applySequelizeCommonScope(models.acquirer.scope('admin'))
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.acquirerId) {
     query.where.id = req.params.acquirerId
@@ -137,7 +139,7 @@ module.exports.getAcquirers = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let acquirers = await scopedAcquirer.findAndCountAll(query)
+      const acquirers = await scopedAcquirer.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         acquirers.rows,
@@ -155,7 +157,7 @@ module.exports.getAcquirers = async (req, res, next) => {
 }
 
 module.exports.updateAcquirer = async (req, res, next) => {
-  let scopedAcquirer = models.acquirer.scope('paranoid')
+  const scopedAcquirer = models.acquirer.scope('paranoid')
   let acquirer
 
   let updated = false
@@ -190,7 +192,7 @@ module.exports.updateAcquirer = async (req, res, next) => {
 }
 
 module.exports.deleteAcquirer = async (req, res, next) => {
-  let scopedAcquirer = models.acquirer.scope('paranoid')
+  const scopedAcquirer = models.acquirer.scope('paranoid')
   let acquirer
 
   await models.sequelize.transaction(async t => {
@@ -229,13 +231,20 @@ module.exports.getAcquirersMiddlewares = [
   exports.getAcquirers
 ]
 
+module.exports.getAgentAcquirersMiddlewares = [
+  queryToSequelizeMiddleware.commonValidator,
+  errorMiddleware.validatorErrorHandler,
+  queryToSequelizeMiddleware.common,
+  exports.getAgentAcquirers
+]
+
 module.exports.getMerchantStaffAcquirersMiddlewares = [
   queryToSequelizeMiddleware.paginationValidator(['acquirer']),
-  queryToSequelizeMiddleware.filterValidator(['acquirer'], ['*archivedAt']),
+  queryToSequelizeMiddleware.filterValidator(['acquirer']),
   errorMiddleware.validatorErrorHandler,
   queryToSequelizeMiddleware.pagination,
   queryToSequelizeMiddleware.filter,
-  module.exports.getMerchantStaffAcquirers
+  exports.getMerchantStaffAcquirers
 ]
 
 module.exports.deleteAcquirerMiddlewares = [

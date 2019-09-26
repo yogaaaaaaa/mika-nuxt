@@ -3,7 +3,7 @@
 module.exports.mapTransaction = (transaction) => {
   if (!transaction) return
 
-  let mappedTransaction = {}
+  const mappedTransaction = {}
 
   mappedTransaction.transactionId = transaction.id
 
@@ -34,7 +34,7 @@ module.exports.mapTransaction = (transaction) => {
 module.exports.mapCreatedTransaction = (trxCreateResult) => {
   if (!trxCreateResult) return
 
-  let mappedTrxCreateResult = {}
+  const mappedTrxCreateResult = {}
 
   mappedTrxCreateResult.transactionId = trxCreateResult.transactionId
   mappedTrxCreateResult.agentId = String(trxCreateResult.agentId)
@@ -54,7 +54,7 @@ module.exports.mapCreatedTransaction = (trxCreateResult) => {
 module.exports.mapAgent = (agent) => {
   if (!agent) return
 
-  let mappedAgent = {}
+  const mappedAgent = {}
 
   mappedAgent.agentId = String(agent.id)
   mappedAgent.agentName = agent.name
@@ -64,7 +64,7 @@ module.exports.mapAgent = (agent) => {
   mappedAgent.merchant.merchantName = agent.merchant.name
 
   mappedAgent.acquirers = []
-  for (let acquirer of agent.merchant.acquirers) {
+  for (const acquirer of agent.merchant.acquirers) {
     mappedAgent.acquirers.push({
       acquirerId: String(acquirer.id),
       acquirerName: acquirer.acquirerType.name,
@@ -78,7 +78,7 @@ module.exports.mapAgent = (agent) => {
 
 module.exports.mapMerchant = (merchant) => {
   if (!merchant) return
-  let mappedMerchant = {}
+  const mappedMerchant = {}
 
   mappedMerchant.merchantId = merchant.id
   mappedMerchant.merchantName = merchant.name

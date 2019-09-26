@@ -43,7 +43,7 @@ module.exports.midtransNotifHandle = async function (req, res, next) {
       return
     }
 
-    let midtransConfig = midtrans.mixConfig(transaction.acquirer.acquirerConfig.config)
+    const midtransConfig = midtrans.mixConfig(transaction.acquirer.acquirerConfig.config)
 
     if (!midtrans.checkNotificationSignature(Object.assign(req.body, midtransConfig))) {
       res

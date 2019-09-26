@@ -6,21 +6,24 @@ const sequelize = require('../libs/sequelize')
 
 const basename = path.basename(__filename)
 
-let models = {}
+const models = {}
 
 fs
   .readdirSync(__dirname)
   .filter(file => (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js'))
   .forEach(file => {
-    let model = sequelize.import(path.join(__dirname, file))
+    const model = sequelize.import(path.join(__dirname, file))
     models[model.name] = model
   })
 
 for (const modelName of Object.keys(models)) {
+  models[modelName].addScope('timestamp', {
+    attributes: { exclude: ['archivedAt', 'createdAt', 'updatedAt'] }
+  })
   models[modelName].addScope('excludeTimestamp', {
     attributes: { exclude: ['archivedAt', 'createdAt', 'updatedAt'] }
   })
-  models[modelName].addScope('excludeDeletedAt', {
+  models[modelName].addScope('excludeArchivedAt', {
     attributes: { exclude: ['archivedAt'] }
   })
   models[modelName].addScope('excludeId', {

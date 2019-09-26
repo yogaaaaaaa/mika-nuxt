@@ -262,6 +262,35 @@ module.exports = {
         username: 'mikastaff4',
         password: await hash.bcryptHash('mikastaff4'),
         userType: 'merchantStaff'
+      },
+
+      {
+        id: 201,
+        secure: false,
+        username: 'acquirerStaff',
+        password: await hash.bcryptHash('acquirerStaff'),
+        userType: 'acquirerStaff'
+      },
+      {
+        id: 202,
+        secure: false,
+        username: 'acquirerStaff2',
+        password: await hash.bcryptHash('acquirerStaff2'),
+        userType: 'acquirerStaff'
+      },
+      {
+        id: 203,
+        secure: false,
+        username: 'acquirerStaff3',
+        password: await hash.bcryptHash('acquirerStaff3'),
+        userType: 'acquirerStaff'
+      },
+      {
+        id: 204,
+        secure: false,
+        username: 'acquirerStaff4',
+        password: await hash.bcryptHash('acquirerStaff4'),
+        userType: 'acquirerStaff'
       }
 
     ]

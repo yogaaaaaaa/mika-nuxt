@@ -4,13 +4,15 @@ const msg = require('../libs/msg')
 const auth = require('../libs/auth')
 const models = require('../models')
 
+const userHelper = require('./helpers/userHelper')
+
 const errorMiddleware = require('../middlewares/errorMiddleware')
 const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 
 const agentValidator = require('../validators/agentValidator')
 
 module.exports.getAgent = async (req, res, next) => {
-  let agent = await models.agent
+  const agent = await models.agent
     .scope('agent')
     .findByPk(req.auth.agentId)
 
@@ -23,7 +25,8 @@ module.exports.getAgent = async (req, res, next) => {
 }
 
 module.exports.getMerchantStaffAgents = async (req, res, next) => {
-  let query = { where: {} }
+  const query = { where: {} }
+  const scopedAgent = models.agent.scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
 
   if (req.params.outletId) query.where.outletId = req.params.outletId
 
@@ -31,17 +34,17 @@ module.exports.getMerchantStaffAgents = async (req, res, next) => {
     query.where.id = req.params.agentId
     msg.expressGetEntityResponse(
       res,
-      await models.agent.scope('merchantStaff').findOne(query)
+      await scopedAgent.findOne(query)
     )
   } else {
-    let scopedAgent =
+    const localScopedAgent =
       req.applySequelizeFilterScope(
         req.applySequelizePaginationScope(
-          models.agent.scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
+          scopedAgent
         )
       )
     if (req.query.get_count) {
-      let agents = await scopedAgent.findAndCountAll(query)
+      const agents = await localScopedAgent.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         agents.rows,
@@ -52,34 +55,78 @@ module.exports.getMerchantStaffAgents = async (req, res, next) => {
     } else {
       msg.expressGetEntityResponse(
         res,
-        await scopedAgent.findAll(query)
+        await localScopedAgent.findAll(query)
+      )
+    }
+  }
+}
+
+module.exports.getAcquirerStaffAgents = async (req, res, next) => {
+  const query = { where: {} }
+  const scopedAgent = models.agent.scope({ method: ['acquirerStaff', req.auth.acquirerCompanyId] })
+
+  if (req.params.agentId) {
+    query.where.id = req.params.agentId
+    msg.expressGetEntityResponse(
+      res,
+      await scopedAgent.findOne(query)
+    )
+  } else {
+    const localScopedAgent =
+      req.applySequelizeFilterScope(
+        req.applySequelizePaginationScope(
+          scopedAgent
+        )
+      )
+    if (req.query.get_count) {
+      const agents = await localScopedAgent.findAndCountAll(query)
+      msg.expressGetEntityResponse(
+        res,
+        agents.rows,
+        agents.count,
+        req.query.page,
+        req.query.per_page
+      )
+    } else {
+      msg.expressGetEntityResponse(
+        res,
+        await localScopedAgent.findAll(query)
       )
     }
   }
 }
 
 module.exports.createAgent = async (req, res, next) => {
+  let user
   let agent
 
+  let createdAgent
+  let generatedPassword
+
   await models.sequelize.transaction(async t => {
-    agent = await models.agent.create(req.body, {
-      include: [ models.user ],
-      transaction: t
-    })
-    agent = await models.agent
+    user = models.user.build(req.body.user)
+    generatedPassword = await auth.resetPassword(user, req.query.humane_password)
+    await user.save({ transaction: t })
+
+    agent = models.agent.build(req.body)
+    agent.userId = user.id
+    await agent.save({ transaction: t })
+
+    createdAgent = await models.agent
       .scope('admin')
       .findByPk(agent.id, { transaction: t })
+    createdAgent = createdAgent.toJSON()
+    createdAgent.user.password = generatedPassword
   })
-
   msg.expressCreateEntityResponse(
     res,
-    agent
+    createdAgent
   )
 }
 
 module.exports.getAgents = async (req, res, next) => {
   let scopedAgent = req.applySequelizeCommonScope(models.agent.scope('admin'))
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.agentId) {
     query.where.id = req.params.agentId
@@ -95,7 +142,7 @@ module.exports.getAgents = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let agents = await scopedAgent.findAndCountAll(query)
+      const agents = await scopedAgent.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         agents.rows,
@@ -113,7 +160,7 @@ module.exports.getAgents = async (req, res, next) => {
 }
 
 module.exports.updateAgent = async (req, res, next) => {
-  let scopedAgent = models.agent.scope('admin', 'paranoid')
+  const scopedAgent = models.agent.scope('adminUpdate')
   let agent
 
   let updated = false
@@ -126,6 +173,7 @@ module.exports.updateAgent = async (req, res, next) => {
 
       if (req.body.user) {
         Object.assign(agent.user, req.body.user)
+        await auth.checkPasswordUpdate(agent.user)
         delete req.body.user
 
         if (agent.user.changed()) updated = true
@@ -142,7 +190,7 @@ module.exports.updateAgent = async (req, res, next) => {
       await agent.save({ transaction: t })
 
       if (updated) {
-        agent = await scopedAgent.findByPk(agent.id, { transaction: t })
+        agent = await models.agent.scope('admin').findByPk(agent.id, { transaction: t })
         await auth.removeAuthByUserId(agent.userId)
       }
     }
@@ -157,7 +205,7 @@ module.exports.updateAgent = async (req, res, next) => {
 }
 
 module.exports.deleteAgent = async (req, res, next) => {
-  let scopedAgent = models.agent.scope('admin', 'paranoid')
+  const scopedAgent = models.agent.scope('admin')
   let agent
 
   await models.sequelize.transaction(async t => {
@@ -176,6 +224,8 @@ module.exports.deleteAgent = async (req, res, next) => {
     agent
   )
 }
+
+module.exports.resetAgentPassword = userHelper.createResetUserPasswordHandler('agent')
 
 module.exports.createAgentMiddlewares = [
   agentValidator.bodyCreate,
@@ -209,6 +259,15 @@ module.exports.getMerchantStaffAgentsMiddlewares = [
   queryToSequelizeMiddleware.pagination,
   queryToSequelizeMiddleware.filter,
   module.exports.getMerchantStaffAgents
+]
+
+module.exports.getAcquirerStaffAgentsMiddlewares = [
+  queryToSequelizeMiddleware.paginationValidator(['agent']),
+  queryToSequelizeMiddleware.filterValidator(['agent', 'outlet']),
+  errorMiddleware.validatorErrorHandler,
+  queryToSequelizeMiddleware.pagination,
+  queryToSequelizeMiddleware.filter,
+  module.exports.getAcquirerStaffAgents
 ]
 
 module.exports.deleteAgentMiddlewares = [

@@ -40,9 +40,9 @@ module.exports = (trxManager) => {
       userTokenTypes: []
     },
     async handler (ctx) {
-      let tcashQrnConfig = tcashQrn.mixConfig(ctx.acquirer.acquirerConfig.config)
+      const tcashQrnConfig = tcashQrn.mixConfig(ctx.acquirer.acquirerConfig.config)
 
-      let response = await tcashQrn.generateTcashNationalQr({
+      const response = await tcashQrn.generateTcashNationalQr({
         merchantTrxID: ctx.transaction.id,
         amount: ctx.transaction.amount,
         fee: 0,

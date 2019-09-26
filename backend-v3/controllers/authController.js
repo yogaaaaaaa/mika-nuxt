@@ -1,40 +1,16 @@
 'use strict'
 
-const errorMiddleware = require('../middlewares/errorMiddleware')
-const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
-
 const msg = require('../libs/msg')
 const auth = require('../libs/auth')
 
-const { body } = require('express-validator')
+const errorMiddleware = require('../middlewares/errorMiddleware')
+const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
+const authValidator = require('../validators/authValidator')
 
 const commonConfig = require('../configs/commonConfig')
 
-module.exports.loginValidator = [
-  body('username').isString(),
-  body('password').isString(),
-  body('userTypes').isArray().optional()
-]
-
-module.exports.resetPasswordValidator = [
-  body('userId').exists(),
-  body('password').isString()
-]
-
-module.exports.sessionTokenCheckValidator = [
-  body('sessionToken').isString()
-]
-
-module.exports.changePasswordValidator = [
-  body('oldPassword')
-    .isString(),
-  body('password')
-    .isString()
-    .isLength({ min: 8 })
-]
-
 module.exports.login = async (req, res, next) => {
-  let options = {}
+  const options = {}
 
   options.userTypes = req.body.userTypes
 
@@ -43,10 +19,10 @@ module.exports.login = async (req, res, next) => {
     options.terminalId = req.body.cipherbox.terminalId
   }
 
-  let authResult = await auth.doAuth(req.body.username, req.body.password, options)
+  const authResult = await auth.doAuth(req.body.username, req.body.password, options)
 
   if (authResult) {
-    let response = Object.assign({
+    const response = Object.assign({
       sessionToken: authResult.sessionToken,
       authExpirySecond: authResult.authExpirySecond,
       publicDetails: {
@@ -82,7 +58,7 @@ module.exports.logout = async (req, res, next) => {
 }
 
 module.exports.sessionTokenCheck = async (req, res, next) => {
-  let checkAuth = await auth.checkAuth(req.body.sessionToken)
+  const checkAuth = await auth.checkAuth(req.body.sessionToken)
   if (checkAuth) {
     msg.expressResponse(
       res,
@@ -98,50 +74,57 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
 }
 
 module.exports.changePassword = async (req, res, next) => {
-  if (await auth.changePassword(req.auth.userId, req.body.password, req.body.oldPassword)) {
-    await auth.removeAuth(req.sessionToken)
-    msg.expressResponse(
-      res,
-      msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
-    )
-  } else {
-    msg.expressResponse(
-      res,
-      msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD_INVALID_OLD_PASSWORD
-    )
-  }
+  await auth.changePassword(
+    req.auth.userId,
+    req.body.password,
+    req.body.oldPassword
+  )
+  msg.expressResponse(
+    res,
+    msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+  )
 }
 
-module.exports.resetPassword = async (req, res, next) => {
-  if (auth.resetAuth(req.body.userId, req.body.password)) {
+module.exports.changeExpiredPassword = async (req, res, next) => {
+  if (!await auth.changeExpiredPassword(
+    req.body.username,
+    req.body.password,
+    req.body.oldPassword
+  )) {
     msg.expressResponse(
       res,
-      msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+      msg.msgTypes.MSG_ERROR_AUTH_CANNOT_CHANGE_PASSWORD
     )
+    return
   }
+
+  msg.expressResponse(
+    res,
+    msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
+  )
 }
 
 module.exports.loginMiddlewares = [
   cipherboxMiddleware.processCipherbox(),
-  exports.loginValidator,
+  authValidator.loginValidator,
   errorMiddleware.validatorErrorHandler,
   exports.login
 ]
 
 module.exports.changePasswordMiddlewares = [
-  exports.changePasswordValidator,
+  authValidator.changePasswordValidator,
   errorMiddleware.validatorErrorHandler,
   exports.changePassword
 ]
 
-module.exports.sessionTokenCheckMiddlewares = [
-  exports.sessionTokenCheckValidator,
+module.exports.changeExpiredPasswordMiddlewares = [
+  authValidator.changeExpiredPasswordValidator,
   errorMiddleware.validatorErrorHandler,
-  exports.sessionTokenCheck
+  exports.changeExpiredPassword
 ]
 
-module.exports.resetPasswordMiddlewares = [
-  exports.resetPasswordValidator,
+module.exports.sessionTokenCheckMiddlewares = [
+  authValidator.sessionTokenCheckValidator,
   errorMiddleware.validatorErrorHandler,
-  exports.resetPassword
+  exports.sessionTokenCheck
 ]

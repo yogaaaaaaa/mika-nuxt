@@ -36,7 +36,7 @@ module.exports = {
         }
       },
       async handler (ctx) {
-        let idReport = await uid.ksuid.random()
+        const idReport = await uid.ksuid.random()
 
         generate.createMerchantStaffDailyReport(ctx.params.merchantStaffId, ctx.params.options)
           .catch(err => {

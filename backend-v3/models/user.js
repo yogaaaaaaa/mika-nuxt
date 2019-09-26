@@ -1,19 +1,44 @@
 'use strict'
 
+const moment = require('moment')
 const hash = require('../libs/hash')
 
+const commonConfig = require('../configs/commonConfig')
+
 module.exports = (sequelize, DataTypes) => {
-  let user = sequelize.define('user', {
+  const user = sequelize.define('user', {
     username: DataTypes.STRING,
     password: DataTypes.STRING,
 
     secure: DataTypes.BOOLEAN,
 
+    followPasswordExpiry: DataTypes.BOOLEAN,
+    followFailedLoginLockout: DataTypes.BOOLEAN,
+
+    lastPasswords: {
+      type: DataTypes.STRING(1024),
+      get () {
+        const val = this.getDataValue('lastPasswords')
+        if (typeof val === 'string') return val.split(',')
+      },
+      set (val) {
+        if (Array.isArray(val)) {
+          this.setDataValue('lastPasswords', val.join(','))
+        } else if (typeof val === 'string') {
+          this.setDataValue('lastPasswords', val)
+        }
+      }
+    },
+
+    lastLoginAttemptAt: DataTypes.DATE,
+    lastPasswordChangeAt: DataTypes.DATE,
+    failedLoginAttempt: DataTypes.INTEGER,
+
     userType: DataTypes.CHAR(32),
     userRoles: {
       type: DataTypes.STRING,
       get () {
-        let val = this.getDataValue('userRoles')
+        const val = this.getDataValue('userRoles')
         if (typeof val === 'string') return val.split(',')
       },
       set (val) {
@@ -30,8 +55,17 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: false,
     hooks: {
       async beforeSave (user) {
-        if (user.password) {
+        if (user.changed('password')) {
+          const lastPasswordsCount = commonConfig.authLastPasswordsCount
+          let lastPasswords = user.lastPasswords
           user.password = await hash.bcryptHash(user.password)
+          if (Array.isArray(lastPasswords)) {
+            lastPasswords.push(user.password)
+            while (lastPasswords.length >= lastPasswordsCount) lastPasswords.shift()
+          } else {
+            lastPasswords = [user.password]
+          }
+          user.lastPasswords = lastPasswords
         }
       }
     }
@@ -41,8 +75,81 @@ module.exports = (sequelize, DataTypes) => {
     return hash.compareBcryptHash(this.getDataValue('password'), password)
   }
 
+  user.prototype.checkFailedLoginAttempt = function () {
+    if (!this.followFailedLoginLockout) return
+
+    const maxAttempt = parseInt(commonConfig.authMaxFailedLoginAttempt)
+    const lockSecond = commonConfig.authLockSecond
+    const endLockoutMoment = this.lastLoginAttemptAt ? moment(this.lastLoginAttemptAt).add(lockSecond, 'second') : undefined
+
+    if (this.failedLoginAttempt >= maxAttempt) {
+      if (!endLockoutMoment) return true
+      if (moment().isBefore(endLockoutMoment)) return true
+
+      this.failedLoginAttempt = 0
+    }
+  }
+
+  user.prototype.setLastLoginAttemptAt = function () {
+    this.lastLoginAttemptAt = moment().toDate()
+  }
+
+  user.prototype.setLastPasswordChangeAt = function () {
+    this.lastPasswordChangeAt = moment().toDate()
+  }
+
+  user.prototype.getPasswordExpiryMoment = function () {
+    if (!this.lastPasswordChangeAt) return
+    const passwordAgeSecond = commonConfig.authPasswordAgeSecond
+    return moment(this.lastPasswordChangeAt).add(passwordAgeSecond, 'second')
+  }
+
+  user.prototype.isPasswordExpired = function () {
+    const expiryMoment = this.getPasswordExpiryMoment()
+    if (!expiryMoment && this.followPasswordExpiry) return true
+    if (expiryMoment && moment().isAfter(expiryMoment)) return true
+  }
+
+  user.prototype.isIncludedInLastPasswords = async function (newPassword) {
+    const lastPasswords = this.lastPasswords || []
+    if (this.password) lastPasswords.push(this.password)
+    for (const lastPassword of lastPasswords) {
+      if (await hash.compareBcryptHash(lastPassword, newPassword)) return true
+    }
+  }
+
+  user.prototype.saveFailedLogin = async function (saveOptions) {
+    this.setLastLoginAttemptAt()
+    this.failedLoginAttempt++
+    return this.save(saveOptions)
+  }
+
+  user.prototype.saveSuccessLogin = async function (saveOptions) {
+    this.setLastLoginAttemptAt()
+    this.failedLoginAttempt = 0
+    return this.save(saveOptions)
+  }
+
+  user.prototype.expirePassword = function () {
+    this.lastPasswordChangeAt = null
+  }
+
+  user.prototype.unExpirePassword = function () {
+    this.lastPasswordChangeAt = new Date()
+  }
+
+  user.prototype.lockout = function () {
+    this.lastLoginAttemptAt = new Date()
+    this.failedLoginAttempt = parseInt(parseInt(commonConfig.authMaxFailedLoginAttempt))
+  }
+
+  user.prototype.unLockout = function () {
+    this.lastLoginAttemptAt = new Date()
+    this.failedLoginAttempt = 0
+  }
+
   user.addScope('excludePassword', {
-    attributes: { exclude: ['password'] }
+    attributes: { exclude: ['password', 'lastPasswords'] }
   })
 
   user.associate = (models) => {

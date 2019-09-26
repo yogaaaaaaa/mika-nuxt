@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
   const Op = Sequelize.Op
 
-  let agent = sequelize.define('agent', {
+  const agent = sequelize.define('agent', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     attributes: { exclude: ['archivedAt'] },
     include: [
       {
-        model: sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchant'),
+        model: sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchantId'),
         include: [
           sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
         ]
@@ -42,24 +42,49 @@ module.exports = (sequelize, DataTypes) => {
     ]
   }))
   agent.addScope('merchantStaff', (merchantStaffId) => ({
-    attributes: { exclude: ['archivedAt'] },
-    include: [
-      sequelize.models.outlet.scope('excludeDeletedAt', 'excludeMerchant')
-    ],
+    paranoid: false,
     where: {
       [Op.and]: [
         {
           outletId: {
             [Op.in]: Sequelize.literal(
-              query.get('sub/getOutletByMerchantStaff.sql', [ sequelize.escape(merchantStaffId) ])
+              query.get('sub/getOutletByMerchantStaff.sql', [sequelize.escape(merchantStaffId)])
             )
           }
         }
       ]
-    }
+    },
+    include: [
+      {
+        model: sequelize.models.outlet.scope('excludeMerchantId'),
+        paranoid: false
+      }
+    ]
   }))
+
+  agent.addScope('acquirerStaff', (acquirerCompanyId) => ({
+    paranoid: false,
+    where: {
+      [Op.and]: [
+        {
+          outletId: {
+            [Op.in]: Sequelize.literal(
+              query.get('sub/getOutletByAcquirerCompany.sql', [sequelize.escape(acquirerCompanyId)])
+            )
+          }
+        }
+      ]
+    },
+    include: [
+      {
+        model: sequelize.models.outlet,
+        paranoid: false
+      }
+    ]
+  }))
+
   agent.addScope('agentAcquirer', (acquirerId) => {
-    let whereAcquirer = {
+    const whereAcquirer = {
       acquirerConfigId: {
         [Op.not]: null
       }
@@ -78,15 +103,20 @@ module.exports = (sequelize, DataTypes) => {
               required: true,
               include: [
                 {
-                  where: whereAcquirer,
                   model: sequelize.models.acquirer.scope(
                     { method: ['agentExclusion', '`agent`.`id`'] },
-                    'excludeTimestamp',
                     'excludeShare'
                   ),
+                  where: whereAcquirer,
                   include: [
-                    sequelize.models.acquirerType.scope('excludeTimestamp'),
-                    sequelize.models.acquirerConfig.scope('excludeTimestamp', 'excludeConfig')
+                    {
+                      model: sequelize.models.acquirerType,
+                      required: true
+                    },
+                    {
+                      model: sequelize.models.acquirerConfig.scope('excludeConfig'),
+                      required: true
+                    }
                   ]
                 }
               ]
@@ -96,33 +126,9 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   })
-  agent.addScope('trxManager', (acquirerId) => ({
-    include: [
-      {
-        model: sequelize.models.outlet,
-        required: true,
-        include: [
-          {
-            model: sequelize.models.merchant,
-            required: true,
-            include: [
-              {
-                model: sequelize.models.acquirer.scope(
-                  'acquirerType',
-                  'acquirerConfig',
-                  { method: ['agentExclusion', '`agent`.`id`'] }
-                ),
-                where: acquirerId ? { id: acquirerId } : undefined,
-                required: false
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }))
+
   agent.addScope('partner', (partnerId, merchantId) => {
-    let whereMerchant = {}
+    const whereMerchant = {}
 
     if (partnerId) {
       whereMerchant.partnerId = partnerId
@@ -168,10 +174,13 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   }))
+
   agent.addScope('admin', () => ({
+    paranoid: false,
     include: [
       {
         model: sequelize.models.outlet,
+        paranoid: false,
         attributes: [
           'id',
           'name',
@@ -180,6 +189,12 @@ module.exports = (sequelize, DataTypes) => {
         ]
       },
       sequelize.models.user.scope('excludePassword')
+    ]
+  }))
+  agent.addScope('adminUpdate', () => ({
+    paranoid: false,
+    include: [
+      sequelize.models.user
     ]
   }))
 

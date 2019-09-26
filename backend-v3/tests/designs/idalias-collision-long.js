@@ -7,8 +7,8 @@
 const uid = require('../../libs/uid')
 
 function generateTransactionIdLongAlias (name) {
-  let ksuid = uid.ksuid.randomSync()
-  let part = uid.base32CrfEncode(ksuid.raw).substring(0, 18).match(/.{1,6}/g)
+  const ksuid = uid.ksuid.randomSync()
+  const part = uid.base32CrfEncode(ksuid.raw).substring(0, 18).match(/.{1,6}/g)
   return {
     id: ksuid.string,
     idAlias: `${name}-${part[0]}-${part[1]}-${part[2]}`
@@ -18,9 +18,9 @@ function generateTransactionIdLongAlias (name) {
 let idGenerated = 0
 let idGeneratedCollision = 0
 
-let idObject = new Map()
+const idObject = new Map()
 
-let startTime = Date.now()
+const startTime = Date.now()
 let currentTime = 0
 let lastCurrentTime = startTime
 
@@ -36,7 +36,7 @@ function display () {
 }
 
 while (true) {
-  let currentIdObject = generateTransactionIdLongAlias('mika')
+  const currentIdObject = generateTransactionIdLongAlias('mika')
   if (idObject.get(currentIdObject.idAlias)) idGeneratedCollision++
   idObject.set(currentIdObject.idAlias, currentIdObject.idAlias)
   idGenerated++

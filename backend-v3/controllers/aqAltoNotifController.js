@@ -10,7 +10,7 @@ const trxManager = require('../libs/trxManager')
 module.exports.altoHandleNotification = [
   async (req, res, next) => {
     try {
-      let data = JSON.parse(req.body.data)
+      const data = JSON.parse(req.body.data)
 
       const transaction = await models.transaction.scope('transactionExtraKv').findOne({
         where: {
@@ -18,11 +18,11 @@ module.exports.altoHandleNotification = [
           referenceNumber: data.trade_no,
           amount: data.amount
         },
-        include: [ models.acquirer.scope('acquirerConfig') ]
+        include: [models.acquirer.scope('acquirerConfig')]
       })
       if (!transaction) next()
 
-      let altoConfig = alto.mixConfig(transaction.acquirer.acquirerConfig)
+      const altoConfig = alto.mixConfig(transaction.acquirer.acquirerConfig)
 
       if (!alto.altoVerifyContainer(altoConfig.altoPemAltoPublicKey, req.body)) next()
       if (altoConfig.mch_id !== data.mch_id) next()
@@ -43,7 +43,7 @@ module.exports.altoHandleNotification = [
           transaction.status === trxManager.transactionStatuses.EXPIRED
         ) {
           // Invalid transaction, we need to refund
-          let response = await alto.altoRefundPayment(Object.assign({
+          const response = await alto.altoRefundPayment(Object.assign({
             out_trade_no: data.out_trade_no,
             out_refund_no: `ref${data.out_trade_no}`,
             refund_amount: parseInt(data.amount),
@@ -59,7 +59,7 @@ module.exports.altoHandleNotification = [
         // TODO: What to handle when refund is failed, try refunding ?
         // Possible solution is to try refunding with different id
         await models.sequelize.transaction(async t => {
-          let transactionExtra = transaction.extra
+          const transactionExtra = transaction.extra
           transactionExtra.out_refund_no = data.out_refund_no
           await models.transactionExtraKv.setKv(transaction.id, transactionExtra, t)
           transaction.changed('updatedAt', true)

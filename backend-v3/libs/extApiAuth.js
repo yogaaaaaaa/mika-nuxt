@@ -16,7 +16,7 @@ const extApiConfig = require('../configs/extApiConfig')
 
 async function getApiKey (idKey) {
   let apiKey = null
-  let redisKeyName = `extApiAuth:${idKey}`
+  const redisKeyName = `extApiAuth:${idKey}`
 
   try {
     apiKey = JSON.parse(await redis.get(redisKeyName))
@@ -61,7 +61,7 @@ module.exports.createKey = async (partnerId) => {
 }
 
 module.exports.createServerToken = async (idKey, payload) => {
-  let tokenPayload = {
+  const tokenPayload = {
     keyId: idKey,
     payloadSHA256: crypto.createHash('sha256').update(payload).digest('hex')
   }
@@ -81,12 +81,12 @@ module.exports.createClientToken = async (idKey, secretKey, sharedKey) => {
 
 module.exports.verifyClientToken = async (tokenString) => {
   try {
-    let tokenPayload = jwt.decode(tokenString)
+    const tokenPayload = jwt.decode(tokenString)
 
     if (!tokenPayload.iat) return
     if (Math.abs((new Date().getTime()) - (tokenPayload.iat * 1000)) > extApiConfig.tokenTimeout) return
 
-    let apiKey = await getApiKey(tokenPayload.keyId)
+    const apiKey = await getApiKey(tokenPayload.keyId)
 
     if (!apiKey) return
     if (!hash.compareHash(apiKey.secretKey, tokenPayload.keySecret)) return

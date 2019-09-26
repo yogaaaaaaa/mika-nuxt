@@ -13,7 +13,7 @@ const terminalValidator = require('../validators/terminalValidator')
  * Generate terminal key (cipherbox key) for certain terminal
  */
 module.exports.generateTerminalCbKey = async (req, res, next) => {
-  let cb3Key = await cipherbox.generateCb3Key()
+  const cb3Key = await cipherbox.generateCb3Key()
 
   await models.sequelize.transaction(async t => {
     await models.cipherboxKey.destroy({
@@ -53,7 +53,7 @@ module.exports.createTerminal = async (req, res, next) => {
 
 module.exports.getTerminals = async (req, res, next) => {
   let scopedTerminal = req.applySequelizeCommonScope(models.terminal.scope('admin'))
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.terminalId) {
     query.where.id = req.params.terminalId
@@ -69,7 +69,7 @@ module.exports.getTerminals = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let terminals = await scopedTerminal.findAndCountAll(query)
+      const terminals = await scopedTerminal.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         terminals.rows,
@@ -87,7 +87,7 @@ module.exports.getTerminals = async (req, res, next) => {
 }
 
 module.exports.updateTerminal = async (req, res, next) => {
-  let scopedTerminal = models.terminal.scope('admin', 'paranoid')
+  const scopedTerminal = models.terminal.scope('paranoid')
   let terminal
 
   let updated = false
@@ -122,7 +122,7 @@ module.exports.updateTerminal = async (req, res, next) => {
 }
 
 module.exports.deleteTerminal = async (req, res, next) => {
-  let scopedTerminal = models.terminal.scope('paranoid')
+  const scopedTerminal = models.terminal.scope('paranoid')
   let terminal
 
   await models.sequelize.transaction(async t => {

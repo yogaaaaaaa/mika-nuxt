@@ -3,23 +3,25 @@
 const uid = require('./uid')
 
 module.exports.transactions = async (
-  agentIds,
-  acquirerIds,
-  dateStart,
-  dateEnd,
-  count = 100,
-  amountMin = 100,
-  amountMax = 5000000,
-  statuses = ['success', 'failed']
+  {
+    agentIds,
+    acquirerIds,
+    dateStart,
+    dateEnd,
+    count = 100,
+    amountMin = 100,
+    amountMax = 5000000,
+    statuses = ['success', 'failed']
+  } = {}
 ) => {
-  let result = []
+  const result = []
 
-  let timestampDiff = dateEnd.getTime() - dateStart.getTime()
+  const timestampDiff = dateEnd.getTime() - dateStart.getTime()
 
   while (count) {
-    let genId = await uid.generateTransactionId()
-    let createdAtTimestamp = Math.round(dateStart.getTime() + (Math.random() * timestampDiff))
-    let updatedAtTimestamp = Math.round(createdAtTimestamp + (Math.random() * (200 * 1000)))
+    const genId = await uid.generateTransactionId()
+    const createdAtTimestamp = Math.round(dateStart.getTime() + (Math.random() * timestampDiff))
+    const updatedAtTimestamp = Math.round(createdAtTimestamp + (Math.random() * (200 * 1000)))
 
     result.push({
       id: genId.id,

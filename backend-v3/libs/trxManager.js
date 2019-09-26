@@ -10,6 +10,7 @@ const path = require('path')
 
 const EventEmitter2 = require('eventemitter2').EventEmitter2
 
+const err = require('./err')
 const models = require('../models')
 const Sequelize = models.Sequelize
 const Op = Sequelize.Op
@@ -18,18 +19,17 @@ const dTimer = require('./dTimer')
 const events = new EventEmitter2()
 
 const config = require('../configs/trxManagerConfig')
-const types = require('./types/trxManagerTypes')
+const constants = require('./constants/trxManager')
 
-module.exports.types = types
-module.exports.transactionStatuses = types.transactionStatuses
-module.exports.transactionSettlementStatuses = types.transactionSettlementStatuses
-module.exports.tokenTypes = types.tokenTypes
-module.exports.userTokenTypes = types.userTokenTypes
-module.exports.transactionFlags = types.transactionFlags
-module.exports.transactionFlows = types.transactionFlows
-module.exports.eventTypes = types.eventTypes
+module.exports.transactionStatuses = constants.transactionStatuses
+module.exports.transactionSettlementStatuses = constants.transactionSettlementStatuses
+module.exports.tokenTypes = constants.tokenTypes
+module.exports.userTokenTypes = constants.userTokenTypes
+module.exports.transactionFlags = constants.transactionFlags
+module.exports.transactionFlows = constants.transactionFlows
+module.exports.eventTypes = constants.eventTypes
 
-module.exports.errorTypes = types.errorTypes
+module.exports.errorTypes = constants.errorTypes
 
 module.exports.config = config
 
@@ -41,11 +41,8 @@ const transactionEventId = (transactionId) => `trx-${transactionId}`
 /**
  * Create trxManager style error
  */
-module.exports.error = (name, message) => {
-  let error = Error(message)
-  error.name = name || exports.errorTypes.JUST_ERROR
-  return error
-}
+module.exports.error = (name, message) =>
+  err.createError(name || exports.errorTypes.JUST_ERROR, message)
 
 /**
  * Array containing acquirer handler
@@ -59,7 +56,7 @@ module.exports.acquirerHandlers = []
 module.exports.findAcquirerHandler = (name) => {
   name = name.toLowerCase()
   name = name.replace(' ', '_')
-  for (let pp of exports.acquirerHandlers) {
+  for (const pp of exports.acquirerHandlers) {
     if (pp.name === name) {
       return pp
     }
@@ -84,7 +81,7 @@ module.exports.formatAcquirerInfo = (acquirerHandler) => {
  * by its handler name
  */
 module.exports.getAcquirerInfo = (handlerName) => {
-  let acquirerHandler = exports.findAcquirerHandler(handlerName)
+  const acquirerHandler = exports.findAcquirerHandler(handlerName)
   if (acquirerHandler) return exports.formatAcquirerInfo(acquirerHandler)
 }
 
@@ -118,7 +115,7 @@ module.exports.listenStatusChange = (handler) => {
  * (include agent, merchant, acquirer, and its handler)
  */
 module.exports.buildTransactionCtx = async (transaction, options = {}) => {
-  let ctx = {
+  const ctx = {
     transaction,
     transactionRefunds: [],
     acquirer: null,
@@ -136,7 +133,7 @@ module.exports.buildTransactionCtx = async (transaction, options = {}) => {
   )
 
   if (options.transactionId) {
-    let whereTransaction = {
+    const whereTransaction = {
       id: options.transactionId
     }
     if (Array.isArray(options.transactionStatuses)) {
@@ -149,44 +146,92 @@ module.exports.buildTransactionCtx = async (transaction, options = {}) => {
     }
     await models.sequelize.transaction(async t => {
       ctx.transaction = await models.transaction
-        .scope('trxManager')
+        .scope('totalRefundAmount')
         .findOne({
-          where: whereTransaction
-        }, { transaction: t })
+          where: whereTransaction,
+          transaction: t
+        })
 
       if (!ctx.transaction) throw exports.error(exports.errorTypes.INVALID_TRANSACTION)
       if (!ctx.transaction.agentId || !ctx.transaction.acquirerId) throw exports.error(exports.errorTypes.INVALID_TRANSACTION)
 
       ctx.agent = await models.agent
-        .scope({
+        .findOne({
+          where: {
+            id: ctx.transaction.agentId
+          },
           include: [
             {
               model: models.outlet,
+              required: true,
               include: [
-                models.merchant
+                {
+                  model: models.merchant,
+                  required: true
+                }
               ]
             }
-          ]
+          ],
+          transaction: t
         })
-        .findByPk(ctx.transaction.agentId, { transaction: t })
+      if (!ctx.agent) throw exports.error(exports.errorTypes.INVALID_TRANSACTION)
 
       ctx.acquirer = await models.acquirer
-        .scope(
-          'acquirerType',
-          'acquirerConfig'
-        )
-        .findByPk(ctx.transaction.acquirerId, { transaction: t })
+        .findOne({
+          where: {
+            id: ctx.transaction.acquirerId
+          },
+          include: [
+            {
+              model: models.acquirerType,
+              required: true
+            },
+            {
+              model: models.acquirerConfig.scope('acquirerConfigKv'),
+              required: true
+            }
+          ],
+          transaction: t
+        })
+      if (!ctx.acquirer) throw exports.error(exports.errorTypes.INVALID_TRANSACTION)
 
       ctx.transactionRefunds = await models.transactionRefund
         .findAll({ where: { transactionId: ctx.transaction.id }, transaction: t })
     })
   } else {
-    ctx.agent = await models.agent.scope(
-      { method: ['trxManager', ctx.transaction.acquirerId] }
-    ).findByPk(ctx.transaction.agentId)
+    ctx.agent = await models.agent
+      .findOne({
+        where: {
+          id: ctx.transaction.agentId
+        },
+        include: [
+          {
+            model: models.outlet,
+            required: true,
+            include: [
+              {
+                model: models.merchant,
+                required: true,
+                include: [
+                  {
+                    model: models.acquirer.scope({ method: ['agentExclusion', '`agent`.`id`'] }),
+                    required: false,
+                    where: {
+                      id: ctx.transaction.acquirerId
+                    },
+                    include: [
+                      { model: models.acquirerType, required: true },
+                      { model: models.acquirerConfig.scope('acquirerConfigKv'), required: true }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
 
     if (!ctx.agent) throw exports.error(exports.errorTypes.INVALID_AGENT)
-
     if (!ctx.agent.outlet.merchant.acquirers.length) throw exports.error(exports.errorTypes.INVALID_ACQUIRER)
     ctx.acquirer = ctx.agent.outlet.merchant.acquirers[0]
   }
@@ -196,6 +241,10 @@ module.exports.buildTransactionCtx = async (transaction, options = {}) => {
   ctx.acquirerHandler = exports.findAcquirerHandler(ctx.acquirer.acquirerConfig.handler)
   if (!ctx.acquirerHandler) throw exports.error(exports.errorTypes.INVALID_ACQUIRER_HANDLER)
 
+  if (!ctx.acquirerHandler.classes.includes(ctx.acquirer.acquirerType.class)) {
+    throw exports.error(exports.errorTypes.INVALID_ACQUIRER_HANDLER)
+  }
+
   return ctx
 }
 
@@ -204,7 +253,7 @@ module.exports.buildTransactionCtx = async (transaction, options = {}) => {
  * acquirer handler according to acquirerConfig.
  */
 module.exports.create = async (transaction, options) => {
-  let ctx = Object.assign(
+  const ctx = Object.assign(
     await exports.buildTransactionCtx(transaction),
     {
       redirectTo: null,
@@ -257,14 +306,17 @@ module.exports.create = async (transaction, options) => {
     }
   }
 
-  let genId = await uid.generateTransactionId()
+  const genId = await uid.generateTransactionId()
   ctx.transaction.id = genId.id
   ctx.transaction.idAlias = genId.idAlias
   ctx.transaction.status = exports.transactionStatuses.CREATED
+  ctx.transaction.processFee = ctx.acquirer.processFee
+  ctx.transaction.shareAcquirer = ctx.acquirer.shareAcquirer
+  ctx.transaction.shareMerchant = ctx.acquirer.shareMerchant
   ctx.transaction = models.transaction.build(ctx.transaction)
 
   if (typeof ctx.acquirerHandler.handler === 'function') {
-    let handlerResult = await ctx.acquirerHandler.handler(ctx)
+    const handlerResult = await ctx.acquirerHandler.handler(ctx)
     if (handlerResult) trxCreateResult = handlerResult // override trxCreateResult, if any
   }
 
@@ -319,7 +371,7 @@ module.exports.create = async (transaction, options) => {
  * acquirer cancelHandler if exist
  */
 module.exports.cancel = async (transactionId) => {
-  let ctx = await exports.buildTransactionCtx(null, {
+  const ctx = await exports.buildTransactionCtx(null, {
     transactionId,
     transactionStatuses: [
       exports.transactionStatuses.CREATED
@@ -334,7 +386,7 @@ module.exports.cancel = async (transactionId) => {
 
   await ctx.transaction.save()
 
-  let trxCancelResult = {
+  const trxCancelResult = {
     transactionId: ctx.transaction.id,
     agentId: ctx.transaction.agentId,
     acquirerId: ctx.transaction.acquirerId,
@@ -352,7 +404,7 @@ module.exports.cancel = async (transactionId) => {
  * acquirer voidHandler
  */
 module.exports.void = async (transactionId) => {
-  let ctx = await exports.buildTransactionCtx(null, {
+  const ctx = await exports.buildTransactionCtx(null, {
     transactionId,
     transactionStatuses: [
       exports.transactionStatuses.SUCCESS
@@ -369,7 +421,7 @@ module.exports.void = async (transactionId) => {
 
   await ctx.transaction.save()
 
-  let trxVoidResult = {
+  const trxVoidResult = {
     transactionId: ctx.transaction.id,
     agentId: ctx.transaction.agentId,
     acquirerId: ctx.transaction.acquirerId,
@@ -388,7 +440,7 @@ module.exports.void = async (transactionId) => {
  * acquirer refundHandler
  */
 module.exports.refund = async (transactionRefund, options) => {
-  let ctx = Object.assign(
+  const ctx = Object.assign(
     await exports.buildTransactionCtx(null, {
       transactionId: transactionRefund.transactionId,
       transactionStatuses: [
@@ -448,7 +500,7 @@ module.exports.refund = async (transactionRefund, options) => {
     await ctx.transactionRefund.reload({ transaction: t })
   })
 
-  let trxRefundResult = {
+  const trxRefundResult = {
     transactionId: ctx.transaction.id,
     agentId: ctx.transaction.agentId,
     acquirerId: ctx.transaction.acquirerId,
@@ -474,7 +526,7 @@ module.exports.followUp = async (transaction, options = {}) => {
  */
 module.exports.forceStatus = async (transactionId, transactionStatus, agentId) => {
   if (transactionStatus) {
-    let whereTransaction = {
+    const whereTransaction = {
       id: transactionId
     }
     if (agentId) {
@@ -500,7 +552,7 @@ module.exports.forceStatus = async (transactionId, transactionStatus, agentId) =
  * acquirer forceUpdateHandler to check if acquirer host is able to update the transaction
  */
 module.exports.forceStatusUpdate = async (transactionId, newTransactionStatus, options) => {
-  let ctx = await exports.buildTransactionCtx(null, {
+  const ctx = await exports.buildTransactionCtx(null, {
     transactionId: transactionId,
     agentId: options.agentId
   })
@@ -531,7 +583,7 @@ module.exports.forceStatusUpdate = async (transactionId, newTransactionStatus, o
     })
   }
 
-  let trxForceUpdateResult = {
+  const trxForceUpdateResult = {
     transactionId: ctx.transaction.id,
     oldTransactionStatus: ctx.oldTransactionStatus,
     transactionStatus: ctx.newTransactionStatus,
@@ -548,7 +600,7 @@ module.exports.forceStatusUpdate = async (transactionId, newTransactionStatus, o
 dTimer.handleEvent(async (event) => {
   try {
     if (event.event === exports.eventTypes.TRANSACTION_EXPIRY) {
-      let ctx = await exports.buildTransactionCtx(null, { transactionId: event.transactionId })
+      const ctx = await exports.buildTransactionCtx(null, { transactionId: event.transactionId })
 
       if (ctx.transaction.status === exports.transactionStatuses.CREATED) {
         ctx.transaction.status = exports.transactionStatuses.EXPIRED

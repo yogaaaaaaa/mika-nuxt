@@ -34,7 +34,7 @@ module.exports.createAcquirerConfig = async (req, res, next) => {
 
 module.exports.getAcquirerConfigs = async (req, res, next) => {
   let scopedAcquirerConfig = req.applySequelizeCommonScope(models.acquirerConfig.scope('admin'))
-  let query = { where: {} }
+  const query = { where: {} }
 
   if (req.params.acquirerConfigId) {
     query.where.id = req.params.acquirerConfigId
@@ -50,7 +50,7 @@ module.exports.getAcquirerConfigs = async (req, res, next) => {
         )
       )
     if (req.query.get_count) {
-      let acquirerConfigs = await scopedAcquirerConfig.findAndCountAll(query)
+      const acquirerConfigs = await scopedAcquirerConfig.findAndCountAll(query)
       msg.expressGetEntityResponse(
         res,
         acquirerConfigs.rows,
@@ -68,7 +68,7 @@ module.exports.getAcquirerConfigs = async (req, res, next) => {
 }
 
 module.exports.updateAcquirerConfig = async (req, res, next) => {
-  let scopedAcquirerConfig = models.acquirerConfig.scope('paranoid')
+  const scopedAcquirerConfig = models.acquirerConfig.scope('paranoid')
   let acquirerConfig
 
   let updated = false
@@ -110,7 +110,7 @@ module.exports.updateAcquirerConfig = async (req, res, next) => {
 }
 
 module.exports.deleteAcquirerConfig = async (req, res, next) => {
-  let scopedAcquirerConfig = models.acquirerConfig.scope('paranoid')
+  const scopedAcquirerConfig = models.acquirerConfig.scope('paranoid')
   let acquirerConfig
 
   await models.sequelize.transaction(async t => {
