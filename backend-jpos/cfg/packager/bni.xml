@@ -74,6 +74,11 @@
       name="Point Of Service Entry Mode, PAN and PIN entry capbility"
       class="org.jpos.iso.IFB_NUMERIC"/>
   <isofield
+      id="23"
+      length="3"
+      name="Card Sequence Number"
+      class="org.jpos.iso.IFB_NUMERIC"/>
+  <isofield
       id="24"
       length="3"
       pad="true"
@@ -88,8 +93,9 @@
   <isofield
       id="35"
       length="37"
+      pad="false"
       name="Track 2 Data"
-      class="org.jpos.iso.IFB_LLBINARY"/>
+      class="org.jpos.iso.IFB_LLNUM"/>
   <isofield
       id="37"
       length="12"
@@ -138,17 +144,17 @@
       id="61"
       length="999"
       name="Private Use 1"
-      class="org.jpos.iso.IFB_LLLCHAR"/>
+      class="org.jpos.iso.IFB_LLLBINARY"/>
   <isofield
       id="62"
       length="999"
       name="Private Use 2"
-      class="org.jpos.iso.IFB_LLLCHAR"/>
+      class="org.jpos.iso.IFB_LLLBINARY"/>
   <isofield
       id="63"
       length="999"
       name="Private Use 3"
-      class="org.jpos.iso.IFB_LLLCHAR"/>
+      class="org.jpos.iso.IFB_LLLBINARY"/>
   <isofield
       id="64"
       length="8"

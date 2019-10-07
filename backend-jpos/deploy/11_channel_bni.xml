@@ -2,9 +2,20 @@
 
 <channel-adaptor name='bni-channel' class="org.jpos.q2.iso.ChannelAdaptor" logger="Q2">
     <channel class="org.jpos.iso.channel.PostChannel" packager="org.jpos.iso.packager.GenericPackager">
+        <!--
         <property name="host" value="10.44.65.87" />
         <property name="port" value="2010" />
-        <property name="packager-config" value="cfg/packager/bni.xml" /> 
+        -->
+                
+        <!--
+        <property name="host" value="10.8.0.250" />
+        <property name="port" value="2010" />
+        -->
+        
+        <property name="host" value="10.20.0.250" />
+        <property name="port" value="2010" />
+
+        <property name="packager-config" value="cfg/packager/iso87binaryBNI.xml" /> 
         <property name="override-header" value="true" />
     </channel>
     <in>bni-send</in>
