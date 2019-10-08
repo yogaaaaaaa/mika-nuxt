@@ -9,9 +9,9 @@ data class MerchantTransactionStatistic(
     val acquirer: AcquirerStatData,
     @SerializedName("acquirerId")
     val acquirerId: String,
-    @SerializedName("amount")
+    @SerializedName("totalAmount")
     val amount: BigDecimal,
-    @SerializedName("nettAmount")
+    @SerializedName("totalNettAmount")
     val nettAmount: Double,
     @SerializedName("transactionCount")
     val transactionCount: Int

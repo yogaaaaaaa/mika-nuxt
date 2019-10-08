@@ -140,7 +140,7 @@ public class BytesUtil {
             hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
             //图像数据转换，使用了矩阵转换
             BitMatrix bitMatrix = new QRCodeWriter().encode(data, BarcodeFormat.QR_CODE, size, size, hints);
-            //System.out.println("bitmatrix height:" + bitMatrix.getHeight() + " width:" + bitMatrix.getWidth());
+            //System.out.bitmap("bitmatrix height:" + bitMatrix.getHeight() + " width:" + bitMatrix.getWidth());
             return getBytesFromBitMatrix(bitMatrix);
         } catch (WriterException e) {
             e.printStackTrace();

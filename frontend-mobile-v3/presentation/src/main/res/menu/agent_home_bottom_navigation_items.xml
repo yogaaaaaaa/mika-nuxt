@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_charge"
+        android:icon="@drawable/pembayaran_bottom_navigation_icon"
+        android:title="@string/title_charge" />
+
+    <item
+        android:id="@+id/navigation_transaction"
+        android:icon="@drawable/transaksi_bottom_navigation_icon"
+        android:title="@string/title_transaction" />
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/profil_bottom_navigation_icon"
+        android:title="@string/title_profile" />
+
+</menu>

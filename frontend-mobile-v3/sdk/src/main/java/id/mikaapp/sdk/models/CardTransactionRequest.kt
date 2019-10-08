@@ -17,3 +17,14 @@ data class CardTransactionRequest(
     @SerializedName("userToken")
     val userToken: UserToken
 )
+
+data class CardTransactionRequestWithoutLocation(
+    @SerializedName("acquirerId")
+    val acquirerId: String,
+    @SerializedName("amount")
+    val amount: Int,
+    @SerializedName("flags")
+    val flags: List<Any>,
+    @SerializedName("userToken")
+    val userToken: UserToken
+)

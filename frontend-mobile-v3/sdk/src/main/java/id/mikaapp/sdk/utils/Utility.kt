@@ -49,8 +49,10 @@ internal interface IUtility {
      * Start MIKA SDK MQTT Service
      */
     fun startMqttService(
-        brokerDetail: BrokerDetail,
-        serviceConnection: ServiceConnection
+            useWebSocket: Boolean = true,
+            keepAliveInterval: Int = 60,
+            brokerDetail: BrokerDetail,
+            serviceConnection: ServiceConnection
     )
 }
 
@@ -98,7 +100,7 @@ internal class Utility(var context: Context) : IUtility {
         try {
             val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             if (connManager.activeNetworkInfo != null && connManager.activeNetworkInfo
-                    .isAvailable && connManager.activeNetworkInfo.isConnected
+                            .isAvailable && connManager.activeNetworkInfo.isConnected
             ) {
                 return true
             }
@@ -126,20 +128,24 @@ internal class Utility(var context: Context) : IUtility {
      * Start MIKA SDK MQTT Service
      */
     override fun startMqttService(
-        brokerDetail: BrokerDetail,
-        serviceConnection: ServiceConnection
+            useWebSocket: Boolean,
+            keepAliveInterval: Int,
+            brokerDetail: BrokerDetail,
+            serviceConnection: ServiceConnection
     ) {
 
         val startServiceIntent = Intent(context, MikaMqttService::class.java)
         context.bindService(startServiceIntent, serviceConnection, 0)
         startServiceIntent.action = MikaMqttService.MQTT_CONNECT
         startServiceIntent.putExtra(MikaMqttService.MQTT_SERVER_URL, brokerDetail.brokerUrl)
+        startServiceIntent.putExtra(MikaMqttService.MQTT_SERVER_ALT_URL, brokerDetail.brokerUrlAlt)
         startServiceIntent.putExtra(MikaMqttService.MQTT_CLIENT_ID, brokerDetail.clientId)
         startServiceIntent.putExtra(MikaMqttService.MQTT_CLIENT_USERNAME, brokerDetail.user)
         startServiceIntent.putExtra(MikaMqttService.MQTT_CLIENT_PASSWORD, brokerDetail.password)
         startServiceIntent.putExtra(MikaMqttService.MQTT_CLIENT_TOPIC, brokerDetail.clientTopic)
         startServiceIntent.putExtra(MikaMqttService.MQTT_CLEAN_SESSION, brokerDetail.cleanSession)
-
+        startServiceIntent.putExtra(MikaMqttService.MQTT_KEEP_ALIVE_INTERVAL, keepAliveInterval)
+        startServiceIntent.putExtra(MikaMqttService.MQTT_USE_WEB_SOCKET, useWebSocket)
         context.startService(startServiceIntent)
     }
 }

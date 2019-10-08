@@ -3,20 +3,22 @@ package id.mikaapp.sdk.models
 import com.google.gson.annotations.SerializedName
 
 data class BrokerDetail(
-    @SerializedName("broadcastTopic")
+        @SerializedName("broadcastTopic")
     var broadcastTopic: String,
-    @SerializedName("brokerUrl")
+        @SerializedName("brokerUrl")
     var brokerUrl: String,
-    @SerializedName("cleanSession")
+        @SerializedName("brokerUrlAlt")
+        var brokerUrlAlt: String?,
+        @SerializedName("cleanSession")
     var cleanSession: Boolean,
-    @SerializedName("clientId")
+        @SerializedName("clientId")
     var clientId: String,
-    @SerializedName("clientTopic")
+        @SerializedName("clientTopic")
     var clientTopic: String,
-    @SerializedName("password")
+        @SerializedName("password")
     var password: String,
-    @SerializedName("serverTopic")
+        @SerializedName("serverTopic")
     var serverTopic: String,
-    @SerializedName("user")
+        @SerializedName("user")
     var user: String
 )

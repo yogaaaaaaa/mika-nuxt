@@ -1,234 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" xmlns:tools="http://schemas.android.com/tools">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBar"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/qrPaymentToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:weightSum="1"
+        app:contentInsetStart="@null"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            app:elevation="@null">
-
-        <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_qr_payment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:weightSum="1"
-                app:contentInsetStart="@null"
-                app:elevation="@null">
+            android:layout_height="match_parent">
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_gravity="start|center_vertical"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="15dp"
-                    android:text="@string/title_qr"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp"/>
-
-            <!--<ImageView-->
-            <!--android:id="@+id/img_refresh"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:src="@drawable/ic_refresh_white_24px"-->
-            <!--android:layout_gravity="end|center_vertical"-->
-            <!--android:layout_marginEnd="15dp"/>-->
-
-        </androidx.appcompat.widget.Toolbar>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/appBar"
-            android:background="@color/qrBackground">
-
-        <TextView
-                android:id="@+id/text_date"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_big"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
-
-        <TextView
-                android:id="@+id/text_outlet_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_large"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_date"/>
-
-        <ProgressBar
-                android:id="@+id/progressBar_timer"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/circle_shape"
-                android:indeterminate="false"
-                android:max="100"
-                android:progressDrawable="@drawable/circular_progress_bar"
-                app:layout_constraintBottom_toTopOf="@id/img_qrcode"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/text_outlet_name"
-                app:layout_constraintTop_toTopOf="parent"/>
-
-        <TextView
-                android:id="@+id/text_timer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/custom_family"
-                android:textColor="@color/colorPrimary"
-                android:textSize="@dimen/font_size_reguler"
-                app:layout_constraintBottom_toBottomOf="@id/progressBar_timer"
-                app:layout_constraintEnd_toEndOf="@id/progressBar_timer"
-                app:layout_constraintStart_toStartOf="@id/progressBar_timer"
-                app:layout_constraintTop_toTopOf="@id/progressBar_timer"/>
-
-        <ImageView
-                android:id="@+id/img_qrcode"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_marginTop="20dp"
-                android:scaleType="fitXY"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_outlet_name"
-                android:contentDescription="@string/content_desc_qrCode"/>
-
-        <TextView
-                android:id="@+id/text_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:textColor="@color/colorPrimary"
-                android:textSize="@dimen/font_size_very_large"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/img_qrcode"/>
-
-        <TextView
-                android:id="@+id/text_acquirer_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_big"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_amount"/>
-
-        <TextView
-                android:id="@+id/text_notes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="72dp"
                 android:gravity="center"
-                android:text="@string/please_scan"
-                android:textColor="@color/lightGrey"
-                android:textSize="@dimen/font_size_big"
+                android:text="Scan QR"
+                android:textAlignment="center"
+                android:textColor="#FFF"
+                android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_acquirer_name"/>
+                tools:ignore="HardcodedText"
+                tools:layout_marginStart="72dp" />
 
-        <LinearLayout
-                android:id="@+id/llAcquirer"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/qrPaymentUpdateStatus"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/text_notes">
-
-            <Button
-                    android:id="@+id/btn_choose_acquirer"
-                    style="@style/BaseButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="8dp"
-                    android:text="@string/choose_other_payment"
-                    android:textSize="12sp"/>
-
-            <LinearLayout
-                    android:id="@+id/btn_camera"
-                    style="@style/BaseButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_chainStyle="spread"
-                    app:layout_constraintStart_toEndOf="@id/btn_choose_acquirer"
-                    app:layout_constraintTop_toBottomOf="@id/text_notes">
-
-                <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:src="@drawable/ic_scanner"/>
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/choose_camera"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/font_size_small"/>
-            </LinearLayout>
-
-            <!--<Button-->
-            <!--android:id="@+id/btn_camera"-->
-            <!--style="@style/BaseButton"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:drawableStart="@drawable/ic_scanner"-->
-            <!--android:paddingStart="@dimen/_35sdp"-->
-            <!--android:gravity="center"-->
-            <!--android:paddingEnd="@dimen/_20sdp"-->
-            <!--android:text="@string/choose_camera"-->
-            <!--android:textSize="12sp" />-->
-
-        </LinearLayout>
-        <Button
-                android:visibility="gone"
-                tools:visibility="visible"
-                android:id="@+id/buttonChangeStatusSuccess"
-                style="@style/BaseButton"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toTopOf="@id/buttonChangeStatusFailed"
-                app:layout_constraintTop_toBottomOf="@id/llAcquirer"
-                android:text="Change Status Success"
-                android:textSize="12sp"/>
-
-        <Button
-                android:visibility="gone"
-                tools:visibility="visible"
-                android:id="@+id/buttonChangeStatusFailed"
-                style="@style/BaseButton"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_refresh_white_24px"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/buttonChangeStatusSuccess"
-                android:text="Change Status Failed"
-                android:textSize="12sp"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.appcompat.widget.Toolbar>
 
-</RelativeLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background_scan"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/qrPaymentToolbar" />
+
+    <TextView
+        android:id="@+id/qrPaymentDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:paddingTop="16dp"
+        android:textColor="#fff"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/qrPaymentToolbar"
+        tools:text="12 Mei 2019" />
+
+    <TextView
+        android:id="@+id/qrPaymentMerchantName"
+        android:layout_width="match_parent"
+        android:padding="4dp"
+        android:layout_height="wrap_content"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/qrPaymentDate"
+        tools:text="Merchant A" />
+
+    <FrameLayout
+        android:id="@+id/qrPaymentCountDownContainer"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toTopOf="@id/qrPaymentDate"
+        tools:background="@drawable/progress_bar" />
+
+    <FrameLayout
+        android:id="@+id/qrPaymentFragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentAmount"
+        app:layout_constraintDimensionRatio="h,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/qrPaymentMerchantName"
+        app:layout_constraintWidth_percent=".65"
+        tools:background="@drawable/qr_placement" />
+
+    <TextView
+        android:id="@+id/qrPaymentAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFCC33"
+        android:textSize="26sp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentMenggunakan"
+        tools:text="Rp 25.000" />
+
+    <TextView
+        android:id="@+id/qrPaymentMenggunakan"
+        android:textColor="#fff"
+        android:textSize="14sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="menggunakan"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentAcquirerName"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/qrPaymentAcquirerName"
+        android:layout_width="match_parent"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentAcquirerFooter"
+        tools:text="GO-PAY" />
+
+    <TextView
+        android:id="@+id/qrPaymentAcquirerFooter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#fff"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"
+        android:text="Silakan scan QR code di atas\n untuk menyelesaikan transaksi"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentSelectAnotherAcquirer"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/qrPaymentSelectAnotherAcquirer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/agent_transaction_date_picker_confirm_background"
+        android:backgroundTint="@android:color/white"
+        android:textColor="#2571A4"
+        android:layout_marginBottom="16dp"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="Pilih metode lainnya"
+        app:layout_constraintWidth_percent="0.7"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentSuccess"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/qrPaymentSuccess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="Success"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/qrPaymentFailed"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/qrPaymentFailed"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:text="Failed"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:ignore="HardcodedText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

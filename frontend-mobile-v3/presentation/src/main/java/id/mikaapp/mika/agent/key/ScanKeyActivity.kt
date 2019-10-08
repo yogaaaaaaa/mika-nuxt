@@ -7,13 +7,13 @@ import android.content.pm.PackageManager
 import android.graphics.Point
 import android.hardware.Camera
 import android.os.*
-import com.google.android.material.appbar.AppBarLayout
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import com.google.android.material.appbar.AppBarLayout
 import com.sunmi.scan.Config
 import com.sunmi.scan.Image
 import com.sunmi.scan.ImageScanner
@@ -23,7 +23,6 @@ import id.mikaapp.sdk.models.User
 import kotlinx.android.synthetic.main.activity_scankey.*
 import org.json.JSONException
 import org.json.JSONObject
-import retrofit2.Retrofit
 import sunmi.sunmiui.utils.LogUtil
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -46,7 +45,6 @@ class ScanKeyActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private val TAG = ScanKeyActivity::class.java.simpleName
     private var isFlashOn: Boolean = false
     private var user: User? = null
-    private var retrofit: Retrofit? = null
     private var token: String? = null
     private var isLoading = false
     private var mAlias: String? = null
@@ -57,7 +55,7 @@ class ScanKeyActivity : AppCompatActivity(), SurfaceHolder.Callback {
         setContentView(R.layout.activity_scankey)
 
         toolbar = toolbar_scankey
-        appBarLayout = appBar
+        appBarLayout = qrPaymentAppBar
         surfaceView = surface_view
         scannerBar = scanner_bar
         scannerLayout = scanner_layout
@@ -301,7 +299,7 @@ class ScanKeyActivity : AppCompatActivity(), SurfaceHolder.Callback {
             val data = mImageScanner.scanImage(src_data)
             if (data != 0) {
                 playBeepSoundAndVibrate()//解码成功播放提示音
-                val syms = mImageScanner.getResults()//获取解码结果
+                val syms = mImageScanner.results//获取解码结果
                 for (sym in syms) {
                     val temp = HashMap<String, String>()
                     temp[ScanConfig.TYPE] = sym.symbolName

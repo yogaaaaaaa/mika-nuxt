@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector>
+    <!--<item android:drawable="@drawable/agent_home_bottom_navigation_item_background_checked" android:state_checked="true" />-->
+</selector>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:weightSum="100">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="85"
+            android:paddingStart="18dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:text="@string/message_input_pin"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_weight="15"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:paddingTop="5dp"
+            android:paddingEnd="15dp"
+            android:paddingBottom="5dp"
+            android:scaleType="fitEnd"
+            android:src="@drawable/ic_close" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lyt_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="25dp">
+
+        <EditText
+            android:id="@+id/edit_pin1"
+            style="@style/PinEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/edit_pin2"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edit_pin2"
+            style="@style/PinEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/edit_pin1"
+            app:layout_constraintRight_toLeftOf="@id/edit_pin3"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edit_pin3"
+            style="@style/PinEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/edit_pin2"
+            app:layout_constraintRight_toLeftOf="@id/edit_pin4"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edit_pin4"
+            style="@style/PinEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/edit_pin3"
+            app:layout_constraintRight_toLeftOf="@id/edit_pin5"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edit_pin5"
+            style="@style/PinEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/edit_pin4"
+            app:layout_constraintRight_toLeftOf="@id/edit_pin6"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edit_pin6"
+            style="@style/PinEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/edit_pin5"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lyt_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/pinPadButton1"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_1"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton4"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/pinPadButton2"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <Button
+            android:id="@+id/pinPadButton2"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_2"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton5"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton1"
+            app:layout_constraintRight_toLeftOf="@id/pinPadButton3"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <Button
+            android:id="@+id/pinPadButton3"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_3"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton6"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton2"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <Button
+            android:id="@+id/pinPadButton4"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_4"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton7"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/pinPadButton5"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton1" />
+
+        <Button
+            android:id="@+id/pinPadButton5"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_5"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton8"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton4"
+            app:layout_constraintRight_toLeftOf="@id/pinPadButton6"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton2" />
+
+        <Button
+            android:id="@+id/pinPadButton6"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_6"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton9"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton5"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton3" />
+
+        <Button
+            android:id="@+id/pinPadButton7"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_7"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButtonDelete"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/pinPadButton8"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton4" />
+
+        <Button
+            android:id="@+id/pinPadButton8"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_8"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButton0"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton7"
+            app:layout_constraintRight_toLeftOf="@id/pinPadButton9"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton5" />
+
+        <Button
+            android:id="@+id/pinPadButton9"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_9"
+            app:layout_constraintBottom_toTopOf="@id/pinPadButtonOK"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton8"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton6" />
+
+        <Button
+            android:id="@+id/pinPadButtonDelete"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_backspace"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/pinPadButton0"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton7" />
+
+        <Button
+            android:id="@+id/pinPadButton0"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/button_0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButtonDelete"
+            app:layout_constraintRight_toLeftOf="@id/pinPadButtonOK"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton8" />
+
+        <Button
+            android:id="@+id/pinPadButtonOK"
+            style="@style/PinNumberButton"
+            android:layout_width="0dp"
+            android:text="@string/text_okay"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/pinPadButton8"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pinPadButton9" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

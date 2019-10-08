@@ -18,3 +18,16 @@ data class WalletTransactionRequest(
     @SerializedName("userTokenType")
     val userTokenType: String
 )
+
+internal data class WalletTransactionRequestWithoutLocation(
+        @SerializedName("acquirerId")
+        val acquirerId: String,
+        @SerializedName("amount")
+        val amount: Int,
+        @SerializedName("flags")
+        val flags: List<Any>,
+        @SerializedName("userToken")
+        val userToken: List<Any>,
+        @SerializedName("userTokenType")
+        val userTokenType: String
+)

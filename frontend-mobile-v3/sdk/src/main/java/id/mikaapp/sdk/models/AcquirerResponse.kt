@@ -12,5 +12,5 @@ data class AcquirerResponse(
     @SerializedName("isError")
     val isError: Boolean,
     @SerializedName("data")
-    var data: ArrayList<Acquirer>
+    var data: Acquirer
 )

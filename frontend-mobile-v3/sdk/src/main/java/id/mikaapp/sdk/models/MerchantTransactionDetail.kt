@@ -2,6 +2,7 @@ package id.mikaapp.sdk.models
 
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigDecimal
 
 data class MerchantTransactionDetail(
     @SerializedName("acquirer")
@@ -17,7 +18,7 @@ data class MerchantTransactionDetail(
     @SerializedName("aliasThumbnailGray")
     val aliasThumbnailGray: Any,
     @SerializedName("amount")
-    val amount: Int,
+    val amount: BigDecimal,
     @SerializedName("cardAcquirer")
     val cardAcquirer: Any,
     @SerializedName("cardApprovalCode")
@@ -28,7 +29,7 @@ data class MerchantTransactionDetail(
     val cardNetwork: Any,
     @SerializedName("cardPanMasked")
     val cardPanMasked: String,
-    @SerializedName("cardType")
+    @SerializedName("toCardType")
     val cardType: Any,
     @SerializedName("createdAt")
     val createdAt: String,
@@ -49,7 +50,7 @@ data class MerchantTransactionDetail(
     @SerializedName("locationLong")
     val locationLong: String,
     @SerializedName("referenceNumber")
-    val referenceNumber: Any,
+    val referenceNumber: String,
     @SerializedName("referenceNumberName")
     val referenceNumberName: Any,
     @SerializedName("settlementStatus")
@@ -71,5 +72,24 @@ data class MerchantTransactionDetail(
     @SerializedName("userTokenType")
     val userTokenType: Any,
     @SerializedName("voidReason")
-    val voidReason: Any
-)
+    val voidReason: Any,
+    @SerializedName("transactionRefunds")
+    val transactionRefunds: List<Transaction.TransactionRefund>
+) {
+    data class TransactionRefund(
+        @SerializedName("id")
+        val id: String,
+        @SerializedName("amount")
+        val amount: BigDecimal,
+        @SerializedName("reason")
+        val reason: String?,
+        @SerializedName("reference")
+        val reference: String,
+        @SerializedName("referenceName")
+        val referenceName: String,
+        @SerializedName("createdAt")
+        val createdAt: String,
+        @SerializedName("updatedAt")
+        val updatedAt: String
+    )
+}

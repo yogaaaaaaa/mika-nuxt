@@ -1,103 +1,93 @@
+@file:Suppress("RemoveExplicitTypeArguments")
+
 package id.mikaapp.mika.di
 
+import android.app.Application
 import android.content.SharedPreferences
+import android.os.Build
 import android.preference.PreferenceManager
-import com.squareup.picasso.Picasso
-import id.mikaapp.data.api.Api
-import id.mikaapp.data.local.SharedPrefsLocalStorage
-import id.mikaapp.data.repositories.RemoteUserDataStore
-import id.mikaapp.data.repositories.UserRepositoryImpl
-import id.mikaapp.domain.UserRepository
-import id.mikaapp.domain.usecases.UserLogin
 import id.mikaapp.mika.BuildConfig
+import id.mikaapp.mika.MqttHandler
 import id.mikaapp.mika.agent.account.AccountViewModel
-import id.mikaapp.mika.agent.acquirer.AcquirerViewModel
+import id.mikaapp.mika.agent.agenthome.AgentHomeViewModel
+import id.mikaapp.mika.agent.agenthome.charge.ChargeViewModel
+import id.mikaapp.mika.agent.agenthome.profile.ProfileViewModel
+import id.mikaapp.mika.agent.agenthome.transaction.acquirerfilter.AgentTransactionAcquirerFilterViewModel
+import id.mikaapp.mika.agent.agenthome.transaction.transactionlist.AgentTransactionListViewModel
+import id.mikaapp.mika.agent.agenttransactiondetail.AgentTransactionDetailViewModel
 import id.mikaapp.mika.agent.cardpayment.CardPaymentViewModel
-import id.mikaapp.mika.agent.charge.ChargeViewModel
 import id.mikaapp.mika.agent.credential.ChangePasswordViewModel
+import id.mikaapp.mika.agent.qrpayment.CreateQrTransactionViewModel
 import id.mikaapp.mika.agent.qrpayment.QrPaymentViewModel
-import id.mikaapp.mika.agent.transaction.TransactionViewModel
-import id.mikaapp.mika.agent.transactiondetail.TransactionDetailViewModel
-import id.mikaapp.mika.common.ASyncTransformer
-import id.mikaapp.mika.common.ImageLoader
-import id.mikaapp.mika.common.PicassoImageLoader
+import id.mikaapp.mika.agent.selectacquirerbottomsheet.SelectAcquirerBottomSheetViewModel
+import id.mikaapp.mika.datasource.LocalPersistentDataSource
 import id.mikaapp.mika.login.LoginViewModel
-import id.mikaapp.mika.mappers.DetailTransactionMapper
-import id.mikaapp.mika.mappers.UserEntityUserMapper
-import id.mikaapp.mika.merchant.dashboard.DashboardViewModel
-import id.mikaapp.mika.merchant.outlet.OutletViewModel
-import id.mikaapp.mika.merchant.transaction.MerchantTransactionViewModel
-import id.mikaapp.mika.utils.NotificationHelper
+import id.mikaapp.mika.service.BroadcastService
+import id.mikaapp.mika.service.NotificationService
+import id.mikaapp.mika.service.PrinterService
 import id.mikaapp.sdk.MikaSdk
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
+import id.mikaapp.sdk.enums.CardPaymentMethod
+import id.mikaapp.sdk.service.DeviceType
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.module
-import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
 
 val appModule = module {
     single {
         MikaSdk.instance.initialize(androidContext(), BuildConfig.SANDBOX_MODE)
         MikaSdk.instance
     }
-    single<UserRepository> { UserRepositoryImpl(RemoteUserDataStore(get())) }
     single<SharedPreferences> { PreferenceManager.getDefaultSharedPreferences(androidContext()) }
-    single { SharedPrefsLocalStorage(get()) }
-    single { NotificationHelper(androidContext()) }
-    single<ImageLoader> { PicassoImageLoader(Picasso.get()) }
-}
-
-val networkModule = module {
-    single<Api> {
-        val interceptors = arrayListOf<Interceptor>()
-
-        val keyInterceptor = Interceptor { chain ->
-
-            val original = chain.request()
-            val originalHttpUrl = original.url()
-
-            val url = originalHttpUrl.newBuilder()
-//                .addQueryParameter("api_key", apiKey)
-                .build()
-
-            val requestBuilder = original.newBuilder()
-                .url(url)
-
-            val request = requestBuilder.build()
-            return@Interceptor chain.proceed(request)
-        }
-
-        interceptors.add(keyInterceptor)
-        val clientBuilder = OkHttpClient.Builder()
-        if (interceptors.isNotEmpty()) {
-            interceptors.forEach { interceptor ->
-                clientBuilder.addInterceptor(interceptor)
+    single { LocalPersistentDataSource(get()) }
+    single { NotificationService(androidContext(), get<MikaSdk>()) }
+    single { BroadcastService(androidContext(), get<NotificationService>()) }
+    single<PrinterService> {
+        PrinterService(
+            androidContext(), when {
+                Build.MODEL.toLowerCase().startsWith("p1") -> DeviceType.Sunmi
+                Build.MODEL.toLowerCase() == "x990" -> DeviceType.Verifone
+                else -> DeviceType.Unsupported
             }
-        }
-        Retrofit.Builder()
-            .client(clientBuilder.build())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(BuildConfig.BASE_URL)
-            .build().create(Api::class.java)
+        )
     }
 }
 
 val loginModule = module {
-    factory { UserLogin(ASyncTransformer(), get()) }
-    viewModel { LoginViewModel(get(), UserEntityUserMapper(), get()) }
+    viewModel { LoginViewModel(get<MikaSdk>(), get<LocalPersistentDataSource>(), get<Application>()) }
+}
+
+val agentHomeModule = module {
+    factory<MqttHandler> {
+        MqttHandler(
+            mikaSdk = get<MikaSdk>(),
+            broadcastService = get<BroadcastService>()
+        )
+    }
+    viewModel { AgentHomeViewModel(get<MikaSdk>(), get<MqttHandler>()) }
+    viewModel { AgentTransactionAcquirerFilterViewModel(get<MikaSdk>()) }
 }
 
 val chargeModule = module {
-    viewModel { ChargeViewModel(get()) }
+    viewModel { ChargeViewModel(get<Application>()) }
 }
 
-val transactionModule = module {
-    viewModel { TransactionViewModel(get()) }
-    viewModel { MerchantTransactionViewModel(get()) }
+val agentTransactionModule = module {
+    viewModel { AgentTransactionListViewModel(get<MikaSdk>()) }
+}
+
+val agentTransactionDetailModule = module {
+    viewModel { (transactionID: String) ->
+        AgentTransactionDetailViewModel(
+            transactionID,
+            get<MikaSdk>(),
+            get<LocalPersistentDataSource>(),
+            get<PrinterService>()
+        )
+    }
+}
+
+val profileModule = module {
+    viewModel { ProfileViewModel(get<MikaSdk>()) }
 }
 
 val accountModule = module {
@@ -105,11 +95,20 @@ val accountModule = module {
 }
 
 val acquirerModule = module {
-    viewModel { AcquirerViewModel(get()) }
+    viewModel { SelectAcquirerBottomSheetViewModel(get<MikaSdk>(), get<LocalPersistentDataSource>()) }
 }
 
 val cardPaymentModule = module {
-    viewModel { CardPaymentViewModel(get()) }
+    viewModel { (amount: Int, cardPaymentMethod: CardPaymentMethod) ->
+        CardPaymentViewModel(
+            amount,
+            "acqID",
+            cardPaymentMethod,
+            get<MikaSdk>(),
+            get<LocalPersistentDataSource>(),
+            get<PrinterService>()
+        )
+    }
 }
 
 val changePasswordModule = module {
@@ -117,17 +116,18 @@ val changePasswordModule = module {
 }
 
 val qrPaymentModule = module {
-    viewModel { QrPaymentViewModel(get()) }
-}
-
-val transactionDetailModule = module {
-    viewModel { TransactionDetailViewModel(get(), DetailTransactionMapper()) }
-}
-
-val outletModule = module {
-    viewModel { OutletViewModel(get()) }
-}
-
-val dashboardModule = module {
-    viewModel { DashboardViewModel(get()) }
+    viewModel {
+        QrPaymentViewModel(
+            get<Application>(),
+            mikaSdk = get<MikaSdk>(),
+            localPersistentDataSource = get<LocalPersistentDataSource>(),
+            printerService = get<PrinterService>()
+        )
+    }
+    viewModel {
+        CreateQrTransactionViewModel(
+            mikaSdk = get<MikaSdk>(),
+            localPersistentDataSource = get<LocalPersistentDataSource>()
+        )
+    }
 }

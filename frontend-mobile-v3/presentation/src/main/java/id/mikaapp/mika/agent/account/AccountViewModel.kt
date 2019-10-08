@@ -1,11 +1,10 @@
 package id.mikaapp.mika.agent.account
 
 import androidx.lifecycle.MutableLiveData
-import id.mikaapp.mika.common.BaseViewModel
-import id.mikaapp.mika.common.SingleLiveEvent
+import androidx.lifecycle.ViewModel
+import id.mikaapp.mika.liveevent.LiveEvent
 import id.mikaapp.sdk.MikaSdk
-import id.mikaapp.sdk.callbacks.AgentInfoCallback
-import id.mikaapp.sdk.callbacks.MerchantStaffCallback
+import id.mikaapp.sdk.callbacks.MikaCallback
 import id.mikaapp.sdk.models.AgentResponse
 import id.mikaapp.sdk.models.BasicResponse
 import id.mikaapp.sdk.models.MerchantStaffResponse
@@ -16,17 +15,17 @@ import id.mikaapp.sdk.models.MerchantStaffResponse
 
 class AccountViewModel(
     private val mikaSdk: MikaSdk
-) : BaseViewModel() {
+) : ViewModel() {
 
-    var viewState: MutableLiveData<AccountViewState> = MutableLiveData()
-    var errorState: SingleLiveEvent<Throwable?> = SingleLiveEvent()
+    var viewState = MutableLiveData<AccountViewState>()
+    var errorState = LiveEvent<Throwable>()
 
     init {
         viewState.value = AccountViewState()
     }
 
     fun getAgentAccount() {
-        mikaSdk.getAgentInfo(object : AgentInfoCallback {
+        mikaSdk.getAgentInfo(object : MikaCallback<AgentResponse> {
             override fun onSuccess(response: AgentResponse) {
                 viewState.value?.let {
                     val newState = viewState.value?.copy(
@@ -52,7 +51,7 @@ class AccountViewModel(
     }
 
     fun getStaffAccount(){
-        mikaSdk.getMerchantStaffInfo(object:MerchantStaffCallback{
+        mikaSdk.getMerchantStaffInfo(object:MikaCallback<MerchantStaffResponse>{
             override fun onSuccess(response: MerchantStaffResponse) {
                 viewState.value?.let {
                     val newState = viewState.value?.copy(

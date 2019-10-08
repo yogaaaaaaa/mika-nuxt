@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:behavior_peekHeight="0dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    tools:context=".agent.selectacquirerbottomsheet.SelectAcquirerBottomSheetFragment">
+
+    <View
+        android:id="@+id/selectAcquirerBottomSheetTopHandle"
+        android:layout_width="42dp"
+        android:layout_height="2dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="#D8DBE1" />
+
+    <TextView
+        android:id="@+id/selectAcquirerBottomSheetTitle"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Select Acquirer"
+        android:textAlignment="center"
+        android:textColor="#657082"
+        android:textSize="20sp"
+        tools:ignore="HardcodedText" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:background="#D8DBE1" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/selectAcquirerBottomSheetRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="#f8F9FB" />
+
+</LinearLayout>

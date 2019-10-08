@@ -32,4 +32,9 @@ data class Acquirer(
     val acquirerConfig: AcquirerConfig,
     @SerializedName("_handler")
     internal val handler: Handler? = null
-)
+) {
+
+    val canRefund get() : Boolean = handler?.properties?.flows?.contains("flowRefund")?:false
+    val canPartialRefund get() : Boolean = handler?.properties?.flows?.contains("flowPartialRefund")?:false
+
+}

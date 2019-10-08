@@ -3,7 +3,7 @@ package id.mikaapp.sdk.utils
 internal class Constant {
     companion object {
         const val MESSAGE_ERROR_SDK = "SDK must be initialized"
-        const val MESSAGE_ERROR_NOT_IN_SANDBOX_MODE = "Sandbox feature can only be in sandbox mode"
+        const val MESSAGE_ERROR_NOT_IN_SANDBOX_MODE = "Sandbox feature can only be called in sandbox mode"
         const val MESSAGE_ERROR_FAILED_TO_CONNECT = "Failed to connect to server"
         const val MESSAGE_ERROR_USER_PASSWORD_EMPTY = "Username or password is empty"
         const val MESSAGE_ERROR_EMPTY_RESPONSE = "Failed to retrieve response from server"

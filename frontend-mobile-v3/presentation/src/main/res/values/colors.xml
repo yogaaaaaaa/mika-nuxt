@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#268aca</color>
+    <color name="colorPrimary">#28A3DD</color>
     <color name="colorPrimaryDark">#227bb3</color>
     <color name="colorAccent">#268aca</color>
 
@@ -11,9 +11,9 @@
     <color name="borderPassword">#707070</color>
     <color name="lightGrey">#dbdbdb</color>
 
-    <color name="statusSuccess">#000000</color>
+    <color name="transactionStatusSuccess">#28A745</color>
     <color name="statusCanceled">#D4D4D4</color>
-    <color name="statusFailed">#FF3E3E</color>
+    <color name="transactionStatusFailed">#DC3545</color>
     <color name="headerBg">#ebebeb</color>
     <color name="headerTextColor">#c5c5c5</color>
 

@@ -8,3 +8,4 @@ interface CheckLoginSessionCallback : HttpRequestCallback {
     fun onSuccess(response: CheckResponse)
     fun onFailure(errorResponse: BasicResponse)
 }
+

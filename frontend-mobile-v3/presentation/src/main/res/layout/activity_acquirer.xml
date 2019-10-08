@@ -5,10 +5,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".agent.acquirer.AcquirerActivity">
+    tools:context=".agent.selectacquirerbottomsheet.AcquirerActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBar"
+            android:id="@+id/qrPaymentAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -40,7 +40,7 @@
             android:id="@+id/swipeRefreshLayout_paymentAcquirer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/appBar">
+            android:layout_below="@id/qrPaymentAppBar">
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView_acquirer"
                 android:layout_width="match_parent"

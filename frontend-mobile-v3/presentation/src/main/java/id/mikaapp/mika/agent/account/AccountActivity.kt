@@ -1,26 +1,26 @@
 package id.mikaapp.mika.agent.account
 
 import android.app.Dialog
-import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import id.mikaapp.data.local.SharedPrefsLocalStorage
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 import id.mikaapp.mika.R
+import id.mikaapp.mika.customview.CustomDialog
+import id.mikaapp.mika.datasource.LocalPersistentDataSource
 import id.mikaapp.mika.login.LoginActivity
-import id.mikaapp.mika.utils.CustomDialog
 import kotlinx.android.synthetic.main.activity_account.*
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class AccountActivity : AppCompatActivity() {
 
-    private val sharedPrefsLocalStorage: SharedPrefsLocalStorage by inject()
+    private val localPersistentDataSource: LocalPersistentDataSource by inject()
     private val viewModel: AccountViewModel by viewModel()
     private lateinit var textViewUsername: TextView
     private lateinit var textViewOutlet: TextView
@@ -42,7 +42,7 @@ class AccountActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayShowHomeEnabled(true)
 
         if (savedInstanceState == null) {
-            when (sharedPrefsLocalStorage.getStringPref(LoginActivity.USER_TYPE_PREF)) {
+            when (localPersistentDataSource.userType) {
                 "agent" -> {
                     viewModel.getAgentAccount()
                 }
