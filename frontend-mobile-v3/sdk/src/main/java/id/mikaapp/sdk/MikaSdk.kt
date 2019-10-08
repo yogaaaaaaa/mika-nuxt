@@ -5,20 +5,23 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import com.google.gson.Gson
-import com.securepreferences.SecurePreferences
 import com.sunmi.pay.hardware.aidlv2.emv.EMVOptV2
 import com.sunmi.pay.hardware.aidlv2.pinpad.PinPadOptV2
 import com.sunmi.pay.hardware.aidlv2.readcard.ReadCardOptV2
 import com.sunmi.pay.hardware.aidlv2.security.SecurityOptV2
 import com.sunmi.pay.hardware.aidlv2.system.BasicOptV2
 import id.mikaapp.sdk.api.MikaApiService
-import id.mikaapp.sdk.api.MikaRestAdapter
-import id.mikaapp.sdk.callbacks.*
+import id.mikaapp.sdk.callbacks.MikaCallback
+import id.mikaapp.sdk.callbacks.StartSunmiPayServiceCallback
+import id.mikaapp.sdk.datasource.LocalPersistentDataSource
+import id.mikaapp.sdk.di.MikaSdkKoinContext
+import id.mikaapp.sdk.di.ModuleName
 import id.mikaapp.sdk.models.*
 import id.mikaapp.sdk.mqtt.BaseMqtt
 import id.mikaapp.sdk.mqtt.MikaMqttCallback
 import id.mikaapp.sdk.mqtt.MikaMqttService
+import id.mikaapp.sdk.service.DeviceType
+import id.mikaapp.sdk.service.cardpayment.CardTransactionService
 import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_DEVICE_NOT_SUPPORTED
 import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_ERROR_FAILED_TO_CONNECT
 import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_ERROR_NOT_IN_SANDBOX_MODE
@@ -26,30 +29,40 @@ import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_ERROR_SDK
 import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_ERROR_UNAUTHENTICATED
 import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_ERROR_USER_PASSWORD_EMPTY
 import id.mikaapp.sdk.utils.Constant.Companion.MESSAGE_MQTT_FAIL
-import id.mikaapp.sdk.utils.Constant.Companion.MQTT_BROKER_PREF
-import id.mikaapp.sdk.utils.Constant.Companion.SESSION_TOKEN_PREF
-import id.mikaapp.sdk.utils.Constant.Companion.USER_TYPE_PREF
 import id.mikaapp.sdk.utils.IUtility
 import id.mikaapp.sdk.utils.PaymentCardUtil
-import id.mikaapp.sdk.utils.Utility
 import io.sentry.Sentry
 import io.sentry.android.AndroidSentryClientFactory
-import org.eclipse.paho.client.mqttv3.MqttException
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import sunmi.paylib.SunmiPayKernel
 import java.io.IOException
-import java.lang.NullPointerException
 
-class MikaSdk {
-    private lateinit var apiService: MikaApiService
+
+// TODO Log only when in debug
+class MikaSdk : KoinComponent {
+    override fun getKoin() = MikaSdkKoinContext.koinApp.koin
+
+    private val apiService: MikaApiService by inject(ModuleName.mikaApiService)
+    private val utility: IUtility by inject(ModuleName.iUtility)
+    private val localPersistentDataSource: LocalPersistentDataSource by inject(ModuleName.localPersistentDataSource)
     private lateinit var mSMPayKernel: SunmiPayKernel
     private lateinit var mqttCallback: MikaMqttCallback
     private lateinit var mEMVOptV2: EMVOptV2
     private lateinit var paymentCardUtil: PaymentCardUtil
     internal var isSandbox = false
+    val cardTransactionService by lazy {
+        CardTransactionService(
+            appContext, when {
+                Build.MODEL.toLowerCase().startsWith("p1") -> DeviceType.Sunmi
+                Build.MODEL.toLowerCase() == "x990" -> DeviceType.Verifone
+                else -> DeviceType.Unsupported
+            }
+        )
+    }
 
     private object Holder {
         val INSTANCE = MikaSdk()
-
     }
 
     companion object {
@@ -59,8 +72,6 @@ class MikaSdk {
         internal var isConnectPaymentSdk: Boolean = false
         internal var isMqttConnected: Boolean = false
         internal lateinit var appContext: Context
-        internal lateinit var utility: IUtility
-        internal lateinit var sharedPreferences: SecurePreferences
         internal lateinit var mBasicOptV2: BasicOptV2
         internal lateinit var mReadCardOptV2: ReadCardOptV2
         internal lateinit var mPinPadOptV2: PinPadOptV2
@@ -68,8 +79,10 @@ class MikaSdk {
         internal lateinit var mEMVOptV2: EMVOptV2
         internal lateinit var mqttService: BaseMqtt
         internal lateinit var serviceConnection: ServiceConnection
-        internal var isEmvInitialized: Boolean = false
     }
+
+    val baseThumbnailURL get() = localPersistentDataSource.thumbnailBaseURL
+
 
     /**
      * Initialize Mika SDK
@@ -79,13 +92,10 @@ class MikaSdk {
         if (isSdkInitialized) {
             return
         }
-
         //Global context of current app
         this.isSandbox = isSandbox
         appContext = context
-        sharedPreferences = SecurePreferences(context)
-        utility = Utility(context)
-        apiService = MikaApiService(MikaRestAdapter().newMikaApiService())
+        cardTransactionService
         mSMPayKernel = SunmiPayKernel.getInstance()
 
         // Initialize Sentry
@@ -104,6 +114,13 @@ class MikaSdk {
                 isMqttConnected = false
             }
         }
+
+        // Log uncaught exception
+        val defaultUncaughtExceptionHandler = Thread.currentThread().uncaughtExceptionHandler
+        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
+            Sentry.capture(throwable)
+            defaultUncaughtExceptionHandler.uncaughtException(thread, throwable)
+        }
         isSdkInitialized = true
     }
 
@@ -113,7 +130,7 @@ class MikaSdk {
      * @param password
      * @param callback LoginCallback
      */
-    fun login(username: String, password: String, callback: LoginCallback) {
+    fun login(username: String, password: String, callback: MikaCallback<LoginResponse>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -131,6 +148,31 @@ class MikaSdk {
             } else {
                 callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
             }
+        }
+    }
+
+    /**
+     * Start the SDK MQTT service
+     * @param useWebSocket Boolean
+     * @param keepAliveInterval Int
+     * @param callback MikaMqttCallback
+     */
+    fun startMikaMqttService(useWebSocket: Boolean = true, keepAliveInterval: Int = 60, callback: MikaMqttCallback) {
+        // verify the SDK has been initialized
+        if (!isSdkInitialized) {
+            throw Exception(MESSAGE_ERROR_SDK)
+        }
+
+        mqttCallback = callback
+        // retrieve the broker information from shared preference
+        val brokerDetail = localPersistentDataSource.brokerDetail
+        if (brokerDetail == null) {
+            throw Exception(MESSAGE_ERROR_UNAUTHENTICATED)
+        } else {
+            utility.startMqttService(
+                useWebSocket = useWebSocket, keepAliveInterval = keepAliveInterval,
+                brokerDetail = brokerDetail, serviceConnection = serviceConnection
+            )
         }
     }
 
@@ -156,7 +198,7 @@ class MikaSdk {
      * Validate whether the login session is still valid
      * @param callback CheckLoginSessionCallback
      */
-    fun checkLoginSession(callback: CheckLoginSessionCallback) {
+    fun checkLoginSession(callback: MikaCallback<CheckResponse>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -164,8 +206,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 val request = CheckRequest(it)
                 apiService.checkLoginSession(request, callback)
@@ -181,7 +222,7 @@ class MikaSdk {
      * Clear the user login session and delete all the entries from shared preference
      * @param callback LogoutCallback
      */
-    fun logout(callback: LogoutCallback) {
+    fun logout(callback: MikaCallback<BasicResponse>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -189,8 +230,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.logout(it, callback)
                 if (isMqttConnected) {
@@ -210,16 +250,14 @@ class MikaSdk {
      *
      */
     fun clearSharedPreference() {
-        utility.deleteObjectsFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        utility.deleteObjectsFromSharedPref(MQTT_BROKER_PREF, sharedPreferences)
-        utility.deleteObjectsFromSharedPref(USER_TYPE_PREF, sharedPreferences)
+        localPersistentDataSource.save { sessionToken(null); brokerDetail(null); userType(null) }
     }
 
     /**
      * Retrieve all acquirers
-     * @param callback AcquirerCallback
+     * @param callback MikaCallback<ArrayList<Acquirer>>
      */
-    fun getAcquirers(callback: AcquirerCallback) {
+    fun getAcquirers(callback: MikaCallback<ArrayList<Acquirer>>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -227,10 +265,33 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getAcquirers(it, callback)
+            } else {
+                callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
+            }
+        } ?: run {
+            callback.onError(Throwable(MESSAGE_ERROR_UNAUTHENTICATED))
+        }
+    }
+
+    /**
+     * Retrieve acquirer by id
+     * @param acquirerID String
+     * @param callback MikaCallback<ArrayList<Acquirer>>
+     */
+    fun getAcquirerByID(acquirerID: String, callback: MikaCallback<Acquirer>) {
+        // verify the SDK has been initialized
+        if (!isSdkInitialized) {
+            callback.onError(Throwable(MESSAGE_ERROR_SDK))
+            return
+        }
+
+        // verify the session token (authenticated)
+        localPersistentDataSource.sessionToken?.let {
+            if (utility.isNetworkAvailable()) {
+                apiService.getAcquirerByID(it, acquirerID, callback)
             } else {
                 callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
             }
@@ -244,7 +305,7 @@ class MikaSdk {
      * @param order asc or desc
      * @param callback TransactionCallback
      */
-    fun getTransactions(order: String, callback: TransactionCallback) {
+    fun getTransactions(order: String, callback: MikaCallback<ArrayList<Transaction>>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -252,8 +313,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactions(it, "", "", order, "0", callback)
             } else {
@@ -272,7 +332,13 @@ class MikaSdk {
      * @param getCount include total counting
      * @param callback TransactionCallback
      */
-    fun getTransactions(page: String, perPage: String, order: String, getCount: String, callback: TransactionCallback) {
+    fun getTransactions(
+        page: String,
+        perPage: String,
+        order: String,
+        getCount: String,
+        callback: MikaCallback<ArrayList<Transaction>>
+    ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -280,8 +346,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactions(it, page, perPage, order, getCount, callback)
             } else {
@@ -311,7 +376,7 @@ class MikaSdk {
         acquirerId: String,
         order: String,
         getCount: String,
-        callback: TransactionCallback
+        callback: MikaCallback<ArrayList<Transaction>>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -320,8 +385,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactionsByFilters(
                     it,
@@ -359,7 +423,7 @@ class MikaSdk {
         endDate: String,
         order: String,
         getCount: String,
-        callback: TransactionCallback
+        callback: MikaCallback<ArrayList<Transaction>>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -368,8 +432,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactionsByFilters(
                     it,
@@ -405,7 +468,7 @@ class MikaSdk {
         acquirerId: String,
         order: String,
         getCount: String,
-        callback: TransactionCallback
+        callback: MikaCallback<ArrayList<Transaction>>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -414,8 +477,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactionsByFilters(
                     it,
@@ -441,7 +503,7 @@ class MikaSdk {
      * @param id Transaction id
      * @param callback TransactionDetailCallback
      */
-    fun getTransactionById(id: String, callback: TransactionDetailCallback) {
+    fun getTransactionById(id: String, callback: MikaCallback<TransactionDetail>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -449,8 +511,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactionById(id, it, callback)
             } else {
@@ -466,7 +527,7 @@ class MikaSdk {
      * @param idAlias Transaction id
      * @param callback TransactionDetailCallback
      */
-    fun getTransactionByIdAlias(idAlias: String, callback: TransactionDetailCallback) {
+    fun getTransactionByIdAlias(idAlias: String, callback: MikaCallback<TransactionDetail>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -474,8 +535,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getTransactionByIdAlias(idAlias, it, callback)
             } else {
@@ -488,18 +548,18 @@ class MikaSdk {
 
     /**
      * Create a new wallet transaction request
-     * @param acquirerId Id of acquirer
+     * @param acquirerID ID of acquirer
      * @param amount Transaction amount
      * @param locationLat Latitude of current location
      * @param locationLong Longitude of current location
      * @param callback CreateTransactionCallback
      */
     fun createTransaction(
-        acquirerId: String,
+        acquirerID: String,
         amount: Int,
-        locationLat: String,
-        locationLong: String,
-        callback: CreateTransactionCallback
+        locationLat: String?,
+        locationLong: String?,
+        callback: MikaCallback<TokenTransaction>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -508,19 +568,35 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
-                val request = WalletTransactionRequest(
-                    acquirerId,
-                    amount,
-                    arrayListOf(),
-                    locationLat,
-                    locationLong,
-                    arrayListOf(),
-                    ""
-                )
-                apiService.createTransactionWallet(it, request, callback)
+                if (locationLat != null && locationLong != null) {
+                    apiService.createTransactionWallet(
+                        sessionToken = it,
+                        request = WalletTransactionRequest(
+                            acquirerID,
+                            amount,
+                            arrayListOf(),
+                            locationLat,
+                            locationLong,
+                            arrayListOf(),
+                            ""
+                        ),
+                        callback = callback
+                    )
+                } else {
+                    apiService.createTransactionWallet(
+                        sessionToken = it,
+                        request = WalletTransactionRequestWithoutLocation(
+                            acquirerId = acquirerID,
+                            amount = amount,
+                            flags = arrayListOf(),
+                            userToken = arrayListOf(),
+                            userTokenType = ""
+                        ),
+                        callback = callback
+                    )
+                }
             } else {
                 callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
             }
@@ -529,8 +605,8 @@ class MikaSdk {
         }
     }
 
-    //* @param track2Data Track2 data
-    //* @param emvData EMV data
+//* @param track2Data Track2 data
+//* @param emvData EMV data
     /**
      * Create a new card transaction request
      * @param acquirerId Id of acquirer
@@ -543,19 +619,19 @@ class MikaSdk {
      * @param callback CreateTransactionCallback
      */
     fun createTransaction(
-        acquirerId: String,
+        acquirerID: String,
         amount: Int,
         locationLat: String,
         locationLong: String,
         cardType: String,
         pinData: String,
         signatureData: String,
-        callback: CardTransactionCallback
+        callback: MikaCallback<CardTransaction>
     ) {
         if (paymentCardUtil.magneticTrack2.isEmpty() && paymentCardUtil.mEmvData.isEmpty())
             callback.onError(Throwable("No card detected"))
         createTransaction(
-            acquirerId,
+            acquirerID,
             amount,
             locationLat,
             locationLong,
@@ -568,17 +644,17 @@ class MikaSdk {
         )
     }
 
-    private fun createTransaction(
-        acquirerId: String,
+    internal fun createTransaction(
+        acquirerID: String,
         amount: Int,
-        locationLat: String,
-        locationLong: String,
+        locationLat: String?,
+        locationLong: String?,
         cardType: String,
         track2Data: String,
         emvData: String,
-        pinData: String,
+        pinBlockData: String,
         signatureData: String,
-        callback: CardTransactionCallback
+        callback: MikaCallback<CardTransaction>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -587,17 +663,29 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 val userToken = if (track2Data.isNotEmpty()) {
-                    UserToken(arrayListOf(cardType), signatureData, pinData, "", track2Data)
+                    UserToken(arrayListOf(cardType), signatureData, pinBlockData, "", track2Data)
                 } else {
-                    UserToken(arrayListOf(cardType), signatureData, pinData, emvData, "")
+                    UserToken(arrayListOf(cardType), signatureData, pinBlockData, emvData, "")
                 }
-                val request =
-                    CardTransactionRequest(acquirerId, amount, ArrayList(), locationLat, locationLong, userToken)
-                apiService.createTransactionCard(it, request, callback)
+                if (locationLat != null || locationLong != null) {
+                    val request =
+                        CardTransactionRequest(
+                            acquirerID,
+                            amount,
+                            ArrayList(),
+                            locationLat!!,
+                            locationLong!!,
+                            userToken
+                        )
+                    apiService.createTransactionCard(it, request, callback)
+                } else {
+                    val request =
+                        CardTransactionRequestWithoutLocation(acquirerID, amount, ArrayList(), userToken)
+                    apiService.createTransactionCardWithoutLocation(it, request, callback)
+                }
             } else {
                 callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
             }
@@ -610,7 +698,7 @@ class MikaSdk {
      * Retrieve agent information
      * @param callback AgentInfoCallback
      */
-    fun getAgentInfo(callback: AgentInfoCallback) {
+    fun getAgentInfo(callback: MikaCallback<AgentResponse>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -618,8 +706,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getAgentInfo(it, callback)
             } else {
@@ -636,7 +723,7 @@ class MikaSdk {
      * @param newPassword
      * @param callback ChangePasswordCallback
      */
-    fun changePassword(oldPassword: String, newPassword: String, callback: ChangePasswordCallback) {
+    fun changePassword(oldPassword: String, newPassword: String, callback: MikaCallback<BasicResponse>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -644,8 +731,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 val request = ChangePasswordRequest(oldPassword, newPassword)
                 apiService.changePassword(it, request, callback)
@@ -710,31 +796,6 @@ class MikaSdk {
         }
     }
 
-    /**
-     * Start the SDK MQTT service
-     * @param callback MikaMqttCallback
-     */
-    fun startMikaMqttService(callback: MikaMqttCallback) {
-        // verify the SDK has been initialized
-        if (!isSdkInitialized) {
-            throw Exception(MESSAGE_ERROR_SDK)
-        }
-
-        mqttCallback = callback
-        // retrieve the broker information from shared preference
-        val brokerJson = utility.retrieveObjectFromSharedPref(MQTT_BROKER_PREF, sharedPreferences)
-        if (brokerJson == null) {
-            throw Exception(MESSAGE_ERROR_UNAUTHENTICATED)
-        } else {
-            try {
-                val brokerDetail = Gson().fromJson(brokerJson, BrokerDetail::class.java)
-                utility.startMqttService(brokerDetail, serviceConnection)
-            } catch (exception: MqttException) {
-                throw exception
-            }
-        }
-    }
-
     fun getMerchantTransactions(
         page: String,
         perPage: String,
@@ -744,7 +805,7 @@ class MikaSdk {
         order: String,
         getCount: String,
         outletId: String,
-        callback: MerchantTransactionCallback
+        callback: MikaCallback<ArrayList<MerchantTransaction>>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -753,8 +814,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getMerchantTransactions(
                     it,
@@ -776,7 +836,7 @@ class MikaSdk {
         }
     }
 
-    fun getMerchantTransactionById(id: String, callback: MerchantTransactionDetailCallback) {
+    fun getMerchantTransactionById(id: String, callback: MikaCallback<MerchantTransactionDetail>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -784,8 +844,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getMerchantTransactionById(id, it, callback)
             } else {
@@ -800,7 +859,7 @@ class MikaSdk {
      * Retrieve merchant staff information
      * @param callback MerchantStaffCallback
      */
-    fun getMerchantStaffInfo(callback: MerchantStaffCallback) {
+    fun getMerchantStaffInfo(callback: MikaCallback<MerchantStaffResponse>) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -808,8 +867,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getMerchantStaffInfo(it, callback)
             } else {
@@ -824,7 +882,7 @@ class MikaSdk {
         startDate: String,
         endDate: String,
         outletId: String,
-        callback: MerchantAcquirerStatisticCallback
+        callback: MikaCallback<ArrayList<MerchantTransactionStatistic>>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -833,8 +891,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getMerchantStatisticByAcquirer(it, startDate, endDate, outletId, callback)
             } else {
@@ -852,7 +909,7 @@ class MikaSdk {
         groupTime: String,
         utcOffset: String,
         outletId: String,
-        callback: MerchantStatisticCallback
+        callback: MikaCallback<ArrayList<MerchantStatisticCount>>
     ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
@@ -861,8 +918,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getMerchantStatisticByTimeCount(
                     it,
@@ -882,7 +938,12 @@ class MikaSdk {
         }
     }
 
-    fun getMerchantOutlets(page: String, perPage: String, outletName: String, callback: MerchantOutletCallback) {
+    fun getMerchantOutlets(
+        page: String,
+        perPage: String,
+        outletName: String,
+        callback: MikaCallback<ArrayList<MerchantOutlet>>
+    ) {
         // verify the SDK has been initialized
         if (!isSdkInitialized) {
             callback.onError(Throwable(MESSAGE_ERROR_SDK))
@@ -890,8 +951,7 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
                 apiService.getMerchantOutlets(it, page, perPage, outletName, callback)
             } else {
@@ -902,16 +962,113 @@ class MikaSdk {
         }
     }
 
-    //---------- SANDBOX FEATURE ----------
+    /**
+     * Refund transaction
+     * @param transactionID String
+     * @param amount Int?
+     * @param reason String?
+     * @param callback MikaCallback<BasicResponse>
+     */
+    fun refundTransaction(
+        transactionID: String,
+        amount: Int? = null,
+        reason: String? = null,
+        callback: MikaCallback<BasicResponse>
+    ) {
+        // verify the SDK has been initialized
+        if (!isSdkInitialized) {
+            callback.onError(Throwable(MESSAGE_ERROR_SDK))
+            return
+        }
+
+        // verify the session token (authenticated)
+        localPersistentDataSource.sessionToken?.let {
+            if (utility.isNetworkAvailable()) {
+                apiService.refundTransaction(
+                    it,
+                    transactionID,
+                    RefundTransactionRequest(amount?.toString(), reason),
+                    callback
+                )
+            } else {
+                callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
+            }
+        } ?: run {
+            callback.onError(Throwable(MESSAGE_ERROR_UNAUTHENTICATED))
+        }
+    }
+
+    /**
+     * Cancel on going transaction
+     * @param transactionID String
+     * @param callback MikaCallback<BasicResponse>
+     */
+    fun cancelTransaction(transactionID: String, callback: MikaCallback<BasicResponse>) {
+        // verify the SDK has been initialized
+        if (!isSdkInitialized) {
+            callback.onError(Throwable(MESSAGE_ERROR_SDK))
+            return
+        }
+
+        // verify the session token (authenticated)
+        localPersistentDataSource.sessionToken?.let {
+            if (utility.isNetworkAvailable()) {
+                apiService.cancelTransaction(it, transactionID, callback)
+            } else {
+                callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
+            }
+        } ?: run {
+            callback.onError(Throwable(MESSAGE_ERROR_UNAUTHENTICATED))
+        }
+    }
+
+
+//    fun startCardPaymentProcess(
+////        acquirerID: String,
+////        amount: Int,
+////        locationLat: String?,
+////        locationLong: String?,
+////        cardPaymentMethod: CardPaymentMethod,
+//        listener: CardTransactionServiceListener
+//    ) {
+//        cardTransactionProcess.setListener(listener)
+//        cardTransactionProcess.start()
+////        currentCardTransactionProcess = CardTransactionService(
+////            context = appContext,
+////            deviceType = DeviceType.Sunmi,
+////            acquirerID = acquirerID,
+////            amount = amount,
+////            cardPaymentMethod = cardPaymentMethod,
+////            locationLat = locationLat,
+////            locationLong = locationLong,
+////            listener = listener
+////        )
+////        currentCardTransactionProcess = CardTransactionProcess(
+////            appContext,
+////            cardType,
+////            cardReadTimeout,
+////            acquirerID,
+////            amount,
+////            locationLat,
+////            locationLong,
+////            listener
+////        )
+//    }
+
+//    fun stopCardTransactionProcess() {
+//        cardTransactionProcess.stop()
+////        currentCardTransactionProcess = null
+//    }
+//---------- SANDBOX FEATURE ----------
     /**
      * [SANDBOX FEATURE]
-     * Set on process transaction status
+     * Change on process transaction status
      * @param request ChangeTransactionStatusRequest
      * @param callback ChangeTransactionStatusCallback
      */
-    fun changeTransactionStatus(request: ChangeTransactionStatusRequest, callback: ChangeTransactionStatusCallback) {
+    fun changeTransactionStatus(request: ChangeTransactionStatusRequest, callback: MikaCallback<BasicResponse>) {
         // verify can use sandbox feature
-        if (!isSandbox)
+        if (!BuildConfig.DEBUG && !isSandbox)
             throw Exception(MESSAGE_ERROR_NOT_IN_SANDBOX_MODE)
 
         // verify the SDK has been initialized
@@ -921,10 +1078,9 @@ class MikaSdk {
         }
 
         // verify the session token (authenticated)
-        val sessionToken = utility.retrieveObjectFromSharedPref(SESSION_TOKEN_PREF, sharedPreferences)
-        sessionToken?.let {
+        localPersistentDataSource.sessionToken?.let {
             if (utility.isNetworkAvailable()) {
-                apiService.changeTransactionStatus(sessionToken, request, callback)
+                apiService.changeTransactionStatus(it, request, callback)
             } else {
                 callback.onError(Throwable(MESSAGE_ERROR_FAILED_TO_CONNECT))
             }

@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_gravity="bottom"
-              android:orientation="vertical"
-              android:paddingStart="15dp"
-              android:paddingTop="15dp"
-              android:paddingBottom="15dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:orientation="vertical"
+    android:paddingStart="15dp"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp">
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal"
-            android:weightSum="100">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:weightSum="100">
 
         <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="85"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:text="@string/message_input_signature"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="85"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:text="@string/message_input_signature"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
         <ImageButton
-                android:id="@+id/btn_close"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_weight="15"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:paddingTop="5dp"
-                android:paddingEnd="11dp"
-                android:paddingBottom="5dp"
-                android:scaleType="fitEnd"
-                android:src="@drawable/ic_close" />
+            android:id="@+id/signatureBottomSheetClose"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_weight="15"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:paddingTop="5dp"
+            android:paddingEnd="11dp"
+            android:paddingBottom="5dp"
+            android:scaleType="fitEnd"
+            android:src="@drawable/ic_close" />
     </LinearLayout>
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="15dp"
-            android:background="@drawable/password_text_bg"
-            android:padding="3dp">
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:background="@drawable/password_text_bg"
+        android:padding="3dp">
 
         <!--<android.gesture.GestureOverlayView-->
         <!--android:id="@+id/gestureoverlay_signature"-->
@@ -59,43 +59,43 @@
         <!--android:gestureStrokeType="multiple"-->
         <!--android:orientation="vertical" />-->
         <com.github.gcacace.signaturepad.views.SignaturePad
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/signature_pad" />
+            android:id="@+id/signatureBottomSheetPad"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/llAcquirer"
+        android:id="@+id/signatureBottomSheetButtonRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="15dp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/signatureBottomSheetClear"
+            style="@style/BaseButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:layout_marginEnd="15dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_gray_bg"
+            android:padding="8dp"
+            android:text="@string/text_clear"
+            android:textSize="14sp" />
 
         <Button
-                android:id="@+id/btn_clear"
-                style="@style/BaseButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:background="@drawable/btn_gray_bg"
-                android:padding="8dp"
-                android:text="@string/text_clear"
-                android:textSize="14sp" />
-
-        <Button
-                android:id="@+id/btn_continue"
-                style="@style/BaseButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_weight="1"
-                android:background="@drawable/btn_gray_bg"
-                android:padding="8dp"
-                android:text="@string/text_continue"
-                android:textSize="14sp" />
+            android:id="@+id/signatureBottomSheetContinue"
+            style="@style/BaseButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_gray_bg"
+            android:padding="8dp"
+            android:text="@string/text_continue"
+            android:textSize="14sp" />
 
     </LinearLayout>
 </LinearLayout>

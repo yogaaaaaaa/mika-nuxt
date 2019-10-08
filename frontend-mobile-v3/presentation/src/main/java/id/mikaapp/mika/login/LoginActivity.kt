@@ -1,140 +1,76 @@
 package id.mikaapp.mika.login
 
+import android.annotation.SuppressLint
 import android.app.Dialog
-import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
-import com.google.gson.Gson
-import id.mikaapp.data.local.SharedPrefsLocalStorage
+import id.mikaapp.mika.BuildConfig
 import id.mikaapp.mika.R
-import id.mikaapp.mika.agent.home.HomeActivity
-import id.mikaapp.mika.agent.transactiondetail.TransactionDetailActivity
-import id.mikaapp.mika.merchant.home.DashboardHomeActivity
-import id.mikaapp.mika.utils.CustomDialog
-import id.mikaapp.sdk.MikaSdk
+import id.mikaapp.mika.customview.CustomDialog
+import id.mikaapp.mika.ext.getDrawableCompat
+import id.mikaapp.mika.ext.observe
+import id.mikaapp.mika.ext.showToast
 import kotlinx.android.synthetic.main.activity_login.*
-import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class LoginActivity : AppCompatActivity(), View.OnClickListener {
-
-    val sharedPrefsLocalStorage: SharedPrefsLocalStorage by inject()
-    val mikaSdk: MikaSdk by inject()
+class LoginActivity : AppCompatActivity() {
     val viewModel: LoginViewModel by viewModel()
-    private lateinit var editTextUsername: EditText
-    private lateinit var editTextPassword: EditText
-    private lateinit var btnLogin: Button
-    private lateinit var dialog: Dialog
+    private val waitDialog: Dialog by lazy { CustomDialog.progressDialog(this, getString(R.string.loading)) }
 
-    companion object {
-        const val USER_TYPE_PREF = "user_type_pref"
-        const val ACQUIRER_CACHE = "acquirer_cache"
-    }
+    private val iconNama by lazy { getDrawableCompat(R.drawable.icon_nama) }
+    private val iconNamaError by lazy { getDrawableCompat(R.drawable.icon_nama_error) }
+    private val iconKunci by lazy { getDrawableCompat(R.drawable.icon_kunci) }
+    private val iconKunciError by lazy { getDrawableCompat(R.drawable.icon_kunci_error) }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        editTextUsername = username_edit_text
-        editTextPassword = password_edit_text
-        btnLogin = login_button
-        dialog = CustomDialog.progressDialog(this, getString(R.string.loading))
-        btnLogin.setOnClickListener(this)
-
-        observeViewState()
-    }
-
-    override fun onClick(v: View?) {
-        if (v == btnLogin) {
-            val username = editTextUsername.text.toString()
-            val password = editTextPassword.text.toString()
-            viewModel.login(username, password)
+        var appVersionText = "version ${BuildConfig.VERSION_NAME}"
+        if (BuildConfig.DEBUG) {
+            @Suppress("ConstantConditionIf")
+            appVersionText += "(" + if (BuildConfig.SANDBOX_MODE) "SBOX" else "STG31" + ")"
         }
-    }
-
-    private fun observeViewState() {
-        viewModel.viewState.observe(this, Observer {
-            if (it != null) handleViewState(it)
-        })
-        viewModel.errorState.observe(this, Observer { throwable ->
-            throwable?.let {
-                Toast.makeText(this, throwable.message, Toast.LENGTH_LONG).show()
+        loginAppInfoVersion.text = appVersionText
+        loginUsernameEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                viewModel.processUsernameInput(p0.toString())
             }
         })
-    }
-
-    private fun handleViewState(state: LoginViewState) {
-        if (state.showLoading) {
-            showDialog(dialog)
-        } else {
-            hideDialog(dialog)
-        }
-
-        if (state.isUsernameOrPasswordEmpty) {
-            Toast.makeText(this, getString(R.string.message_username_password_empty), Toast.LENGTH_SHORT).show()
-        }
-
-        state.agentInfo?.let { agentResponse ->
-            sharedPrefsLocalStorage.save(USER_TYPE_PREF, "agent")
-            sharedPrefsLocalStorage.save(
-                TransactionDetailActivity.MERCHANT_KEY,
-                agentResponse.data.outlet.merchant.name
-            )
-            sharedPrefsLocalStorage.save(TransactionDetailActivity.OUTLET_KEY, agentResponse.data.outlet.name)
-            agentResponse.data.outlet.streetAddress?.let { address ->
-                sharedPrefsLocalStorage.save(TransactionDetailActivity.OUTLET_ADDRESS, address)
+        loginPasswordEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                viewModel.processPasswordInput(p0.toString())
             }
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+        })
+        loginLogin.setOnClickListener { viewModel.login() }
 
-        state.merchantStaffInfo?.let { merchantStaff ->
-            sharedPrefsLocalStorage.save(USER_TYPE_PREF, "merchantStaff")
-            sharedPrefsLocalStorage.save(TransactionDetailActivity.MERCHANT_KEY, merchantStaff.data.merchant.name)
-            merchantStaff.data.merchant.streetAddress?.let { address ->
-                sharedPrefsLocalStorage.save(TransactionDetailActivity.OUTLET_ADDRESS, address)
-            }
-            val intent = Intent(this, DashboardHomeActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-
-        state.acquirers?.let { acquirers ->
-            val gson = Gson()
-            val acquirersJson = gson.toJson(acquirers)
-
-            sharedPrefsLocalStorage.save(ACQUIRER_CACHE, acquirersJson)
-
-            when (sharedPrefsLocalStorage.getStringPref(USER_TYPE_PREF)) {
-                "agent" -> {
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
-                "merchantStaff" -> {
-                    val intent = Intent(this, DashboardHomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
+        observe(viewModel.loadingState) { if (it) waitDialog.show() else waitDialog.dismiss() }
+        observe(viewModel.warningState) { showToast(it) }
+        observe(viewModel.usernameFieldErrorState) {
+            loginUsernameLayout.error = it
+            if (it == null) {
+                loginUsernameLayout.isErrorEnabled = false
+                loginUsernameIcon.setImageDrawable(iconNama)
+            } else {
+                loginUsernameIcon.setImageDrawable(iconNamaError)
             }
         }
-    }
-
-    private fun showDialog(dialog: Dialog) {
-        if (!dialog.isShowing) {
-            dialog.show()
+        observe(viewModel.passwordFieldErrorState) {
+            loginPasswordLayout.error = it
+            if (it == null) {
+                loginPasswordLayout.isErrorEnabled = false
+                loginPasswordIcon.setImageDrawable(iconKunci)
+            } else {
+                loginPasswordIcon.setImageDrawable(iconKunciError)
+            }
         }
+        observe(viewModel.navigateState) { startActivity(Intent(this, it));finish() }
     }
-
-    private fun hideDialog(dialog: Dialog) {
-        if (dialog.isShowing) {
-            dialog.dismiss()
-        }
-    }
-
 }

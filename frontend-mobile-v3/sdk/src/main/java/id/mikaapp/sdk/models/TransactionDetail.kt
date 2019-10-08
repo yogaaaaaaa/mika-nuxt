@@ -1,6 +1,7 @@
 package id.mikaapp.sdk.models
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigDecimal
 
 data class TransactionDetail(
     @SerializedName("agentId")
@@ -10,7 +11,7 @@ data class TransactionDetail(
     @SerializedName("aliasThumbnailGray")
     var aliasThumbnailGray: Any? = "",
     @SerializedName("amount")
-    var amount: Int,
+    var amount: BigDecimal,
     @SerializedName("cardAcquirer")
     var cardAcquirer: Any? = "",
     @SerializedName("cardApprovalCode")
@@ -20,11 +21,11 @@ data class TransactionDetail(
     @SerializedName("cardNetwork")
     var cardNetwork: Any? = "",
     @SerializedName("cardPanMasked")
-    var cardPan: String? = "",
-    @SerializedName("cardType")
+    var cardPanMasked: String? = "",
+    @SerializedName("toCardType")
     var cardType: Any? = "",
     @SerializedName("createdAt")
-    var createdAt: String? = "",
+    val createdAt: String,
     @SerializedName("customerReference")
     var customerReference: Any? = "",
     @SerializedName("customerReferenceType")
@@ -51,7 +52,7 @@ data class TransactionDetail(
     /**
      * Reference Id to payment gateway. Dependent to payment gateway used
      */
-    var referenceNumber: Any? = "",
+    var referenceNumber: String? = "",
     @SerializedName("referenceNumberType")
     var referenceNumberType: Any? = "",
     @SerializedName("terminalId")
@@ -78,7 +79,7 @@ data class TransactionDetail(
      * success means transaction is finished,
      * failed means transaction is failed in processing or timed out
      */
-    var status: String? = "",
+    val status: String,
     @SerializedName("updatedAt")
     var updatedAt: String? = "",
     @SerializedName("userToken")
@@ -86,5 +87,24 @@ data class TransactionDetail(
     @SerializedName("userTokenType")
     var userTokenType: Any? = "",
     @SerializedName("voidReason")
-    var voidReason: Any? = ""
-)
+    var voidReason: Any? = "",
+    @SerializedName("transactionRefunds")
+    val transactionRefunds: List<Transaction.TransactionRefund>
+) {
+    data class TransactionRefund(
+        @SerializedName("id")
+        val id: String,
+        @SerializedName("amount")
+        val amount: BigDecimal,
+        @SerializedName("reason")
+        val reason: String?,
+        @SerializedName("reference")
+        val reference: String,
+        @SerializedName("referenceName")
+        val referenceName: String,
+        @SerializedName("createdAt")
+        val createdAt: String,
+        @SerializedName("updatedAt")
+        val updatedAt: String
+    )
+}

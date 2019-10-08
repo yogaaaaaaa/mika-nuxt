@@ -8,8 +8,8 @@ data class UserToken(
     val cardTypesOnly: List<String>,
     @SerializedName("signatureData")
     val signatureData: String,
-    @SerializedName("pinData")
-    val pinData: String,
+    @SerializedName("pinblockData")
+    val pinBlockData: String,
     @SerializedName("emvData")
     val emvData: String,
     @SerializedName("track2Data")

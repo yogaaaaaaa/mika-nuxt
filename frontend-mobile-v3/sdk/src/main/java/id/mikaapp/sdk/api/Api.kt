@@ -1,6 +1,5 @@
 package id.mikaapp.sdk.api
 
-import id.mikaapp.sdk.models.LoginResponse
 import id.mikaapp.sdk.models.*
 import retrofit2.Call
 import retrofit2.http.*
@@ -17,8 +16,10 @@ internal interface Api {
     fun checkLoginSession(@Body request: CheckRequest): Call<CheckResponse>
 
     @GET("agent/acquirers")
-    fun getAcquirers(@Header("X-Access-Token") token: String): Call<AcquirerResponse>
+    fun getAcquirers(@Header("X-Access-Token") token: String): Call<AcquirersResponse>
 
+    @GET("agent/acquirers/{acquirerID}")
+    fun getAcquirerByID(@Header("X-Access-Token") sessionToken: String, @Path("acquirerID") acquirerID: String) : Call<AcquirerResponse>
 
     @GET("agent/transactions")
     fun getTransactions(@Header("X-Access-Token") token: String): Call<TransactionResponse>
@@ -44,7 +45,16 @@ internal interface Api {
     fun createTransactionWallet(@Header("X-Access-Token") token: String, @Body request: WalletTransactionRequest): Call<CreateTransactionResponse>
 
     @POST("agent/transactions")
+    fun createTransactionWallet(@Header("X-Access-Token") token: String, @Body request: WalletTransactionRequestWithoutLocation): Call<CreateTransactionResponse>
+
+
+    @POST("agent/transactions")
     fun createTransactionCard(@Header("X-Access-Token") token: String, @Body request: CardTransactionRequest): Call<CardTransactionResponse>
+
+    @POST("agent/transactions")
+    fun createTransactionCardWithoutLocation(@Header("X-Access-Token") token: String, @Body request: CardTransactionRequestWithoutLocation): Call<CardTransactionResponse>
+
+
 
     @GET("agent")
     fun getAgentInfo(@Header("X-Access-Token") token: String): Call<AgentResponse>
@@ -79,8 +89,17 @@ internal interface Api {
     ): Call<MerchantStatisticResponse>
 
     @GET("merchant_staff/acquirers")
-    fun getMerchantAcquirers(@Header("X-Access-Token") token: String): Call<AcquirerResponse>
+    fun getMerchantAcquirers(@Header("X-Access-Token") token: String): Call<AcquirersResponse>
+
+    @GET("merchant_staff/acquirers/{acquirerID}")
+    fun getMerchantAcquirerByID(@Header("X-Access-Token") sessionToken: String, @Path("acquirerID") acquirerID: String) : Call<AcquirerResponse>
 
     @POST("agent/debug/change_transaction_status")
     fun changeTransactionStatus(@Header("X-Access-Token") token : String, @Body request: ChangeTransactionStatusRequest) : Call<BasicResponse>
+
+    @POST("agent/transactions/{transactionID}/refund")
+    fun refundTransaction(@Header("X-Access-Token") token : String, @Path(value = "transactionID") transactionID : String, @Body request : RefundTransactionRequest) : Call<BasicResponse>
+
+    @POST("agent/transactions/{transactionID}/cancel")
+    fun cancelTransaction(@Header("X-Access-Token") token : String, @Path(value = "transactionID") transactionID : String) : Call<BasicResponse>
 }

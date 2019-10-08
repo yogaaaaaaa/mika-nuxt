@@ -6,7 +6,7 @@
                 android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBar"
+            android:id="@+id/qrPaymentAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -48,7 +48,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             android:layout_marginEnd="15dp"
-                            android:src="@drawable/ic_arrow_drop_down_black_24dp"
+                            android:src="@drawable/ic_arrow_drop_down_white_24dp"
                             android:tint="@color/white"/>
 
                 </LinearLayout>
@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_below="@id/appBar">
+            android:layout_below="@id/qrPaymentAppBar">
         <LinearLayout
                 android:id="@+id/clSorting"
                 android:layout_width="match_parent"
@@ -114,7 +114,7 @@
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/appBar">
+                android:layout_below="@+id/qrPaymentAppBar">
 
 
             <androidx.constraintlayout.widget.Guideline
@@ -228,7 +228,7 @@
                     app:layout_constraintTop_toBottomOf="parent"/>
 
             <LinearLayout
-                    android:id="@+id/rlTipePembayaran"
+                    android:id="@+id/transactionTipePembayaran"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"

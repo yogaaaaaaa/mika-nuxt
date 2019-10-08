@@ -48,7 +48,7 @@
     <string name="done">Selesai</string>
     <string name="transaction_details">Detail Transaksi</string>
     <string name="date">Tanggal:</string>
-    <string name="sender">Outlet:</string>
+    <string name="sender">Nama Outlet:</string>
     <string name="amount">Jumlah:</string>
     <string name="payment_method">Metode Pembayaran:</string>
     <string name="transaction">Transaksi:</string>
@@ -108,7 +108,7 @@
     <string name="success_transaction_notification">Transaksi Sukses</string>
     <string name="failed_transaction_notification">Transaksi Gagal</string>
     <string name="channel_notification">mika</string>
-    <string name="intent_name_isnotification">isNotification</string>
+    <string name="intent_name_isnotification">getToPrint</string>
     <string name="intent_name_transaction">transaction</string>
     <string name="intent_name_issucess">isSuccess</string>
     <string name="text_continue">Lanjut</string>
@@ -172,7 +172,7 @@
     <string name="message_activate_location">Aktifkan lokasi</string>
     <string name="error_message_location">Terjadi kesalahan, lokasi saat ini tidak ditemukan. Tolong ulangi lagi
     </string>
-    <string name="error_not_authenticated">Not authenticated</string>
+    <string name="error_not_authenticated">Not unauthenticated. Please call login method first</string>
     <string name="title_year">Tahun</string>
     <string name="title_month">Bulan</string>
     <string name="title_date">Tanggal</string>

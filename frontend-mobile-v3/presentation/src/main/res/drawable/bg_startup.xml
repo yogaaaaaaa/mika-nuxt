@@ -2,12 +2,12 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item>
-        <color android:color="@android:color/white"/>
+        <color android:color="@color/colorPrimary"/>
     </item>
     <item>
         <bitmap
                 android:gravity="center"
-                android:src="@mipmap/ic_launcher_foreground"/>
+                android:src="@drawable/mika_splash_screen_logo"/>
     </item>
 
 </layer-list>

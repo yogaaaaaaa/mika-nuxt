@@ -3,15 +3,15 @@ package id.mikaapp.sdk.models
 import com.google.gson.annotations.SerializedName
 
 data class BasicResponse(
+    @SerializedName("version")
+    internal val version: String,
     @SerializedName("isError")
-    var isError: Boolean,
+    val isError: Boolean,
     @SerializedName("message")
-    var message: String,
+    val message: String,
     @SerializedName("status")
     /**
      * Status code
      */
-    var status: String,
-    @SerializedName("version")
-    var version: String? = ""
+    val status: String
 )

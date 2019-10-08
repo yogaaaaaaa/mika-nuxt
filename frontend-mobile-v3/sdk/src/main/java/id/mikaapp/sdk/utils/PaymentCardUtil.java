@@ -116,9 +116,9 @@ public class PaymentCardUtil {
                     }
                     break;
                 case IC_CARD_DETACH:
-                    mEmvTrack2 = "";
-                    mEmvData = "";
-                    magneticTrack2 = "";
+//                    mEmvTrack2 = "";
+//                    mEmvData = "";
+//                    magneticTrack2 = "";
                     callback.onAttach(false, false);
                     mCardReady = false;
                     initEmvProcess();
@@ -242,31 +242,47 @@ public class PaymentCardUtil {
         }
     }
 
-    /**
-     * Check whether the IC/NFC card exist on slot
-     */
-    private void checkAttachedIC() {
-        if (mCardType == AidlConstantsV2.CardType.IC.getValue() || mCardType == AidlConstantsV2.CardType.NFC.getValue()) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // if card exist on slot then stop checking card, else check card
-                        if (mReadCardOptV2.getCardExistStatus(mCardType) == AidlConstantsV2
-                                .CardExistStatus.CARD_PRESENT) {
-                            mHandler.postDelayed(this, 1000);
-                        } else {
-                            mHandler.obtainMessage(IC_CARD_DETACH).sendToTarget();
-                        }
-                    } catch (Exception e) {
-                        if (BuildConfig.DEBUG) {
-                            LogUtil.e(TAG, "exception:" + e.getMessage());
-                        }
-                    }
-                }
-            });
+    //Callback for card checking process
+    private CheckCardCallbackV2 mCheckCardCallback = new CheckCardCallbackV2.Stub() {
+
+
+
+        @Override
+        public void findMagCard(Bundle bundle) {
+            if (BuildConfig.DEBUG) {
+                LogUtil.d(TAG, "findMagCard");
+            }
+            mCardType = AidlConstantsV2.CardType.MAGNETIC.getValue();
+            mHandler.obtainMessage(CARD_DETECTED, bundle).sendToTarget();
         }
-    }
+
+        @Override
+        public void findICCard(String s) {
+            if (BuildConfig.DEBUG) {
+                LogUtil.d(TAG, "onFindICCard: " + s);
+            }
+            mCardType = AidlConstantsV2.CardType.IC.getValue();
+            mHandler.obtainMessage(IC_CARD_ATTACH).sendToTarget();
+        }
+
+        @Override
+        public void findRFCard(String s) {
+            if (BuildConfig.DEBUG) {
+                LogUtil.d(TAG, "findRFCard: " + s);
+            }
+            mCardType = AidlConstantsV2.CardType.NFC.getValue();
+            mHandler.obtainMessage(IC_CARD_ATTACH).sendToTarget();
+        }
+
+        @Override
+        public void onError(int code, String message) {
+            String error = "onError:" + message + " -- " + code;
+            if (BuildConfig.DEBUG) {
+                LogUtil.e(TAG, error);
+            }
+            mHandler.obtainMessage(CARD_ERROR, code, code, error).sendToTarget();
+        }
+    };
 
     /**
      * Cancel attached card listener
@@ -294,44 +310,31 @@ public class PaymentCardUtil {
         }
     }
 
-    //Callback for card checking process
-    private CheckCardCallbackV2 mCheckCardCallback = new CheckCardCallbackV2.Stub() {
-        @Override
-        public void findMagCard(Bundle bundle) {
-            if (BuildConfig.DEBUG) {
-                LogUtil.d(TAG, "findMagCard");
-            }
-            mCardType = AidlConstantsV2.CardType.MAGNETIC.getValue();
-            mHandler.obtainMessage(CARD_DETECTED, bundle).sendToTarget();
+    /**
+     * Check whether the IC/NFC card exist on slot
+     */
+    private void checkAttachedIC() {
+        if (mCardType == AidlConstantsV2.CardType.IC.getValue() || mCardType == AidlConstantsV2.CardType.NFC.getValue()) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // if card exist on slot then stopTransactionProcess checking card, else check card
+                        if (mReadCardOptV2.getCardExistStatus(mCardType) == AidlConstantsV2
+                                .CardExistStatus.CARD_PRESENT) {
+                            mHandler.postDelayed(this, 1000);
+                        } else {
+                            mHandler.obtainMessage(IC_CARD_DETACH).sendToTarget();
+                        }
+                    } catch (Exception e) {
+                        if (BuildConfig.DEBUG) {
+                            LogUtil.e(TAG, "exception:" + e.getMessage());
+                        }
+                    }
+                }
+            });
         }
-
-        @Override
-        public void findICCard(String s) {
-            if (BuildConfig.DEBUG) {
-                LogUtil.d(TAG, "findICCard: " + s);
-            }
-            mCardType = AidlConstantsV2.CardType.IC.getValue();
-            mHandler.obtainMessage(IC_CARD_ATTACH).sendToTarget();
-        }
-
-        @Override
-        public void findRFCard(String s) {
-            if (BuildConfig.DEBUG) {
-                LogUtil.d(TAG, "findRFCard: " + s);
-            }
-            mCardType = AidlConstantsV2.CardType.NFC.getValue();
-            mHandler.obtainMessage(IC_CARD_ATTACH).sendToTarget();
-        }
-
-        @Override
-        public void onError(int code, String message) {
-            String error = "onError:" + message + " -- " + code;
-            if (BuildConfig.DEBUG) {
-                LogUtil.e(TAG, error);
-            }
-            mHandler.obtainMessage(CARD_ERROR, code, code, error).sendToTarget();
-        }
-    };
+    }
 
     /**
      * Handle the magnet card data
@@ -351,7 +354,7 @@ public class PaymentCardUtil {
                 mEmvData = "";
                 magneticTrack2 = track2;
                 String pan = magneticTrack2.split("=")[0];
-                String last4digitPAN = pan.substring(mEmvTrack2.length() - 4);
+                String last4digitPAN = pan.substring(pan.length() - 4);
                 String first6digitPAN = pan.substring(0, 6);
                 String panMasked = first6digitPAN.substring(0, 4) + " " + first6digitPAN.substring(4, 6) + "xx xxxx " + last4digitPAN;
 

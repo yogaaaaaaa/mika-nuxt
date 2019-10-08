@@ -1,6 +1,7 @@
 package id.mikaapp.sdk.models
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigDecimal
 
 data class Transaction(
     @SerializedName("extra")
@@ -39,7 +40,7 @@ data class Transaction(
     /**
      * Reference Id to payment gateway. Dependent to payment gateway used
      */
-    val referenceNumber: Any,
+    val referenceNumber: String?,
     @SerializedName("referenceNumberName")
     val referenceNumberName: Any,
     @SerializedName("cardApprovalCode")
@@ -52,7 +53,7 @@ data class Transaction(
     val cardAcquirer: Any,
     @SerializedName("cardPanMasked")
     val cardPanMasked: Any,
-    @SerializedName("cardType")
+    @SerializedName("toCardType")
     val cardType: Any,
     @SerializedName("aliasThumbnail")
     val aliasThumbnail: Any,
@@ -72,6 +73,25 @@ data class Transaction(
     val createdAt: String,
     @SerializedName("updatedAt")
     val updatedAt: String,
+    @SerializedName("transactionRefunds")
+    val transactionRefunds : List<TransactionRefund>,
     @SerializedName("acquirer")
     val acquirer: Acquirer
-)
+) {
+    data class TransactionRefund (
+        @SerializedName("id")
+        val id: String,
+        @SerializedName("amount")
+        val amount: BigDecimal,
+        @SerializedName("reason")
+        val reason: String?,
+        @SerializedName("reference")
+        val reference: String,
+        @SerializedName("referenceName")
+        val referenceName: String,
+        @SerializedName("createdAt")
+        val createdAt: String,
+        @SerializedName("updatedAt")
+        val updatedAt: String
+    )
+}

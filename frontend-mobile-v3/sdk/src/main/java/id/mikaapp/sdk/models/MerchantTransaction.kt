@@ -28,7 +28,7 @@ data class MerchantTransaction(
     val cardNetwork: Any,
     @SerializedName("cardPanMasked")
     val cardPan: Any,
-    @SerializedName("cardType")
+    @SerializedName("toCardType")
     val cardType: Any,
     @SerializedName("createdAt")
     val createdAt: String,

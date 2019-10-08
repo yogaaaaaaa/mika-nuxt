@@ -1,11 +1,11 @@
 package id.mikaapp.mika.agent.credential
 
 import androidx.lifecycle.MutableLiveData
-import id.mikaapp.mika.common.BaseViewModel
-import id.mikaapp.mika.common.SingleLiveEvent
+import androidx.lifecycle.ViewModel
+import id.mikaapp.mika.BaseMikaCallback
+import id.mikaapp.mika.ext.liveData
+import id.mikaapp.mika.liveevent.LiveEvent
 import id.mikaapp.sdk.MikaSdk
-import id.mikaapp.sdk.callbacks.ChangePasswordCallback
-import id.mikaapp.sdk.models.BasicResponse
 
 /**
  * Created by grahamdesmon on 15/04/19.
@@ -13,60 +13,32 @@ import id.mikaapp.sdk.models.BasicResponse
 
 class ChangePasswordViewModel(
     private val mikaSdk: MikaSdk
-) : BaseViewModel() {
+) : ViewModel() {
 
-    var viewState: MutableLiveData<ChangePasswordViewState> = MutableLiveData()
-    var errorState: SingleLiveEvent<Throwable?> = SingleLiveEvent()
+    private val loading = MutableLiveData<Boolean>()
+    val loadingState = loading.liveData
 
-    init {
-        viewState.value = ChangePasswordViewState()
-    }
+    private val warning = LiveEvent<String>()
+    val warningState = warning.liveData
 
-    fun changePassword(oldPassword: String, newPassword: String) {
-        errorState.value = null
+    private val changePasswordSuccess = LiveEvent<Boolean>()
+    val changePasswordSuccessState = changePasswordSuccess.liveData
 
-        if (oldPassword.isEmpty() || newPassword.isEmpty()) {
-            viewState.value = viewState.value?.copy(
-                isLoading = false,
-                isPasswordEmpty = true,
-                response = null,
-                changePasswordSuccess = false
-            )
-        } else {
-            viewState.value = viewState.value?.copy(
-                isLoading = true,
-                isPasswordEmpty = false,
-                changePasswordSuccess = false
-            )
-
-            performChangePassword(oldPassword, newPassword)
+    fun changePassword(oldPassword: String, newPassword: String, confirmNewPassword: String) {
+        if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmNewPassword.isEmpty()) {
+            warning.value = "Field cannot be empty"
+            return
         }
-    }
-
-    private fun performChangePassword(oldPassword: String, newPassword: String) {
-        mikaSdk.changePassword(oldPassword, newPassword, object : ChangePasswordCallback {
-            override fun onSuccess(response: BasicResponse) {
-                viewState.value?.let {
-                    val newState = viewState.value?.copy(
-                        isLoading = false,
-                        isPasswordEmpty = false,
-                        changePasswordSuccess = true
-                    )
-                    viewState.value = newState
-                    errorState.value = null
-                }
-            }
-
-            override fun onFailure(errorResponse: BasicResponse) {
-                viewState.value = viewState.value?.copy(isLoading = false)
-                errorState.value = Throwable(errorResponse.message)
-            }
-
-            override fun onError(error: Throwable) {
-                viewState.value = viewState.value?.copy(isLoading = false)
-                errorState.value = error
-            }
-
-        })
+        if (newPassword != confirmNewPassword) {
+            warning.value = "Konfirmasi password baru tidak cocok"
+            return
+        }
+        loading.value = true
+        mikaSdk.changePassword(oldPassword, newPassword, BaseMikaCallback(
+            complete = { loading.value = false },
+            success = { changePasswordSuccess.value = true },
+            failure = { warning.value = it.message },
+            error = { warning.value = it.message }
+        ))
     }
 }

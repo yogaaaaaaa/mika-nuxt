@@ -7,7 +7,7 @@
                 tools:context="id.mikaapp.mika.agent.account.AccountActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBar"
+            android:id="@+id/qrPaymentAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -38,7 +38,7 @@
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/appBar"
+            android:layout_below="@id/qrPaymentAppBar"
             android:padding="20dp">
 
         <TextView

@@ -1,17 +1,14 @@
 package id.mikaapp.mika.login
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import id.mikaapp.domain.common.Mapper
-import id.mikaapp.domain.entities.UserEntity
-import id.mikaapp.domain.usecases.UserLogin
-import id.mikaapp.mika.common.BaseViewModel
-import id.mikaapp.mika.common.SingleLiveEvent
-import id.mikaapp.mika.entities.User
+import id.mikaapp.mika.agent.agenthome.AgentHomeActivity
+import id.mikaapp.mika.datasource.LocalPersistentDataSource
+import id.mikaapp.mika.ext.liveData
 import id.mikaapp.sdk.MikaSdk
-import id.mikaapp.sdk.callbacks.AcquirerCallback
-import id.mikaapp.sdk.callbacks.AgentInfoCallback
-import id.mikaapp.sdk.callbacks.LoginCallback
-import id.mikaapp.sdk.callbacks.MerchantStaffCallback
+import id.mikaapp.sdk.callbacks.MikaCallback
 import id.mikaapp.sdk.models.*
 
 /**
@@ -19,95 +16,116 @@ import id.mikaapp.sdk.models.*
  */
 
 class LoginViewModel(
-    private val userLogin: UserLogin,
-    private val entityUserMapper: Mapper<UserEntity, User>,
-    private val mikaSdk: MikaSdk
-) : BaseViewModel() {
+    private val mikaSdk: MikaSdk,
+    private val localPersistentDataSource: LocalPersistentDataSource,
+    application: Application
+) : AndroidViewModel(application) {
 
-    var viewState: MutableLiveData<LoginViewState> = MutableLiveData()
-    var errorState: SingleLiveEvent<Throwable?> = SingleLiveEvent()
+    private val loading = MutableLiveData<Boolean>()
+    val loadingState: LiveData<Boolean> = loading
 
-    init {
-        viewState.value = LoginViewState()
-    }
+    private val usernameFieldError = MutableLiveData<String?>()
+    val usernameFieldErrorState = usernameFieldError.liveData
 
-    lateinit var userEntity: UserEntity
+    private val passwordFieldError = MutableLiveData<String?>()
+    val passwordFieldErrorState = passwordFieldError.liveData
 
-    fun login(username: String, password: String) {
-        errorState.value = null
+    private val warning = MutableLiveData<String>()
+    val warningState: LiveData<String> = warning
 
-        if (username.isEmpty() || password.isEmpty()) {
-            viewState.value = viewState.value?.copy(
-                showLoading = false,
-                isUsernameOrPasswordEmpty = true,
-                user = null,
-                agentInfo = null,
-                loginSuccess = false
-            )
+    private val navigate = MutableLiveData<Class<*>>()
+    val navigateState = navigate.liveData
+
+    private var username = ""
+    private var password = ""
+
+    fun login() {
+        val usernameEmpty = username.isEmpty()
+        val passwordEmpty = password.isEmpty()
+        if (usernameEmpty || passwordEmpty) {
+            if (usernameEmpty) usernameFieldError.value = "Nama Pengguna tidak boleh kosong"
+            if (passwordEmpty) passwordFieldError.value = "Kata Sandi tidak boleh kosong"
         } else {
-            viewState.value = viewState.value?.copy(
-                showLoading = true,
-                agentInfo = null,
-                isUsernameOrPasswordEmpty = false,
-                loginSuccess = false
-            )
+            loading.value = true
+            mikaSdk.login(username, password, object : MikaCallback<LoginResponse> {
+                override fun onSuccess(response: LoginResponse) {
+                    loading.value = false
+                    getAccount(response.data.userType!!)
+                }
 
-//            performLogin(username, password)
-            performLoginSdk(username, password)
+                override fun onFailure(errorResponse: BasicResponse) {
+                    val warningConverted = when (errorResponse.message) {
+                        "Invalid credential for authentication" -> "Username/Password salah"
+                        else -> errorResponse.message
+                    }
+                    loading.value = false
+                    warning.value = warningConverted
+                }
+
+                override fun onError(error: Throwable) {
+                    loading.value = false
+                    warning.value = error.localizedMessage
+                }
+            })
         }
     }
 
-    fun getAccount(userType: String) {
+    fun processUsernameInput(input: String?) {
+        username = input ?: ""
+        usernameFieldError.apply { if (value != null) value = null }
+    }
+
+    fun processPasswordInput(input: String?) {
+        password = input ?: ""
+        passwordFieldError.apply { if (value != null) value = null }
+    }
+
+    private fun getAccount(userType: String) {
         when (userType) {
             "agent" -> {
-                mikaSdk.getAgentInfo(object : AgentInfoCallback {
+                mikaSdk.getAgentInfo(object : MikaCallback<AgentResponse> {
                     override fun onSuccess(response: AgentResponse) {
-                        viewState.value?.let {
-                            val newState = viewState.value?.copy(
-                                agentInfo = response,
-                                showLoading = true
-                            )
-                            getAcquirers()
-                            viewState.value = newState
-                            errorState.value = null
+                        localPersistentDataSource.save {
+                            userType("agent")
+                            outletName(response.data.outlet.name)
+                            outletAddress(response.data.outlet.streetAddress)
+                            merchantName(response.data.outlet.merchant.name)
                         }
+                        getAcquirers(userType)
                     }
 
                     override fun onFailure(errorResponse: BasicResponse) {
-                        viewState.value = viewState.value?.copy(showLoading = false)
-                        errorState.value = Throwable(errorResponse.message)
+                        loading.value = false
+                        warning.value = errorResponse.message
                     }
 
                     override fun onError(error: Throwable) {
-                        viewState.value = viewState.value?.copy(showLoading = false)
-                        errorState.value = error
+                        loading.value = false
+                        warning.value = error.localizedMessage
                     }
 
                 })
             }
 
             "merchantStaff" -> {
-                mikaSdk.getMerchantStaffInfo(object : MerchantStaffCallback {
+                mikaSdk.getMerchantStaffInfo(object : MikaCallback<MerchantStaffResponse> {
                     override fun onSuccess(response: MerchantStaffResponse) {
-                        viewState.value?.let {
-                            val newState = viewState.value?.copy(
-                                merchantStaffInfo = response,
-                                showLoading = true
-                            )
-                            getAcquirers()
-                            viewState.value = newState
-                            errorState.value = null
+                        localPersistentDataSource.save {
+                            userType("merchantStaff")
+                            merchantName(response.data.merchant.name)
+                            outletAddress(response.data.merchant.streetAddress)
                         }
+                        getAcquirers(userType)
                     }
 
                     override fun onFailure(errorResponse: BasicResponse) {
-                        viewState.value = viewState.value?.copy(showLoading = false)
-                        errorState.value = Throwable(errorResponse.message)
+                        loading.value = false
+                        warning.value = errorResponse.message
                     }
 
                     override fun onError(error: Throwable) {
-                        viewState.value = viewState.value?.copy(showLoading = false)
-                        errorState.value = error
+                        loading.value = false
+                        warning.value = error.localizedMessage
                     }
 
                 })
@@ -115,88 +133,27 @@ class LoginViewModel(
         }
     }
 
-    fun getAcquirers() {
-        mikaSdk.getAcquirers(object : AcquirerCallback {
+    private fun getAcquirers(userType: String) {
+        mikaSdk.getAcquirers(object : MikaCallback<ArrayList<Acquirer>> {
             override fun onSuccess(response: ArrayList<Acquirer>) {
-                viewState.value?.let {
-                    val newState = viewState.value?.copy(
-                        showLoading = false,
-                        acquirers = response
-                    )
-                    viewState.value = newState
-                    errorState.value = null
+                localPersistentDataSource.save { acquirers(response) }
+                loading.value = false
+                when (userType) {
+                    "agent" -> navigate.value = AgentHomeActivity::class.java
+                    else -> warning.value = "Tipe user tidak diketahui"
                 }
             }
 
             override fun onFailure(errorResponse: BasicResponse) {
-                viewState.value = viewState.value?.copy(showLoading = false)
-                errorState.value = Throwable(errorResponse.message)
+                loading.value = false
+                warning.value = errorResponse.message
             }
 
             override fun onError(error: Throwable) {
-                viewState.value = viewState.value?.copy(showLoading = false)
-                errorState.value = error
+                loading.value = false
+                warning.value = error.localizedMessage
             }
 
         })
-    }
-
-    private fun performLogin(username: String, password: String) {
-        addDisposable(userLogin.login(username, password)
-            .map {
-                it.value?.let {
-                    userEntity = it
-                    entityUserMapper.mapFrom(userEntity)
-                } ?: run {
-                    throw Throwable("Something went wrong")
-                }
-            }
-            .subscribe({ user ->
-                viewState.value?.let {
-                    val newState = this.viewState.value?.copy(
-                        showLoading = false,
-                        isUsernameOrPasswordEmpty = false,
-                        user = user,
-                        loginSuccess = true
-                    )
-                    this.viewState.value = newState
-                    this.errorState.value = null
-                }
-            }, {
-                viewState.value = viewState.value?.copy(showLoading = false)
-                errorState.value = it
-            })
-        )
-    }
-
-    private fun performLoginSdk(username: String, password: String) {
-        mikaSdk.login(username, password, loginCallback)
-    }
-
-    private val loginCallback = object : LoginCallback {
-        override fun onSuccess(response: LoginResponse) {
-            viewState.value?.let {
-                val newState = viewState.value?.copy(
-                    isUsernameOrPasswordEmpty = false,
-                    loginSuccess = true,
-                    showLoading = true,
-                    agentInfo = null
-                )
-
-                getAccount(response.data.userType!!)
-                viewState.value = newState
-                errorState.value = null
-            }
-        }
-
-        override fun onFailure(errorResponse: BasicResponse) {
-            viewState.value = viewState.value?.copy(showLoading = false)
-            errorState.value = Throwable(errorResponse.message)
-        }
-
-        override fun onError(error: Throwable) {
-            viewState.value = viewState.value?.copy(showLoading = false)
-            errorState.value = error
-        }
     }
 }
