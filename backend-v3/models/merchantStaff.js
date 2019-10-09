@@ -55,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         model: sequelize.models.merchant.scope('id'),
         paranoid: false,
+        required: true,
         include: [
           {
             model: sequelize.models.acquirer.scope('excludeShare'),

@@ -25,8 +25,8 @@ module.exports = {
       },
       {
         id: 10,
-        name: 'Fairpay Default Configuration',
-        handler: 'fairpay'
+        name: 'Kuma Bank Default Configuration',
+        handler: 'kumabank'
       },
       {
         id: 100,

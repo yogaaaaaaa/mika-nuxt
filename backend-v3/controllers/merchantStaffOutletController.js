@@ -20,10 +20,10 @@ module.exports.associateOutlets = async (req, res, next) => {
   const failedOutletIds = []
 
   await models.sequelize.transaction(async t => {
-    merchantStaff = await models.merchantStaff.findByPk(req.params.merchantStaffId, { transaction: t })
+    merchantStaff = await models.merchantStaff.findByPk(req.params.merchantStaffId, { paranoid: false, transaction: t })
     if (merchantStaff) {
       for (const outletId of req.body.outletIds) {
-        const outlet = await models.outlet.findByPk(outletId, { transaction: t })
+        const outlet = await models.outlet.findByPk(outletId, { paranoid: false, transaction: t })
         if (outlet && (merchantStaff.merchantId === outlet.merchantId)) {
           try {
             await models.merchantStaffOutlet.create({
@@ -51,7 +51,7 @@ module.exports.dissociateOutlets = async (req, res, next) => {
   const failedOutletIds = []
 
   await models.sequelize.transaction(async t => {
-    merchantStaff = await models.merchantStaff.findByPk(req.params.merchantStaffId, { transaction: t })
+    merchantStaff = await models.merchantStaff.findByPk(req.params.merchantStaffId, { paranoid: false, transaction: t })
     if (merchantStaff) {
       for (const outletId of req.body.outletIds) {
         try {

@@ -154,6 +154,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         model: sequelize.models.acquirer,
         paranoid: false,
+        required: true,
         include: [
           {
             model: sequelize.models.acquirerType,

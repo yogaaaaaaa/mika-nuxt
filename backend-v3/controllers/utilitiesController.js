@@ -14,7 +14,7 @@ module.exports.listTrxManagerProps = (req, res, next) => {
     res,
     msg.msgTypes.MSG_SUCCESS,
     {
-      types: trxManager.types,
+      types: trxManager.constants,
       handlers: trxManager.acquirerHandlers.map((acquirerHandler) => trxManager.formatAcquirerInfo(acquirerHandler))
     }
   )

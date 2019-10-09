@@ -2,9 +2,9 @@
 
 Welcome to backend part of mika ! An hybrid monolithic and microservices backend apps.
 This project uses,
-- For Core backend app, uses [express.js](https://expressjs.com/) framework. 
-- For RPC and event messaging between services, [moleculer.js](https://moleculer.services) framework is used.
-- For database framework, this project uses [sequelize.js](http://docs.sequelizejs.com/).
+- [express.js](https://expressjs.com/) as primary web framework, used by core service.
+- [moleculer.js](https://moleculer.services) for RPC and event messaging between services.
+- [sequelize.js](http://docs.sequelizejs.com/) as database framework.
 
 ## Prerequisites
 Component below is needed to start mika backend app
@@ -19,7 +19,7 @@ Component below is needed to start mika backend app
 
 This project adhere strictly to standard.js style. 
 
-Please run `standard --fix` BEFORE committing any javascript source code.
+Please run `npm run standard` BEFORE committing any javascript source code.
 
 ## Migrations and Seeder
 Use sequelize cli to migrate database schema, all database configuration is stored in `configs/dbConfig.json` file.
@@ -30,6 +30,8 @@ npm run db-create
 
 # Migrations
 npm run db-migrate
+# Migrations undo
+npm run db-migrate-undo
 
 # Seeds
 npm run db-seed-development

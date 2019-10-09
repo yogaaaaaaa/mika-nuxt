@@ -21,6 +21,8 @@ const events = new EventEmitter2()
 const config = require('../configs/trxManagerConfig')
 const constants = require('./constants/trxManager')
 
+module.exports.constants = constants
+
 module.exports.transactionStatuses = constants.transactionStatuses
 module.exports.transactionSettlementStatuses = constants.transactionSettlementStatuses
 module.exports.tokenTypes = constants.tokenTypes
