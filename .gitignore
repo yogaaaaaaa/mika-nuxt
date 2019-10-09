@@ -97,3 +97,7 @@ captures
 cache*
 upload*
 _configs*
+
+# Common Runtime
+ecosystem.config.js
+.env

@@ -58,7 +58,7 @@ if (!baseConfig.version) {
       const shortHash = childProcess.execSync('git rev-parse --short HEAD').toString('utf8').trim()
       const timestamp = childProcess.execSync('git show -s --format=%ct HEAD').toString('utf8').trim()
       const commitDate = new Date(timestamp * 1000).toISOString()
-      baseConfig.version = `${baseConfig.name} ${branch}-${shortHash}-${revCount} ${commitDate}`
+      baseConfig.version = `${baseConfig.name} ${branch} ${shortHash} ${revCount} ${commitDate}`
     }
   } catch (error) {}
 }

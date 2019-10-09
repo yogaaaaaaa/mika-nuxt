@@ -16,6 +16,47 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.10.0] - 2019-10-09
+### Added
+  - Added `kumabank` transaction manager handler for testing card payment in development environment,
+    replacing `fairpay`
+### Changed
+  - Change version display in `development` environment
+    ```
+    [environment] [branch] [commitHash] [commitCount] [timestamp]
+    mika-v3-development andra-dev10-c0a6a5a-101 2019-09-26T04:42:05.000Z
+    ```
+  - Moved several ignore pattern from local `.gitignore` to global `.gitignore`
+### Fixed
+ - Fixed cannot associate/dissociate archived outlet
+ - Fixed missing `types` in `trx_props` caused by naming convention change
+   from `types` to `constants` (see version `3.9.0` changelog)
+ - Fixed invalid count with several GET entity. Caused by deep `where` parameter
+   without `required` parameter in parent
+   ```js
+   // Example: Query to get agent by merchant id. 
+   
+   // Parameter `where` is used as condition to include (or JOIN) merchant.
+   // If `required: true` is not included, findAllAndCountAll will return wrong count.
+   // Under the hood, `required: true` will force sequelize to use INNER JOIN instead
+   // of LEFT JOIN.
+   const query = {
+     model: models.agent,
+     include: [
+       {
+         model: models.outlet,
+         required: true // required should be included here
+         include: [
+           {
+             model: models.merchant
+             where: { id: currentMerchantId } // deep where
+           }
+         ]
+       }
+     ]
+   }
+   ```
+
 ## [3.9.0] - 2019-09-25
 ### Added
   - [__Feature__] Added password policy for users (`admin`, `merchantStaff`, `agent`) 
