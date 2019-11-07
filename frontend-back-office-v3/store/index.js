@@ -1,86 +1,83 @@
 export const state = () => ({
-  token: null,
-  merchants: [],
-  transactions: [],
-  totalPage: "",
-  api: "",
-  apiOutlet: "",
-  apiAgent: "",
-  apiTransaction: "",
-  apiMerchantStaff: "",
-  apiAcquirer: "",
-  admin: "",
-  user: "",
-  merchant: "",
-  outlet: "",
-  agent: "",
-  acquirerType: "",
-  acquirer: ""
-});
+  sidebar: false,
+  snackbarShow: false,
+  snackbarText: '',
+  snackbarType: '',
+  filterValue: null,
+  filterBy: null,
+  operator: null,
+  dateFilter: null,
+  confirmTitle: '',
+  confirmText: '',
+  confirmShow: false,
+  confirmColor: 'primary',
+  currentEdit: null,
+  filterArchived: null,
+  login: true,
+})
 
 export const mutations = {
-  setToken(state, token) {
-    state.token = token;
+  snackbarShow(state, v) {
+    state.snackbarShow = v
   },
-  setMerchants(state, merchants) {
-    console.log("isi mutation");
-    state.merchants = merchants;
+  snackbarText(state, v) {
+    state.snackbarText = v
   },
-  setMerchant(state, merchant) {
-    console.log("store merchant", merchant);
-    state.merchant = merchant;
+  snackbarType(state, v) {
+    state.snackbarType = v
   },
-  setOutlet(state, outlet) {
-    state.outlet = outlet;
+  filterBy(state, v) {
+    state.filterBy = v
   },
-  setTransactions(state, transactions) {
-    console.log("store transactions");
-    state.transactions = transactions;
+  operator(state, v) {
+    state.operator = v
   },
-  setAcquirerType(state, acquirerType) {
-    state.acquirerType = acquirerType;
+  filterValue(state, v) {
+    state.filterValue = v
   },
-  setAcquirer(state, acquirer) {
-    console.log("store acquirer", acquirer);
-    state.acquirer = acquirer;
+  filterArchived(state, v) {
+    state.filterArchived = v
   },
-  setApi(state, api) {
-    console.log("store api ", api);
-    state.api = api;
+  dateFilter(state, v) {
+    state.dateFilter = v
   },
-  setApiOutlet(state, apiOutlet) {
-    state.apiOutlet = apiOutlet;
+  confirmTitle(state, v) {
+    state.confirmTitle = v
   },
-  setApiAgent(state, apiAgent) {
-    state.apiAgent = apiAgent;
+  confirmText(state, v) {
+    state.confirmText = v
   },
-  setApiTransaction(state, apiTransaction) {
-    state.apiTransaction = apiTransaction;
+  confirmShow(state, v) {
+    state.confirmShow = v
   },
-  setApiMerchantStaff(state, apiMerchantStaff) {
-    state.apiMerchantStaff = apiMerchantStaff;
+  confirmColor(state, v) {
+    state.confirmColor = v
   },
-  setApiAcquirer(state, apiAcquirer) {
-    state.apiAcquirer = apiAcquirer;
+  currentEdit(state, v) {
+    state.currentEdit = v
   },
-  setAdmin(state, admin) {
-    state.admin = admin;
+  login(state, v) {
+    state.login = v
   },
-  setAgent(state, agent) {
-    state.agent = agent;
-  },
-  setUser(state, user) {
-    state.user = user;
-  }
-};
+}
 
-export const getters = {
-  isAuthenticated(state) {
-    console.log("isauthenticated", state.auth.loggedIn);
-    return state.auth.loggedIn;
+export const actions = {
+  showConfirm(context, p) {
+    context.commit('confirmShow', p.confirmShow || true)
+    context.commit('confirmTitle', p.confirmTitle || '')
+    context.commit(
+      'confirmText',
+      p.confirmText || 'Are you sure want to logout ?'
+    )
+    context.commit('confirmColor', 'warning')
+    context.commit('login', false)
   },
-  loggedInUser(state) {
-    console.log(state.auth.user);
-    return state.auth.user;
-  }
-};
+  clearFilter(context) {
+    context.commit('filterBy', null)
+    context.commit('operator', null)
+    context.commit('filterValue', null)
+    context.commit('filterArchived', null)
+  },
+}
+
+export const getters = {}
