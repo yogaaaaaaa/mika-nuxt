@@ -1,21 +1,17 @@
 <template>
-  <div id="main" style="margin-top: 30px">
-    <v-card class="pa-3">
-      <div class="title font-weight-light text--blue">
-        <v-icon color="blue">dashboard</v-icon>Dashboard
-      </div>
-    </v-card>
+  <div class="center">
+    <h1 class="display-1">
+      Dashboard
+    </h1>
   </div>
 </template>
 
-<script>
-export default {
-  middleware: "auth"
-};
-</script>
-
-<style scoped>
-.main {
-  padding: 2em;
+<style lang="scss" scoped>
+.center {
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

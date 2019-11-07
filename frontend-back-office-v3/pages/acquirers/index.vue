@@ -1,92 +1,153 @@
 <template>
-  <div id="acquirer">
-    <main-title :text="'List Acquirer'" :icon="'device_hub'" :show="false"/>
-    <v-card class="pa-4">
-      <table-acquirer
-        :acquirers="acquirers"
-        :api="api"
-        :filter="filterAcquirer"
-        :totalPage="totalPage"
-        :loading="loadingAcquirer"
-      />
+  <div>
+    <pageTitle
+      :title="`${$changeCase.titleCase(resource)} List`"
+      icon="supervisor_account"
+    ></pageTitle>
+    <v-card card flat>
+      <v-card-title>
+        <tableHeader
+          :filter="headers"
+          :btn-add-text="btnAddText"
+          :permission-role="permissionRole"
+          @showForm="modalAddForm = !modalAddForm"
+          @applyFilter="populateData"
+          @downloadCsv="downloadCsv"
+        />
+      </v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="items"
+        :options.sync="options"
+        :server-items-length="totalCount"
+        :loading="loading"
+        :footer-props="footerProps"
+        class="elevation-0 pa-2"
+      >
+        <template v-slot:item.name="{ item }">
+          <a @click="toDetail(item.id)">{{ item.name }}</a>
+        </template>
+        <template v-slot:item.createdAt="{ item }">{{
+          $moment(item.createdAt).format('YYYY-MM-DD')
+        }}</template>
+      </v-data-table>
     </v-card>
-    <button-add @dialog="form = !form"/>
-    <v-dialog v-model="form" width="700">
-      <form-acquirer
-        @close="form = false"
-        @refresh="getAcquirers()"
-        :aConfig="acquirerConfigs"
-        :acquirerType="acquirerTypes"
-      />
-    </v-dialog>
+    <dform
+      :show="modalAddForm"
+      @onClose="modalAddForm = false"
+      @onSubmit="submit"
+    ></dform>
   </div>
 </template>
 
 <script>
-import acquirerTable from "~/components/table/acquirers.vue";
-import addButton from "~/components/add.vue";
-import acquirerForm from "~/components/form/acquirer.vue";
-import mainTitle from "~/components/mainTitle.vue";
-import { mapState } from "vuex";
-import { filterHeader } from "~/mixins";
+import { catchError, tableMixin } from '~/mixins'
+import debounce from 'lodash/debounce'
+import { tableHeader, pageTitle } from '~/components/commons'
+import dform from '~/components/acquirers/dform'
 
 export default {
-  layout: "default-layout",
-  middleware: "auth",
   components: {
-    "table-acquirer": acquirerTable,
-    "button-add": addButton,
-    "form-acquirer": acquirerForm,
-    "main-title": mainTitle
+    tableHeader,
+    dform,
+    pageTitle,
   },
-  mixins: [filterHeader],
+  mixins: [catchError, tableMixin],
   data() {
     return {
-      acquirers: [],
-      form: false,
-      contoh: [],
-      acquirerConfigs: [],
-      acquirerTypes: [],
-      totalPage: 1,
-      loadingAcquirer: true
-    };
+      resource: 'acquirer',
+      url: '/back_office/acquirers',
+      btnAddText: 'Add Acquirer',
+      headers: [
+        {
+          text: 'Name',
+          align: 'left',
+          sortable: true,
+          value: 'name',
+        },
+        {
+          text: 'Merchant',
+          align: 'left',
+          sortable: true,
+          value: 'merchant.name',
+        },
+        {
+          text: 'Min Amount',
+          align: 'left',
+          sortable: true,
+          value: 'minimumAmount',
+        },
+        {
+          text: 'Max Amount',
+          align: 'left',
+          sortable: true,
+          value: 'maximumAmount',
+        },
+      ],
+      dataToDownload: [],
+      modalAddForm: false,
+      permissionRole: 'adminMarketing',
+    }
+  },
+  watch: {
+    options: {
+      handler: debounce(function() {
+        this.populateData()
+      }, 500),
+      deep: true,
+    },
   },
   mounted() {
-    this.getAcquirers();
-    this.getAcquirerConfigs();
-    this.getAcquirerType();
-  },
-  computed: {
-    ...mapState(["api"])
+    this.populateData()
   },
   methods: {
-    async getAcquirers() {
-      await this.$axios
-        .$get(`/api/back_office/acquirers?get_count=1`)
-        .then(r => {
-          this.acquirers = r.data;
-          this.loadingAcquirer = false;
-          this.$store.commit(
-            "setApi",
-            `/api/back_office/acquirers?get_count=1&page=`
-          );
-        });
+    async populateData() {
+      try {
+        this.loading = true
+        const queries = this.getQueries()
+        const response = await this.$axios.$get(this.url + queries)
+        this.totalCount = response.meta ? response.meta.totalCount : 0
+        this.items = response.data
+        this.generateDownload(this.items)
+        this.loading = false
+      } catch (e) {
+        this.catchError(e)
+      }
     },
-    async getAcquirerConfigs() {
-      this.acquirerConfigs = await this.$axios
-        .$get(`/api/back_office/acquirer_configs`)
-        .then(r => r.data)
-        .catch(e => console.log(e));
+    downloadCsv() {
+      this.csvExport(
+        `${this.$changeCase.titleCase(this.resource)}s`,
+        this.dataToDownload
+      )
     },
-    async getAcquirerType() {
-      this.acquirerTypes = await this.$axios
-        .$get(`/api/back_office/acquirer_types`)
-        .then(r => r.data)
-        .catch(e => console.log(e));
-    }
-  }
-};
+    generateDownload(data) {
+      data.map(d => {
+        this.dataToDownload.push({
+          name: d.name,
+          description: d.description,
+          created_at: this.$moment(d.created_at).format('YYYY-MM-DD HH:mm:ss'),
+          updated_at: this.$moment(d.updated_at).format('YYYY-MM-DD HH:mm:ss'),
+        })
+      })
+    },
+    async submit(data) {
+      try {
+        data.shareAcquirer = data.shareAcquirer / 100
+        data.shareMerchant = data.shareMerchant / 100
+        data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
+        data.sharePartner = data.sharePartner / 100
+        const response = await this.$axios.$post(this.url, data)
+        this.items.unshift(response.data)
+        this.showSnackbar('success', `${this.btnAddText} success`)
+      } catch (e) {
+        this.catchError(e)
+      }
+    },
+    toDetail(id) {
+      this.$router.push(`/${this.resource}s/${id}`)
+    },
+  },
+}
 </script>
 
-<style>
-</style>
+<style></style>

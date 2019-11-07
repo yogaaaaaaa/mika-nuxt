@@ -1,4 +1,4 @@
-import Vue from "vue";
-import DatePicker from "vue2-datepicker";
+import Vue from 'vue'
+import DatePicker from 'vue2-datepicker'
 
-Vue.use(DatePicker);
+Vue.component('date-picker', DatePicker)
