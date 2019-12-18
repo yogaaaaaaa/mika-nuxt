@@ -1,16 +1,16 @@
 <template>
   <div>
-    <pageTitle :title="`${$changeCase.titleCase(resource)} List`" icon="supervisor_account"></pageTitle>
     <v-card card flat>
       <v-card-title>
         <tableHeader
           :filter="headers"
           :btn-add-text="btnAddText"
           :permission-role="permissionRole"
-          :show-add-btn="showAddBtn"
           @showForm="modalAddForm = !modalAddForm"
           @applyFilter="populateData"
           @downloadCsv="downloadCsv"
+          @archived="populateData"
+          @unarchived="populateData"
         />
       </v-card-title>
       <v-data-table
@@ -19,53 +19,64 @@
         :options.sync="options"
         :server-items-length="totalCount"
         :loading="loading"
-        :footer-props="footerProps"
         class="elevation-0 pa-2"
+        :footer-props="footerProps"
       >
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.minimumAmount="{ item }">
-          <span
-            style="font-family: Roboto"
-          >{{ item.minimumAmount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
-        </template>
-        <template v-slot:item.maximumAmount="{ item }">
-          <span
-            style="font-family: Roboto"
-          >{{ item.maximumAmount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
-        </template>
-        <template
-          v-slot:item.createdAt="{ item }"
-        >{{ $moment(item.createdAt).format('YYYY-MM-DD') }}</template>
-        <template v-slot:item.archivedAt="{ item }" class="text-center">
-          <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
-          <span v-else>-</span>
+        <template v-slot:item.createdAt="{ item }">
+          {{ $moment(item.createdAt).format('YYYY-MM-DD') }}
         </template>
       </v-data-table>
     </v-card>
-    <dform :show="modalAddForm" @onClose="modalAddForm = false" @onSubmit="submit"></dform>
+    <v-dialog v-model="modalAddForm" fullscreen hide-overlay>
+      <v-card>
+        <v-toolbar color="primary" dark flat>
+          <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
+          <v-spacer />
+          <v-btn icon dark @click="modalAddForm = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="mt-5">
+          <formAdd
+            :form-field="formField"
+            :sm6="true"
+            :permission-role="permissionRole"
+            @close="modalAddForm = false"
+            @onSubmit="submit"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
-import { tableHeader, pageTitle } from '~/components/commons'
-import dform from '~/components/acquirers/dform'
+import { tableHeader, formAdd } from '~/components/commons'
+import formField from './formField'
 
 export default {
   components: {
     tableHeader,
-    dform,
-    pageTitle,
+    formAdd,
   },
   mixins: [catchError, tableMixin],
+  props: {
+    condirionalUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
   data() {
     return {
-      resource: 'acquirer',
-      url: '/back_office/acquirers',
-      btnAddText: 'Add Acquirer',
+      resource: 'acquirerConfigs',
+      url: '/back_office/acquirer_configs',
+      btnAddText: 'Add Acquirer Config',
       headers: [
         {
           text: 'Name',
@@ -74,38 +85,21 @@ export default {
           value: 'name',
         },
         {
-          text: 'Merchant',
+          text: 'Merchant Id',
           align: 'left',
-          sortable: true,
-          value: 'merchant.name',
-        },
-        {
-          text: 'Min Amount',
-          align: 'right',
-          sortable: true,
-          value: 'minimumAmount',
-        },
-        {
-          text: 'Max Amount',
-          align: 'right',
-          sortable: true,
-          value: 'maximumAmount',
+          value: 'merchantId',
         },
         {
           text: 'Created At',
+          align: 'left',
           sortable: true,
           value: 'createdAt',
-        },
-        {
-          text: 'Archived At',
-          sortable: true,
-          value: 'archivedAt',
         },
       ],
       dataToDownload: [],
       modalAddForm: false,
       permissionRole: 'adminMarketing',
-      showAddBtn: false,
+      formField: formField,
     }
   },
   watch: {
@@ -143,8 +137,14 @@ export default {
     generateDownload(data) {
       data.map(d => {
         this.dataToDownload.push({
+          id: d.id,
           name: d.name,
           description: d.description,
+          config: d.config,
+          handler: d.handler,
+          sandbox: d.sandbox,
+          merchantId: d.merchantId,
+          acquirerConfigKvs: d.acquirerConfigKvs,
           created_at: this.$moment(d.created_at).format('YYYY-MM-DD HH:mm:ss'),
           updated_at: this.$moment(d.updated_at).format('YYYY-MM-DD HH:mm:ss'),
         })
@@ -164,7 +164,7 @@ export default {
       }
     },
     toDetail(id) {
-      this.$router.push(`/${this.resource}s/${id}`)
+      this.$router.push(`/${this.resource}/${id}`)
     },
   },
 }

@@ -1,0 +1,25 @@
+.v-application {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+.breadcrumbs-wrapper{
+  width: 100%;
+  display: flex;
+  justify-content: flex-end
+}
+
+.link {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: #808080;
+  border-bottom: 1px;
+  border-bottom-color: #808080;
+  border-bottom-style: solid;
+  padding: 5px 0;
+}
+
+.link:hover {
+  cursor: pointer;
+}

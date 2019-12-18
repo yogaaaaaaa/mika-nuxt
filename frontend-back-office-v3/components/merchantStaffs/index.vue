@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <pageTitle title="Merchant List" icon="domain"></pageTitle>
+  <div class="mt-4">
     <v-card card flat>
       <v-card-title>
         <tableHeader
@@ -19,9 +18,9 @@
         :items="items"
         :options.sync="options"
         :server-items-length="totalCount"
+        :footer-props="footerProps"
         :loading="loading"
         class="elevation-0 pa-2"
-        :footer-props="footerProps"
       >
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
@@ -31,7 +30,7 @@
         >{{ $moment(item.createdAt).format('YYYY-MM-DD') }}</template>
         <template v-slot:item.archivedAt="{ item }">
           <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
-          <div v-else>-</div>
+          <span v-else>-</span>
         </template>
       </v-data-table>
     </v-card>
@@ -47,53 +46,65 @@
         <v-card-text class="mt-5">
           <formAdd
             :form-field="formField"
-            :initial-data="fakeData"
             :sm6="true"
             :permission-role="permissionRole"
-            :btn-show-archive="btnShowArchive"
             @close="modalAddForm = false"
             @onSubmit="submit"
           />
         </v-card-text>
       </v-card>
     </v-dialog>
+    <dialogPassword
+      :user="newUser"
+      :password="password"
+      :show="passwordDialog"
+      @onCopy="copied"
+      @onClose="passwordDialog = false"
+    />
   </div>
 </template>
 
 <script>
 import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
-import { tableHeader, formAdd, pageTitle } from '~/components/commons'
-import formField, { fakeData } from '~/components/merchants/formField'
+import { tableHeader, formAdd, dialogPassword } from '../commons'
+import formField from './formField'
 
 export default {
   components: {
     tableHeader,
     formAdd,
-    pageTitle,
+    dialogPassword,
   },
   mixins: [catchError, tableMixin],
+  props: {
+    conditionalUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
   data() {
     return {
-      url: '/back_office/merchants',
-      btnAddText: 'Add Merchant',
+      url: '/back_office/merchant_staffs',
+      titlePage: 'Merchant Staff List',
+      iconPage: 'perm_contact_calendar',
+      btnAddText: 'Add Merchant Staff',
       headers: [
-        {
-          text: 'Name',
-          align: 'left',
-          sortable: true,
-          value: 'name',
-        },
-        { text: 'Bank Name', value: 'bankName' },
-        { text: 'Date Created', value: 'createdAt' },
-        { text: 'Archived At', align: 'center', value: 'archivedAt' },
+        { text: 'Name', value: 'name', sortable: false },
+        { text: 'Id Card Number', value: 'idCardNumber', sortable: false },
+        { text: 'Id Card Type', value: 'idCardType', sortable: false },
+        { text: 'Created At', value: 'createdAt' },
+        { text: 'Archived At', value: 'archivedAt' },
       ],
       dataToDownload: [],
       modalAddForm: false,
       formField: formField,
-      fakeData: fakeData,
+      frontendUrl: `/merchantStaffs`,
       permissionRole: 'adminMarketing',
-      btnShowArchive: false,
+      newUser: '',
+      password: '',
+      passwordDialog: false,
     }
   },
   watch: {
@@ -112,9 +123,10 @@ export default {
     async populateData() {
       try {
         this.loading = true
-        this.dataToDownload = []
         const queries = this.getQueries()
-        const response = await this.$axios.$get(this.url + queries)
+        const response = await this.$axios.$get(
+          this.url + queries + this.conditionalUrl
+        )
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
         this.generateDownload(this.items)
@@ -123,50 +135,82 @@ export default {
         this.catchError(e)
       }
     },
+    toDetail(id) {
+      this.$router.push(`${this.frontendUrl}/${id}`)
+    },
     downloadCsv() {
-      this.csvExport('Merchants', this.dataToDownload)
+      this.csvExport(this.titlePage, this.dataToDownload)
     },
     generateDownload(data) {
       data.map(d => {
         this.dataToDownload.push({
           id: d.id,
           name: d.name,
-          shortName: d.shortName,
-          status: d.status,
+          username: d.user.username,
           email: d.email,
-          website: d.website,
+          idCardNumber: d.idCardNumber,
+          idCardType: d.idCardType,
+          occupation: d.occupation,
           phoneNumber: d.phoneNumber,
-          taxCardNumber: d.taxCardNumber,
-          bankName: d.bankName,
-          bankBranchName: d.bankBranchName,
-          bankAccountName: d.bankAccountName,
-          bankAccountNumber: d.bankAccountNumber,
-          ownerName: d.ownerName,
-          ownerOccupation: d.ownerOccupation,
-          ownerPhoneNumber: d.ownerPhoneNumber,
-          ownerIdCardNumber: d.ownerIdCardNumber,
-          ownerIdCardType: d.ownerIdCardType,
-          partnerId: d.partnerId,
-          created_at: this.$moment(d.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-          updated_at: this.$moment(d.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
-          archived_at: this.$moment(d.archivedAt).format('YYYY-MM-DD HH:mm:ss'),
+          streetAddress: d.streetAddress,
+          locacity: d.locacity,
+          district: d.district,
+          city: d.city,
+          province: d.province,
+          postalCode: d.postalCode,
+          merchantId: d.merchantId,
+          created_at: this.$moment(d.created_at).format('YYYY-MM-DD HH:mm:ss'),
+          updated_at: this.$moment(d.updated_at).format('YYYY-MM-DD HH:mm:ss'),
         })
       })
     },
     async submit(data) {
       try {
-        const response = await this.$axios.$post(this.url, data)
+        const postData = {
+          name: data.name,
+          description: data.description,
+          email: data.email,
+          idCardNumber: data.idCardNumber,
+          idCardType: data.idCardType,
+          locationLong: data.locationLong,
+          locationLat: data.locationLat,
+          occupation: data.occupation,
+          streetAddress: data.streetAddress,
+          locality: data.locality,
+          district: data.district,
+          city: data.city,
+          province: data.province,
+          postalCode: data.postalCode,
+          phoneNumber: data.phoneNumber,
+          merchantId: this.$route.params.id,
+          user: {
+            username: data.username,
+          },
+        }
+        const response = await this.$axios.$post(`${this.url}/`, postData)
         this.items.unshift(response.data)
-        this.showSnackbar('success', `${this.btnAddText} success`)
+        this.newUser = response.data.name
+        this.password = response.data.user.password
+        this.passwordDialog = true
+        if (response.status === 'ent-201') {
+          this.$store.commit('currentEdit', response.data)
+          this.showSnackbar('success', response.message)
+        }
       } catch (e) {
         this.catchError(e)
       }
     },
-    toDetail(id) {
-      this.$router.push(`/merchants/${id}`)
+    copied() {
+      this.showSnackbar('success', 'Copied !')
     },
   },
 }
 </script>
 
-<style></style>
+<style>
+.page-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+</style>

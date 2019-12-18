@@ -1,7 +1,7 @@
 <template>
   <div>
     <pageTitle title="Agent List" icon="person"></pageTitle>
-    <tableAgent />
+    <tableAgent :show-add-btn="showAddBtn"/>
   </div>
 </template>
 
@@ -13,6 +13,11 @@ export default {
   components: {
     tableAgent,
     pageTitle,
+  },
+  data() {
+    return {
+      showAddBtn: false,
+    }
   },
 }
 </script>
