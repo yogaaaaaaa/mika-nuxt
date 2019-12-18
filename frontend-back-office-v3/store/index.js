@@ -14,6 +14,7 @@ export const state = () => ({
   currentEdit: null,
   filterArchived: null,
   login: true,
+    globalLoading: false,
 })
 
 export const mutations = {
@@ -58,6 +59,9 @@ export const mutations = {
   },
   login(state, v) {
     state.login = v
+  },
+  globalLoading(state, v) {
+    state.globalLoading = v
   },
 }
 

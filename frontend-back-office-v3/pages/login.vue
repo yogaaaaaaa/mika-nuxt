@@ -1,0 +1,172 @@
+<template>
+  <v-img :src="imageBackground" cover class="background-image">
+    <v-container fill-height>
+      <v-layout align-center justify-center>
+        <v-card class="card-login">
+          <v-layout>
+            <v-flex lg6 md6>
+              <div class="logo">
+                <v-img
+                  src="/img/logonew.png"
+                  max-height="6vh"
+                  position="center"
+                  contain
+                  aspec-ratio="1"
+                />
+                <span class="title-backoffice text-blue">Mika Backoffice System</span>
+              </div>
+              <!-- </v-flex> -->
+              <!-- <v-flex lg6 md6 sm12> -->
+              <div class="right-side pa-10 mb-5">
+                <div>
+                  <h1 class="welcome text-blue">Selamat Datang</h1>
+                  <h3>Silahkan login terlebih dahulu</h3>
+                </div>
+                <v-form class="mt-5">
+                  <v-text-field
+                    v-model="username"
+                    prepend-inner-icon="person"
+                    outlined
+                    placeholder="username"
+                    single-line
+                    autofocus
+                  />
+                  <v-text-field
+                    v-model="password"
+                    prepend-inner-icon="lock"
+                    outlined
+                    single-line
+                    placeholder="password"
+                    :type="show1 ? 'text' : 'password'"
+                    :append-icon="show1 ? 'visibility' : 'visibility_off'"
+                    @click:append="show1 = !show1"
+                  />
+                  <span class="text-blue">Lupa password ?</span>
+                  <div class="mt-2">
+                    <v-btn color="primary" block x-large :loading="loading" @click="login">Login</v-btn>
+                    <confirmationBox
+                      :confirm-show="confirmShowExpired"
+                      :confirm-title="confirmTitleExpired"
+                      :confirm-text="confirmTextExpired"
+                      :confirm-color="'warning'"
+                      @onClose="confirmShowExpired = false"
+                      @onConfirm="toExpired"
+                    />
+                  </div>
+                </v-form>
+                <span>copyright</span>
+              </div>
+            </v-flex>
+            <v-flex class="hidden-sm-and-down px-6"></v-flex>
+          </v-layout>
+        </v-card>
+      </v-layout>
+    </v-container>
+  </v-img>
+</template>
+
+<script>
+import { catchError } from '~/mixins'
+import confirmationBox from '~/components/commons/confirmation'
+
+export default {
+  layout: 'login',
+  $_veeValidate: {
+    validator: 'new',
+  },
+  components: {
+    confirmationBox,
+  },
+  mixins: [catchError],
+  data: () => ({
+    username: '',
+    password: '',
+    show1: false,
+    loading: false,
+    confirmShowExpired: false,
+    imageBackground: require('~/static/img/Login-bg.png'),
+    confirmTitleExpired: 'Kata Sandi Kadaluarsa',
+    confirmTextExpired:
+      'Kata sandi yang dimasukan telah kadaluarsa. Anda harus mengubah kata sandi anda sekarang untuk bisa login!',
+  }),
+  mounted() {
+    const nodenv = process.env.NODE_ENV
+    if (nodenv === 'development') {
+      this.username = 'admin'
+      this.password = 'admin'
+    }
+  },
+  methods: {
+    submit() {
+      this.$validator.validateAll().then(result => {
+        if (result) {
+          this.login()
+          return
+        }
+      })
+    },
+    async login() {
+      try {
+        this.loading = true
+        await this.$auth.loginWith('local', {
+          data: {
+            username: this.username,
+            password: this.password,
+          },
+        })
+        this.$router.push('/')
+      } catch (e) {
+        this.loading = false
+        if (e.response.data.status == 'auth-420') {
+          this.confirmShowExpired = true
+          this.loading = false
+        }
+        this.catchError(e)
+      }
+    },
+    toExpired() {
+      this.confirmShowExpired = false
+      this.$router.push('/changePassword')
+    },
+  },
+}
+</script>
+<style lang="scss">
+.right-side {
+  // padding: 20px;
+  // display: flex;
+  // flex-direction: column;
+  // min-height: 70vh;
+  // justify-content: center;
+  /* align-items: center; */
+  color: #767f8b;
+  font-family: Nunito;
+}
+.card-login {
+  // height: 80;
+  width: 60%;
+}
+.background-image {
+  width: 100%;
+  height: 100vh;
+}
+.title-backoffice {
+  width: 312px;
+  height: 38px;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.36;
+  text-align: center;
+  margin-top: 0.5em;
+}
+.text-blue {
+  color: #27a3dd;
+}
+.logo {
+  display: flex;
+  flex-direction: column;
+  // justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+}
+</style>

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <pageTitle :title="`${$changeCase.titleCase(resource)} List`" icon="supervisor_account"></pageTitle>
     <v-card card flat>
       <v-card-title>
         <tableHeader
@@ -11,6 +10,8 @@
           @showForm="modalAddForm = !modalAddForm"
           @applyFilter="populateData"
           @downloadCsv="downloadCsv"
+          @archived="populateData"
+          @unarchived="populateData"
         />
       </v-card-title>
       <v-data-table
@@ -25,16 +26,6 @@
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.minimumAmount="{ item }">
-          <span
-            style="font-family: Roboto"
-          >{{ item.minimumAmount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
-        </template>
-        <template v-slot:item.maximumAmount="{ item }">
-          <span
-            style="font-family: Roboto"
-          >{{ item.maximumAmount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
-        </template>
         <template
           v-slot:item.createdAt="{ item }"
         >{{ $moment(item.createdAt).format('YYYY-MM-DD') }}</template>
@@ -44,23 +35,44 @@
         </template>
       </v-data-table>
     </v-card>
-    <dform :show="modalAddForm" @onClose="modalAddForm = false" @onSubmit="submit"></dform>
+    <dform
+      :initial-data="formField"
+      :show="modalAddForm"
+      @onClose="modalAddForm = false"
+      @onSubmit="submit"
+    ></dform>
   </div>
 </template>
 
 <script>
 import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
-import { tableHeader, pageTitle } from '~/components/commons'
+import { tableHeader } from '~/components/commons'
 import dform from '~/components/acquirers/dform'
+import formField from './formField'
 
 export default {
   components: {
     tableHeader,
     dform,
-    pageTitle,
   },
   mixins: [catchError, tableMixin],
+  props: {
+    conditionalUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    showAddBtn: {
+      type: Boolean,
+      default: false,
+    },
+    acquirerCompanyId: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
   data() {
     return {
       resource: 'acquirer',
@@ -81,31 +93,21 @@ export default {
         },
         {
           text: 'Min Amount',
-          align: 'right',
+          align: 'left',
           sortable: true,
           value: 'minimumAmount',
         },
         {
           text: 'Max Amount',
-          align: 'right',
+          align: 'left',
           sortable: true,
           value: 'maximumAmount',
-        },
-        {
-          text: 'Created At',
-          sortable: true,
-          value: 'createdAt',
-        },
-        {
-          text: 'Archived At',
-          sortable: true,
-          value: 'archivedAt',
         },
       ],
       dataToDownload: [],
       modalAddForm: false,
       permissionRole: 'adminMarketing',
-      showAddBtn: false,
+      formField: formField,
     }
   },
   watch: {
@@ -125,7 +127,9 @@ export default {
       try {
         this.loading = true
         const queries = this.getQueries()
-        const response = await this.$axios.$get(this.url + queries)
+        const response = await this.$axios.$get(
+          this.url + queries + this.conditionalUrl
+        )
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
         this.generateDownload(this.items)
@@ -156,9 +160,14 @@ export default {
         data.shareMerchant = data.shareMerchant / 100
         data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
         data.sharePartner = data.sharePartner / 100
+        data.acquirerCompanyId = this.acquirerCompanyId
+        console.log('acquirer company id', data)
         const response = await this.$axios.$post(this.url, data)
         this.items.unshift(response.data)
-        this.showSnackbar('success', `${this.btnAddText} success`)
+        if (response.status === 'ent-201') {
+          this.$store.commit('currentEdit', response.data)
+          this.showSnackbar('success', response.message)
+        }
       } catch (e) {
         this.catchError(e)
       }

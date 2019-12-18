@@ -1,16 +1,17 @@
 <template>
-  <div>
-    <pageTitle :title="`${$changeCase.titleCase(resource)} List`" icon="supervisor_account"></pageTitle>
+  <div class="mt-4">
     <v-card card flat>
       <v-card-title>
         <tableHeader
           :filter="headers"
           :btn-add-text="btnAddText"
+          :show-add-btn="showAddBtn"
           :permission-role="permissionRole"
           @showForm="modalAddForm = !modalAddForm"
           @applyFilter="populateData"
           @downloadCsv="downloadCsv"
           @archived="populateData"
+          @unarchived="populateData"
         />
       </v-card-title>
       <v-data-table
@@ -18,20 +19,21 @@
         :items="items"
         :options.sync="options"
         :server-items-length="totalCount"
+        :footer-props="footerProps"
         :loading="loading"
         class="elevation-0 pa-2"
       >
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.createdAt="{ item }">
-          {{
+        <template v-slot:item.createdAt="{ item }">{{
           $moment(item.createdAt).format('YYYY-MM-DD')
-          }}
-        </template>
-        <template v-slot:item.archivedAt="{ item }">
-          <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
-          <div v-else>-</div>
+        }}</template>
+        <template v-slot:item.archivedAt="{ item }" class="text-center">
+          <div v-if="item.archivedAt">
+            {{ $moment(item.archivedAt).format('YYYY-MM-DD') }}
+          </div>
+          <span v-else>-</span>
         </template>
       </v-data-table>
     </v-card>
@@ -39,7 +41,7 @@
       <v-card>
         <v-toolbar color="primary" dark flat>
           <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
-          <v-spacer/>
+          <v-spacer />
           <v-btn icon dark @click="modalAddForm = false">
             <v-icon>close</v-icon>
           </v-btn>
@@ -47,8 +49,6 @@
         <v-card-text class="mt-5">
           <formAdd
             :form-field="formField"
-            :with-top-toolbar="false"
-            :props-data="{ roles }"
             :permission-role="permissionRole"
             @close="modalAddForm = false"
             @onSubmit="submit"
@@ -57,7 +57,7 @@
       </v-card>
     </v-dialog>
     <dialogPassword
-      :user="newUser"
+      :user="newAgent"
       :password="password"
       :show="passwordDialog"
       @onCopy="copied"
@@ -69,62 +69,48 @@
 <script>
 import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
-import { tableHeader, formAdd, pageTitle } from '~/components/commons'
-import formField from '~/components/admins/formField'
-import dialogPassword from '~/components/commons/dialogPassword'
+import { tableHeader, formAdd, dialogPassword } from '../commons'
+import formField from './formField'
 
 export default {
   components: {
     tableHeader,
     formAdd,
-    pageTitle,
     dialogPassword,
   },
   mixins: [catchError, tableMixin],
+  props: {
+    conditionalUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    showAddBtn: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   data() {
     return {
-      resource: 'admin',
-      url: '/back_office/admins',
-      btnAddText: 'Add Admin',
+      url: '/back_office/agents',
+      titlePage: 'Agent List',
+      iconPage: 'person',
+      btnAddText: 'Add Merchant Agent',
       headers: [
-        {
-          text: 'Name',
-          align: 'left',
-          sortable: true,
-          value: 'name',
-        },
-        {
-          text: 'Username',
-          align: 'left',
-          sortable: true,
-          value: 'user.username',
-        },
-        {
-          text: 'Email',
-          align: 'left',
-          sortable: true,
-          value: 'email',
-        },
-        {
-          text: 'Register at',
-          align: 'left',
-          sortable: true,
-          value: 'createdAt',
-        },
-        {
-          text: 'Archived at',
-          sortable: true,
-          value: 'archivedAt',
-        },
+        { text: 'Name', value: 'name', sortable: false },
+        { text: 'Username', value: 'user.username', sortable: false },
+        { text: 'Created At', value: 'createdAt' },
+        { text: 'Archived At', value: 'archivedAt' },
       ],
       dataToDownload: [],
       modalAddForm: false,
       formField: formField,
-      roles: [],
-      permissionRole: 'adminHead',
-      passwordDialog: false,
+      frontendUrl: `/agents`,
+      permissionRole: 'adminMarketing',
+      newAgent: '',
       password: '',
-      newUser: '',
+      passwordDialog: false,
     }
   },
   watch: {
@@ -136,16 +122,23 @@ export default {
     },
   },
   mounted() {
-    this.populateData()
+    const index = this.formField.findIndex(d => d.key === 'outletId')
+    if (index != -1) {
+      let outletIdIndex = this.formField[index]
+      outletIdIndex.value = this.$route.params.id
+      this.formField.splice(index, 1, outletIdIndex)
+    }
     this.$store.dispatch('clearFilter')
-    this.getRoles()
+    this.populateData()
   },
   methods: {
     async populateData() {
       try {
         this.loading = true
         const queries = this.getQueries()
-        const response = await this.$axios.$get(this.url + queries)
+        const response = await this.$axios.$get(
+          this.url + queries + this.conditionalUrl
+        )
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
         this.generateDownload(this.items)
@@ -154,31 +147,18 @@ export default {
         this.catchError(e)
       }
     },
-    async getRoles() {
-      try {
-        const resp = await this.$axios
-          .$get('/utilities/auth_props')
-          .then(res => res.data)
-        const tmp = Object.values(resp.userRoleTypes)
-        this.roles = this.changeCase(tmp)
-      } catch (e) {
-        this.catchError(e)
-      }
+    toDetail(id) {
+      this.$router.push(`${this.frontendUrl}/${id}`)
     },
     downloadCsv() {
-      this.csvExport(
-        `${this.$changeCase.titleCase(this.resource)}s`,
-        this.dataToDownload
-      )
+      this.csvExport(this.titlePage, this.dataToDownload)
     },
     generateDownload(data) {
       data.map(d => {
         this.dataToDownload.push({
+          id: d.id,
           name: d.name,
-          email: d.email,
           username: d.user.username,
-          roles: d.user.userRoles.join(', '),
-          description: d.description,
           created_at: this.$moment(d.created_at).format('YYYY-MM-DD HH:mm:ss'),
           updated_at: this.$moment(d.updated_at).format('YYYY-MM-DD HH:mm:ss'),
         })
@@ -186,47 +166,42 @@ export default {
     },
     async submit(data) {
       try {
-        const roles = this.changeCamelCase(data.userRoles)
         const postData = {
           name: data.name,
-          email: data.email,
+          generalLocationLong: data.generalLocationLong,
+          generalLocationLat: data.generalLocationLat,
           description: data.description,
+          outletId: data.outletId,
           user: {
             username: data.username,
-            userRoles: roles,
+            password: data.password,
           },
         }
         const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)
-        this.newUser = response.data.name
+        this.newAgent = response.data.name
         this.password = response.data.user.password
         this.passwordDialog = true
-        console.log(response.status)
-        if (response.status === 'sys-200') {
-          console.log(response)
-          this.showSnackbar('success', 'Berhasil menambahkan admin baru')
-          // this.showSnackbar('success', `${this.btnAddText} success`)
+        if (response.status === 'ent-201') {
+          this.$store.commit('currentEdit', response.data)
+          this.showSnackbar('success', response.message)
         }
       } catch (e) {
+        console.log('error')
         this.catchError(e)
       }
     },
-    toDetail(id) {
-      this.$router.push(`/${this.resource}s/${id}`)
-    },
     copied() {
       this.showSnackbar('success', 'Copied !')
-    },
-    changeCase(value) {
-      const val = value.map(x => this.$changeCase.titleCase(x))
-      return val
-    },
-    changeCamelCase(value) {
-      const val = value.map(x => this.$changeCase.camelCase(x))
-      return val
     },
   },
 }
 </script>
 
-<style></style>
+<style>
+.page-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+</style>
