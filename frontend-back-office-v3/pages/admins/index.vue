@@ -18,6 +18,7 @@
         :items="items"
         :options.sync="options"
         :server-items-length="totalCount"
+        :footer-props="footerProps"
         :loading="loading"
         class="elevation-0 pa-2"
       >
@@ -148,7 +149,6 @@ export default {
         const response = await this.$axios.$get(this.url + queries)
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
@@ -166,8 +166,12 @@ export default {
       }
     },
     downloadCsv() {
+      this.generateDownload(this.items)
+      console.log('apa ini')
       this.csvExport(
-        `${this.$changeCase.titleCase(this.resource)}s`,
+        `Mika Admin Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
         this.dataToDownload
       )
     },

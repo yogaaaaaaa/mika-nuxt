@@ -1,6 +1,6 @@
 <template>
   <div>
-    <pageTitle :title="`${$changeCase.titleCase(resource)} List`" icon="supervisor_account"></pageTitle>
+    <pageTitle :title="`${$changeCase.titleCase(resource)} List`" icon="account_balance"></pageTitle>
     <v-card card flat>
       <v-card-title>
         <tableHeader
@@ -128,17 +128,20 @@ export default {
         const response = await this.$axios.$get(this.url + queries)
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
       }
     },
     downloadCsv() {
+      this.generateDownload(this.items)
       this.csvExport(
-        `${this.$changeCase.titleCase(this.resource)}s`,
+        `Mika Acquirer Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
         this.dataToDownload
       )
+      this.dataToDownload = []
     },
     generateDownload(data) {
       data.map(d => {

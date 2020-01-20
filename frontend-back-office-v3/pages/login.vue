@@ -54,7 +54,11 @@
                     />
                   </div>
                 </v-form>
-                <span>copyright</span>
+                <div class="section-copy-right">
+                  <div class="copyright">
+                    <span>Copyright © 2019 PT. Mika Informatika Indonesia. All Right Reserved</span>
+                  </div>
+                </div>
               </div>
             </v-flex>
             <v-flex class="hidden-sm-and-down px-6"></v-flex>
@@ -168,5 +172,19 @@ export default {
   // justify-content: center;
   align-items: center;
   padding-top: 20px;
+}
+.section-copy-right {
+  min-height: 7vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.copyright {
+  font-size: 0.8em;
+  font-weight: 600;
+  text-align: center;
+  color: #767f8b;
+  display: flex;
+  align-items: flex-end;
 }
 </style>

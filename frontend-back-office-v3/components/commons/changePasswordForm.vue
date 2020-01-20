@@ -8,8 +8,10 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="form" v-model="valid" lazy-validation class="mt-3 mb-3">
+            <span>{{text}}</span>
             <v-text-field
               v-model="oldPassword"
+              class="mt-2"
               rounded
               prepend-inner-icon="lock"
               outlined
@@ -80,7 +82,6 @@
   </div>
 </template>
 
-// password for nicorobin: SRY3rx15R8
 <script>
 import { catchError } from '~/mixins'
 export default {
@@ -89,6 +90,11 @@ export default {
     show: {
       type: Boolean,
       required: true,
+    },
+    text: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {

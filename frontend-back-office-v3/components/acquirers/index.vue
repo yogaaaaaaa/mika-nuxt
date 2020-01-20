@@ -132,17 +132,20 @@ export default {
         )
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
       }
     },
     downloadCsv() {
+      this.generateDownload(this.items)
       this.csvExport(
-        `${this.$changeCase.titleCase(this.resource)}s`,
+        `Mika Acquirer Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
         this.dataToDownload
       )
+      this.dataToDownload = {}
     },
     generateDownload(data) {
       data.map(d => {

@@ -47,7 +47,6 @@
         <v-card-text class="mt-5">
           <formAdd
             :form-field="formField"
-            :initial-data="fakeData"
             :sm6="true"
             :permission-role="permissionRole"
             :btn-show-archive="btnShowArchive"
@@ -117,14 +116,20 @@ export default {
         const response = await this.$axios.$get(this.url + queries)
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
       }
     },
     downloadCsv() {
-      this.csvExport('Merchants', this.dataToDownload)
+      this.generateDownload(this.items)
+      this.csvExport(
+        `Mika Merchant Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
+        this.dataToDownload
+      )
+      this.dataToDownload = {}
     },
     generateDownload(data) {
       data.map(d => {
@@ -155,7 +160,27 @@ export default {
     },
     async submit(data) {
       try {
-        const response = await this.$axios.$post(this.url, data)
+        const postData = {
+          bankAccountName: data.bankAccountName,
+          bankAccountNumber: data.bankAccountNumber,
+          bankBranchName: data.bankBranchName,
+          bankName: data.bankName,
+          companyForm: data.companyForm,
+          description: data.description,
+          email: data.email,
+          name: data.name,
+          ownerEmail: data.ownerEmail,
+          ownerIdCardNumber: data.ownerIdCardNumber,
+          ownerIdCardType: data.ownerIdCardType,
+          ownerName: data.ownerName,
+          ownerOccupation: data.ownerOccupation,
+          ownerPhoneNumber: data.ownerPhoneNumber,
+          ownerTaxCardNumber: data.ownerTaxCardNumber,
+          phoneNumber: data.phoneNumber,
+          taxCardNumber: data.taxCardNumber,
+          website: data.website,
+        }
+        const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)
         this.showSnackbar('success', `${this.btnAddText} success`)
       } catch (e) {

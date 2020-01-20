@@ -6,15 +6,53 @@
           <v-img src="/img/logo_horizontal_putih.png" width="100px"/>
         </v-toolbar-title>
       </v-toolbar>
+
       <v-list>
-        <v-list-item v-for="(item, i) in items" :key="i" :to="item.to" router exact>
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.text"/>
-          </v-list-item-content>
-        </v-list-item>
+        <template v-for="item in items">
+          <!-- <v-row v-if="item.heading" :key="item.heading" align="center">
+            <v-col cols="6">
+              <v-subheader v-if="item.heading">{{ item.heading }}</v-subheader>
+            </v-col>
+            <v-col cols="6" class="text-center">
+              <a href="#!" class="body-2 black--text">EDIT</a>
+            </v-col>
+          </v-row>-->
+          <v-list-group v-if="item.children" :key="item.text" v-model="item.model" append-icon>
+            <template v-slot:activator>
+              <v-list-item class="pa-0" :to="item.to">
+                <v-list-item-action>
+                  <v-icon>{{ item.icon }}</v-icon>
+                </v-list-item-action>
+                <v-list-item-content>
+                  <v-list-item-title>{{ item.text }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+            <v-list-item
+              v-for="(child, i) in item.children"
+              :key="i"
+              :to="child.to"
+              link
+              append-icon
+              class="pl-8"
+            >
+              <v-list-item-action v-if="child.icon" class="ml-8 pa-0">
+                <v-icon>{{ child.icon }}</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title class="pl-0">{{ child.text }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-group>
+          <v-list-item v-else :key="item.text" :to="item.to" link>
+            <v-list-item-action>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.text }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app flat color="primary" dark>
@@ -59,8 +97,14 @@
       :confirm-show="confirmationLogout"
       :confirm-title="logoutTitle"
       :confirm-color="logoutColor"
+      :confirm-text="confirmationLogoutText"
       @onClose="confirmationLogout = false"
       @onConfirm="logout"
+    />
+    <changePasswordForm
+      :show="showChangePasswordForm"
+      @onClose="showChangePasswordForm = false"
+      :text="changePasswordText"
     />
     <changePasswordForm :show="showChangePasswordForm" @onClose="showChangePasswordForm = false"/>
   </v-app>
@@ -70,17 +114,17 @@
 import {
   snackbar,
   // confirmationBox,
-  changePasswordForm
-} from "~/components/commons";
-import confirmation from "~/components/commons/confirmation";
-import { mapState } from "vuex";
+  changePasswordForm,
+} from '~/components/commons'
+import confirmation from '~/components/commons/confirmation'
+import { mapState } from 'vuex'
 
 export default {
   components: {
     snackbar,
     // confirmationBox,
     confirmation,
-    changePasswordForm
+    changePasswordForm,
   },
   data() {
     return {
@@ -89,14 +133,43 @@ export default {
       fixed: true,
       showChangePasswordForm: false,
       confirmationLogout: false,
+      confirmationLogoutText: 'Are you want to logout ?',
+      changePasswordText:
+        'Demi keamanan dan kenyamanan, silahkan ganti password anda!',
       items: [
         { icon: "supervisor_account", text: "Admins", to: "/admins" },
         { icon: "domain", text: "Merchants", to: "/merchants" },
         { icon: "store", text: "Outlets", to: "/outlets" },
         {
-          icon: "account_balance",
-          text: "Acquirers",
-          to: "/acquirers"
+          icon: 'account_balance',
+          text: 'Acquirers',
+          // to: '/acquirers',
+          children: [
+            {
+              text: 'List Acquirer',
+              to: '/acquirers',
+            },
+            {
+              text: 'Acquirer Types',
+              to: '/acquirerTypes',
+            },
+            {
+              text: 'Acquirer Configs',
+              to: '/acquirerConfigs',
+            },
+            // {
+            //   text: 'Acquirer Config Agents',
+            //   to: '/acquirerConfigAgents',
+            // },
+            // {
+            //   text: 'Acquirer Config Outlets',
+            //   to: '/acquirerConfigOutlets',
+            // },
+            {
+              text: 'Acquirer Terminals',
+              to: '/acquirerTerminals',
+            },
+          ],
         },
         { icon: "person", text: "Agents", to: "/agents" },
         {
@@ -105,24 +178,75 @@ export default {
           to: "/transactions"
         },
         {
-          icon: "home",
-          text: "Acquirer Companies",
-          to: "/acquirerCompanies"
+          icon: 'home',
+          text: 'Acquirer Companies',
+          to: '/acquirerCompanies',
         },
+        // {
+        //   icon: 'people_outline',
+        //   text: 'Partners',
+        //   to: '/partners',
+        // },
         {
-          icon: "tap_and_play",
-          text: "Terminal Models",
-          to: "/terminalModels"
+          icon: 'keyboard_arrow_down',
+          text: 'Terminal',
+          // to: '/terminalModels',
+          children: [
+            {
+              icon: 'delete',
+              text: 'Procurement',
+              to: '/',
+            },
+            {
+              icon: 'add',
+              text: 'Batches',
+              to: '/terminalModels',
+            },
+            {
+              text: 'Inventory',
+              to: '/inventories',
+            },
+            {
+              text: 'Deliveries',
+              to: '/deliveries',
+            },
+            {
+              text: 'Tickets',
+              to: '/tickets',
+            },
+          ],
         },
+        // {
+        //   icon: 'credit_card',
+        //   text: 'Cards',
+        //   children: [
+        //     {
+        //       text: 'Card IIN',
+        //       to: '/cards/iins',
+        //     },
+        //     {
+        //       text: 'Card Types',
+        //       to: '/cards/types',
+        //     },
+        //     {
+        //       text: 'Card Issuer',
+        //       to: '/cards/issuers',
+        //     },
+        //     {
+        //       text: 'Card Scheme',
+        //       to: '/cards/schemes',
+        //     },
+        //   ],
+        // },
         {
-          icon: "bug_report",
-          text: "Fraud Rules",
-          to: "/fraudRules"
-        }
+          icon: 'bug_report',
+          text: 'Fraud Rules',
+          to: '/fraudRules',
+        },
       ],
-      logoutTitle: "Are you want to logout ?",
-      logoutColor: "warning"
-    };
+      logoutTitle: 'Logout ?',
+      logoutColor: 'warning',
+    }
   },
   computed: {
     user() {
@@ -134,7 +258,12 @@ export default {
     this.$store.dispatch("clearFilter");
   },
   mounted() {
-    this.$store.commit("login", true);
+    this.$store.commit('login', true)
+    if (this.user.user.lastPasswordChangeAt == null) {
+      console.log('last password')
+      this.checkPassword()
+    }
+    console.log('user', this.user)
   },
   methods: {
     async logout() {
@@ -142,8 +271,11 @@ export default {
       this.$router.push("/login");
     },
     showConfirm() {
-      this.confirmationLogout = true;
-    }
-  }
-};
+      this.confirmationLogout = true
+    },
+    checkPassword() {
+      this.showChangePasswordForm = true
+    },
+  },
+}
 </script>

@@ -129,7 +129,6 @@ export default {
         )
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
@@ -139,7 +138,13 @@ export default {
       this.$router.push(`${this.frontendUrl}/${id}`)
     },
     downloadCsv() {
-      this.csvExport(this.titlePage, this.dataToDownload)
+      this.generateDownload(this.items)
+      this.csvExport(
+        `Mika Merchant Staff Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
+        this.dataToDownload
+      )
     },
     generateDownload(data) {
       data.map(d => {

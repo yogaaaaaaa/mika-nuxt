@@ -28,7 +28,7 @@
           />
         </div>
         <div v-else>
-          <v-text-field v-model="filterValue" />
+          <v-text-field v-model="filterValue"/>
         </div>
       </v-flex>
       <v-flex md3 sm6 sx12>
@@ -43,7 +43,7 @@
       </v-flex>
     </v-layout>
     <v-toolbar flat style="margin-top: -25px; margin-bottom: 10px">
-      <v-spacer />
+      <v-spacer/>
       <tooltip
         v-if="showArchiveBtn && !showUnarchivedBtn"
         icon="archive"
@@ -56,16 +56,8 @@
         tooltip-text="Show Unarchived Data"
         @onClick="unarchived"
       />
-      <tooltip
-        icon="cloud_download"
-        tooltip-text="Download as CSV"
-        @onClick="confirmDownload"
-      />
-      <tooltip
-        icon="refresh"
-        tooltip-text="Clear Filter"
-        @onClick="clearFilter"
-      />
+      <tooltip icon="cloud_download" tooltip-text="Download as CSV" @onClick="confirmDownload"/>
+      <tooltip icon="refresh" tooltip-text="Clear Filter" @onClick="clearFilter"/>
       <tooltip
         icon="check"
         tooltip-text="Apply Filter"
@@ -80,7 +72,7 @@
       />
     </v-toolbar>
     <v-divider></v-divider>
-    <confirmationBox v-if="login == true" @onConfirm="downloadCsv" />
+    <confirmationBox v-if="login == true" @onConfirm="downloadCsv"/>
   </v-container>
 </template>
 
@@ -130,7 +122,7 @@ export default {
         { text: '>=', value: 'gte' },
         { text: '<=', value: 'lte' },
       ],
-      selectedOperator: {},
+      selectedOperator: { text: 'like', value: 'like' },
       filterValue: '',
       filterArchived: '',
       date1: null,
@@ -170,7 +162,6 @@ export default {
         f.value !== 'createdAt' &&
         f.value !== 'archivedAt'
     )
-    this.$store.commit('operator', 'like')
   },
   methods: {
     applyFilter() {
@@ -217,7 +208,7 @@ export default {
     },
     async onFilterValueChange(searchFilter) {
       this.$store.commit('filterBy', searchFilter)
-      this.$store.commit('operator', 'eq')
+      this.$store.commit('operator', 'like')
       this.filterValues = await this.getTransactionFilter(searchFilter)
     },
     async getTransactionFilter(val) {

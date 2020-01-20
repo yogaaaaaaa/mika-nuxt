@@ -31,6 +31,10 @@ export default {
       },
       {
         rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css?family=Nunito&display=swap',
+      },
+      {
+        rel: 'stylesheet',
         href: '/css/style.css',
       },
     ],

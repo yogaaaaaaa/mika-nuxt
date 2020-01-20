@@ -5,7 +5,12 @@
         <v-row align="center" class="justify-center">
           <v-col class="text-center" cols="4">
             <div class="my-2">
-              <v-btn color="warning" block @click="confirmShowLogin = true">
+              <v-btn
+                color="warning"
+                block
+                @click="confirmShowLogin = true"
+                :disabled="checkBlocked(currentEdit.user) == true"
+              >
                 <v-icon left>settings_backup_restore</v-icon>
                 <span class="font-weight-black">Buka Blokir</span>
               </v-btn>
@@ -91,12 +96,11 @@ export default {
     ...mapState(['currentEdit']),
   },
   methods: {
-    checkBlocked() {
-      if (this.currentEdit.user.failedLoginAttempt > 6) {
-        console.log('failed login ', this.currentEdit.user.failedLoginAttempt)
+    checkBlocked(params) {
+      if (params.failedLoginAttempt > 5) {
+        console.log(params.failedLoginAttempt)
         return false
       }
-      console.log('failed', this.currentEdit.user.failedLoginAttempt)
       return true
     },
     async setPassword() {
