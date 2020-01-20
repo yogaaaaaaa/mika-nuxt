@@ -156,6 +156,10 @@
               <span class="font-weight-black">Unarchive</span>
             </v-btn>
           </div>
+          <v-btn class="mr-2" color="warning" @click="onReset" v-if="created == false">
+            <v-icon left>refresh</v-icon>
+            <span class="font-weight-black">Reset</span>
+          </v-btn>
           <v-btn color="primary" @click="submit">
             <v-icon left>save</v-icon>
             <span class="font-weight-black">Save</span>
@@ -310,6 +314,9 @@ export default {
     unarchived() {
       this.$emit('unarchived')
       this.confirmShowUnarchive = false
+    },
+    onReset() {
+      this.formData = {}
     },
   },
 }

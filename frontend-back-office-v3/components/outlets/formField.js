@@ -37,7 +37,7 @@ export default [
     fieldType: 'text',
     rules: '',
     type: 'point',
-    value: '',
+    value: 0,
   },
   {
     key: 'locationLat',
@@ -45,7 +45,7 @@ export default [
     fieldType: 'text',
     rules: '',
     type: 'point',
-    value: '',
+    value: 0,
   },
   {
     key: 'streetAddress',
