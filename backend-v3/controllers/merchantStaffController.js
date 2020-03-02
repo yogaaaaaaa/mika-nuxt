@@ -1,187 +1,79 @@
 'use strict'
 
-const msg = require('../libs/msg')
-const auth = require('../libs/auth')
-const models = require('../models')
+const crudGenerator = require('./helpers/crudGenerator')
+const userCrudGenerator = require('./helpers/userCrudGenerator')
+const merchantStaffValidator = require('validators/merchantStaffValidator')
 
-const userHelper = require('./helpers/userHelper')
-
-const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
-const errorMiddleware = require('../middlewares/errorMiddleware')
-
-const merchantStaffValidator = require('../validators/merchantStaffValidator')
-
-module.exports.getMerchantStaff = async (req, res, next) => {
-  const merchantStaff = await models.merchantStaff
-    .scope('merchantStaff')
-    .findByPk(req.auth.merchantStaffId)
-
-  if (!merchantStaff) throw Error('merchantStaff should be exist')
-
-  msg.expressGetEntityResponse(
-    res,
-    merchantStaff
-  )
-}
-
-module.exports.createMerchantStaff = async (req, res, next) => {
-  let user
-  let merchantStaff
-
-  let createdMerchantStaff
-  let generatedPassword
-
-  await models.sequelize.transaction(async t => {
-    user = models.user.build(req.body.user)
-    generatedPassword = await auth.resetPassword(user, req.query.humane_password)
-    await user.save({ transaction: t })
-
-    merchantStaff = models.merchantStaff.build(req.body)
-    merchantStaff.userId = user.id
-    await merchantStaff.save({ transaction: t })
-
-    createdMerchantStaff = await models.merchantStaff
-      .scope('admin')
-      .findByPk(merchantStaff.id, { transaction: t })
-    createdMerchantStaff = createdMerchantStaff.toJSON()
-    createdMerchantStaff.user.password = generatedPassword
-  })
-  msg.expressCreateEntityResponse(
-    res,
-    createdMerchantStaff
-  )
-}
-
-module.exports.getMerchantStaffs = async (req, res, next) => {
-  let scopedMerchantStaff = req.applySequelizeCommonScope(models.merchantStaff.scope('admin'))
-  const query = { where: {} }
-
-  if (req.params.merchantStaffId) {
-    query.where.id = req.params.merchantStaffId
-    msg.expressGetEntityResponse(
-      res,
-      await scopedMerchantStaff.findOne(query)
-    )
-  } else {
-    scopedMerchantStaff =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          scopedMerchantStaff
-        )
-      )
-    if (req.query.get_count) {
-      const merchantStaffs = await scopedMerchantStaff.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        merchantStaffs.rows,
-        merchantStaffs.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(
-        res,
-        await scopedMerchantStaff.findAll(query)
-      )
-    }
-  }
-}
-
-module.exports.updateMerchantStaff = async (req, res, next) => {
-  const scopedMerchantStaff = models.merchantStaff.scope('adminUpdate')
-  let merchantStaff
-
-  let updated = false
-  let found = false
-
-  await models.sequelize.transaction(async t => {
-    merchantStaff = await scopedMerchantStaff.findByPk(req.params.merchantStaffId, { transaction: t })
-    if (merchantStaff) {
-      found = true
-
-      if (req.body.user) {
-        Object.assign(merchantStaff.user, req.body.user)
-        await auth.checkPasswordUpdate(merchantStaff.user)
-        delete req.body.user
-
-        if (merchantStaff.user.changed()) updated = true
-        await merchantStaff.user.save({ transaction: t })
-      }
-
-      Object.assign(merchantStaff, req.body)
-
-      if (req.body.archivedAt === true || req.body.archivedAt === false) {
-        merchantStaff.setDataValue('archivedAt', req.body.archivedAt ? new Date() : null)
-      }
-
-      if (merchantStaff.changed()) updated = true
-      await merchantStaff.save({ transaction: t })
-
-      if (updated) {
-        merchantStaff = await models.merchantStaff.scope('admin').findByPk(merchantStaff.id, { transaction: t })
-        await auth.removeAuthByUserId(merchantStaff.userId)
-      }
+module.exports.getMerchantStaffMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'merchantStaff',
+    modelScope: 'merchantStaff',
+    onlySingleRead: true,
+    identifierSource: {
+      path: 'auth.merchantStaffId',
+      as: 'id'
     }
   })
-
-  msg.expressUpdateEntityResponse(
-    res,
-    updated,
-    merchantStaff,
-    found
-  )
-}
-
-module.exports.deleteMerchantStaff = async (req, res, next) => {
-  const scopedMerchantStaff = models.merchantStaff.scope('admin', 'paranoid')
-  let merchantStaff
-
-  await models.sequelize.transaction(async t => {
-    merchantStaff = await scopedMerchantStaff.findByPk(req.params.merchantStaffId, { transaction: t })
-    if (merchantStaff) {
-      await merchantStaff.destroy({ force: true, transaction: t })
-      if (merchantStaff.user) {
-        await merchantStaff.user.destroy({ force: true, transaction: t })
-      }
-      await auth.removeAuthByUserId(merchantStaff.userId)
-    }
-  })
-
-  msg.expressDeleteEntityResponse(
-    res,
-    merchantStaff
-  )
-}
-
-module.exports.resetMerchantStaffPassword =
-  userHelper.createResetUserPasswordHandler('merchantStaff')
+]
 
 module.exports.createMerchantStaffMiddlewares = [
   merchantStaffValidator.bodyCreate,
-  errorMiddleware.validatorErrorHandler,
-  exports.createMerchantStaff,
-  errorMiddleware.sequelizeErrorHandler
+  userCrudGenerator.generateCreateUserController({
+    modelName: 'merchantStaff',
+    modelScopeResponse: 'admin'
+  })
+]
+
+module.exports.getMerchantStaffsMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'merchantStaff',
+    modelScope: 'admin',
+    identifierSource: {
+      path: 'params.merchantStaffId',
+      as: 'id',
+      type: 'int'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['merchantStaff']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: ['merchantStaff', 'user']
+    }
+  })
 ]
 
 module.exports.updateMerchantStaffMiddlewares = [
   merchantStaffValidator.bodyUpdate,
-  errorMiddleware.validatorErrorHandler,
-  exports.updateMerchantStaff,
-  errorMiddleware.sequelizeErrorHandler
-]
-
-module.exports.getMerchantStaffsMiddlewares = [
-  queryToSequelizeMiddleware.commonValidator,
-  queryToSequelizeMiddleware.paginationValidator(['merchantStaff']),
-  queryToSequelizeMiddleware.filterValidator(['merchantStaff', 'user']),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.common,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  module.exports.getMerchantStaffs
+  userCrudGenerator.generateUpdateUserController({
+    modelName: 'merchantStaff',
+    modelScopeResponse: 'admin',
+    identifierSource: {
+      path: 'params.merchantStaffId',
+      as: 'id',
+      type: 'int'
+    }
+  })
 ]
 
 module.exports.deleteMerchantStaffMiddlewares = [
-  module.exports.deleteMerchantStaff,
-  errorMiddleware.sequelizeErrorHandler
+  userCrudGenerator.generateDeleteUserController({
+    modelName: 'merchantStaff',
+    identifierSource: {
+      path: 'params.merchantStaffId',
+      as: 'id',
+      type: 'int'
+    }
+  })
+]
+
+module.exports.resetMerchantStaffPasswordMiddlewares = [
+  userCrudGenerator.generateResetUserPasswordController({
+    modelName: 'merchantStaff',
+    identifierSource: {
+      path: 'params.merchantStaffId',
+      as: 'id',
+      type: 'int'
+    }
+  })
 ]

@@ -1,7 +1,9 @@
 'use strict'
 
-const kv = require('./helpers/kv')
+const cipherbox = require('libs/cipherbox')
 const query = require('./helpers/query')
+
+const { transactionStatuses } = require('libs/trxManager/constants')
 
 module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
@@ -10,15 +12,14 @@ module.exports = (sequelize, DataTypes) => {
   const transaction = sequelize.define('transaction', {
     id: {
       primaryKey: true,
-      type: DataTypes.CHAR(27)
+      type: DataTypes.STRING(27)
     },
 
-    idAlias: DataTypes.CHAR(40),
+    idAlias: DataTypes.STRING(40),
 
     amount: DataTypes.DECIMAL(28, 2),
 
-    status: DataTypes.CHAR(32),
-    settlementStatus: DataTypes.CHAR(32),
+    status: DataTypes.STRING(32),
 
     token: DataTypes.STRING,
     tokenType: DataTypes.STRING,
@@ -26,60 +27,120 @@ module.exports = (sequelize, DataTypes) => {
     userToken: DataTypes.STRING,
     userTokenType: DataTypes.STRING,
 
+    reference: DataTypes.STRING,
+    referenceName: DataTypes.STRING,
+
+    // Deprecated
+    referenceNumber: {
+      type: new DataTypes.VIRTUAL(DataTypes.STRING, ['reference']),
+      get () {
+        return this.get('reference')
+      }
+    },
+
     customerReference: DataTypes.STRING,
     customerReferenceName: DataTypes.STRING,
-    referenceNumber: DataTypes.STRING,
-    referenceNumberName: DataTypes.STRING,
 
-    cardApprovalCode: DataTypes.STRING,
-    cardNetwork: DataTypes.STRING,
-    cardIssuer: DataTypes.STRING,
-    cardAcquirer: DataTypes.STRING,
-    cardPanMasked: DataTypes.STRING,
-    cardType: DataTypes.STRING,
+    authorizationReference: DataTypes.STRING,
+    authorizationReferenceName: DataTypes.STRING,
 
-    aliasThumbnail: DataTypes.STRING,
-    aliasThumbnailGray: DataTypes.STRING,
+    acquirerUtcOffset: DataTypes.STRING,
+    voidAcquirerTimeAt: DataTypes.DATE,
 
-    locationLong: DataTypes.DECIMAL(12, 8),
-    locationLat: DataTypes.DECIMAL(12, 8),
-    ipAddress: DataTypes.STRING,
+    voidReference: DataTypes.STRING,
+    voidReferenceName: DataTypes.STRING,
 
-    voidReason: DataTypes.TEXT,
-    agentId: DataTypes.INTEGER,
-    terminalId: DataTypes.INTEGER,
-    acquirerId: DataTypes.INTEGER,
+    traceNumber: DataTypes.INTEGER,
+
+    voidAuthorizationReference: DataTypes.STRING,
+    voidAuthorizationReferenceName: DataTypes.STRING,
+
+    voidTraceNumber: DataTypes.INTEGER,
+
+    acquirerTimeAt: DataTypes.DATE,
+
+    agentOrderReference: DataTypes.STRING,
 
     processFee: DataTypes.DECIMAL(28, 2),
     shareAcquirer: DataTypes.DECIMAL(5, 4),
     shareMerchant: DataTypes.DECIMAL(5, 4),
 
-    extra: {
-      type: DataTypes.VIRTUAL,
-      get: kv.selfKvGetter('transactionExtraKvs')
-    }
+    locationLong: DataTypes.DECIMAL(12, 8),
+    locationLat: DataTypes.DECIMAL(12, 8),
+    ipAddress: DataTypes.STRING,
+
+    aliasThumbnail: DataTypes.STRING,
+    aliasThumbnailGray: DataTypes.STRING,
+
+    description: DataTypes.STRING,
+    voidReason: DataTypes.STRING,
+
+    references: DataTypes.JSONB,
+    properties: DataTypes.JSONB,
+    encryptedProperties: DataTypes.JSONB,
+
+    settleBatchInId: DataTypes.INTEGER,
+    settleBatchId: DataTypes.INTEGER,
+
+    agentId: DataTypes.INTEGER,
+    terminalId: DataTypes.INTEGER,
+    acquirerId: DataTypes.INTEGER,
+
+    acquirerConfigAgentId: DataTypes.INTEGER,
+    acquirerConfigOutletId: DataTypes.INTEGER
   }, {
     timestamps: true,
     freezeTableName: true,
-    paranoid: false
+    paranoid: false,
+    hooks: {
+      async beforeSave (transaction) {
+        transaction._encryptedProperties = transaction.encryptedProperties
+        if (
+          transaction.encryptedPropertiesKey &&
+          transaction.changed('encryptedProperties')
+        ) {
+          const createResult = cipherbox.createCb0({
+            data: JSON.stringify(transaction.encryptedProperties),
+            key: transaction.encryptedPropertiesKey
+          })
+          if (createResult) transaction.encryptedProperties = createResult.box
+        }
+      },
+      async afterSave (transaction) {
+        transaction.encryptedProperties = transaction._encryptedProperties
+      }
+    }
   })
+
+  transaction.prototype.setupEncryptedProperties = function (keyBuffer) {
+    this.encryptedPropertiesKey = keyBuffer
+    const openResult = cipherbox.openCb0({
+      box: this.encryptedProperties,
+      key: this.encryptedPropertiesKey,
+      tsTolerance: null
+    })
+    if (openResult) {
+      this.encryptedProperties = JSON.parse(openResult.data.toString())
+      return this.encryptedProperties
+    }
+  }
 
   transaction.associate = (models) => {
     transaction.belongsTo(models.agent, { foreignKey: 'agentId' })
     transaction.belongsTo(models.terminal, { foreignKey: 'terminalId' })
     transaction.belongsTo(models.acquirer, { foreignKey: 'acquirerId' })
-    transaction.hasMany(models.transactionExtraKv, { foreignKey: 'transactionId' })
+
+    transaction.belongsTo(models.settleBatch, { foreignKey: 'settleBatchId' })
+    transaction.belongsTo(models.settleBatchIn, { foreignKey: 'settleBatchInId' })
+
+    transaction.belongsTo(models.acquirerConfigAgent, { foreignKey: 'acquirerConfigAgentId' })
+    transaction.belongsTo(models.acquirerConfigOutlet, { foreignKey: 'acquirerConfigOutletId' })
 
     transaction.hasMany(models.transactionRefund, { foreignKey: 'transactionId' })
   }
 
-  transaction.addScope('transactionExtraKv', () => ({
-    include: [
-      sequelize.models.transactionExtraKv.scope('excludeEntity')
-    ]
-  }))
-
-  transaction.addScope('agent', () => ({
+  transaction.addScope('agent', (agentId) => ({
+    where: agentId ? { agentId } : {},
     attributes: {
       exclude: [
         'token',
@@ -87,12 +148,24 @@ module.exports = (sequelize, DataTypes) => {
         'ipAddress',
         'processFee',
         'shareAcquirer',
-        'shareMerchant'
+        'shareMerchant',
+        'encryptedProperties'
       ]
     },
     include: [
-      sequelize.models.transactionExtraKv.scope('excludeEntity'),
       sequelize.models.transactionRefund.scope('excludeTransactionId'),
+      {
+        model: sequelize.models.settleBatchIn,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatch,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.agent,
+        paranoid: false
+      },
       {
         model: sequelize.models.acquirer.scope('excludeShare'),
         paranoid: false,
@@ -106,12 +179,45 @@ module.exports = (sequelize, DataTypes) => {
             paranoid: false
           }
         ]
+      },
+      {
+        model: sequelize.models.acquirerConfigAgent.scope('excludeConfig'),
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.acquirerTerminal.scope('excludeConfig'),
+            paranoid: false,
+            include: [
+              {
+                model: sequelize.models.acquirerTerminalCommon.scope('excludeConfig'),
+                paranoid: false,
+                include: [
+                  {
+                    model: sequelize.models.acquirerCompany,
+                    paranoid: false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        model: sequelize.models.acquirerConfigOutlet.scope('excludeConfig'),
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatchIn,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatch,
+        paranoid: false
       }
     ]
   }))
   transaction.addScope('merchantStaff', (merchantStaffId, outletId) => ({
     include: [
-      sequelize.models.transactionExtraKv.scope('excludeEntity'),
       sequelize.models.transactionRefund.scope('excludeTransactionId'),
       {
         model: sequelize.models.agent,
@@ -144,12 +250,19 @@ module.exports = (sequelize, DataTypes) => {
             paranoid: false
           }
         ]
+      },
+      {
+        model: sequelize.models.settleBatchIn,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatch,
+        paranoid: false
       }
     ]
   }))
   transaction.addScope('acquirerStaff', acquirerCompanyId => ({
     include: [
-      sequelize.models.transactionExtraKv.scope('excludeEntity'),
       sequelize.models.transactionRefund.scope('excludeTransactionId'),
       {
         model: sequelize.models.acquirer,
@@ -178,36 +291,126 @@ module.exports = (sequelize, DataTypes) => {
             paranoid: false
           }
         ]
+      },
+      {
+        model: sequelize.models.settleBatchIn,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatch,
+        paranoid: false
       }
     ]
   }))
+  transaction.addScope('admin', () => ({
+    include: [
+      {
+        model: sequelize.models.agent,
+        paranoid: false,
+        attributes: [
+          'id',
+          'name',
+          'outletId'
+        ],
+        include: [
+          {
+            model: sequelize.models.outlet,
+            paranoid: false,
+            attributes: [
+              'id',
+              'name',
+              'merchantId'
+            ],
+            include: [
+              {
+                model: sequelize.models.merchant.scope('id', 'name'),
+                paranoid: false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        model: sequelize.models.acquirer,
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.acquirerType,
+            paranoid: false
+          }
+        ]
+      },
+      {
+        model: sequelize.models.settleBatchIn,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatch,
+        paranoid: false
+      }
+    ]
+  }))
+  transaction.addScope('totalRefundAmount', () => ({
+    attributes: {
+      include: [
+        [
+          Sequelize.literal(query.get('sub/getTransactionRefundSum.sql', ['"transaction"."id"'])),
+          'totalRefundAmount'
+        ]
+      ]
+    }
+  }))
+  transaction.addScope('totalSuccessAmount', {
+    attributes: [
+      [
+        Sequelize.literal(
+          query.get('sub/getTransactionSumWithRefundSum.sql')
+        ),
+        'totalAmount'
+      ],
+      [
+        sequelize.fn('count', sequelize.col('transaction.id')),
+        'transactionCount'
+      ]
+    ],
+    where: {
+      status: {
+        [Op.in]: [
+          transactionStatuses.SUCCESS,
+          transactionStatuses.REFUNDED_PARTIAL
+        ]
+      }
+    }
+  })
+
   // TODO: This query is HORRIBLE, please fix ASAP
+  // TODO: This query is not working in postgres
   transaction.addScope('merchantStaffAcquirerTransactionStats', (merchantStaffId) => ({
     attributes: [
       'acquirerId',
       [
         Sequelize.literal(
-          'SUM(`transaction`.`amount`)'
+          'SUM("transaction"."amount")'
         ),
         'totalAmountNoRefund'
       ],
       [
         Sequelize.literal(
-          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0) ) `
+        `SUM("transaction"."amount" - COALESCE(${query.get('sub/getTransactionRefundSum.sql', ['"transaction"."id"'])}, 0) ) `
         ),
         'totalAmount'
       ],
       [
         Sequelize.literal(
           'SUM(' +
-            'GREATEST(' +
-              '(' +
-                `((\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0))` +
-                ' * IFNULL(`transaction`.`shareMerchant`, 1))' +
-              ')' +
-              ' - IFNULL(`transaction`.`processFee`, 0)' +
-            ', 0)' +
-          ')'
+        'GREATEST(' +
+        '(' +
+        `(("transaction"."amount" - COALESCE(${query.get('sub/getTransactionRefundSum.sql', ['"transaction"."id"'])}, 0))` +
+        ' * COALESCE("transaction"."shareMerchant", 1))' +
+        ')' +
+        ' - COALESCE("transaction"."processFee", 0)' +
+        ', 0)' +
+        ')'
         ),
         'totalNettAmount'
       ],
@@ -220,19 +423,19 @@ module.exports = (sequelize, DataTypes) => {
       {
         model: sequelize.models.acquirer,
         paranoid: false,
-        attributes: ['id', 'name', 'description', 'shareMerchant', 'merchantId', 'acquirerTypeId'],
+        attributes: [],
         include: [
           {
             model: sequelize.models.acquirerType,
             paranoid: false,
-            attributes: ['id', 'class', 'name', 'description', 'thumbnail', 'thumbnailGray', 'chartColor']
+            attributes: []
           }
         ]
       },
       {
         model: sequelize.models.agent,
         paranoid: false,
-        attributes: ['id', 'outletId'],
+        attributes: [],
         where: {
           [Op.and]: {
             outletId: {
@@ -253,7 +456,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         model: sequelize.models.agent,
         paranoid: false,
-        attributes: ['outletId'],
+        attributes: [],
         where: {
           [Op.and]: [
             {
@@ -270,31 +473,32 @@ module.exports = (sequelize, DataTypes) => {
   }))
 
   // TODO: This query is HORRIBLE, please fix ASAP
+  // TODO: This query is not working in postgres
   transaction.addScope('merchantStaffReportOutletTransactionStats', (merchantStaffId) => ({
     attributes: [
       [
         Sequelize.literal(
-          'SUM(`transaction`.`amount`)'
+          'SUM("transaction"."amount")'
         ),
         'totalAmountNoRefund'
       ],
       [
         Sequelize.literal(
-          `SUM(\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0) ) `
+        `SUM("transaction"."amount" - COALESCE(${query.get('sub/getTransactionRefundSum.sql', ['"transaction"."id"'])}, 0) ) `
         ),
         'totalAmount'
       ],
       [
         Sequelize.literal(
           'SUM(' +
-            'GREATEST(' +
-              '(' +
-                `((\`transaction\`.\`amount\` - IFNULL(${query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])}, 0))` +
-                ' * IFNULL(`transaction`.`shareMerchant`, 1))' +
-              ')' +
-              ' - IFNULL(`transaction`.`processFee`, 0)' +
-            ', 0)' +
-          ')'
+        'GREATEST(' +
+        '(' +
+        `(("transaction"."amount" - COALESCE(${query.get('sub/getTransactionRefundSum.sql', ['"transaction"."id"'])}, 0))` +
+        ' * COALESCE("transaction"."shareMerchant", 1))' +
+        ')' +
+        ' - COALESCE("transaction"."processFee", 0)' +
+        ', 0)' +
+        ')'
         ),
         'totalNettAmount'
       ],
@@ -358,98 +562,14 @@ module.exports = (sequelize, DataTypes) => {
             paranoid: false
           }
         ]
-      }
-    ]
-  }))
-
-  transaction.addScope('partner', (partnerId, merchantId) => {
-    const whereMerchant = {}
-    if (partnerId) {
-      whereMerchant.partnerId = partnerId
-    }
-    if (merchantId) {
-      whereMerchant.id = merchantId
-    }
-    return {
-      include: [
-        {
-          model: sequelize.models.acquirer,
-          include: [
-            sequelize.models.acquirerType
-          ]
-        },
-        {
-          model: sequelize.models.agent,
-          required: true,
-          include: [
-            {
-              model: sequelize.models.merchant,
-              where: whereMerchant
-            }
-          ]
-        }
-      ]
-    }
-  })
-  transaction.addScope('validPartner', (partnerId) => ({
-    attributes: ['id'],
-    include: [
-      {
-        model: sequelize.models.agent.scope('id'),
-        include: [
-          {
-            model: sequelize.models.merchant.scope('id'),
-            where: { partnerId }
-          }
-        ]
-      }
-    ]
-  }))
-  transaction.addScope('totalRefundAmount', () => ({
-    attributes: {
-      include: [
-        [Sequelize.literal(query.get('sub/getTransactionRefundSum.sql', ['`transaction`.`id`'])), 'totalRefundAmount']
-      ]
-    }
-  }))
-
-  transaction.addScope('admin', () => ({
-    include: [
-      {
-        model: sequelize.models.agent,
-        paranoid: false,
-        attributes: [
-          'id',
-          'name',
-          'outletId'
-        ],
-        include: [
-          {
-            model: sequelize.models.outlet,
-            paranoid: false,
-            attributes: [
-              'id',
-              'name',
-              'merchantId'
-            ],
-            include: [
-              {
-                model: sequelize.models.merchant.scope('id', 'name'),
-                paranoid: false
-              }
-            ]
-          }
-        ]
       },
       {
-        model: sequelize.models.acquirer,
-        paranoid: false,
-        include: [
-          {
-            model: sequelize.models.acquirerType,
-            paranoid: false
-          }
-        ]
+        model: sequelize.models.settleBatchIn,
+        paranoid: false
+      },
+      {
+        model: sequelize.models.settleBatch,
+        paranoid: false
       }
     ]
   }))

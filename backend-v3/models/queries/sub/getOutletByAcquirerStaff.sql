@@ -1,21 +1,21 @@
 (SELECT
-  `outlet`.`id` 
+  "outlet"."id" 
 FROM
-  `outlet` 
+  "outlet" 
 WHERE
-  `outlet`.`merchantId` IN (
+  "outlet"."merchantId" IN (
     SELECT 
-      `acquirer`.`merchantId`
+      "acquirer"."merchantId"
     FROM 
-      `acquirer`
+      "acquirer"
     WHERE
-      `acquirer`.`acquirerCompanyId` IN (
+      "acquirer"."acquirerCompanyId" IN (
         SELECT 
-          `acquirerStaff`.`acquirerCompanyId`
+          "acquirerStaff"."acquirerCompanyId"
         FROM
-          `acquirerStaff`
+          "acquirerStaff"
         WHERE
-          `acquirerStaff`.`id` = ?
+          "acquirerStaff"."id" = ?
       )
   ) 
 )

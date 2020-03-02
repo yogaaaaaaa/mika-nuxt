@@ -1,8 +1,6 @@
 'use strict'
 
-/**
- * TODO: This is a stub migration for terminalDistributor
- */
+// TODO: This is a stub migration for terminalDistributor
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

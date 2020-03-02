@@ -11,7 +11,7 @@ commander
   .option('-c, --config <file>', 'Specify config file', 'configs/bench-std-config.js')
 commander.parse(process.argv)
 
-let baseConfig = {
+const baseConfig = {
   method: 'GET',
   url: 'http://localhost',
   duration: 10,
@@ -44,8 +44,8 @@ async function begin (config) {
   }
 
   let conn = config.connStart
-  let results = []
-  let csvResults = [[
+  const results = []
+  const csvResults = [[
     'connections',
     'method',
     'url',
@@ -100,7 +100,7 @@ async function begin (config) {
 
     process.stdout.write(`# Connections : ${config.connections} ... `)
 
-    let result = await autocannon(config)
+    const result = await autocannon(config)
 
     results.push(result)
     csvResults.push([

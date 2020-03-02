@@ -16,7 +16,7 @@ const modules = new Map()
 
 module.exports.addModule = async (name) => {
   if (!modules.get(name)) {
-    console.log('Ready: new module', name)
+    console.log(`Ready: new module '${name}'`)
     modules.set(name, exports.state.NOT_READY)
   }
 }
@@ -44,7 +44,7 @@ module.exports.ready = (name) => {
 }
 
 module.exports.notReady = (name) => {
-  console.log('Module Not Ready:', name)
+  console.log('Not Ready:', name)
   modules.set(name, exports.state.NOT_READY)
   events.emit('notReady')
 }
@@ -57,6 +57,6 @@ module.exports.onReadyAll = (handler) => {
   events.on('ready', handler)
 }
 
-module.exports.OnNotReadyAll = (handler) => {
+module.exports.onNotReadyAll = (handler) => {
   events.on('notReady', handler)
 }

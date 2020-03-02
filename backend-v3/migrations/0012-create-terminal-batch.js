@@ -1,8 +1,6 @@
 'use strict'
 
-/**
- * TODO: This is a stub migration for terminalBatch
- */
+// TODO: This is a stub migration for terminalBatch
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

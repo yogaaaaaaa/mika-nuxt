@@ -4,10 +4,8 @@
  * Providing various constant and function related to tcash acquirer
  */
 
-module.exports.handlerName = 'tcash'
-module.exports.handlerClasses = ['linkaja', 'tcash']
-
 module.exports.baseConfig = require('../configs/aqTcashConfig')
+module.exports.handlerName = 'tcash'
 
 module.exports.tcashMessageCode = {
   TCASH_INQUIRY_SUCCESS: {

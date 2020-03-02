@@ -10,33 +10,23 @@ const models = require('../models')
  * Warning: This middleware hijack `res.send` function
 */
 module.exports.processCipherbox = (mandatory = false) => async function (req, res, next) {
-  if (req.body.cbx && req.body.id) {
+  if (req.body && req.body.cb && req.body.id) {
     const whereCipherbox = {
       id: req.body.id
     }
-    if (req.auth) {
-      if (req.auth.terminalId) {
-        whereCipherbox.terminalId = req.auth.terminalId
-      }
+
+    if (req.auth && req.auth.terminalId) {
+      whereCipherbox.terminalId = req.auth.terminalId
     }
 
-    const cipherboxKey = await models.cipherboxKey.scope('active').findOne({
-      where: whereCipherbox
-    })
+    const cipherboxKey = await models.cipherboxKey
+      .scope('active')
+      .findOne({ where: whereCipherbox })
 
     if (cipherboxKey) {
-      const keys = JSON.parse(cipherboxKey.keys)
-      let unbox = null
-
-      if (keys.cbx === cipherbox.cbType.cb0) {
-        unbox = cipherbox.openCB0Box(req.body, Buffer.from(keys.key, 'base64'))
-      } else if (keys.cbx === cipherbox.cbType.cb1) {
-        unbox = cipherbox.openCB1Box(req.body, keys.key, keys.keyType)
-      } else if (keys.cbx === cipherbox.cbType.cb3) {
-        unbox = cipherbox.openCB3Box(req.body, Buffer.from(keys.key, 'base64'))
-      }
-
-      if (!unbox) {
+      const keyBox = JSON.parse(cipherboxKey.keys)
+      const openResult = cipherbox.open(req.body, keyBox)
+      if (!openResult.data) {
         msg.expressResponse(
           res,
           msg.msgTypes.MSG_ERROR_INVALID_CIPHERBOX
@@ -49,29 +39,21 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
         terminalId: cipherboxKey.terminalId
       }
 
-      // We assume body is JSON, finger cross
-      // if its not, just convert to string
-      try {
-        req.body = JSON.parse(unbox.data)
-      } catch (error) {
-        req.body = unbox.data.toString()
-      }
+      // We assume body is JSON
+      req.body = JSON.parse(openResult.data)
 
       // Hijack send function
-      const send = res.send
+      const resSend = res.send
       res.send = (body) => {
-        if (typeof body === 'object') {
-          body = cipherbox.sealBoxWithCB0(JSON.stringify(body), unbox.key).box
-        } else {
-          body = cipherbox.sealBoxWithCB0(String(body), unbox.key).box
-        }
-
-        res.send = send
-        return res.send(body)
+        res.send = resSend
+        return res.send(cipherbox.createCb0({
+          data: JSON.stringify(body),
+          key: openResult.key
+        }).box)
       }
     }
-    next()
-    return
+
+    return next()
   }
 
   if (mandatory && req.auth) {
@@ -80,7 +62,6 @@ module.exports.processCipherbox = (mandatory = false) => async function (req, re
         res,
         msg.msgTypes.MSG_ERROR_AUTH_CIPHERBOX_MANDATORY
       )
-      return
     }
   }
 

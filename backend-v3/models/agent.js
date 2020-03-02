@@ -1,6 +1,7 @@
 'use strict'
 
 const query = require('./helpers/query')
+const counter = require('./helpers/counter')
 
 module.exports = (sequelize, DataTypes) => {
   const Sequelize = sequelize.Sequelize
@@ -9,6 +10,8 @@ module.exports = (sequelize, DataTypes) => {
   const agent = sequelize.define('agent', {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
+
+    traceNumberCounter: DataTypes.INTEGER,
 
     generalLocationLong: DataTypes.DECIMAL(12, 8),
     generalLocationLat: DataTypes.DECIMAL(12, 8),
@@ -21,6 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     deletedAt: 'archivedAt',
     paranoid: true
+  })
+
+  agent.prototype.incrementTraceCounter = counter.generateCounterFunction({
+    attribute: 'traceNumberCounter',
+    max: 999000
   })
 
   agent.associate = (models) => {
@@ -36,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         model: sequelize.models.outlet.scope('excludeTimestamp', 'excludeBusiness', 'excludeMerchantId'),
         include: [
-          sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
+          sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank')
         ]
       }
     ]
@@ -104,7 +112,7 @@ module.exports = (sequelize, DataTypes) => {
               include: [
                 {
                   model: sequelize.models.acquirer.scope(
-                    { method: ['agentExclusion', '`agent`.`id`'] },
+                    { method: ['agentExclusion', '"agent"."id"'] },
                     'excludeShare'
                   ),
                   where: whereAcquirer,
@@ -127,50 +135,30 @@ module.exports = (sequelize, DataTypes) => {
     }
   })
 
-  agent.addScope('partner', (partnerId, merchantId) => {
-    const whereMerchant = {}
-
-    if (partnerId) {
-      whereMerchant.partnerId = partnerId
-    }
-
-    if (merchantId) {
-      whereMerchant.id = merchantId
-    }
-
-    return {
-      include: [
-        {
-          model: sequelize.models.outlet,
-          include: [
-            {
-              model: sequelize.models.merchant,
-              where: whereMerchant,
-              include: [
-                {
-                  model: sequelize.models.acquirer.scope(
-                    { method: ['agentExclusion', '`agent`.`id`'] }
-                  ),
-                  include: [
-                    sequelize.models.acquirerType
-                  ],
-                  required: false
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  })
-  agent.addScope('validPartner', (partnerId) => ({
-    attributes: ['id'],
+  agent.addScope('agentWithoutAcquirerConfigAgent', (acquirerConfigId) => ({
+    paranoid: false,
+    where: {
+      id: {
+        [Op.notIn]: Sequelize.literal(
+          query.get('sub/getAgentInAcquirerConfigAgentByAcquirerConfig.sql', [sequelize.escape(acquirerConfigId)])
+        )
+      }
+    },
     include: [
       {
-        model: sequelize.models.merchant.scope('id'),
-        where: {
-          partnerId
-        }
+        model: sequelize.models.outlet.scope('id', 'name'),
+        paranoid: false,
+        attributes: [
+          'id',
+          'name',
+          'merchantId'
+        ],
+        include: [
+          {
+            model: sequelize.models.merchant.scope('id', 'name'),
+            paranoid: false
+          }
+        ]
       }
     ]
   }))
@@ -186,15 +174,12 @@ module.exports = (sequelize, DataTypes) => {
           'name',
           'description',
           'merchantId'
+        ],
+        include: [
+          sequelize.models.merchant.scope('id', 'name', 'paranoid')
         ]
       },
       sequelize.models.user.scope('excludePassword')
-    ]
-  }))
-  agent.addScope('adminUpdate', () => ({
-    paranoid: false,
-    include: [
-      sequelize.models.user
     ]
   }))
 

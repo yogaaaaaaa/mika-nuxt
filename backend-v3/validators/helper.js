@@ -80,6 +80,17 @@ module.exports.bodyRemove = (field) => (req, res, next) => {
 }
 
 /**
+ * Return a middleware to force property/field in `req.params` to default value
+ * if its not integer
+ */
+module.exports.paramsDefaultNotInteger = (field, value) => (req, res, next) => {
+  if (req.params[field]) {
+    req.params[field] = req.params[field].match(/^[-+]\d+/) ? req.params[field] : value
+  }
+  next()
+}
+
+/**
  * Custom validator whether password is Valid to mika standard
  */
 module.exports.isStandardPassword = (password) => {

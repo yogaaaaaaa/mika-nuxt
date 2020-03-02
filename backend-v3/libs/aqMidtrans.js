@@ -8,10 +8,8 @@ const crypto = require('crypto')
 const superagent = require('superagent')
 const htmlParser = require('node-html-parser')
 
-module.exports.handlerName = 'midtrans'
-module.exports.handlerClasses = ['gopay']
-
 module.exports.baseConfig = require('../configs/aqMidtransConfig')
+module.exports.handlerName = 'midtrans'
 
 function midtransRequestAgent (config) {
   const request = superagent
@@ -185,6 +183,6 @@ module.exports.gopaySandboxPay = async (config) => {
 
     return isPaySuccess
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }

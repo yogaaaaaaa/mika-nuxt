@@ -14,5 +14,6 @@ module.exports.filter = filter.filter
 module.exports.paginationValidator = pagination.paginationValidator
 module.exports.pagination = pagination.pagination
 
+// TODO: timeGroup is not working in postgres
 module.exports.timeGroupValidator = timeGroup.timeGroupValidator
 module.exports.timeGroup = timeGroup.timeGroup

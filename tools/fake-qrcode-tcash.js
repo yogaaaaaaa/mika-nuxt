@@ -12,7 +12,7 @@ const request = require('request-promise')
  * Generate date format for use in tcash, e.g : 20180928132659
  */
 function tcashDateNow () {
-  let now = new Date()
+  const now = new Date()
   return '' +
     now.getFullYear() +
     ((now.getMonth()).toString()).padStart(2, '0') +
@@ -60,8 +60,8 @@ parameter
 
 async function begin () {
   if (parameter.qrcode) {
-    let qrcodeArray = parameter.qrcode.split('|')
-    let qrcode = {
+    const qrcodeArray = parameter.qrcode.split('|')
+    const qrcode = {
       terminal: qrcodeArray[2],
       accNo: qrcodeArray[3]
     }
@@ -84,7 +84,7 @@ async function begin () {
 
     /** @NOTE for some reason, tcash decide to upper case the terminal name, we just follow that */
     if (qrcode.terminal.toUpperCase() === parameter.terminal.toUpperCase()) {
-      let form = {
+      const form = {
         trx_type: '',
         trx_date: tcashDateNow(),
         acc_no: qrcode.accNo,
@@ -105,7 +105,7 @@ async function begin () {
           console.log('url encoded body:', JSON.stringify(form))
         }
 
-        let response = await request({
+        const response = await request({
           method: 'POST',
           uri: parameter.inqurl,
           form: form
@@ -115,7 +115,7 @@ async function begin () {
           console.log('inquiry() response:', response)
         }
 
-        let tcashResponses = response.split(':')
+        const tcashResponses = response.split(':')
         if (tcashResponses.length) {
           if (
             tcashResponses[0] === '00' &&
@@ -165,7 +165,7 @@ async function begin () {
         }
         // Do pay() POST request
         form.trx_type = '022'
-        let response = await request({
+        const response = await request({
           method: 'POST',
           uri: parameter.payurl,
           form: form
@@ -175,7 +175,7 @@ async function begin () {
           console.log('pay() response:', response)
         }
 
-        let tcashResponses = response.split(':')
+        const tcashResponses = response.split(':')
 
         if (tcashResponses.length) {
           if (

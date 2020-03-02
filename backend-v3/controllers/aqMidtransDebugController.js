@@ -16,7 +16,7 @@ module.exports.queryTransactionMiddlewares = [
   ],
   errorMiddleware.validatorErrorHandler,
   async (req, res, next) => {
-    const acquirerConfig = await models.acquirerConfig.scope('acquirerConfigKv').findOne({
+    const acquirerConfig = await models.acquirerConfig.findOne({
       where: {
         id: req.body.acquirerConfigId
       }

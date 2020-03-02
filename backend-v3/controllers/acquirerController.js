@@ -7,8 +7,10 @@ const trxManager = require('../libs/trxManager')
 
 const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
 const errorMiddleware = require('../middlewares/errorMiddleware')
+const crudGenerator = require('./helpers/crudGenerator')
+const identifierValidator = require('./helpers/identifierValidator')
 
-const acquirerValidator = require('../validators/acquirerValidator')
+const acquirerValidator = require('validators/acquirerValidator')
 
 module.exports.getAgentAcquirers = async (req, res, next) => {
   const query = {
@@ -17,7 +19,7 @@ module.exports.getAgentAcquirers = async (req, res, next) => {
     }
   }
 
-  if (req.params.acquirerId) {
+  if (req.params.acquirerId !== undefined) {
     const scopedAgent = req.applySequelizeCommonScope(
       models.agent.scope({ method: ['agentAcquirer', req.params.acquirerId] })
     )
@@ -66,7 +68,7 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
     }
   }
 
-  if (req.params.acquirerId) {
+  if (req.params.acquirerId !== undefined) {
     let acquirer = null
 
     const merchantStaff = await models.merchantStaff.scope(
@@ -102,136 +104,10 @@ module.exports.getMerchantStaffAcquirers = async (req, res, next) => {
   }
 }
 
-module.exports.createAcquirer = async (req, res, next) => {
-  if (req.params.merchantId) {
-    req.body.merchantId = req.params.merchantId
-  }
-
-  let acquirer
-  await models.sequelize.transaction(async t => {
-    acquirer = await models.acquirer.create(req.body, { transaction: t })
-    acquirer = await models.acquirer
-      .scope('admin')
-      .findByPk(acquirer.id, { transaction: t })
-  })
-
-  msg.expressCreateEntityResponse(
-    res,
-    acquirer
-  )
-}
-
-module.exports.getAcquirers = async (req, res, next) => {
-  let scopedAcquirer = req.applySequelizeCommonScope(models.acquirer.scope('admin'))
-  const query = { where: {} }
-
-  if (req.params.acquirerId) {
-    query.where.id = req.params.acquirerId
-    msg.expressGetEntityResponse(
-      res,
-      await scopedAcquirer.findOne(query)
-    )
-  } else {
-    scopedAcquirer =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          scopedAcquirer
-        )
-      )
-    if (req.query.get_count) {
-      const acquirers = await scopedAcquirer.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        acquirers.rows,
-        acquirers.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(
-        res,
-        await scopedAcquirer.findAll(query)
-      )
-    }
-  }
-}
-
-module.exports.updateAcquirer = async (req, res, next) => {
-  const scopedAcquirer = models.acquirer.scope('paranoid')
-  let acquirer
-
-  let updated = false
-  let found = false
-
-  await models.sequelize.transaction(async t => {
-    acquirer = await scopedAcquirer.findByPk(req.params.acquirerId, { transaction: t })
-    if (acquirer) {
-      found = true
-
-      Object.assign(acquirer, req.body)
-
-      if (req.body.archivedAt === true || req.body.archivedAt === false) {
-        acquirer.setDataValue('archivedAt', req.body.archivedAt ? new Date() : null)
-      }
-
-      if (acquirer.changed()) updated = true
-      await acquirer.save({ transaction: t })
-
-      if (updated) {
-        acquirer = await scopedAcquirer.findByPk(acquirer.id, { transaction: t })
-      }
-    }
-  })
-
-  msg.expressUpdateEntityResponse(
-    res,
-    updated,
-    acquirer,
-    found
-  )
-}
-
-module.exports.deleteAcquirer = async (req, res, next) => {
-  const scopedAcquirer = models.acquirer.scope('paranoid')
-  let acquirer
-
-  await models.sequelize.transaction(async t => {
-    acquirer = await scopedAcquirer.findByPk(req.params.acquirerId, { transaction: t })
-    if (acquirer) await acquirer.destroy({ force: true, transaction: t })
-  })
-
-  msg.expressDeleteEntityResponse(
-    res,
-    acquirer
-  )
-}
-
-module.exports.createAcquirerMiddlewares = [
-  acquirerValidator.bodyCreate,
-  errorMiddleware.validatorErrorHandler,
-  exports.createAcquirer,
-  errorMiddleware.sequelizeErrorHandler
-]
-
-module.exports.updateAcquirerMiddlewares = [
-  acquirerValidator.bodyUpdate,
-  errorMiddleware.validatorErrorHandler,
-  exports.updateAcquirer,
-  errorMiddleware.sequelizeErrorHandler
-]
-
-module.exports.getAcquirersMiddlewares = [
-  queryToSequelizeMiddleware.commonValidator,
-  queryToSequelizeMiddleware.paginationValidator(['acquirer']),
-  queryToSequelizeMiddleware.filterValidator(['acquirer']),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  queryToSequelizeMiddleware.common,
-  exports.getAcquirers
-]
-
 module.exports.getAgentAcquirersMiddlewares = [
+  identifierValidator.identifierIntValidator([
+    'params.acquirerId'
+  ]),
   queryToSequelizeMiddleware.commonValidator,
   errorMiddleware.validatorErrorHandler,
   queryToSequelizeMiddleware.common,
@@ -239,15 +115,58 @@ module.exports.getAgentAcquirersMiddlewares = [
 ]
 
 module.exports.getMerchantStaffAcquirersMiddlewares = [
-  queryToSequelizeMiddleware.paginationValidator(['acquirer']),
-  queryToSequelizeMiddleware.filterValidator(['acquirer']),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
+  identifierValidator.identifierIntValidator([
+    'params.acquirerId'
+  ]),
   exports.getMerchantStaffAcquirers
 ]
 
+module.exports.createAcquirerMiddlewares = [
+  acquirerValidator.bodyCreate,
+  crudGenerator.generateCreateEntityController({
+    modelName: 'acquirer',
+    modelScope: 'admin'
+  })
+]
+
+module.exports.getAcquirersMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'acquirer',
+    modelScope: 'admin',
+    identifierSource: {
+      path: 'params.acquirerId',
+      as: 'id',
+      type: 'int'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['acquirer']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: ['acquirer']
+    }
+  })
+]
+
+module.exports.updateAcquirerMiddlewares = [
+  acquirerValidator.bodyUpdate,
+  crudGenerator.generateUpdateEntityController({
+    modelName: 'acquirer',
+    identifierSource: {
+      path: 'params.acquirerId',
+      as: 'id',
+      type: 'int'
+    }
+  })
+]
+
 module.exports.deleteAcquirerMiddlewares = [
-  exports.deleteAcquirer,
-  errorMiddleware.sequelizeErrorHandler
+  crudGenerator.generateDeleteEntityController({
+    modelName: 'acquirer',
+    identifierSource: {
+      path: 'params.acquirerId',
+      as: 'id',
+      type: 'int'
+    }
+  })
 ]

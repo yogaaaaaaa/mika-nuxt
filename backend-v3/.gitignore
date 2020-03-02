@@ -1,2 +1,3 @@
 # Exclusion for vagrant config
 !_configs.vagrant
+keys

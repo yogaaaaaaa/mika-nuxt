@@ -4,38 +4,50 @@
  * Internal API Route Handler
  */
 
-const express = require('../libs/express')
+const express = require('libs/express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
-const auth = require('../libs/auth')
-const errorMap = require('../libs/constants/errorMap')
+const auth = require('libs/auth')
+const errorMap = require('libs/errorMap')
 
-const commonConfig = require('../configs/commonConfig')
+const commonConfig = require('configs/commonConfig')
 const isEnvProduction = process.env.NODE_ENV === 'production'
 
-const acquirerConfigController = require('../controllers/acquirerConfigController')
-const acquirerController = require('../controllers/acquirerController')
-const acquirerTypeController = require('../controllers/acquirerTypeController')
-const adminController = require('../controllers/adminController')
-const agentController = require('../controllers/agentController')
-const authController = require('../controllers/authController')
-const generalController = require('../controllers/generalController')
-const merchantController = require('../controllers/merchantController')
-const merchantStaffController = require('../controllers/merchantStaffController')
-const merchantStaffOutletController = require('../controllers/merchantStaffOutletController')
-const outletController = require('../controllers/outletController')
-const partnerController = require('../controllers/partnerController')
-const terminalController = require('../controllers/terminalController')
-const terminalModelController = require('../controllers/terminalModelController')
-const transactionController = require('../controllers/transactionController')
-const utilitiesController = require('../controllers/utilitiesController')
-const userController = require('../controllers/userController')
-const acquirerCompanyController = require('../controllers/acquirerCompanyController')
-const acquirerStaffController = require('../controllers/acquirerStaffController')
+const acquirerCompanyController = require('controllers/acquirerCompanyController')
+const acquirerConfigAgentController = require('controllers/acquirerConfigAgentController')
+const acquirerConfigController = require('controllers/acquirerConfigController')
+const acquirerConfigOutletController = require('controllers/acquirerConfigOutletController')
+const acquirerController = require('controllers/acquirerController')
+const acquirerStaffController = require('controllers/acquirerStaffController')
+const acquirerTerminalCommonController = require('controllers/acquirerTerminalCommonController')
+const acquirerTerminalController = require('controllers/acquirerTerminalController')
+const acquirerTypeController = require('controllers/acquirerTypeController')
+const adminController = require('controllers/adminController')
+const agentController = require('controllers/agentController')
+const aqTerminalBniController = require('controllers/aqTerminalBniController')
+const authController = require('controllers/authController')
+const cardIinController = require('controllers/cardIinController')
+const cardIssuerController = require('controllers/cardIssuerController')
+const cardSchemeController = require('controllers/cardSchemeController')
+const cardTypeController = require('controllers/cardTypeController')
+const generalController = require('controllers/generalController')
+const merchantController = require('controllers/merchantController')
+const merchantStaffController = require('controllers/merchantStaffController')
+const merchantStaffOutletController = require('controllers/merchantStaffOutletController')
+const outletController = require('controllers/outletController')
+const partnerController = require('controllers/partnerController')
+const settleBatchController = require('controllers/settleBatchController')
+const terminalController = require('controllers/terminalController')
+const terminalModelController = require('controllers/terminalModelController')
+const transactionController = require('controllers/transactionController')
+const userController = require('controllers/userController')
+const fraudDetectionController = require('../controllers/fraudDetectionController')
+const utilitiesController = require('controllers/utilitiesController')
 
-const authMiddleware = require('../middlewares/authMiddleware')
-const errorMiddleware = require('../middlewares/errorMiddleware')
+const debugMiddleware = require('middlewares/debugMiddleware')
+const authMiddleware = require('middlewares/authMiddleware')
+const errorMiddleware = require('middlewares/errorMiddleware')
 
 const router = express.Router()
 
@@ -47,6 +59,14 @@ router.use([
   bodyParser.json()
 ])
 
+/**
+ * Debug middlewares
+ */
+if (!isEnvProduction) {
+  router.use(debugMiddleware.pathDelay())
+  router.use(debugMiddleware.log())
+  router.use(debugMiddleware.clientDelay())
+}
 /**
  * Hello endpoint
  */
@@ -74,6 +94,11 @@ router.post('/auth/change_password',
 router.post('/auth/change_expired_password',
   authController.changeExpiredPasswordMiddlewares
 )
+router.post('/auth/self_password_check',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  authController.selfPasswordCheckMiddlewares
+)
 
 /**
  * General utilities endpoints
@@ -81,22 +106,31 @@ router.post('/auth/change_expired_password',
 router.get('/utilities/msg_props',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  utilitiesController.listMsgProps
+  utilitiesController.listMsgPropsMiddlewares
 )
 router.get('/utilities/trx_props',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  utilitiesController.listTrxManagerProps
+  utilitiesController.listTrxManagerPropsMiddlewares
 )
 router.get('/utilities/auth_props',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  utilitiesController.listAuthProps
+  utilitiesController.listAuthPropsMiddlewares
 )
 router.get('/utilities/thumbnail_lists',
   authMiddleware.auth(),
   authMiddleware.authErrorHandler,
-  utilitiesController.listThumbnails
+  utilitiesController.listThumbnailsMiddlewares
+)
+router.get(
+  [
+    '/utilities/card_iins',
+    '/utilities/card_iins/:cardIinId'
+  ],
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  cardIinController.searchCardIinMiddlewares
 )
 
 /**
@@ -130,7 +164,7 @@ router.get('/files/:fileId',
 router.get('/agent',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  agentController.getAgent
+  agentController.getAgentMiddlewares
 )
 
 router.get(
@@ -144,6 +178,15 @@ router.get(
 )
 router.get(
   [
+    '/agent/acquirer_types',
+    '/agent/acquirer_types/:acquirerTypeId'
+  ],
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  acquirerTypeController.getAgentAcquirerTypesMiddlewares
+)
+router.get(
+  [
     '/agent/transactions',
     '/agent/transactions/:transactionId',
     '/agent/transactions/by_alias/:idAlias'
@@ -151,6 +194,31 @@ router.get(
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
   transactionController.getAgentTransactionsMiddlewares
+)
+router.get(
+  [
+    '/agent/settle_batches',
+    '/agent/settle_batches/:settleBatchId'
+  ],
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  settleBatchController.getAgentSettleBatchMiddlewares
+)
+router.post(
+  [
+    '/agent/settle_batches/:settleBatchId/settle'
+  ],
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  settleBatchController.startAgentSettleMiddlewares
+)
+router.post(
+  [
+    '/agent/bulk_settle/'
+  ],
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  settleBatchController.startAgentSettleBulkMiddlewares
 )
 router.post(
   [
@@ -161,10 +229,23 @@ router.post(
   authMiddleware.authErrorHandler,
   transactionController.createTransactionMiddlewares
 )
-router.post('/agent/transactions/:transactionId/cancel',
+router.post(
+  [
+    '/agent/reverse_last_transaction',
+    '/agent/cancel_last_transaction',
+    '/agent/transactions/:transactionId/reverse',
+    '/agent/transactions/:transactionId/cancel',
+    '/agent/transactions/:transactionId/reverse',
+    '/agent/transactions/:agentOrderReference/reverse_by_aor'
+  ],
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,
-  transactionController.cancelTransactionMiddlewares
+  transactionController.reverseTransactionMiddlewares
+)
+router.post('/agent/transactions/:transactionId/void',
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  transactionController.voidTransactionMiddlewares
 )
 router.post('/agent/transactions/:transactionId/refund',
   authMiddleware.auth([auth.userTypes.AGENT]),
@@ -194,7 +275,7 @@ if (!isEnvProduction) {
 router.get('/merchant_staff',
   authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  merchantStaffController.getMerchantStaff
+  merchantStaffController.getMerchantStaffMiddlewares
 )
 router.get(
   [
@@ -203,7 +284,7 @@ router.get(
   ],
   authMiddleware.auth([auth.userTypes.MERCHANT_STAFF]),
   authMiddleware.authErrorHandler,
-  acquirerController.getMerchantStaffAcquirers
+  acquirerController.getMerchantStaffAcquirersMiddlewares
 )
 router.get(
   [
@@ -234,6 +315,8 @@ router.get(
   authMiddleware.authErrorHandler,
   transactionController.getMerchantStaffTransactionsMiddlewares
 )
+/*
+TODO: this route is not working in postgres
 router.get(
   [
     '/merchant_staff/statistics/transactions/by_acquirer'
@@ -242,6 +325,9 @@ router.get(
   authMiddleware.authErrorHandler,
   transactionController.getMerchantStaffAcquirerTransactionStatsMiddlewares
 )
+*/
+/*
+TODO: this route is not working in postgres
 router.get(
   [
     '/merchant_staff/statistics/transactions/count_by_time_group'
@@ -250,6 +336,7 @@ router.get(
   authMiddleware.authErrorHandler,
   transactionController.getMerchantStaffTransactionTimeGroupCountMiddlewares
 )
+*/
 
 /**
  * Acquirer Staff related endpoints
@@ -259,7 +346,7 @@ router.get(
   '/acquirer_staff',
   authMiddleware.auth([auth.userTypes.ACQUIRER_STAFF]),
   authMiddleware.authErrorHandler,
-  acquirerStaffController.getAcquirerStaff
+  acquirerStaffController.getAcquirerStaffMiddlewares
 )
 router.get(
   [
@@ -299,7 +386,7 @@ router.get(
 router.get('/back_office/admin',
   authMiddleware.auth([auth.userTypes.ADMIN]),
   authMiddleware.authErrorHandler,
-  adminController.getAdmin
+  adminController.getAdminMiddlewares
 )
 
 /**
@@ -336,12 +423,12 @@ router.put('/back_office/admins/:adminId',
 router.delete('/back_office/admins/:adminId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
-  adminController.deleteAdmin
+  adminController.deleteAdminMiddlewares
 )
 router.post('/back_office/admins/:adminId/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
-  adminController.resetAdminPassword
+  adminController.resetAdminPasswordMiddlewares
 )
 
 /**
@@ -427,12 +514,12 @@ router.put('/back_office/agents/:agentId',
 router.delete('/back_office/agents/:agentId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  agentController.deleteAgent
+  agentController.deleteAgentMiddlewares
 )
 router.post('/back_office/agents/:agentId/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
-  agentController.resetAgentPassword
+  agentController.resetAgentPasswordMiddlewares
 )
 
 /**
@@ -460,12 +547,12 @@ router.put('/back_office/merchant_staffs/:merchantStaffId',
 router.delete('/back_office/merchant_staffs/:merchantStaffId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  merchantStaffController.deleteMerchantStaff
+  merchantStaffController.deleteMerchantStaffMiddlewares
 )
 router.post('/back_office/merchant_staffs/:merchantStaffId/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
-  merchantStaffController.resetMerchantStaffPassword
+  merchantStaffController.resetMerchantStaffPasswordMiddlewares
 )
 
 /**
@@ -502,7 +589,7 @@ router.post(
   '/back_office/acquirer_staffs/:acquirerStaffId/reset_password',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
   authMiddleware.authErrorHandler,
-  acquirerStaffController.resetAcquirerStaffPassword
+  acquirerStaffController.resetAcquirerStaffPasswordMiddlewares
 )
 
 /**
@@ -535,6 +622,7 @@ router.delete(
   authMiddleware.authErrorHandler,
   acquirerCompanyController.deleteAcquirerCompanyMiddlewares
 )
+
 /**
  * Acquirer entity
  */
@@ -620,6 +708,152 @@ router.delete('/back_office/acquirer_configs/:acquirerConfigId',
 )
 
 /**
+ * Acquirer Config Agent entity
+ */
+router.get(
+  [
+    '/back_office/acquirer_config_agents',
+    '/back_office/acquirer_config_agents/:acquirerConfigAgentId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigAgentController.getAcquirerConfigAgentsMiddlewares
+)
+router.get('/back_office/acquirer_configs/:acquirerConfigId/agents_without_acquirer_config_agent',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  agentController.getAgentsWithoutAcquirerConfigMiddlewares
+)
+router.post('/back_office/acquirer_config_agents',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigAgentController.createAcquirerConfigAgentMiddlewares
+)
+router.put('/back_office/acquirer_config_agents/:acquirerConfigAgentId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigAgentController.updateAcquirerConfigAgentMiddlewares
+)
+router.delete('/back_office/acquirer_config_agents/:acquirerConfigAgentId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigAgentController.deleteAcquirerConfigAgentMiddlewares
+)
+
+/**
+ * Acquirer Config Outlet entity
+ */
+router.get(
+  [
+    '/back_office/acquirer_config_outlets',
+    '/back_office/acquirer_config_outlets/:acquirerConfigOutletId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigOutletController.getAcquirerConfigOutletsMiddlewares
+)
+router.get('/back_office/acquirer_configs/:acquirerConfigId/outlets_without_acquirer_config_outlet',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  outletController.getOutletsWithoutAcquirerConfigMiddlewares
+)
+router.post('/back_office/acquirer_config_outlets',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigOutletController.createAcquirerConfigOutletMiddlewares
+)
+router.put('/back_office/acquirer_config_outlets/:acquirerConfigOutletId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigOutletController.updateAcquirerConfigOutletMiddlewares
+)
+router.delete('/back_office/acquirer_config_outlets/:acquirerConfigOutletId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerConfigOutletController.deleteAcquirerConfigOutletMiddlewares
+)
+
+/**
+ * Acquirer Terminal Common entity
+ */
+router.get(
+  [
+    '/back_office/acquirer_terminal_commons',
+    '/back_office/acquirer_terminal_commons/:acquirerTerminalCommonId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalCommonController.getAcquirerTerminalCommonsMiddlewares
+)
+router.post('/back_office/acquirer_terminal_commons',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalCommonController.createAcquirerTerminalCommonMiddlewares
+)
+router.put('/back_office/acquirer_terminal_commons/:acquirerTerminalCommonId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalCommonController.updateAcquirerTerminalCommonMiddlewares
+)
+router.delete('/back_office/acquirer_terminal_commons/:acquirerTerminalCommonId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalCommonController.deleteAcquirerTerminalCommonMiddlewares
+)
+
+/**
+ * Acquirer Terminal entity
+ */
+router.get(
+  [
+    '/back_office/acquirer_terminals',
+    '/back_office/acquirer_terminals/:acquirerTerminalId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalController.getAcquirerTerminalsMiddlewares
+)
+router.post('/back_office/acquirer_terminals',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalController.createAcquirerTerminalMiddlewares
+)
+router.put('/back_office/acquirer_terminals/:acquirerTerminalId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalController.updateAcquirerTerminalMiddlewares
+)
+router.delete('/back_office/acquirer_terminals/:acquirerTerminalId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  acquirerTerminalController.deleteAcquirerTerminalMiddlewares
+)
+
+/**
+ * Acquirer terminal - terminalBni handler
+ */
+router.post('/back_office/acquirer_terminals/:acquirerTerminalId/terminal_bni/download_encrypted_ltmk',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING, auth.userRoles.ADMIN_SUPPORT]),
+  authMiddleware.authErrorHandler,
+  aqTerminalBniController.downloadEncryptedLtmkMiddlewares
+)
+router.post('/back_office/acquirer_terminals/:acquirerTerminalId/terminal_bni/save_ltmk',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING, auth.userRoles.ADMIN_SUPPORT]),
+  authMiddleware.authErrorHandler,
+  aqTerminalBniController.saveLtmkMiddlewares
+)
+router.post('/back_office/acquirer_terminals/:acquirerTerminalId/terminal_bni/download_ltwk',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING, auth.userRoles.ADMIN_SUPPORT]),
+  authMiddleware.authErrorHandler,
+  aqTerminalBniController.downloadLtwkMiddlewares
+)
+router.post('/back_office/acquirer_terminals/:acquirerTerminalId/terminal_bni/download_terminal_key',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING, auth.userRoles.ADMIN_SUPPORT]),
+  authMiddleware.authErrorHandler,
+  aqTerminalBniController.downloadTerminalKeyMiddlewares
+)
+
+/**
  * Transaction entity
  */
 router.get(
@@ -634,12 +868,47 @@ router.get(
 )
 
 /**
+ * Settle Batch
+ */
+router.get(
+  [
+    '/back_office/settle_batches',
+    '/back_office/settle_batches:transactionId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  settleBatchController.getSettleBatchMiddlewares
+)
+
+/**
  * Partner entity
  */
-router.post('/back_office/partners/:partnerId/api',
+router.get(
+  [
+    '/back_office/partners',
+    '/back_office/partners/:partnerId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN, auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  partnerController.getPartnersMiddlewares
+)
+router.post(
+  '/back_office/partners',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  partnerController.generatePartnerApiKeyMiddlewares
+  partnerController.createPartnerMiddlewares
+)
+router.put(
+  '/back_office/partners/:partnerId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  partnerController.updatePartnerMiddlewares
+)
+router.delete(
+  '/back_office/partners/:partnerId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  partnerController.deletePartnerMiddlewares
 )
 
 /**
@@ -682,7 +951,7 @@ router.get(
   authMiddleware.authErrorHandler,
   terminalController.getTerminalsMiddlewares
 )
-router.post('/back_office/terminal',
+router.post('/back_office/terminals',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_LOGISTIC]),
   authMiddleware.authErrorHandler,
   terminalController.createTerminalMiddlewares
@@ -692,15 +961,173 @@ router.post('/back_office/terminals/:terminalId/generate_key',
   authMiddleware.authErrorHandler,
   terminalController.generateTerminalCbKeyMiddlewares
 )
-router.put('/back_office/terminal/:terminalId',
+router.put('/back_office/terminals/:terminalId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_LOGISTIC]),
   authMiddleware.authErrorHandler,
   terminalController.updateTerminalMiddlewares
 )
-router.delete('/back_office/terminal/:terminalId',
+router.delete('/back_office/terminals/:terminalId',
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_LOGISTIC]),
   authMiddleware.authErrorHandler,
   terminalController.deleteTerminalMiddlewares
+)
+
+/**
+ * Card Type entity
+ */
+
+router.get(
+  [
+    '/back_office/card_types',
+    '/back_office/card_types/:cardTypeId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardTypeController.getCardTypesMiddlewares
+)
+router.post('/back_office/card_types',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardTypeController.createCardTypeMiddlewares
+)
+router.put('/back_office/card_types/:cardTypeId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardTypeController.updateCardTypeMiddlewares
+)
+router.delete('/back_office/card_types/:cardTypeId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardTypeController.deleteCardTypeMiddlewares
+)
+
+/**
+ * Card Issuer entity
+ */
+
+router.get(
+  [
+    '/back_office/card_issuers',
+    '/back_office/card_issuers/:cardIssuerId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIssuerController.getCardIssuersMiddlewares
+)
+router.post('/back_office/card_issuers',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIssuerController.createCardIssuerMiddlewares
+)
+router.put('/back_office/card_issuers/:cardIssuerId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIssuerController.updateCardIssuerMiddlewares
+)
+router.delete('/back_office/card_issuers/:cardIssuerId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIssuerController.deleteCardIssuerMiddlewares
+)
+
+/**
+ * Card Scheme entity
+ */
+
+router.get(
+  [
+    '/back_office/card_schemes',
+    '/back_office/card_schemes/:cardSchemeId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardSchemeController.getCardSchemesMiddlewares
+)
+router.post('/back_office/card_schemes',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardSchemeController.createCardSchemeMiddlewares
+)
+router.put('/back_office/card_schemes/:cardSchemeId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardSchemeController.updateCardSchemeMiddlewares
+)
+router.delete('/back_office/card_schemes/:cardSchemeId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardSchemeController.deleteCardSchemeMiddlewares
+)
+
+/**
+ * Card IIN entity
+ */
+
+router.get(
+  [
+    '/back_office/card_iins',
+    '/back_office/card_iins/:cardIinId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIinController.getCardIinsMiddlewares
+)
+router.post('/back_office/card_iins',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIinController.createCardIinMiddlewares
+)
+router.put('/back_office/card_iins/:cardIinId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIinController.updateCardIinMiddlewares
+)
+router.delete('/back_office/card_iins/:cardIinId',
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  cardIinController.deleteCardIinMiddlewares
+)
+
+/**
+ * Fraud Detection
+ */
+router.get(
+  [
+    '/back_office/fraud-detections/rules',
+    '/back_office/fraud_detections/rules',
+    '/back_office/fraud-detections/rules/:ruleId',
+    '/back_office/fraud_detections/rules/:ruleId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  fraudDetectionController.getRules
+)
+router.post(
+  [
+    '/back_office/fraud-detections/rules',
+    '/back_office/fraud_detections/rules'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  fraudDetectionController.createRuleMiddlewares
+)
+router.put(
+  [
+    '/back_office/fraud-detections/rules/:ruleId',
+    '/back_office/fraud_detections/rules/:ruleId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  fraudDetectionController.updateRuleMiddlewares
+)
+router.delete(
+  [
+    '/back_office/fraud-detections/rules/:ruleId',
+    '/back_office/fraud_detections/rules/:ruleId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
+  authMiddleware.authErrorHandler,
+  fraudDetectionController.destroyRule
 )
 
 router.use(errorMiddleware.notFoundErrorHandler)
@@ -708,4 +1135,5 @@ router.use(errorMiddleware.errorHandler(errorMap))
 
 const apiRouter = express.Router()
 apiRouter.use('/api', router)
+
 module.exports = apiRouter

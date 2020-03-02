@@ -10,9 +10,9 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      idAlias: { // NOTE: Optional for now
+      idAlias: {
         unique: true,
-        type: Sequelize.CHAR(25, true)
+        type: Sequelize.STRING(25)
       },
 
       name: {
@@ -21,16 +21,16 @@ module.exports = {
         type: Sequelize.STRING
       },
       shortName: {
-        allowNull: false,
+        allowNull: true,
         unique: true,
-        type: Sequelize.CHAR(25, true)
+        type: Sequelize.STRING(25)
       },
       description: {
         type: Sequelize.STRING
       },
 
       status: { // NOTE: Optional for now
-        type: Sequelize.CHAR(32)
+        type: Sequelize.STRING(32)
       },
 
       companyForm: {
@@ -69,7 +69,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       scannedTaxCardResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
@@ -89,35 +89,35 @@ module.exports = {
       },
 
       scannedBankStatementResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSkmenkumhamResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSiupResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedTdpResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       scannedSkdpResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
@@ -146,24 +146,16 @@ module.exports = {
         type: Sequelize.STRING
       },
       ownerScannedIdCardResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       ownerScannedTaxCardResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
-          key: 'id'
-        }
-      },
-
-      partnerId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'partner',
           key: 'id'
         }
       },

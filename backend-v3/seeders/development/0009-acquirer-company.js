@@ -12,6 +12,18 @@ module.exports = {
         {
           id: 2,
           name: 'Gopay'
+        },
+        {
+          id: 3,
+          name: 'Bank BNI'
+        },
+        {
+          id: 100,
+          name: 'Kuma Pay'
+        },
+        {
+          id: 101,
+          name: 'Kuma Bank'
         }
       ],
       {}

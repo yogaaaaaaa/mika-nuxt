@@ -1,0 +1,8 @@
+id,name,description
+unknown,Unknown Scheme,
+many,Many scheme,
+jcb,JCB,
+mastercard,Mastercard,
+npg,National Payment Gateway,
+pl,Private Label,
+visa,Visa,

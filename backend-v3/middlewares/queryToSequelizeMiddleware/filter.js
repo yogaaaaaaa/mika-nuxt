@@ -2,6 +2,7 @@
 
 const _ = require('lodash')
 const { query } = require('express-validator')
+const validator = require('validator')
 
 const helper = require('./helper')
 const models = require('../../models')
@@ -9,39 +10,88 @@ const Sequelize = models.Sequelize
 const Op = Sequelize.Op
 
 const translateOp = {
-  eq: (field, val) => ({
-    [field]: val
+  eq: (prop, val) => ({
+    [prop]: val
   }),
-  neq: (field, val) => ({
-    [field]: { [Op.ne]: val }
+  neq: (prop, val) => ({
+    [prop]: { [Op.ne]: val }
   }),
-  eqtrue: (field, val) => ({
-    [field]: true
+  eqtrue: (prop, val) => ({
+    [prop]: true
   }),
-  eqfalse: (field, val) => ({
-    [field]: true
+  eqfalse: (prop, val) => ({
+    [prop]: true
   }),
-  eqnull: (field, val) => ({
-    [field]: null
+  eqnull: (prop, val) => ({
+    [prop]: null
   }),
-  neqnull: (field, val) => ({
-    [field]: { [Op.ne]: null }
+  neqnull: (prop, val) => ({
+    [prop]: { [Op.ne]: null }
   }),
-  gt: (field, val) => ({
-    [field]: { [Op.gt]: val }
+  gt: (prop, val) => ({
+    [prop]: { [Op.gt]: val }
   }),
-  gte: (field, val) => ({
-    [field]: { [Op.gte]: val }
+  gte: (prop, val) => ({
+    [prop]: { [Op.gte]: val }
   }),
-  lt: (field, val) => ({
-    [field]: { [Op.lt]: val }
+  lt: (prop, val) => ({
+    [prop]: { [Op.lt]: val }
   }),
-  lte: (field, val) => ({
-    [field]: { [Op.lte]: val }
+  lte: (prop, val) => ({
+    [prop]: { [Op.lte]: val }
   }),
-  like: (field, val) => ({
-    [field]: { [Op.like]: val }
+  like: (prop, val) => ({
+    [prop]: { [Op.iLike]: val }
   })
+}
+
+function validateAndCheckFilterContent (field, filterContent, fieldType, errorLists) {
+  if (typeof filterContent !== 'string') return
+
+  const validOps = Object.keys(translateOp)
+  const filterContentSplit = filterContent.split(',')
+  const filterOp = filterContentSplit[0]
+  const filterValue = filterContentSplit.length > 1 ? filterContentSplit.slice(1, filterContentSplit.length).join(',') : ''
+
+  if (!validOps.includes(filterOp)) {
+    errorLists.push(`invalid op for '${field}'`)
+    return
+  }
+
+  let value = filterValue
+  if (fieldType === 'STRING') {}
+  if (fieldType === 'DECIMAL') {
+    if (['like', 'eqtrue', 'eqfalse'].includes(filterOp)) {
+      errorLists.push(`unsupported op for '${field}'`)
+      return
+    }
+    if (!validator.isFloat(value)) {
+      errorLists.push(`invalid value for '${field}'`)
+      return
+    }
+  }
+  if (fieldType === 'INTEGER') {
+    value = value || '0'
+    if (['like', 'eqtrue', 'eqfalse'].includes(filterOp)) {
+      errorLists.push(`unsupported op for '${field}'`)
+      return
+    }
+    if (!validator.isInt(value)) {
+      errorLists.push(`invalid value for '${field}'`)
+      return
+    }
+  }
+  if (fieldType === 'DATE') {
+    if (['like', 'eqtrue', 'eqfalse'].includes(filterOp)) {
+      errorLists.push(`unsupported op for '${field}'`)
+      return
+    }
+    if (!validator.isISO8601(value) || !validator.isRFC3339(value)) {
+      errorLists.push(`invalid value for '${field}'`)
+      return
+    }
+  }
+  return `${filterOp},${value}`
 }
 
 /**
@@ -61,25 +111,37 @@ module.exports.filterValidator = (validModels, bannedFields = null, acceptedFiel
   },
   query('filters')
     .custom((filters) => {
+      const errorLists = []
       if (!_.isPlainObject(filters)) return false
       for (const filterKey of Object.keys(filters)) {
         const field = filterKey.split(',')[0]
         if (!helper.matchFieldPatterns(field, bannedFields, acceptedFields)) return false
-        if (!helper.validateFieldComponents(validModels, field.split('.'))) return false
+        const fieldType = helper.validateFieldComponents(validModels, field)
 
-        const validOps = Object.keys(translateOp)
+        if (!fieldType) {
+          errorLists.push(`invalid field '${field}'`)
+          continue
+        }
+
         if (Array.isArray(filters[filterKey])) {
-          for (const filterContent of filters[filterKey]) {
-            if (typeof filterContent !== 'string') return false
-            if (!validOps.includes(filterContent.split(',')[0])) return false
+          for (let i = 0; i < filters[filterKey].length; i++) {
+            const checkedFilterContent = validateAndCheckFilterContent(field, filters[filterKey][i], fieldType, errorLists)
+            if (!checkedFilterContent) continue
+            filters[filterKey][i] = checkedFilterContent
           }
         } else if (typeof filters[filterKey] === 'string') {
-          if (!validOps.includes(filters[filterKey].split(',')[0])) return false
+          const checkedFilterContent = validateAndCheckFilterContent(field, filters[filterKey], fieldType, errorLists)
+          if (!checkedFilterContent) continue
+          filters[filterKey] = checkedFilterContent
         } else {
           return false
         }
       }
-      return true
+      if (errorLists.length) {
+        throw Error(errorLists.join(', '))
+      } else {
+        return true
+      }
     })
     .optional()
 ]
@@ -108,15 +170,20 @@ module.exports.filter = (req, res, next) => {
     eagerFilters = {}
 
     Object.keys(req.query.filters).forEach((filterKey) => {
-      const filterKeySplit = filterKey.split(',')
+      const filterKeyComps = filterKey.split(',')
 
-      const field = filterKeySplit[0]
-      const fieldProperty = field.split('.').pop()
-      let groupOp = (filterKeySplit[1] || 'and').toLowerCase()
-      if (groupOp === 'or') {
-        groupOp = Op.or
+      let field = filterKeyComps[0]
+      const fieldComps = field.split('.')
+      let fieldProperty = fieldComps[fieldComps.length - 1]
+      fieldComps[fieldComps.length - 1] = fieldProperty.split('>')[0]
+      field = fieldComps.join('.')
+      fieldProperty = fieldProperty.replace(/[>]+/g, '.')
+
+      let fieldGroup = (filterKeyComps[1] || 'and').toLowerCase()
+      if (fieldGroup === 'or') {
+        fieldGroup = Op.or
       } else {
-        groupOp = Op.and
+        fieldGroup = Op.and
       }
 
       const filterContents = Array.isArray(req.query.filters[filterKey]) ? req.query.filters[filterKey] : [req.query.filters[filterKey]]
@@ -130,10 +197,10 @@ module.exports.filter = (req, res, next) => {
 
         const translatedOp = translateOp[op](fieldProperty, value)
         if (!targetFilters[field]) targetFilters[field] = {}
-        if (targetFilters[field][groupOp]) {
-          targetFilters[field][groupOp].push(translatedOp)
+        if (targetFilters[field][fieldGroup]) {
+          targetFilters[field][fieldGroup].push(translatedOp)
         } else {
-          targetFilters[field][groupOp] = [translatedOp]
+          targetFilters[field][fieldGroup] = [translatedOp]
         }
       })
     })
@@ -183,7 +250,7 @@ module.exports.filter = (req, res, next) => {
 
       if (!prevScope.where) prevScope.where = {}
       if (!prevScope.where[Op.and]) prevScope.where[Op.and] = []
-      if (_.isPlainObject(prevScope.where[Op.and])) {
+      if (!Array.isArray(prevScope.where[Op.and])) {
         prevScope.where[Op.and] = [prevScope.where[Op.and]]
       }
       Object.keys(filters).forEach(field => prevScope.where[Op.and].push(filters[field]))

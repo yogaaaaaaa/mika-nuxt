@@ -26,7 +26,7 @@ const userRolesValidator = (validUserRoles) =>
 
 const defaultValidator = [
   helper.bodyRemove('user.lastPasswords'),
-  helper.bodyRemove('user.failedLoginAttempt'),
+  // helper.bodyRemove('user.failedLoginAttempt'),
   helper.bodyRemove('user.lastPasswordChangeAt'),
   helper.bodyRemove('user.lastLoginAt'),
   helper.bodyRemove('user.createdAt')

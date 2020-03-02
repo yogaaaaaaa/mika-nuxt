@@ -1,82 +1,174 @@
 'use strict'
 
 const msg = require('../libs/msg')
-const trxManager = require('../libs/trxManager')
+const trxManager = require('libs/trxManager')
 const models = require('../models')
 
-const cipherboxMiddleware = require('../middlewares/cipherboxMiddleware')
-const errorMiddleware = require('../middlewares/errorMiddleware')
-const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
+const cipherboxMiddleware = require('middlewares/cipherboxMiddleware')
+const errorMiddleware = require('middlewares/errorMiddleware')
+const queryToSequelizeMiddleware = require('middlewares/queryToSequelizeMiddleware')
+const crudGenerator = require('./helpers/crudGenerator')
 
-const transactionValidator = require('../validators/transactionValidator')
+const transactionValidator = require('validators/transactionValidator')
 
 module.exports.createTransaction = async (req, res, next) => {
   const trxCreateResult = await trxManager.create(
     {
       agentId: req.auth.agentId,
-      terminalId: req.auth.terminalId,
-      amount: req.body.amount,
-      acquirerId: req.body.acquirerId,
-      ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
-      locationLat: req.body.locationLat,
-      locationLong: req.body.locationLong,
-      userToken: req.body.userToken,
-      userTokenType: req.body.userTokenType
-    },
-    {
-      flags: req.body.flags
+      transaction: {
+        agentId: req.auth.agentId,
+        terminalId: req.auth.terminalId,
+        acquirerId: req.body.acquirerId,
+        amount: req.body.amount,
+
+        agentOrderReference: req.body.agentOrderReference,
+
+        ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
+
+        locationLat: req.body.locationLat,
+        locationLong: req.body.locationLong,
+
+        userToken: req.body.userToken,
+        userTokenType: req.body.userTokenType
+      },
+      ctxOptions: {
+        flags: req.body.flags
+      }
     }
   )
+  trxCreateResult.transaction = await models.transaction
+    .scope('agent')
+    .findByPk(trxCreateResult.transactionId)
 
-  if (trxCreateResult.redirectTo) {
+  if (trxCreateResult.handlerFailed) {
+    if (trxCreateResult.reversed) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_PROCESSING_ERROR_AND_REVERSED,
+        trxCreateResult
+      )
+    } else if (trxCreateResult.handlerResponse) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_HOST_RESPONSE_ERROR,
+        trxCreateResult
+      )
+    } else {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_HOST_NO_RESPONSE,
+        trxCreateResult
+      )
+    }
+  } else {
+    if (trxCreateResult.followUpType) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_NEED_FOLLOW_UP,
+        trxCreateResult
+      )
+      return
+    }
+    if (trxCreateResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
+        trxCreateResult
+      )
+      return
+    }
     msg.expressResponse(
       res,
-      msg.msgTypes.MSG_SUCCESS_TRANSACTION_REDIRECTED,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
       trxCreateResult
     )
-    return
   }
-
-  if (trxCreateResult.followUpType) {
-    msg.expressResponse(
-      res,
-      msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_NEED_FOLLOW_UP,
-      trxCreateResult
-    )
-    return
-  }
-
-  if (trxCreateResult.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
-    msg.expressResponse(
-      res,
-      msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED_AND_SUCCESS,
-      trxCreateResult
-    )
-    return
-  }
-
-  msg.expressResponse(
-    res,
-    msg.msgTypes.MSG_SUCCESS_TRANSACTION_CREATED,
-    trxCreateResult
-  )
 }
 
-module.exports.cancelTransaction = async (req, res, next) => {
-  const trxCancelResult = await trxManager.cancel(req.params.transactionId)
-  msg.expressResponse(
-    res,
-    msg.msgTypes.MSG_SUCCESS_TRANSACTION_CANCELED,
-    trxCancelResult
-  )
+module.exports.reverseTransaction = async (req, res, next) => {
+  const trxReverseResult = await trxManager.reverse({
+    agentId: req.auth.agentId,
+    transactionId: req.params.transactionId,
+    agentOrderReference: req.params.agentOrderReference
+  })
+  trxReverseResult.transaction = await models.transaction
+    .scope('agent')
+    .findByPk(trxReverseResult.transactionId)
+
+  if (trxReverseResult.handlerFailed) {
+    if (trxReverseResult.handlerResponse) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_HOST_RESPONSE_ERROR,
+        trxReverseResult
+      )
+    } else {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_HOST_NO_RESPONSE,
+        trxReverseResult
+      )
+    }
+  } else {
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_REVERSED,
+      trxReverseResult
+    )
+  }
+}
+
+module.exports.voidTransaction = async (req, res, next) => {
+  const trxVoidResult = await trxManager.void({
+    agentId: req.auth.agentId,
+    transactionId: req.params.transactionId,
+    voidReason: req.body.voidReason
+  })
+  trxVoidResult.transaction = await models.transaction
+    .scope('agent')
+    .findByPk(trxVoidResult.transactionId)
+
+  if (trxVoidResult.handlerFailed) {
+    if (trxVoidResult.reversed) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_PROCESSING_ERROR_AND_REVERSED,
+        trxVoidResult
+      )
+    } else if (trxVoidResult.handlerResponse) {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_HOST_RESPONSE_ERROR,
+        trxVoidResult
+      )
+    } else {
+      msg.expressResponse(
+        res,
+        msg.msgTypes.MSG_ERROR_TRANSACTION_ACQUIRER_HOST_NO_RESPONSE,
+        trxVoidResult
+      )
+    }
+  } else {
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_VOIDED,
+      trxVoidResult
+    )
+  }
 }
 
 module.exports.refundTransaction = async (req, res, next) => {
   const trxRefundResult = await trxManager.refund({
-    transactionId: req.params.transactionId,
-    amount: req.body.amount,
-    reason: req.body.reason
+    agentId: req.auth.agentId,
+    transactionRefund: {
+      transactionId: req.params.transactionId,
+      amount: req.body.amount,
+      reason: req.body.reason
+    }
   })
+  trxRefundResult.transaction = await models.transaction
+    .scope('agent')
+    .findByPk(trxRefundResult.transactionId)
 
   if (trxRefundResult.transactionStatus === trxManager.transactionStatuses.REFUNDED_PARTIAL) {
     msg.expressResponse(
@@ -84,22 +176,21 @@ module.exports.refundTransaction = async (req, res, next) => {
       msg.msgTypes.MSG_SUCCESS_TRANSACTION_PARTIALLY_REFUNDED,
       trxRefundResult
     )
-    return
+  } else {
+    msg.expressResponse(
+      res,
+      msg.msgTypes.MSG_SUCCESS_TRANSACTION_REFUNDED,
+      trxRefundResult
+    )
   }
-
-  msg.expressResponse(
-    res,
-    msg.msgTypes.MSG_SUCCESS_TRANSACTION_REFUNDED,
-    trxRefundResult
-  )
 }
 
 module.exports.changeAgentTransactionStatus = async (req, res, next) => {
   const trxForceUpdateResult = await trxManager.forceStatusUpdate(
-    req.body.transactionId,
-    req.body.status,
     {
       agentId: req.auth.agentId,
+      transactionId: req.body.transactionId,
+      newTransactionStatus: req.body.status,
       syncWithAcquirerHost: req.body.syncWithAcquirerHost
     }
   )
@@ -110,121 +201,7 @@ module.exports.changeAgentTransactionStatus = async (req, res, next) => {
   )
 }
 
-module.exports.getAgentTransactions = async (req, res, next) => {
-  const query = {
-    where: {
-      agentId: req.auth.agentId
-    }
-  }
-
-  if (req.params.transactionId) query.where.id = req.params.transactionId
-  if (req.params.idAlias) query.where.idAlias = req.params.idAlias
-
-  if (req.params.transactionId || req.params.idAlias) {
-    msg.expressGetEntityResponse(
-      res,
-      await models.transaction.scope('agent').findOne(query)
-    )
-  } else {
-    const scopedTransaction =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          models.transaction.scope('agent')
-        )
-      )
-    if (req.query.get_count) {
-      const transactions = await scopedTransaction.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        transactions.rows,
-        transactions.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(
-        res,
-        await scopedTransaction.findAll(query)
-      )
-    }
-  }
-}
-
-module.exports.getMerchantStaffTransactions = async (req, res, next) => {
-  const query = { where: {} }
-
-  if (req.params.transactionId) query.where.id = req.params.transactionId
-  if (req.params.idAlias) query.where.idAlias = req.params.idAlias
-
-  if (req.params.transactionId || req.params.idAlias) {
-    msg.expressGetEntityResponse(
-      res,
-      await models.transaction
-        .scope({ method: ['merchantStaff', req.auth.merchantStaffId] })
-        .findOne(query)
-    )
-  } else {
-    const scopedTransaction =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          models.transaction
-            .scope({ method: ['merchantStaff', req.auth.merchantStaffId, req.params.outletId] })
-        )
-      )
-    if (req.query.get_count) {
-      const transactions = await scopedTransaction.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        transactions.rows,
-        transactions.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(
-        res,
-        await scopedTransaction.findAll(query)
-      )
-    }
-  }
-}
-
-module.exports.getAcquirerStaffTransactions = async (req, res, next) => {
-  const query = { where: {} }
-
-  if (req.params.transactionId) query.where.id = req.params.transactionId
-  if (req.params.idAlias) query.where.idAlias = req.params.idAlias
-
-  if (req.params.transactionId || req.params.idAlias) {
-    msg.expressGetEntityResponse(
-      res,
-      await models.transaction
-        .scope({ method: ['acquirerStaff', req.auth.acquirerCompanyId] })
-        .findOne(query)
-    )
-  } else {
-    const scopedTransaction = req.applySequelizeFilterScope(
-      req.applySequelizePaginationScope(
-        models.transaction.scope({
-          method: ['acquirerStaff', req.auth.acquirerCompanyId]
-        })
-      )
-    )
-    if (req.query.get_count) {
-      const transactions = await scopedTransaction.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        transactions.rows,
-        transactions.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(res, await scopedTransaction.findAll(query))
-    }
-  }
-}
-
+// TODO: not working in postgres
 module.exports.getMerchantStaffAcquirerTransactionStats = async (req, res, next) => {
   const scopedTransaction = req.applySequelizeFilterScope(
     models.transaction.scope(
@@ -242,6 +219,7 @@ module.exports.getMerchantStaffAcquirerTransactionStats = async (req, res, next)
   )
 }
 
+// TODO: not working in postgres
 module.exports.getMerchantStaffTransactionTimeGroupCount = async (req, res, next) => {
   const scopedTransaction =
   req.applySequelizeOrderScope(
@@ -264,46 +242,6 @@ module.exports.getMerchantStaffTransactionTimeGroupCount = async (req, res, next
   )
 }
 
-module.exports.getTransactions = async (req, res, next) => {
-  const query = {
-    where: {}
-  }
-
-  let scopedTransaction = models.transaction.scope('admin')
-
-  if (req.params.transactionId) query.where.id = req.params.transactionId
-  if (req.params.idAlias) query.where.idAlias = req.params.idAlias
-
-  if (req.params.transactionId || req.params.idAlias) {
-    msg.expressGetEntityResponse(
-      res,
-      await scopedTransaction.findOne(query)
-    )
-  } else {
-    scopedTransaction =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          scopedTransaction
-        )
-      )
-    if (req.query.get_count) {
-      const transactions = await scopedTransaction.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        transactions.rows,
-        transactions.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(
-        res,
-        await scopedTransaction.findAll(query)
-      )
-    }
-  }
-}
-
 module.exports.createTransactionMiddlewares = [
   cipherboxMiddleware.processCipherbox(true),
   transactionValidator.createTransactionValidator,
@@ -311,9 +249,14 @@ module.exports.createTransactionMiddlewares = [
   exports.createTransaction
 ]
 
-module.exports.cancelTransactionMiddlewares = [
+module.exports.reverseTransactionMiddlewares = [
   cipherboxMiddleware.processCipherbox(true),
-  exports.cancelTransaction
+  exports.reverseTransaction
+]
+
+module.exports.voidTransactionMiddlewares = [
+  cipherboxMiddleware.processCipherbox(true),
+  exports.voidTransaction
 ]
 
 module.exports.refundTransactionMiddlewares = [
@@ -328,28 +271,110 @@ module.exports.changeAgentTransactionStatusMiddlewares = [
   exports.changeAgentTransactionStatus
 ]
 
+module.exports.getTransactionsMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'transaction',
+    modelScope: 'admin',
+    identifierSource: {
+      path: 'params.transactionId',
+      as: 'id'
+    },
+    sequelizePaginationScopeParam: {
+      validModels: ['transaction']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: [
+        'transaction',
+        'acquirer',
+        'acquirerType',
+        'acquirerConfigAgent',
+        'acquirerConfigOutlet',
+        'agent',
+        'outlet',
+        'merchant'
+      ]
+    }
+  })
+]
+
 module.exports.getAgentTransactionsMiddlewares = [
-  queryToSequelizeMiddleware.paginationValidator(['transaction']),
-  queryToSequelizeMiddleware.filterValidator(
-    ['transaction', 'acquirer', 'acquirerType', 'acquirerConfig']
-  ),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  exports.getAgentTransactions
+  crudGenerator.generateReadEntityController({
+    modelName: 'transaction',
+    modelScope: ({ req }) =>
+      ({ method: ['agent', req.auth.agentId] }),
+    identifierSource: {
+      path: 'params.transactionId',
+      as: 'id'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['transaction']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: [
+        'transaction',
+        'acquirer',
+        'acquirerType',
+        'acquirerConfig',
+        'acquirerConfigAgent',
+        'acquirerConfigOutlet',
+        'acquirerTerminal',
+        'acquirerTerminalCommon',
+        'acquirerCompany'
+      ]
+    }
+  })
 ]
 
 module.exports.getMerchantStaffTransactionsMiddlewares = [
-  queryToSequelizeMiddleware.paginationValidator(['transaction']),
-  queryToSequelizeMiddleware.filterValidator(
-    ['transaction', 'agent', 'outlet', 'acquirer', 'acquirerType', 'acquirerConfig']
-  ),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  exports.getMerchantStaffTransactions
+  crudGenerator.generateReadEntityController({
+    modelName: 'transaction',
+    modelScope: ({ crudCtx, req }) => (
+      {
+        method: [
+          'merchantStaff',
+          req.auth.merchantStaffId,
+          crudCtx.getSecondaryIdentifier({
+            path: 'params.outletId'
+          })
+        ]
+      }
+    ),
+    identifierSource: {
+      path: 'params.transactionId',
+      as: 'id'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['transaction']
+    },
+    sequelizeFilterScopeParam: {
+      validModels:
+        ['transaction', 'agent', 'outlet', 'acquirer', 'acquirerType', 'acquirerConfig']
+    }
+  })
 ]
 
+module.exports.getAcquirerStaffTransactionsMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'transaction',
+    modelScope: ({ req }) => ({ method: ['acquirerStaff', req.auth.acquirerCompanyId] }),
+    identifierSource: {
+      path: 'params.transactionId',
+      as: 'id'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['transaction']
+    },
+    sequelizeFilterScopeParam: {
+      validModels:
+        ['transaction', 'agent', 'outlet', 'acquirer', 'acquirerType', 'acquirerConfig']
+    }
+  })
+]
+
+// TODO: not working in postgres
 module.exports.getMerchantStaffAcquirerTransactionStatsMiddlewares = [
   queryToSequelizeMiddleware.filterValidator(
     ['transaction', 'agent', 'acquirer', 'acquirerType']
@@ -359,6 +384,7 @@ module.exports.getMerchantStaffAcquirerTransactionStatsMiddlewares = [
   exports.getMerchantStaffAcquirerTransactionStats
 ]
 
+// TODO: not working in postgres
 module.exports.getMerchantStaffTransactionTimeGroupCountMiddlewares = [
   queryToSequelizeMiddleware.paginationValidator(['transaction']),
   queryToSequelizeMiddleware.timeGroupValidator('transaction'),
@@ -370,40 +396,4 @@ module.exports.getMerchantStaffTransactionTimeGroupCountMiddlewares = [
   queryToSequelizeMiddleware.filter,
   queryToSequelizeMiddleware.timeGroup,
   exports.getMerchantStaffTransactionTimeGroupCount
-]
-
-module.exports.getAcquirerStaffTransactionsMiddlewares = [
-  queryToSequelizeMiddleware.paginationValidator(['transaction']),
-  queryToSequelizeMiddleware.filterValidator(
-    [
-      'transaction',
-      'agent',
-      'outlet',
-      'acquirer',
-      'acquirerType',
-      'acquirerConfig'
-    ]
-  ),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  exports.getAcquirerStaffTransactions
-]
-
-module.exports.getTransactionsMiddlewares = [
-  queryToSequelizeMiddleware.paginationValidator(['transaction']),
-  queryToSequelizeMiddleware.filterValidator(
-    [
-      'transaction',
-      'acquirer',
-      'acquirerType',
-      'agent',
-      'outlet',
-      'merchant'
-    ]
-  ),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  exports.getTransactions
 ]

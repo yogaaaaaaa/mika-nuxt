@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     lastPasswordChangeAt: DataTypes.DATE,
     failedLoginAttempt: DataTypes.INTEGER,
 
-    userType: DataTypes.CHAR(32),
+    userType: DataTypes.STRING(32),
     userRoles: {
       type: DataTypes.STRING,
       get () {
@@ -57,14 +57,21 @@ module.exports = (sequelize, DataTypes) => {
       async beforeSave (user) {
         if (user.changed('password')) {
           const lastPasswordsCount = commonConfig.authLastPasswordsCount
+
+          const previousPassword = user.previous('password')
+          const hashedPassword = await hash.bcryptHash(user.password)
           let lastPasswords = user.lastPasswords
-          user.password = await hash.bcryptHash(user.password)
+
           if (Array.isArray(lastPasswords)) {
-            lastPasswords.push(user.password)
+            lastPasswords.push(hashedPassword)
             while (lastPasswords.length >= lastPasswordsCount) lastPasswords.shift()
+          } else if (previousPassword) {
+            lastPasswords = [previousPassword, hashedPassword]
           } else {
-            lastPasswords = [user.password]
+            lastPasswords = [hashedPassword]
           }
+
+          user.password = hashedPassword
           user.lastPasswords = lastPasswords
         }
       }
@@ -112,7 +119,12 @@ module.exports = (sequelize, DataTypes) => {
 
   user.prototype.isIncludedInLastPasswords = async function (newPassword) {
     const lastPasswords = this.lastPasswords || []
-    if (this.password) lastPasswords.push(this.password)
+    const previousPassword = this.previous('password')
+    const password = this.password
+
+    if (previousPassword) lastPasswords.push(previousPassword)
+    if (password) lastPasswords.push(password)
+
     for (const lastPassword of lastPasswords) {
       if (await hash.compareBcryptHash(lastPassword, newPassword)) return true
     }

@@ -24,10 +24,7 @@ const descriptionValidator = () =>
     .isLength({ min: 0, max: 250 })
     .optional()
 
-const acquirerCompanyIdValidator = () =>
-  body('acquirerCompanyId')
-    .not()
-    .isEmpty()
+const acquirerCompanyIdValidator = () => body('acquirerCompanyId').isInt()
 
 const defaultValidator = [
   helper.bodyRemove('userId'),

@@ -1,7 +1,5 @@
 'use strict'
 
-const kv = require('./helpers/kv')
-
 module.exports = (sequelize, DataTypes) => {
   const acquirerConfig = sequelize.define('acquirerConfig', {
     name: DataTypes.STRING,
@@ -12,10 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     sandbox: DataTypes.BOOLEAN,
     merchantId: DataTypes.INTEGER,
 
-    config: {
-      type: DataTypes.VIRTUAL,
-      get: kv.selfKvGetter('acquirerConfigKvs')
-    }
+    config: DataTypes.JSONB
   }, {
     timestamps: true,
     freezeTableName: true,
@@ -25,19 +20,10 @@ module.exports = (sequelize, DataTypes) => {
 
   acquirerConfig.associate = (models) => {
     acquirerConfig.belongsTo(models.merchant, { foreignKey: 'merchantId' })
-    acquirerConfig.hasMany(models.acquirer, { foreignKey: 'acquirerConfigId' })
-    acquirerConfig.hasMany(models.acquirerConfigKv, { foreignKey: 'acquirerConfigId' })
+    acquirerConfig.hasMany(models.acquirerConfigAgent, { foreignKey: 'acquirerConfigId' })
+    acquirerConfig.hasMany(models.acquirerConfigOutlet, { foreignKey: 'acquirerConfigId' })
   }
 
-  acquirerConfig.prototype.loadConfigKv = kv.selfKvLoad('acquirerConfigKvs')
-
-  acquirerConfig.addScope('acquirerConfigKv', () => ({
-    include: [
-      {
-        model: sequelize.models.acquirerConfigKv.scope('excludeEntity')
-      }
-    ]
-  }))
   acquirerConfig.addScope('excludeConfig', {
     attributes: {
       exclude: [
@@ -46,10 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   })
   acquirerConfig.addScope('admin', () => ({
-    paranoid: false,
-    include: [
-      sequelize.models.acquirerConfigKv.scope('excludeEntity')
-    ]
+    paranoid: false
   }))
 
   return acquirerConfig

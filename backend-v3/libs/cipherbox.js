@@ -1,17 +1,28 @@
 'use strict'
 
 /**
- * Cipherbox (cb), store ciphertext and its metadata in a JSON
- *
- * Designed to be transparently used as middleware in MIKA-API environment
+ * Cipherbox, a encryption container using JSON as serialization
+ * format.
  *
  * Defined version (so far),
- * cb0 : Plain old encryption using aes-256-cbc encryption and hmac-sha256 for authentication
- * cb1 : Hybrid cryptosystem, using RSA to create session key for aes-256-cbc encryption with hmac-sha256 for authentication
- * cb2 : DUKPT with IPEK and KSN (20 bit counter) with aes-256-cbc and hmac-sha256 for authentication (implemented soon)
- * cb3 : hmac-sha256 key generation with aes-256-cbc and hmac-sha256 for authentication
  *
- * Implementation Note :
+ * cb0 : Plain old AES symmetric encryption. Uses aes-256-cbc cipher
+ * with hmac-sha256 encrypt-then-mac scheme for authenticated encryption.
+ *
+ * cb1 : Same as cb0. Session key is generated using hmac-sha256
+ * with randomly generated salt
+ *
+ * cb2 : Same as cb0. Session key is randomly generated and encrypted using RSA.
+ * Basically a poor man's TLS. Please USE TLS if possible !
+ *
+ *
+ * Some implementation Note :
+ *
+ * Key Derivation Recommendation by NIST
+ * https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Cr1.pdf
+ *
+ * FIPS approved hash
+ * https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
  *
  * Most crypto setting is using nodejs default, see :
  * https://nodejs.org/api/crypto.html
@@ -19,14 +30,29 @@
  * nodejs crypto implementation is using OpenSSL, so refer to OpenSSL about compatibility :
  * https://wiki.openssl.org/index.php/Main_Page
  *
- * cb1 is created based on this :
+ * cb2 is created based on this :
  * https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.csfb500/edrsa.htm
  *
- * On RSA Padding for cb1, fortunately nodejs crypto is using 'good' default :
+ * On RSA Padding for cb2, fortunately nodejs crypto is using 'good' default :
  * https://paragonie.com/blog/2016/12/everything-you-know-about-public-key-encryption-in-php-is-wrong#php-openssl-rsa-bad-default
+ *
+ * More about encrypt-then-mac
+ * https://proandroiddev.com/security-best-practices-symmetric-encryption-with-aes-in-java-and-android-part-2-b3b80e99ad36
  *
  * Authenticated Encryption, see here:
  * https://en.wikipedia.org/wiki/Authenticated_encryption
+ * https://security.stackexchange.com/questions/37880/why-cant-i-use-the-same-key-for-encryption-and-mac
+ * https://crypto.stackexchange.com/questions/8081/using-the-same-secret-key-for-encryption-and-authentication-in-a-encrypt-then-ma
+ *
+ * Length Extension attack
+ * https://en.wikipedia.org/wiki/Length_extension_attack
+ * https://crypto.stackexchange.com/questions/1070/why-is-hk-mathbin-vert-x-not-a-secure-mac-construction
+ *
+ * No known problem of using same key in encrypt-then-mac
+ * https://crypto.stackexchange.com/questions/8081/using-the-same-secret-key-for-encryption-and-authentication-in-a-encrypt-then-ma/8086#8086
+ *
+ * IV must be authenticated
+ * https://crypto.stackexchange.com/questions/24353/encrypt-then-mac-do-i-need-to-authenticate-the-iv
  *
  * Timestamp in Hmac on every cipherbox is needed to prevent replay attack
  *
@@ -35,17 +61,73 @@
 const crypto = require('crypto')
 const ksuid = require('ksuid')
 
+const defaultTsTolerance = 60
+
 function getUnixTimestamp () {
   return String(Math.floor(Date.now() / 1000))
 }
 
-const timestampTolerance = 1500
+function commonCb0Encryption (data, key, cbType, id) {
+  const timestamp = getUnixTimestamp()
+  const iv = crypto.randomBytes(16)
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
+  const dataEncrypted = Buffer.concat([cipher.update(data), cipher.final()])
+  const hmacKey = crypto.createHash('sha256')
+    .update(key)
+    .digest()
+  const hmac = crypto.createHmac('sha256', hmacKey)
+    .update(dataEncrypted)
+    .update(iv)
+    .update(Buffer.from(id || '0'))
+    .update(Buffer.from(cbType))
+    .update(Buffer.from(timestamp))
+    .digest()
 
-module.exports.cbType = {
+  return {
+    t: timestamp,
+    i: iv.toString('base64'),
+    h: hmac.toString('base64'),
+    d: dataEncrypted.toString('base64')
+  }
+}
+
+function commonCb0Decryption (box, key, tsTolerance) {
+  if (
+    tsTolerance &&
+    !(Math.abs(getUnixTimestamp() - parseInt(box.t)) < tsTolerance)
+  ) return
+
+  const iv = Buffer.from(box.i, 'base64')
+  const encryptedData = Buffer.from(box.d, 'base64')
+  const hmacKey = crypto.createHash('sha256')
+    .update(key)
+    .digest()
+  const hmac = crypto.createHmac('sha256', hmacKey)
+    .update(encryptedData)
+    .update(iv)
+    .update(Buffer.from(box.id || '0'))
+    .update(Buffer.from(box.cb))
+    .update(Buffer.from(box.t))
+    .digest()
+
+  if (crypto.timingSafeEqual(hmac, Buffer.from(box.h, 'base64'))) {
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+    return {
+      key,
+      data: Buffer.concat([decipher.update(encryptedData), decipher.final()])
+    }
+  }
+}
+
+module.exports.cbTypes = {
   cb0: 'cb0',
   cb1: 'cb1',
-  cb2: 'cb2',
-  cb3: 'cb3'
+  cb2: 'cb2'
+}
+
+module.exports.cb2KeyTypes = {
+  PRIVATE: 'prv',
+  PUBLIC: 'pub'
 }
 
 module.exports.keyStatuses = {
@@ -53,30 +135,16 @@ module.exports.keyStatuses = {
   ACTIVATED: 'activated'
 }
 
-/**
- * cb0 : Simple encryption using aes-256-cbc encryption and sha256 hmac
- */
-module.exports.sealBoxWithCB0 = (data, key, id = null) => {
+module.exports.createCb0 = ({
+  id = undefined,
+  data,
+  key
+}) => {
   try {
-    const iv = crypto.randomBytes(16)
-    const cipherData = crypto.createCipheriv('aes-256-cbc', key, iv)
-    const dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
-
-    const timestamp = getUnixTimestamp()
-
-    const hmacKey = crypto.createHash('sha256').update(Buffer.concat([key, Buffer.from(timestamp)])).digest()
-    const dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
-
     const cipherBox = {
-      cbx: exports.cbType.cb0,
-      ts: timestamp,
-      iv: iv.toString('base64'),
-      data: dataEncrypted.toString('base64'),
-      hmac: dataEncryptedHmac
-    }
-
-    if (id) {
-      cipherBox.id = id
+      id,
+      cb: exports.cbTypes.cb0,
+      ...commonCb0Encryption(data, key, exports.cbTypes.cb0, id)
     }
 
     return {
@@ -85,217 +153,154 @@ module.exports.sealBoxWithCB0 = (data, key, id = null) => {
     }
   } catch (error) {
     console.error(error)
-    return null
   }
 }
 
-/**
- * cb1 : Hybrid cryptosystem, using RSA to encrypt session key for aes-256-cbc symmetric encryption with hmac-sha256 for authentication
- */
-module.exports.sealBoxWithCB1 = (data, key, keyType = 'public', id = null) => {
+module.exports.openCb0 = ({
+  box,
+  key,
+  tsTolerance = defaultTsTolerance
+}) => {
   try {
-    let sessionKey = null
-    let encryptedSessionKey = null
-    if (keyType === 'private' || keyType === 'public') {
-      sessionKey = crypto.randomBytes(32)
-      encryptedSessionKey = (
-        keyType === 'private'
-          ? crypto.privateEncrypt(key, sessionKey)
-          : crypto.publicEncrypt(key, sessionKey)
-      )
-    } else {
-      return null
-    }
+    if (box.cb !== exports.cbTypes.cb0) return
 
-    const iv = crypto.randomBytes(16)
-    const cipherData = crypto.createCipheriv('aes-256-cbc', sessionKey, iv)
-    const dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
-
-    const timestamp = getUnixTimestamp()
-
-    const hmacKey = crypto.createHash('sha256').update(Buffer.concat([sessionKey, Buffer.from(timestamp)])).digest()
-    const dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
-
-    const cipherBox = {
-      cbx: exports.cbType.cb1,
-      ts: timestamp,
-      pk: keyType,
-      iv: iv.toString('base64'),
-      key: encryptedSessionKey.toString('base64'),
-      hmac: dataEncryptedHmac,
-      data: dataEncrypted.toString('base64')
-    }
-
-    if (id) {
-      cipherBox.id = id
-    }
-
-    return {
-      sessionKey: sessionKey,
-      box: cipherBox
-    }
+    return commonCb0Decryption(box, key, tsTolerance)
   } catch (error) {
     console.error(error)
-    return null
   }
 }
 
-/**
- * cb2 : DUKPT (ipek and ksn) with aes-256-cbc with hmac-sha256 (implemented soon)
- */
-module.exports.sealBoxWithCB2 = (data, ipek, baseKSN, id = null) => {
-  // not implemented lol
-  return null
+module.exports.generateCb0Key = async () => {
+  return {
+    id: (await ksuid.random()).string,
+    cbk: exports.cbTypes.cb0,
+    k: crypto.randomBytes(32).toString('base64')
+  }
 }
 
-/**
- * cb3 : Hmac with sha256 digest for key generation, aes-256-cbc encryption and hmac-sha256 for authentication
- */
-module.exports.sealBoxWithCB3 = (data, key, id = null, iter = 100) => {
+module.exports.createCb1 = ({
+  id = undefined,
+  data,
+  key
+}) => {
   try {
     const salt = crypto.randomBytes(64)
-    const sessionKey = crypto.createHmac('sha256', key).update(salt).digest()
-
-    const iv = crypto.randomBytes(16)
-    const cipherData = crypto.createCipheriv('aes-256-cbc', sessionKey, iv)
-    const dataEncrypted = Buffer.concat([cipherData.update(data), cipherData.final()])
-
-    const timestamp = getUnixTimestamp()
-
-    const hmacKey = crypto.createHash('sha256').update(Buffer.concat([sessionKey, Buffer.from(timestamp)])).digest()
-    const dataEncryptedHmac = crypto.createHmac('sha256', hmacKey).update(dataEncrypted).digest('hex')
+    const sessionKey = crypto.createHmac('sha256', key)
+      .update(salt)
+      .digest()
 
     const cipherBox = {
-      cbx: exports.cbType.cb3,
-      ts: timestamp,
-      salt: salt.toString('base64'),
-      iv: iv.toString('base64'),
-      hmac: dataEncryptedHmac,
-      data: dataEncrypted.toString('base64')
-    }
-
-    if (id) {
-      cipherBox.id = id
+      id,
+      cb: exports.cbTypes.cb1,
+      s: salt.toString('base64'),
+      ...commonCb0Encryption(data, sessionKey, exports.cbTypes.cb1, id)
     }
 
     return {
-      sessionKey: sessionKey,
+      sessionKey,
       box: cipherBox
     }
   } catch (error) {
     console.error(error)
-    return null
   }
 }
 
-module.exports.openCB0Box = (box, key, tsCheck = true) => {
+module.exports.openCb1 = ({
+  box,
+  key,
+  tsTolerance = defaultTsTolerance
+}) => {
   try {
-    if (!box.cbx) {
-      return null
-    }
+    if (box.cb !== exports.cbTypes.cb1) return
 
-    if (box.cbx === exports.cbType.cb0 && Math.abs(getUnixTimestamp() - parseInt(box.ts)) < timestampTolerance) {
-      const encryptedData = Buffer.from(box.data, 'base64')
-      const hmacKey = crypto.createHash('sha256')
-        .update(
-          Buffer.concat([key, Buffer.from(String(box.ts))])
-        )
-        .digest()
-      const encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
+    const sessionKey = crypto.createHmac('sha256', key)
+      .update(Buffer.from(box.s, 'base64'))
+      .digest()
 
-      if (crypto.timingSafeEqual(encryptedDataHMAC, Buffer.from(box.hmac, 'hex'))) {
-        const dataDecipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(box.iv, 'base64'))
-        return {
-          key: key,
-          data: Buffer.concat([dataDecipher.update(encryptedData), dataDecipher.final()])
-        }
-      }
-    }
+    return commonCb0Decryption(box, sessionKey, tsTolerance)
   } catch (error) {
     console.error(error)
   }
-
-  return null
-}
-
-module.exports.openCB1Box = (box, key, keyType = 'private', tsCheck = true) => {
-  try {
-    if (!box.cbx) {
-      return null
-    }
-
-    if (box.cbx === exports.cbType.cb1 && Math.abs(getUnixTimestamp() - parseInt(box.ts)) < timestampTolerance) {
-      const encryptedSessionKey = Buffer.from(box.key, 'base64')
-      let sessionKey = null
-      if ((box.pk === 'private' && keyType === 'public')) {
-        sessionKey = crypto.publicDecrypt(key, encryptedSessionKey)
-      } else if (box.pk === 'public' && keyType === 'private') {
-        sessionKey = crypto.privateDecrypt(key, encryptedSessionKey)
-      } else {
-        return null
-      }
-
-      const encryptedData = Buffer.from(box.data, 'base64')
-
-      const hmacKey = crypto.createHash('sha256')
-        .update(
-          Buffer.concat([sessionKey, Buffer.from(String(box.ts))])
-        )
-        .digest()
-      const encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
-
-      if (crypto.timingSafeEqual(encryptedDataHMAC, Buffer.from(box.hmac, 'hex'))) {
-        const dataDecipher = crypto.createDecipheriv('aes-256-cbc', sessionKey, Buffer.from(box.iv, 'base64'))
-        return {
-          key: sessionKey,
-          data: Buffer.concat([dataDecipher.update(encryptedData), dataDecipher.final()])
-        }
-      }
-    }
-  } catch (error) {
-    console.error(error)
-  }
-  return null
-}
-
-module.exports.openCB2Box = (box, keyIPEK, baseKSN, tsCheck = true) => {
-  // not implemented lol
-  return null
-}
-
-module.exports.openCB3Box = (box, key) => {
-  try {
-    if (!box.cbx) {
-      return null
-    }
-
-    if (box.cbx === exports.cbType.cb3 && Math.abs(getUnixTimestamp() - parseInt(box.ts)) < timestampTolerance) {
-      const sessionKey = crypto.createHmac('sha256', key).update(Buffer.from(box.salt, 'base64')).digest()
-
-      const encryptedData = Buffer.from(box.data, 'base64')
-
-      const hmacKey = crypto.createHash('sha256')
-        .update(
-          Buffer.concat([sessionKey, Buffer.from(String(box.ts))])
-        )
-        .digest()
-      const encryptedDataHMAC = crypto.createHmac('sha256', hmacKey).update(encryptedData).digest()
-
-      if (crypto.timingSafeEqual(encryptedDataHMAC, Buffer.from(box.hmac, 'hex'))) {
-        const dataDecipher = crypto.createDecipheriv('aes-256-cbc', sessionKey, Buffer.from(box.iv, 'base64'))
-        return {
-          key: sessionKey,
-          data: Buffer.concat([dataDecipher.update(encryptedData), dataDecipher.final()])
-        }
-      }
-    }
-  } catch (error) {
-    console.error(error)
-  }
-  return null
 }
 
 module.exports.generateCb1Key = async () => {
+  return {
+    id: await (ksuid.random()).string,
+    cbk: exports.cbTypes.cb1,
+    k: crypto.randomBytes(64).toString('base64')
+  }
+}
+
+module.exports.createCb2 = ({
+  id = undefined,
+  data,
+  key,
+  keyType = exports.cb2KeyTypes.PUBLIC
+}) => {
+  try {
+    let sessionKey
+    let encryptedSessionKey
+    if (
+      keyType === exports.cb2KeyTypes.PRIVATE ||
+      keyType === exports.cb2KeyTypes.PUBLIC
+    ) {
+      sessionKey = crypto.randomBytes(32)
+      encryptedSessionKey = (keyType === exports.cb2KeyTypes.PRIVATE)
+        ? crypto.privateEncrypt(key, sessionKey)
+        : crypto.publicEncrypt(key, sessionKey)
+    } else {
+      return
+    }
+
+    const cipherBox = {
+      id,
+      cb: exports.cbTypes.cb2,
+      kt: keyType,
+      ek: encryptedSessionKey.toString('base64'),
+      ...commonCb0Encryption(data, sessionKey, exports.cbTypes.cb2, id)
+    }
+
+    return {
+      sessionKey,
+      box: cipherBox
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+module.exports.openCb2 = ({
+  box,
+  key,
+  keyType = exports.cb2KeyTypes.PRIVATE,
+  tsTolerance = defaultTsTolerance
+}) => {
+  try {
+    if (box.cb !== exports.cbTypes.cb2) return
+
+    const encryptedSessionKey = Buffer.from(box.ek, 'base64')
+    let sessionKey
+    if (
+      keyType === exports.cb2KeyTypes.PRIVATE &&
+      box.kt === exports.cb2KeyTypes.PUBLIC
+    ) {
+      sessionKey = crypto.privateDecrypt(key, encryptedSessionKey)
+    } else if (
+      keyType === exports.cb2KeyTypes.PUBLIC &&
+      box.kt === exports.cb2KeyTypes.PRIVATE
+    ) {
+      sessionKey = crypto.publicDecrypt(key, encryptedSessionKey)
+    } else {
+      return
+    }
+
+    return commonCb0Decryption(box, sessionKey, tsTolerance)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+module.exports.generateCb2Key = async () => {
   const id = await (ksuid.random()).string
 
   const keyPair = crypto.generateKeyPairSync('rsa', {
@@ -311,25 +316,63 @@ module.exports.generateCb1Key = async () => {
   })
 
   return {
-    cbkeyClient: {
+    private: {
       id,
-      cbx: 'cb1',
-      keyType: 'private',
-      key: keyPair.privateKey
+      cbk: exports.cbTypes.cb2,
+      kt: exports.cb2KeyTypes.PRIVATE,
+      k: keyPair.privateKey
     },
-    cbkeyServer: {
+    public: {
       id,
-      cbx: 'cb1',
-      keyType: 'public',
-      key: keyPair.publicKey
+      cbk: exports.cbTypes.cb2,
+      kt: exports.cb2KeyTypes.PUBLIC,
+      k: keyPair.publicKey
     }
   }
 }
 
-module.exports.generateCb3Key = async () => {
-  return {
-    id: await (ksuid.random()).string,
-    cbx: 'cb3',
-    key: crypto.randomBytes(64).toString('base64')
+module.exports.create = (data, keyBox) => {
+  if (keyBox.cbk === exports.cbTypes.cb0) {
+    return exports.createCb0({
+      id: keyBox.id,
+      data,
+      key: Buffer.from(keyBox.k, 'base64')
+    })
+  } else if (keyBox.cbk === exports.cbTypes.cb1) {
+    return exports.createCb1({
+      id: keyBox.id,
+      data,
+      key: Buffer.from(keyBox.k, 'base64')
+    })
+  } else if (keyBox.cbk === exports.cbTypes.cb2) {
+    return exports.createCb2({
+      id: keyBox.id,
+      data,
+      keyType: keyBox.kt,
+      key: Buffer.from(keyBox.k, 'base64')
+    })
+  }
+}
+
+module.exports.open = (box, keyBox, tsTolerance = defaultTsTolerance) => {
+  if (keyBox.cbx === exports.cbTypes.cb0) {
+    return exports.openCb0({
+      box,
+      key: Buffer.from(keyBox.k, 'base64'),
+      tsTolerance
+    })
+  } else if (keyBox.cbx === exports.cbTypes.cb1) {
+    return exports.openCb1({
+      box,
+      key: Buffer.from(keyBox.k, 'base64'),
+      tsTolerance
+    })
+  } else if (keyBox.cbx === exports.cbTypes.cb2) {
+    return exports.openCb2({
+      box,
+      key: keyBox.k,
+      keyType: keyBox.kt,
+      tsTolerance
+    })
   }
 }

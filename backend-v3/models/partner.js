@@ -27,9 +27,11 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   partner.associate = (models) => {
-    partner.hasMany(models.apiKey, { foreignKey: 'partnerId' })
-    partner.hasMany(models.merchant, { foreignKey: 'partnerId' })
   }
+
+  partner.addScope('admin', () => ({
+    paranoid: false
+  }))
 
   return partner
 }

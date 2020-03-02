@@ -14,18 +14,12 @@ let baseConfig = {
   assetsDir: null,
   templatesDir: null,
   thumbnailsDir: null,
-  customThumbnailsDir: null
+  customThumbnailsDir: null,
+  keyDir: null
 }
 
-/**
- * Load external config file
- */
-try {
-  const configName = require('path').basename(__filename, '.js')
-  const extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
-  baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`${configName} is mixed`)
-} catch (error) {}
+// Load external config file
+baseConfig = require('./helper').loadAndMerge(__filename, baseConfig)
 
 baseConfig.workDir = path.resolve(baseConfig.workDir)
 baseConfig.uploadsDir = baseConfig.uploadsDir || path.join(baseConfig.workDir, 'uploads')
@@ -35,6 +29,8 @@ baseConfig.assetsDir = baseConfig.assetsDir || path.join(baseConfig.workDir, 'as
 baseConfig.thumbnailsDir = baseConfig.thumbnailsDir || path.join(baseConfig.assetsDir, 'images')
 baseConfig.templatesDir = baseConfig.templatesDir || path.join(baseConfig.assetsDir, 'templates')
 baseConfig.customThumbnailsDir = path.join(baseConfig.uploadsDir, 'customThumbnails')
+
+baseConfig.keyDir = baseConfig.keyDir || path.join(baseConfig.workDir, 'keys')
 
 fs.accessSync(baseConfig.workDir, fs.constants.W_OK | fs.constants.R_OK)
 fs.accessSync(baseConfig.assetsDir, fs.constants.R_OK)
@@ -51,5 +47,14 @@ if (!fs.existsSync(baseConfig.cachesDir)) {
 if (!fs.existsSync(baseConfig.customThumbnailsDir)) {
   fs.mkdirSync(baseConfig.customThumbnailsDir)
 }
+
+if (!fs.existsSync(baseConfig.keyDir)) {
+  fs.mkdirSync(baseConfig.keyDir)
+}
+fs.chmodSync(baseConfig.keyDir,
+  fs.constants.S_IRUSR |
+    fs.constants.S_IWUSR |
+    fs.constants.S_IXUSR
+)
 
 module.exports = baseConfig

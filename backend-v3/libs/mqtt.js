@@ -4,11 +4,15 @@
  * Provide ability to connect MQTT Broker that equipped with mosquitto_auth_plugin
  */
 
+const _ = require('lodash')
+const debug = require('debug')('mika:mqtt')
 const mqtt = require('mqtt')
 const crypto = require('crypto')
+const micromatch = require('micromatch')
 
 const Redis = require('ioredis')
 
+const { delay } = require('./timer')
 const ready = require('./ready')
 ready.addModule('mqtt')
 ready.addModule('mqtt-redis')
@@ -56,6 +60,8 @@ module.exports.waitUntilConnected = (client = mqttClient) => {
   })
 }
 
+module.exports.pathDelays = []
+
 module.exports.publish = async (topic, message, options = {}) => {
   await exports.waitUntilConnected()
 
@@ -65,14 +71,48 @@ module.exports.publish = async (topic, message, options = {}) => {
     dup: false
   }, options)
 
-  return new Promise((resolve, reject) => {
-    mqttClient.publish(topic, message, options, (err) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve()
+  if (exports.pathDelays.length) {
+    for (const pathDelay of exports.pathDelays) {
+      const duration = pathDelay.before || 0
+      if (micromatch.isMatch(topic, pathDelay.path)) {
+        if (_.isPlainObject(message) && _.isPlainObject(pathDelay.matches)) {
+          for (const key of Object.keys(pathDelay.matches)) {
+            const matchVal = _.get(message, key)
+            if (matchVal) {
+              if (pathDelay.matches[key] === matchVal) {
+                debug('delay before with match', topic, key, duration, 'ms')
+                if (duration < 0) return
+                await delay(duration)
+              }
+            }
+          }
+        } else {
+          debug('delay before', topic, duration, 'ms')
+          if (duration < 0) return
+          await delay(duration)
+        }
       }
-    })
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    mqttClient.publish(
+      topic,
+      _.isPlainObject(message) ? JSON.stringify(message) : message,
+      options,
+      (err) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        if (debug.enabled) {
+          debug('topic:', topic)
+          if (_.isPlainObject(message)) {
+            debug('message:', JSON.stringify(message, null, 2))
+          }
+        }
+        resolve()
+      })
   })
 }
 

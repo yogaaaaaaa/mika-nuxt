@@ -1,37 +1,48 @@
 'use strict'
 
-const errorMiddleware = require('../middlewares/errorMiddleware')
+const crudGenerator = require('./helpers/crudGenerator')
+const partnerValidator = require('validators/partnerValidator')
 
-const msg = require('../libs/msg')
-const extApiAuth = require('../libs/extApiAuth')
-const models = require('../models')
-
-module.exports.generatePartnerApiKey = async (req, res, next) => {
-  const key = await extApiAuth.createKey(req.params.partnerId)
-
-  await models.sequelize.transaction(async t => {
-    await models.apiKey.destroy({
-      where: {
-        partnerId: req.params.partnerId
-      },
-      transaction: t
-    })
-    await models.apiKey.create({
-      idKey: key.idKey,
-      secretKey: key.secretKeyHashed,
-      sharedKey: key.sharedKey,
-      partnerId: req.params.partnerId
-    }, { transaction: t })
+module.exports.createPartnerMiddlewares = [
+  partnerValidator.bodyCreate,
+  crudGenerator.generateCreateEntityController({
+    modelName: 'partner'
   })
+]
 
-  msg.expressResponse(
-    res,
-    msg.msgTypes.MSG_SUCCESS,
-    key
-  )
-}
+module.exports.updatePartnerMiddlewares = [
+  partnerValidator.bodyUpdate,
+  crudGenerator.generateUpdateEntityController({
+    modelName: 'partner',
+    identifierSource: {
+      path: 'params.partnerId',
+      as: 'id',
+      type: 'int'
+    }
+  })
+]
 
-module.exports.generatePartnerApiKeyMiddlewares = [
-  module.exports.generatePartnerApiKey,
-  errorMiddleware.sequelizeErrorHandler
+module.exports.getPartnersMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'partner',
+    modelScope: 'admin',
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['partner']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: ['partner']
+    }
+  })
+]
+
+module.exports.deletePartnerMiddlewares = [
+  crudGenerator.generateDeleteEntityController({
+    modelName: 'partner',
+    identifierSource: {
+      path: 'params.partnerId',
+      as: 'id',
+      type: 'int'
+    }
+  })
 ]

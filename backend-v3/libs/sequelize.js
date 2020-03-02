@@ -1,15 +1,18 @@
 'use strict'
 
+const debug = require('debug')('mika:database')
 const Sequelize = require('sequelize')
-const ready = require('../libs/ready')
+const ready = require('libs/ready')
 
-const dbConfig = require('../configs/dbConfig')
-let selectedDbConfig
+const dbConfig = require('configs/dbConfig')
 
-if (dbConfig[process.env.NODE_ENV]) {
-  selectedDbConfig = dbConfig[process.env.NODE_ENV]
-} else {
-  selectedDbConfig = dbConfig.development
+const selectedDbConfig = dbConfig[process.env.NODE_ENV] || dbConfig.development
+
+if (selectedDbConfig.logging) {
+  selectedDbConfig.logging = (sql, data) => {
+    debug(sql)
+    if (typeof data === 'number') debug('Elapsed times:', data, 'ms')
+  }
 }
 
 const sequelize = new Sequelize(

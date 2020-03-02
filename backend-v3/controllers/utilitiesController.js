@@ -2,12 +2,12 @@
 
 const fs = require('fs')
 
-const trxManager = require('../libs/trxManager')
-const msg = require('../libs/msg')
-const auth = require('../libs/auth')
-const cipherbox = require('../libs/cipherbox')
+const trxManager = require('libs/trxManager')
+const msg = require('libs/msg')
+const auth = require('libs/auth')
+const cipherbox = require('libs/cipherbox')
 
-const dirConfig = require('../configs/dirConfig')
+const dirConfig = require('configs/dirConfig')
 
 module.exports.listTrxManagerProps = (req, res, next) => {
   msg.expressResponse(
@@ -15,7 +15,7 @@ module.exports.listTrxManagerProps = (req, res, next) => {
     msg.msgTypes.MSG_SUCCESS,
     {
       types: trxManager.constants,
-      handlers: trxManager.acquirerHandlers.map((acquirerHandler) => trxManager.formatAcquirerInfo(acquirerHandler))
+      handlers: Array.from(trxManager.acquirerHandlers.values()).map((acquirerHandler) => trxManager.formatAcquirerInfo(acquirerHandler))
     }
   )
 }
@@ -57,3 +57,19 @@ module.exports.listThumbnails = async (req, res, next) => {
     }))
   )
 }
+
+module.exports.listTrxManagerPropsMiddlewares = [
+  exports.listTrxManagerProps
+]
+
+module.exports.listMsgPropsMiddlewares = [
+  exports.listMsgProps
+]
+
+module.exports.listAuthPropsMiddlewares = [
+  exports.listAuthProps
+]
+
+module.exports.listThumbnailsMiddlewares = [
+  exports.listAuthProps
+]

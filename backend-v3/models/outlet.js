@@ -7,12 +7,12 @@ module.exports = (sequelize, DataTypes) => {
   const Op = Sequelize.Op
 
   const outlet = sequelize.define('outlet', {
-    idAlias: DataTypes.CHAR(25),
+    idAlias: DataTypes.STRING(25),
 
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
-    status: DataTypes.CHAR(32),
+    status: DataTypes.STRING(32),
 
     email: DataTypes.STRING,
     website: DataTypes.STRING,
@@ -32,8 +32,8 @@ module.exports = (sequelize, DataTypes) => {
 
     otherPaymentSystems: DataTypes.STRING,
 
-    outletPhotoResourceId: DataTypes.CHAR(27),
-    cashierDeskPhotoResourceId: DataTypes.CHAR(27),
+    outletPhotoResourceId: DataTypes.STRING(27),
+    cashierDeskPhotoResourceId: DataTypes.STRING(27),
 
     businessType: DataTypes.STRING,
     businessDurationMonth: DataTypes.INTEGER,
@@ -136,6 +136,23 @@ module.exports = (sequelize, DataTypes) => {
 
     return scope
   })
+
+  outlet.addScope('outletWithoutAcquirerConfigOutlet', (acquirerConfigId) => ({
+    paranoid: false,
+    where: {
+      id: {
+        [Op.notIn]: Sequelize.literal(
+          query.get('sub/getAgentInAcquirerConfigAgentByAcquirerConfig.sql', [sequelize.escape(acquirerConfigId)])
+        )
+      }
+    },
+    include: [
+      {
+        model: sequelize.models.merchant.scope('id', 'name'),
+        paranoid: false
+      }
+    ]
+  }))
 
   outlet.associate = function (models) {
     outlet.belongsTo(models.resource, {

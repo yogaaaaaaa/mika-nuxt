@@ -16,7 +16,7 @@ commander
     console.log()
 
     if (values.length) {
-      for (let val of values) {
+      for (const val of values) {
         console.log(val)
         console.log(bcrypt.hashSync(val, bcrypt.genSaltSync(option.salt)))
         console.log()

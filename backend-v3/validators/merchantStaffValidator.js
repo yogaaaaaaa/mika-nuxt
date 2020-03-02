@@ -12,7 +12,7 @@ const emailValidator = () => body('email').isEmail()
 const locationLongValidator = () => body('locationLong').isNumeric()
 const locationLatValidator = () => body('locationLat').isNumeric()
 
-const merchantIdValidator = () => body('merchantId').not().isEmpty()
+const merchantIdValidator = () => body('merchantId').isInt()
 
 const defaultValidator = [
   helper.bodyRemove('userId'),

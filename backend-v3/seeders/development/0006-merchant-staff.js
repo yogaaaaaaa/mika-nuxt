@@ -109,6 +109,14 @@ module.exports = {
         email: 'mikastaff4@getmika.id',
         userId: 104,
         merchantId: 5
+      },
+
+      {
+        id: 500,
+        name: 'Syamsu Fajar',
+        email: 'syamsu@getmika.id',
+        userId: 503,
+        merchantId: 1
       }
     ]
     , {})

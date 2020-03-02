@@ -35,9 +35,9 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
   }
 
   if (req.sessionToken) {
-    const checkAuth = await auth.checkAuth(req.sessionToken)
-    if (checkAuth) {
-      req.auth = checkAuth
+    const sessionData = await auth.checkAuth(req.sessionToken)
+    if (sessionData) {
+      req.auth = sessionData.auth
       if (Array.isArray(allowedUserTypes)) {
         if (!allowedUserTypes.includes(req.auth.userType)) req.authInvalidUserType = true
       }
@@ -51,6 +51,17 @@ module.exports.auth = (allowedUserTypes = null, allowedUserRoles = null) => asyn
     }
   }
   next()
+}
+
+/**
+ * Debug authentication check
+ */
+module.exports.debugAuth = async (req, res, next) => {
+  req.auth = null
+  if (req.headers[commonConfig.debugKeyHeader] === commonConfig.debugKey) {
+    req.auth = 'debug'
+    next()
+  }
 }
 
 /**
@@ -72,15 +83,4 @@ module.exports.authErrorHandler = async (req, res, next) => {
     return
   }
   next()
-}
-
-/**
- * Debug authentication check
- */
-module.exports.debugAuth = async (req, res, next) => {
-  req.auth = null
-  if (req.headers[commonConfig.debugKeyHeader] === commonConfig.debugKey) {
-    req.auth = 'debug'
-    next()
-  }
 }

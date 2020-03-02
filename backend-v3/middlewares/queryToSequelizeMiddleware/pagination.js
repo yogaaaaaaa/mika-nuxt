@@ -19,7 +19,7 @@ module.exports.paginationValidator = (validModels, bannedFields = null, accepted
   query('order_by')
     .custom(orderByField => {
       if (!helper.matchFieldPatterns(orderByField, bannedFields, acceptedFields)) return false
-      return helper.validateFieldComponents(validModels, orderByField.split('.'))
+      return helper.validateFieldComponents(validModels, orderByField)
     })
     .optional()
 ]
@@ -38,6 +38,7 @@ module.exports.pagination = (req, res, next) => {
   req.query.order_by = req.query.order_by || 'createdAt'
 
   const fieldComponents = req.query.order_by.split('.')
+  const defaultOrder = ['id', req.query.order]
   const orderBy = fieldComponents.map((fieldComponent) => {
     if (models[fieldComponent]) {
       return models[fieldComponent]
@@ -45,27 +46,45 @@ module.exports.pagination = (req, res, next) => {
       return fieldComponent
     }
   })
+  orderBy[0] = orderBy[0].replace(/[>]+/g, '.')
   orderBy.push(req.query.order)
 
   req.applySequelizePaginationScope = (model) => {
     if (model) {
+      let order
+      if (Array.isArray(model._scope.order)) {
+        order = model._scope.order
+        order.push(orderBy)
+        order.push(defaultOrder)
+      } else {
+        order = [
+          orderBy,
+          defaultOrder
+        ]
+      }
       return models[model.name].scope(Object.assign(model._scope, {
         offset: (req.query.page - 1) * req.query.per_page,
         limit: req.query.per_page,
-        order: [
-          orderBy,
-          ['id', req.query.order] // default order
-        ]
+        order
       }))
     }
   }
 
   req.applySequelizeOrderScope = (model) => {
     if (model) {
-      return models[model.name].scope(Object.assign(model._scope, {
-        order: [
-          orderBy
+      let order
+      if (Array.isArray(model._scope.order)) {
+        order = model._scope.order
+        order.push(orderBy)
+        order.push(defaultOrder)
+      } else {
+        order = [
+          orderBy,
+          defaultOrder
         ]
+      }
+      return models[model.name].scope(Object.assign(model._scope, {
+        order
       }))
     }
   }

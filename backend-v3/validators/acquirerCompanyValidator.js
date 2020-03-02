@@ -22,7 +22,9 @@ const descriptionValidator = () =>
     .isLength({ min: 0, max: 250 })
     .optional()
 
-const defaultValidator = [helper.archivedAtValidator]
+const defaultValidator = [
+  helper.archivedAtValidator
+]
 
 module.exports.bodyCreate = [
   defaultValidator,
@@ -32,6 +34,6 @@ module.exports.bodyCreate = [
 
 module.exports.bodyUpdate = [
   defaultValidator,
-  nameValidator(),
-  descriptionValidator()
+  nameValidator().optional(),
+  descriptionValidator().optional()
 ]

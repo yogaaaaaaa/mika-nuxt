@@ -13,11 +13,11 @@ module.exports = {
       username: {
         allowNull: false,
         unique: true,
-        type: Sequelize.CHAR(64, true)
+        type: Sequelize.STRING
       },
       password: {
         allowNull: false,
-        type: Sequelize.CHAR(64, true)
+        type: Sequelize.STRING
       },
 
       secure: {
@@ -26,9 +26,34 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
 
+      lastPasswords: {
+        type: Sequelize.STRING(1024)
+      },
+      lastLoginAttemptAt: {
+        type: Sequelize.DATE
+      },
+      lastPasswordChangeAt: {
+        type: Sequelize.DATE
+      },
+      failedLoginAttempt: {
+        allowNull: false,
+        defaultValue: 0,
+        type: Sequelize.INTEGER
+      },
+      followPasswordExpiry: {
+        allowNull: false,
+        defaultValue: false,
+        type: Sequelize.BOOLEAN
+      },
+      followFailedLoginLockout: {
+        allowNull: false,
+        defaultValue: false,
+        type: Sequelize.BOOLEAN
+      },
+
       userType: {
         allowNull: false,
-        type: Sequelize.CHAR(32)
+        type: Sequelize.STRING(32)
       },
       userRoles: {
         type: Sequelize.STRING

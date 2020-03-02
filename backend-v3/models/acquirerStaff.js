@@ -31,12 +31,6 @@ module.exports = (sequelize, DataTypes) => {
       sequelize.models.user.scope('excludePassword')
     ]
   }))
-  acquirerStaff.addScope('adminUpdate', () => ({
-    paranoid: false,
-    include: [
-      sequelize.models.user
-    ]
-  }))
 
   acquirerStaff.addScope('acquirerStaff', () => ({
     attributes: { exclude: ['archivedAt'] },

@@ -1,8 +1,8 @@
 'use strict'
 
-const uid = require('../libs/uid')
-
 const { validationResult } = require('express-validator')
+
+const uid = require('../libs/uid')
 const msg = require('../libs/msg')
 
 const commonConfig = require('../configs/commonConfig')
@@ -30,11 +30,20 @@ module.exports.errorHandler = (errorMap) => (err, req, res, next) => {
     let msgType
     let data
 
-    if (errorMap) msgType = errorMap(err)
-
-    if (err.status === 400) { // status assigned by body-parser when encounter parsing error
+    if (err.name === 'SyntaxError') { // parse error
       msgType = msg.msgTypes.MSG_ERROR_BAD_REQUEST
-    } else if (!msgType) {
+      data = err.message
+    }
+
+    if (typeof errorMap === 'function') {
+      const msgTypeMapped = errorMap(err)
+      if (msgTypeMapped) {
+        msgType = msgTypeMapped
+        data = err.data
+      }
+    }
+
+    if (!msgType) {
       msgType = msg.msgTypes.MSG_ERROR
       const errorRef = `${commonConfig.name}-error-${uid.ksuid.randomSync().string}`
       data = { errorRef }
@@ -55,16 +64,16 @@ module.exports.errorHandler = (errorMap) => (err, req, res, next) => {
  * Handle validator error
  */
 module.exports.validatorErrorHandler = (req, res, next) => {
-  const validationResults = []
+  const validationResults = new Set()
 
   // Handle express-validator
   const expressValidationResults = validationResult(req).array()
   if (expressValidationResults.length > 0) {
     expressValidationResults.forEach(result => {
       if (result.msg === 'Invalid value') {
-        validationResults.push(`${result.location}.${result.param}`)
+        validationResults.add(`${result.location}.${result.param}`)
       } else {
-        validationResults.push(`${result.location}.${result.param}: ${result.msg}`)
+        validationResults.add(`${result.location}.${result.param}: ${result.msg}`)
       }
     })
   }
@@ -76,17 +85,17 @@ module.exports.validatorErrorHandler = (req, res, next) => {
       locations.forEach(location => {
         const results = req.fastestValidatorResults[location]
         results.forEach(result =>
-          validationResults.push(`${location}.${result.field}: ${result.message}`)
+          validationResults.add(`${location}.${result.field}: ${result.message}`)
         )
       })
     }
   }
 
-  if (validationResults.length) {
+  if (validationResults.size) {
     msg.expressResponse(
       res,
       msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION,
-      validationResults
+      Array.from(validationResults)
     )
     return
   }
@@ -95,23 +104,53 @@ module.exports.validatorErrorHandler = (req, res, next) => {
 }
 
 /**
- * Handle sequelize error, like `foreignKeyConstraint`
+ * Handle sequelize error, like `SequelizeForeignKeyConstraintError`
  */
 module.exports.sequelizeErrorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeForeignKeyConstraintError') {
-    if (err.reltype === 'parent') {
-      msg.expressResponse(
-        res,
-        msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_PARENT
-      )
-    } else if (err.reltype === 'child') {
-      msg.expressResponse(
-        res,
-        msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_CHILD,
-        err.fields
-      )
+    if (err.reltype) { // works in mysql/mariadb
+      if (err.reltype === 'parent') {
+        msg.expressResponse(
+          res,
+          msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_PARENT
+        )
+        return
+      } else if (err.reltype === 'child') {
+        msg.expressResponse(
+          res,
+          msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_CHILD,
+          err.fields
+        )
+        return
+      }
+    } else if (err.original) {
+      if (err.original.code === '23503') { // foreign_key_violation in postgres
+        const detailKeyParent = /^Key \((.+)\)=\((.+)\) is still referenced from table "(.+)"\./
+        const detailKeyChild = /^Key \((.+)\)=\((.+)\) is not present in table "(.+)"\./
+        let detailMatch
+
+        detailMatch = err.original.detail.match(detailKeyParent)
+        if (detailMatch) {
+          msg.expressResponse(
+            res,
+            msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_PARENT
+          )
+          return
+        }
+
+        detailMatch = err.original.detail.match(detailKeyChild)
+        if (detailMatch) {
+          msg.expressResponse(
+            res,
+            msg.msgTypes.MSG_ERROR_BAD_REQUEST_FOREIGN_KEY_CHILD,
+            [
+              `${err.original.table}.${detailMatch[1]}`
+            ]
+          )
+          return
+        }
+      }
     }
-    return
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     if (Array.isArray(err.errors)) {
       let data

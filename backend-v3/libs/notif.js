@@ -6,27 +6,31 @@
 
 const crypto = require('crypto')
 
-const trxManager = require('./trxManager')
-const msg = require('./msg')
-const mqtt = require('./mqtt')
-const models = require('../models')
+const trxManager = require('libs/trxManager')
+const msg = require('libs/msg')
+const mqtt = require('libs/mqtt')
+const models = require('models')
 
-const config = require('../configs/notifConfig')
+const commonConfig = require('configs/commonConfig')
+const config = require('configs/notifConfig')
+
+const authExpirySecond = commonConfig.authExpirySecond
+
+module.exports.brokerHost = {
+  brokerUrl: config.brokerUrl,
+  brokerUrlAlt: config.brokerUrlAlt
+}
 
 module.exports.agentBrokerDetail = (agentId, genPassword = false) => {
   const user = `${config.agentPrefix}${agentId}`
   const password = genPassword ? crypto.randomBytes(18).toString('base64') : null
   const clientId = user
   const cleanSession = false
-  const brokerUrl = config.brokerUrl
-  const brokerUrlAlt = config.brokerUrlAlt
   const clientTopic = `${config.topicClientPrefix}/${user}`
   const serverTopic = `${config.topicServerPrefix}/${user}`
   const broadcastTopic = `${config.topicBroadcastPrefix}`
 
   return {
-    brokerUrl,
-    brokerUrlAlt,
     user,
     password,
     clientId,
@@ -37,9 +41,9 @@ module.exports.agentBrokerDetail = (agentId, genPassword = false) => {
   }
 }
 
-module.exports.addAgent = async (agentId, expirySecond = null) => {
+module.exports.addAgent = async (agentId) => {
   const agentBrokerDetail = exports.agentBrokerDetail(agentId, true)
-  await mqtt.addAuthUser(agentBrokerDetail.user, agentBrokerDetail.password, expirySecond)
+  await mqtt.addAuthUser(agentBrokerDetail.user, agentBrokerDetail.password, authExpirySecond)
   await mqtt.addAuthTopics(agentBrokerDetail.user, [
     {
       topic: agentBrokerDetail.clientTopic,
@@ -53,21 +57,19 @@ module.exports.addAgent = async (agentId, expirySecond = null) => {
       topic: agentBrokerDetail.broadcastTopic,
       rw: mqtt.aclKeyTypes.READ_WRITE
     }
-  ], expirySecond)
+  ], authExpirySecond)
 
   return agentBrokerDetail
 }
 
-module.exports.refreshAgent = async (agentId, expirySecond) => {
-  if (expirySecond) {
-    const agentBrokerDetail = exports.agentBrokerDetail(agentId)
-    await mqtt.refreshAuthUser(agentBrokerDetail.user, expirySecond)
-    await mqtt.refreshAuthTopics(agentBrokerDetail.user, [
-      agentBrokerDetail.clientTopic,
-      agentBrokerDetail.serverTopic,
-      agentBrokerDetail.broadcastTopic
-    ], expirySecond)
-  }
+module.exports.refreshAgent = async (agentId) => {
+  const agentBrokerDetail = exports.agentBrokerDetail(agentId)
+  await mqtt.refreshAuthUser(agentBrokerDetail.user, authExpirySecond)
+  await mqtt.refreshAuthTopics(agentBrokerDetail.user, [
+    agentBrokerDetail.clientTopic,
+    agentBrokerDetail.serverTopic,
+    agentBrokerDetail.broadcastTopic
+  ], authExpirySecond)
 }
 
 module.exports.removeAgent = async (agentId) => {
@@ -82,7 +84,8 @@ module.exports.removeAgent = async (agentId) => {
 
 module.exports.notifToAgent = async (agentId, message) => {
   try {
-    await mqtt.publish(`${config.topicClientPrefix}/${config.agentPrefix}${agentId}`, message)
+    const topic = `${config.topicClientPrefix}/${config.agentPrefix}${agentId}`
+    await mqtt.publish(topic, message)
   } catch (err) {
     console.error(err)
   }
@@ -92,35 +95,45 @@ module.exports.agentExist = async (agentId) => {
   return mqtt.getAuthUser(`${config.agentPrefix}${agentId}`)
 }
 
-trxManager.listenStatusChange(async (event) => {
-  if (await exports.agentExist(event.agentId)) {
+trxManager.listenTransactionEvent(async (eventCtx) => {
+  if (await exports.agentExist(eventCtx.agentId)) {
     let eventType
 
-    if (event.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
+    /** Deprecated, will use simpler payload */
+    if (eventCtx.transactionStatus === trxManager.transactionStatuses.SUCCESS) {
       eventType = msg.eventTypes.EVENT_TRANSACTION_SUCCESS
-    } else if (event.transactionStatus === trxManager.transactionStatuses.FAILED) {
+    } else if (eventCtx.transactionStatus === trxManager.transactionStatuses.FAILED) {
       eventType = msg.eventTypes.EVENT_TRANSACTION_FAILED
-    } else if (event.transactionStatus === trxManager.transactionStatuses.EXPIRED) {
+    } else if (eventCtx.transactionStatus === trxManager.transactionStatuses.EXPIRED) {
       eventType = msg.eventTypes.EVENT_TRANSACTION_EXPIRED
     }
 
     if (eventType) {
       const findOptions = {}
-      if (event.t) findOptions.transaction = event.t
+      if (eventCtx.t) findOptions.transaction = eventCtx.t
 
       const transaction = await models.transaction
         .scope('agent')
-        .findByPk(event.transactionId, findOptions)
+        .findByPk(eventCtx.transactionId, findOptions)
 
       await exports.notifToAgent(
-        event.agentId,
-        msg.createNotification(
-          eventType,
-          transaction,
-          undefined,
-          true
-        )
+        eventCtx.agentId,
+        msg.createNotification(eventType, transaction)
       )
     }
+  }
+})
+
+trxManager.listenAgentSettleBatchEvent(async (eventCtx) => {
+  if (await exports.agentExist(eventCtx.agentId)) {
+    const data = {
+      settleBatchId: eventCtx.settleBatchId,
+      settleBatchStatus: eventCtx.settleBatchStatus
+    }
+
+    await exports.notifToAgent(
+      eventCtx.agentId,
+      msg.createNotification(msg.eventTypes.EVENT_SETTLE_BATCH, data)
+    )
   }
 })

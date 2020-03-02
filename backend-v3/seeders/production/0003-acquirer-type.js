@@ -37,7 +37,7 @@ module.exports = {
       },
       {
         id: 5,
-        class: 'emvDebit',
+        class: 'cardDebit',
         name: 'Kartu Debit',
         thumbnail: 'card.png',
         thumbnailGray: 'card-gray.png',
@@ -45,11 +45,35 @@ module.exports = {
       },
       {
         id: 6,
-        class: 'emvCredit',
+        class: 'cardDebit',
         name: 'Kartu Kredit',
         thumbnail: 'card.png',
         thumbnailGray: 'card-gray.png',
         chartColor: '#192061'
+      },
+      {
+        id: 7,
+        class: 'qris',
+        name: 'QR Nasional (QRIS)',
+        thumbnail: 'bi.png',
+        thumbnailGray: 'bi-gray.png',
+        chartColor: '#0A4678'
+      },
+      {
+        id: 8,
+        class: 'cardPrepaid',
+        name: 'Kartu Prepaid',
+        thumbnail: 'bi.png',
+        thumbnailGray: 'bi-gray.png',
+        chartColor: '#0A4678'
+      },
+      {
+        id: 100,
+        class: 'kumapay',
+        name: 'Kuma Pay',
+        thumbnail: 'kumapay.png',
+        thumbnailGray: 'kumapay-gray.png',
+        chartColor: '#808080'
       }
     ]
     , {})

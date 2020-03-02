@@ -5,19 +5,15 @@ module.exports = {
     return queryInterface.bulkInsert('agentAcquirerExclusion', [
       {
         agentId: 8,
-        acquirerId: 5
+        acquirerId: 1
       },
       {
         agentId: 8,
-        acquirerId: 6
+        acquirerId: 2
       },
       {
         agentId: 9,
-        acquirerId: 5
-      },
-      {
-        agentId: 9,
-        acquirerId: 6
+        acquirerId: 9
       }
     ]
     , {})

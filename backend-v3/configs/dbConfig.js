@@ -4,14 +4,13 @@
  * Sequelize Database config
  */
 
-const _ = require('lodash')
-
 const commonDbConfig = {
   username: null,
   password: null,
   database: null,
-  dialect: 'mysql',
+  dialect: 'postgres',
   freezeTableName: true,
+  minifyAliases: true,
   pool: {
     max: 5,
     acquire: 30000,
@@ -19,14 +18,14 @@ const commonDbConfig = {
   }
 }
 
-const baseConfig = {
+let baseConfig = {
   development: {
     username: 'mikadev',
     password: 'mikadev',
-    database: 'mika_v3_31',
+    database: 'mika_dev',
     host: '127.0.0.1',
-    port: 3306,
-    logging: console.log,
+    port: 5432,
+    logging: true,
     benchmark: true,
     ...commonDbConfig
   },
@@ -37,14 +36,7 @@ const baseConfig = {
   }
 }
 
-/**
- * Load external config file
- */
-try {
-  const configName = require('path').basename(__filename, '.js')
-  const extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
-  _.merge(baseConfig, extraConfig)
-  console.log(`${configName} is mixed`)
-} catch (err) {}
+// Load external config file
+baseConfig = require('./helper').loadAndNestedMerge(__filename, baseConfig)
 
 module.exports = baseConfig

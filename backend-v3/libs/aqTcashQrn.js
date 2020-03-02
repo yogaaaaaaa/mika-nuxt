@@ -8,10 +8,8 @@ const crypto = require('crypto')
 const superagent = require('superagent')
 const format = require('../libs/format')
 
-module.exports.handlerName = 'tcashqrn'
-module.exports.handlerClasses = ['qris']
-
 module.exports.baseConfig = require('../configs/aqTcashQrnConfig')
+module.exports.handlerName = 'tcashqrn'
 
 function tcashQrnGetAgent (config) {
   const agent = superagent

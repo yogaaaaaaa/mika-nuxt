@@ -1,139 +1,72 @@
 'use strict'
 
-const msg = require('../libs/msg')
-const models = require('../models')
-
-const queryToSequelizeMiddleware = require('../middlewares/queryToSequelizeMiddleware')
-const errorMiddleware = require('../middlewares/errorMiddleware')
-
-const acquirerTypeValidator = require('../validators/acquirerTypeValidator')
-
-module.exports.createAcquirerType = async (req, res, next) => {
-  let acquirerType
-
-  await models.sequelize.transaction(async t => {
-    acquirerType = await models.acquirerType.create(req.body, { transaction: t })
-    acquirerType = await models.acquirerType
-      .findByPk(acquirerType.id, { transaction: t })
-  })
-
-  msg.expressCreateEntityResponse(
-    res,
-    acquirerType
-  )
-}
-
-module.exports.getAcquirerTypes = async (req, res, next) => {
-  let scopedAcquirerType = req.applySequelizeCommonScope(models.acquirerType.scope('admin'))
-  const query = { where: {} }
-
-  if (req.params.acquirerTypeId) {
-    query.where.id = req.params.acquirerTypeId
-    msg.expressGetEntityResponse(
-      res,
-      await scopedAcquirerType.findOne(query)
-    )
-  } else {
-    scopedAcquirerType =
-      req.applySequelizeFilterScope(
-        req.applySequelizePaginationScope(
-          scopedAcquirerType
-        )
-      )
-    if (req.query.get_count) {
-      const acquirerTypes = await scopedAcquirerType.findAndCountAll(query)
-      msg.expressGetEntityResponse(
-        res,
-        acquirerTypes.rows,
-        acquirerTypes.count,
-        req.query.page,
-        req.query.per_page
-      )
-    } else {
-      msg.expressGetEntityResponse(
-        res,
-        await scopedAcquirerType.findAll(query)
-      )
-    }
-  }
-}
-
-module.exports.updateAcquirerType = async (req, res, next) => {
-  const scopedAcquirerType = models.acquirerType.scope('paranoid')
-  let acquirerType
-
-  let updated = false
-  let found = false
-
-  await models.sequelize.transaction(async t => {
-    acquirerType = await scopedAcquirerType.findByPk(req.params.acquirerTypeId, { transaction: t })
-    if (acquirerType) {
-      found = true
-
-      Object.assign(acquirerType, req.body)
-
-      if (req.body.archivedAt === true || req.body.archivedAt === false) {
-        acquirerType.setDataValue('archivedAt', req.body.archivedAt ? new Date() : null)
-      }
-
-      if (acquirerType.changed()) updated = true
-      await acquirerType.save({ transaction: t })
-
-      if (updated) {
-        acquirerType = await scopedAcquirerType.findByPk(acquirerType.id, { transaction: t })
-      }
-    }
-  })
-
-  msg.expressUpdateEntityResponse(
-    res,
-    updated,
-    acquirerType,
-    found
-  )
-}
-
-module.exports.deleteAcquirerType = async (req, res, next) => {
-  const scopedAcquirerType = models.acquirerType.scope('paranoid')
-  let acquirerType
-
-  await models.sequelize.transaction(async t => {
-    acquirerType = await scopedAcquirerType.findByPk(req.params.acquirerTypeId, { transaction: t })
-    if (acquirerType) await acquirerType.destroy({ force: true, transaction: t })
-  })
-
-  msg.expressDeleteEntityResponse(
-    res,
-    acquirerType
-  )
-}
+const crudGenerator = require('./helpers/crudGenerator')
+const acquirerTypeValidator = require('validators/acquirerTypeValidator')
 
 module.exports.createAcquirerTypeMiddlewares = [
   acquirerTypeValidator.bodyCreate,
-  errorMiddleware.validatorErrorHandler,
-  exports.createAcquirerType,
-  errorMiddleware.sequelizeErrorHandler
+  crudGenerator.generateCreateEntityController({
+    modelName: 'acquirerType'
+  })
 ]
 
 module.exports.updateAcquirerTypeMiddlewares = [
   acquirerTypeValidator.bodyUpdate,
-  errorMiddleware.validatorErrorHandler,
-  exports.updateAcquirerType,
-  errorMiddleware.sequelizeErrorHandler
+  crudGenerator.generateUpdateEntityController({
+    modelName: 'acquirerType',
+    identifierSource: {
+      path: 'params.acquirerTypeId',
+      as: 'id',
+      type: 'int'
+    }
+  })
 ]
 
 module.exports.getAcquirerTypesMiddlewares = [
-  queryToSequelizeMiddleware.commonValidator,
-  queryToSequelizeMiddleware.paginationValidator(['acquirerType']),
-  queryToSequelizeMiddleware.filterValidator(['acquirerType']),
-  errorMiddleware.validatorErrorHandler,
-  queryToSequelizeMiddleware.pagination,
-  queryToSequelizeMiddleware.filter,
-  queryToSequelizeMiddleware.common,
-  exports.getAcquirerTypes
+  crudGenerator.generateReadEntityController({
+    modelName: 'acquirerType',
+    modelScope: 'admin',
+    identifierSource: {
+      path: 'params.acquirerTypeId',
+      as: 'id',
+      type: 'int'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['acquirerType']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: ['acquirerType']
+    }
+  })
 ]
 
 module.exports.deleteAcquirerTypeMiddlewares = [
-  exports.deleteAcquirerType,
-  errorMiddleware.sequelizeErrorHandler
+  crudGenerator.generateDeleteEntityController({
+    modelName: 'acquirerType',
+    identifierSource: {
+      path: 'params.acquirerTypeId',
+      as: 'id',
+      type: 'int'
+    }
+  })
+]
+
+module.exports.getAgentAcquirerTypesMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'acquirerType',
+    modelScope: 'agent',
+    identifierSource: {
+      path: 'params.acquirerTypeId',
+      as: 'id',
+      type: 'int'
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizePaginationScopeParam: {
+      validModels: ['acquirerType']
+    },
+    sequelizeFilterScopeParam: {
+      validModels: ['acquirerType']
+    }
+  })
 ]

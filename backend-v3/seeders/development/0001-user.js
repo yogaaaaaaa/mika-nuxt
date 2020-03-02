@@ -291,6 +291,39 @@ module.exports = {
         username: 'acquirerStaff4',
         password: await hash.bcryptHash('acquirerStaff4'),
         userType: 'acquirerStaff'
+      },
+
+      {
+        id: 500,
+        secure: false,
+        username: 'minseok0',
+        password: await hash.bcryptHash('minseok0'),
+        userType: 'admin',
+        userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
+      },
+      {
+        id: 501,
+        secure: false,
+        username: 'syamsu',
+        password: await hash.bcryptHash('syamsu'),
+        userType: 'admin',
+        userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
+      },
+      {
+        id: 502,
+        secure: false,
+        username: 'agentsyamsu',
+        password: await hash.bcryptHash('agentsyamsu'),
+        userType: 'agent',
+        userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
+      },
+      {
+        id: 503,
+        secure: false,
+        username: 'merchantsyamsyu',
+        password: await hash.bcryptHash('merchantsyamsyu'),
+        userType: 'merchantStaff',
+        userRoles: 'adminHead,adminFinance,adminMarketing,adminSupport,adminLogistic'
       }
 
     ]
