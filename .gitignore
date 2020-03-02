@@ -11,6 +11,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Build
+target
+
 # Runtime data
 pids
 *.pid
@@ -87,6 +90,11 @@ captures
 .nuxt
 .project
 .settings
+.apt_generated
+.classpath
+.factorypath
+.springBeans
+.sts4-cache
 
 # development specific
 .archive
