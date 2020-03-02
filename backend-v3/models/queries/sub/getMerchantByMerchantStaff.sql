@@ -1,6 +1,6 @@
 (SELECT
-  `merchantStaff`.`merchantId` 
+  "merchantStaff"."merchantId" 
 FROM
-  `merchantStaff` 
+  "merchantStaff" 
 WHERE
-  `merchantStaff`.`id` = ?)
+  "merchantStaff"."id" = ?)

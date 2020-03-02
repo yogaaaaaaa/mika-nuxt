@@ -20,7 +20,7 @@ module.exports.midtransNotifHandle = async function (req, res, next) {
       where: {
         id: req.body.order_id,
         amount: req.body.gross_amount,
-        referenceNumber: req.body.transaction_id,
+        reference: req.body.transaction_id,
         status: trxManager.transactionStatuses.CREATED
       },
       include: [{
@@ -28,7 +28,7 @@ module.exports.midtransNotifHandle = async function (req, res, next) {
         model: models.acquirer.scope('id'),
         include: [
           {
-            model: models.acquirerConfig.scope('acquirerConfigKv'),
+            model: models.acquirerConfig,
             where: { handler: midtrans.handlerName }
           }
         ]
@@ -57,7 +57,7 @@ module.exports.midtransNotifHandle = async function (req, res, next) {
 
     await models.sequelize.transaction(async t => {
       await transaction.save({ transaction: t })
-      await trxManager.emitStatusChange(transaction, t)
+      await trxManager.emitTransactionEvent(transaction, t)
     })
 
     res

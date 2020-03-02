@@ -12,7 +12,7 @@ module.exports = {
       {
         id: 2,
         name: 'W6900 P1',
-        description: 'POS System with integrated EMV (NFC, MSR, CHIP) and thermal printer',
+        description: 'POS System with integrated Card Reader (NFC, MSR, CHIP) and thermal printer',
         manufacturer: 'Shanghai Sunmi Tech Co.,Ltd'
       }
     ]

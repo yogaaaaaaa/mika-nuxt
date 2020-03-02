@@ -1,6 +1,6 @@
 (SELECT
-  SUM(`transactionRefund`.`amount`)
+  SUM("transactionRefund"."amount")
 FROM
-  `transactionRefund` 
+  "transactionRefund" 
 WHERE
-  `transactionRefund`.`transactionId` = ?)
+  "transactionRefund"."transactionId" = ?)

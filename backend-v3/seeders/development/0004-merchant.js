@@ -39,8 +39,7 @@ module.exports = {
         bankName: 'Bank Rakyat Indonesia',
         bankBranchName: 'BRI Cisewu',
         bankAccountName: 'Rewu Satria',
-        bankAccountNumber: '029384982312350',
-        partnerId: 1
+        bankAccountNumber: '029384982312350'
       },
 
       {
@@ -53,8 +52,7 @@ module.exports = {
         bankName: 'Bank Rakyat Indonesia',
         bankBranchName: 'Bank Rakyat Indonesia Jayagiri',
         bankAccountName: 'Abang Kuat',
-        bankAccountNumber: '012938019274128',
-        partnerId: 1
+        bankAccountNumber: '012938019274128'
       },
 
       {

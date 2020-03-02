@@ -1,6 +1,6 @@
 (SELECT
-  `agentAcquirerExclusion`.`acquirerId` 
+  "agentAcquirerExclusion"."acquirerId"
 FROM
-  `agentAcquirerExclusion` 
+  "agentAcquirerExclusion" 
 WHERE
-  `agentAcquirerExclusion`.`agentId` = ?)
+  "agentAcquirerExclusion"."agentId" = ?)

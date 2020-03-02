@@ -214,7 +214,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
         transactionDate: time.moment(transaction.createdAt).locale(options.locale).format('DD MMM YYYY HH:mm:ss'),
         transactionOutletName: transaction.agent.outlet.name,
         transactionAcquirerTypeName: transaction.acquirer.acquirerType.name,
-        transactionReferenceNum: transaction.referenceNumber,
+        transactionReferenceNum: transaction.reference,
         transactionAmount: format.formatCurrencyIDR(transaction.amount)
       }
     }),
@@ -371,7 +371,7 @@ module.exports.createMerchantStaffDailyReport = async (merchantStaffId, options)
           agent: transaction.agent.name,
           metode: transaction.acquirer.acquirerType.name,
           kodeTransaksi: transaction.idAlias,
-          kodePembayaran: transaction.referenceNumber || '',
+          kodePembayaran: transaction.reference || '',
           jumlah: transaction.amount
         })
       })

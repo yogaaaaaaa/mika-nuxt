@@ -22,13 +22,6 @@ module.exports = (sequelize, DataTypes) => {
     ]
   }))
 
-  admin.addScope('adminUpdate', () => ({
-    paranoid: false,
-    include: [
-      sequelize.models.user
-    ]
-  }))
-
   admin.associate = (models) => {
     admin.belongsTo(models.user, { foreignKey: 'userId' })
   }

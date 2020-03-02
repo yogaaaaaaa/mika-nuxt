@@ -4,7 +4,7 @@
  * Moleculer service broker config
  */
 
-const commonConfig = require('./commonConfig')
+const commonConfig = require('configs/commonConfig')
 const isEnvProduction = process.env.NODE_ENV === 'production'
 
 let baseConfig = {
@@ -16,14 +16,7 @@ let baseConfig = {
   logFormatter: 'simple'
 }
 
-/**
- * Load external config file
- */
-try {
-  const configName = require('path').basename(__filename, '.js')
-  const extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
-  baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`${configName} is mixed`)
-} catch (error) {}
+// Load external config file
+baseConfig = require('./helper').loadAndMerge(__filename, baseConfig)
 
 module.exports = baseConfig

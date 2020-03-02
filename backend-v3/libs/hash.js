@@ -28,3 +28,22 @@ module.exports.compareHash = (dataHashed, data) => {
   const dataHashB = Buffer.from(dataHashed, 'hex')
   return crypto.timingSafeEqual(dataHashA, dataHashB)
 }
+
+module.exports.createDek = async (secretKey, username, password) =>
+  new Promise((resolve, reject) => {
+    const input = Buffer.concat([
+      Buffer.from(secretKey),
+      Buffer.from(password)
+    ])
+    const salt = crypto.createHash('sha256')
+      .update(Buffer.from(username))
+      .digest()
+
+    crypto.scrypt(input, salt, 32, (err, key) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(key.toString('base64'))
+      }
+    })
+  })

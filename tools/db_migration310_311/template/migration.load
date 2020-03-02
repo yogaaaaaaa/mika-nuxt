@@ -1,0 +1,43 @@
+LOAD DATABASE
+  FROM
+    -- mysql://user:password@host:3306/database
+    mysql://{{mysqlUser}}:{{mysqlPass}}@{{mysqlHost}}:{{mysqlPort}}/{{mysqlDatabase}}
+  INTO
+    -- postgresql://user:password@host:5432/database
+    postgresql://{{pgUser}}:{{pgPass}}@{{pgHost}}:{{pgPort}}/{{pgDatabase}}
+
+  WITH
+    include no drop,
+    create no tables,
+    create no indexes,
+    no foreign keys,
+--    no truncate,
+    disable triggers,
+    reset sequences,
+    quote identifiers
+
+  SET MySQL PARAMETERS
+    net_read_timeout  = '120',
+    net_write_timeout = '120'
+
+  SET PostgreSQL PARAMETERS
+    maintenance_work_mem to '128MB',
+    work_mem to '12MB',
+    search_path to 'public, "$user"'
+
+  ALTER SCHEMA '{{mysqlDatabase}}' RENAME TO 'public'
+
+  EXCLUDING TABLE NAMES MATCHING
+    'SequelizeMeta'
+
+-- INCLUDING ONLY TABLE NAMES MATCHING 
+--    'user',
+--    'admin'
+  
+-- BEFORE LOAD DO
+--    $$ $$
+
+-- AFTER LOAD DO
+--    $$ $$
+
+;

@@ -1,13 +1,10 @@
 'use strict'
 
-console.log('Starting report apps')
+require('libs/appInit').environmentInit()
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'development'
-console.log('NODE_ENV is', process.env.NODE_ENV)
-
-const serviceBroker = require('../libs/serviceBroker')
+const serviceBroker = require('libs/serviceBroker')
 
 /**
  * Register report service
  */
-serviceBroker.createService(require('../services/report'))
+serviceBroker.createService(require('services/report'))

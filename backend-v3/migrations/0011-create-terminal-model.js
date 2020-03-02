@@ -1,8 +1,6 @@
 'use strict'
 
-/**
- * TODO: This is a stub migration for terminalModel
- */
+// TODO: This is a stub migration for terminalModel
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

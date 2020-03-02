@@ -1,6 +1,7 @@
 'use strict'
 
-// const { ValidationError } = require('moleculer').Errors
+/*
+const { ValidationError } = require('moleculer').Errors
 const generate = require('./generate')
 const uid = require('../../libs/uid')
 
@@ -8,6 +9,7 @@ const eventTypes = {
   REPORT_DONE: 'report.merchantStaffDailyReportDone',
   REPORT_ERROR: 'report.merchantStaffDailyReportError'
 }
+*/
 
 module.exports = {
   name: 'report',
@@ -20,7 +22,8 @@ module.exports = {
       return {
         msg: 'Hello World !'
       }
-    },
+    }
+    /* TODO: this service actions is not working in postgres
     createMerchantStaffDailyReport: {
       params: {
         merchantStaffId: { type: 'string', min: 1 },
@@ -54,6 +57,7 @@ module.exports = {
         }
       }
     }
+    */
   },
   created () {
   },

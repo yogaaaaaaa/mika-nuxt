@@ -31,12 +31,33 @@ yum -y -q install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
 # postgres repo
 yum -y -q install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-# Installation of mariadb, nodejs and redis
+# Installation of mariadb, postgres, nodejs and redis
 yum -y -q update
 yum -y -q install nodejs MariaDB-server MariaDB-client arangodb3-3.4.7-1.0
-yum -y -q --enablerepo=remi install redis
 yum -y -q install postgresql11
 yum -y -q install postgresql11-server
+yum -y -q --enablerepo=remi install redis
+
+# Installation of elasticsearch
+mkdir -p "/tmp/elastic"
+cd "/tmp/elastic"
+curl -s -OL "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.5.2-x86_64.rpm"
+ELASTICHASH="1dd9452b9c4ff3cd4eb066e7012dbce3c5c74b8dc97bc62ffc54334cddbf37d77f05591a239c4d2c095383defa23dcc5ea5dee947c9c35c6d17d8ee376f5b4ee  -"
+if [ "$(cat elasticsearch-oss-7.5.2-x86_64.rpm | sha512sum)" == "$ELASTICHASH" ]; then
+	rpm --install "elasticsearch-oss-7.5.2-x86_64.rpm"
+fi
+
+# Installation of pgloader
+yum -y -q install sbcl
+yum -y -q install freetds freetds-devel
+#ln -s /usr/lib64/libsybdb.so.5 /usr/lib64/libsybdb.so
+mkdir -p /opt/pgloader
+cd /opt/pgloader
+curl -s -OL "https://github.com/dimitri/pgloader/releases/download/v3.6.1/pgloader-bundle-3.6.1.tgz"
+tar -xzf "pgloader-bundle-3.6.1.tgz"
+cd "pgloader-bundle-3.6.1"
+make
+ln -s "$(pwd)/bin/pgloader" "/usr/bin/pgloader"
 
 ## Configuring and enabling redis
 sed -i 's/bind 127.0.0.1/#bind 127.0.0.1/' /etc/redis.conf
@@ -94,6 +115,14 @@ cat <<-ARANGOINIT | arangosh  --quiet --server.username "root" --server.password
 ARANGOINIT
 sed -i 's/authentication =.*/authentication = true/' /etc/arangodb3/arangod.conf
 systemctl restart arangodb3.service
+
+## Configure and enabling elasticsearch
+cat <<-ELASTICSEARCHYML >> /etc/elasticsearch/elasticsearch.yml
+	# HTTP bind and port
+	http.host: 0.0.0.0
+	http.port: 9200
+ELASTICSEARCHYML
+systemctl restart elasticsearch
 
 ## Mosquitto build preparation
 yum -y -q install c-ares-devel libwebsockets-devel openssl-devel libuuid-devel libcurl-devel libwebsockets hiredis-devel

@@ -9,11 +9,13 @@ This project uses,
 ## Prerequisites
 Component below is needed to start mika backend app
   - Nodejs >= 10
-  - MariaDb/MySQL database
+  - PostgreSQL 11.5
   - Redis
-  - Mosquitto MQTT broker with mosquitto-auth plugin
-  - Mosquitto MQTT broker for moleculer transporter
-  
+  - Mosquitto MQTT broker with mosquitto-auth plugin (MQTT Notification)
+  - Mosquitto MQTT broker for moleculer transporter (inter-service communication)
+
+See `vagrant/provision.sh` to see detailed step to re-crete development environment
+
 ## Standard Style
 [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
 
@@ -28,6 +30,9 @@ Use sequelize cli to migrate database schema, all database configuration is stor
 npm run db-drop
 npm run db-create
 
+# Create/Recreate and migrate database
+npm run db-recreate-migrate
+
 # Migrations
 npm run db-migrate
 # Migrations undo
@@ -36,6 +41,12 @@ npm run db-migrate-undo
 # Seeds
 npm run db-seed-development
 npm run db-seed-production
+
+# Seeds Card IIN data
+npm run db-seed-card-iin
+
+# Seed about 50k fake transaction data
+npm run db-seed-transaction
 ```
 New schema MUST be added via migration and make sure any foreign key relation is valid.
 
@@ -71,5 +82,40 @@ pm2 start --only mika-v3-report # start only certain app
 ```
 
 ## Environment
-By default all apps/service will run in development environment (`NODE_ENV=development`) . For production mode, just set `NODE_ENV` to `production`.
-If `NODE_ENV` is set to other than `production` it will treated as development environment.
+By default all apps/service will run in development environment (`NODE_ENV=development`) . 
+For production mode, just set `NODE_ENV` to `production`. If `NODE_ENV` is set to other than `production` it will treated as development environment.
+
+## Mosquitto auth Plugin
+Please see https://github.com/jpmens/mosquitto-auth-plug for more information.
+
+For MQTT notification, mika backend use Mosquitto with `mosquitto-auth` plugin 
+with Redis backend for dynamic creation of mosquitto user. 
+
+Set `auth_opt_redis_userquery` and `auth_opt_redis_aclquery` in mosquitto 
+configuration to use same prefix. Default pattern for each environment is,
+- For `NODE_ENV=production`
+    - `mika-v3:mosq:%s` for user query 
+    - `mika-v3:mosqacl:%s:%s` for acl query
+- For `NODE_ENV=development`
+    - `mika-v3-dev:mosq:%s` for user query
+    - `mika-v3-dev:mosqacl:%s:%s:` for acl query
+
+Please define superuser name in `auth_opt_superusers` and set its password with
+`np`, see https://github.com/jpmens/mosquitto-auth-plug#creating-a-user
+
+Example of mosquitto-auth-plugin in `mosquitto.conf`
+```
+auth_opt_backends redis 
+# use local redis server
+auth_opt_redis_host 127.0.0.1
+auth_opt_redis_port 6379
+auth_opt_redis_pass redispassword
+auth_opt_redis_userquery GET mika-v3:mosq:%s
+auth_opt_redis_aclquery GET mika-v3:mosqacl:%s:%s
+auth_opt_superusers superuser
+auth_opt_acl_cacheseconds 0
+auth_opt_auth_cacheseconds 0
+auth_opt_acl_cachejitter 0
+auth_opt_auth_cachejitter 0
+auth_opt_log_quiet true
+``` 

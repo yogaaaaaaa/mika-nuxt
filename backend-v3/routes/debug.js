@@ -4,25 +4,34 @@
  * Quick and dirty debug route handler
  */
 
-const express = require('../libs/express')
+const express = require('libs/express')
 const bodyParser = require('body-parser')
 
-const debugController = require('../controllers/debugController')
-const altoDebugController = require('../controllers/aqAltoDebugController')
-const midtransDebugController = require('../controllers/aqMidtransDebugController')
+const debugController = require('controllers/debugController')
+const altoDebugController = require('controllers/aqAltoDebugController')
+const midtransDebugController = require('controllers/aqMidtransDebugController')
 
-const authMiddleware = require('../middlewares/authMiddleware')
-const errorMiddleware = require('../middlewares/errorMiddleware')
+const authMiddleware = require('middlewares/authMiddleware')
+const errorMiddleware = require('middlewares/errorMiddleware')
 
 const router = express.Router()
 
+router.use(bodyParser.text())
 router.use(bodyParser.json())
+
+// Echo route
+router.all('/echo', debugController.echoMiddlewares)
+
 router.use(authMiddleware.debugAuth)
 router.use(authMiddleware.authErrorHandler)
 
-router.all('/error', debugController.generateError)
+router.post('/error', debugController.generateErrorMiddlewares)
+router.post('/crash', debugController.crashMiddlewares)
+router.post('/db_query', debugController.databaseQueryMiddlewares)
+router.post('/debug_namespaces', debugController.setDebugNamespacesMiddlewares)
 
-router.all('/echo', debugController.echoMiddlewares)
+router.post('/http_delay', debugController.setHttpDelayMiddlewares)
+router.post('/mqtt_delay', debugController.setMqttDelayMiddlewares)
 
 router.post('/transaction/change_status', debugController.changeStatusTransactionMiddlewares)
 

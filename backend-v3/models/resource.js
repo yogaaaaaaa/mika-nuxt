@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   const resource = sequelize.define('resource', {
     id: {
       primaryKey: true,
-      type: DataTypes.CHAR(27)
+      type: DataTypes.STRING(27)
     },
     name: DataTypes.STRING,
     description: DataTypes.STRING

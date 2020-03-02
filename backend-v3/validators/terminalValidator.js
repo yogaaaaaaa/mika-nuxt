@@ -7,7 +7,7 @@ const helper = require('./helper')
 const idAliasValidator = () => body('idAlias').isLength({ min: 1, max: 25 })
 const nameValidator = () => body('name').not().isEmpty()
 
-const terminalModelIdValidator = () => body('terminalModelId').not().isEmpty()
+const terminalModelIdValidator = () => body('terminalModelId').isInt()
 
 const defaultValidator = [
   helper.archivedAtValidator

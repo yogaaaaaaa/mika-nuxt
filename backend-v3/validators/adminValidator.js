@@ -5,7 +5,7 @@ const { body } = require('express-validator')
 
 const auth = require('../libs/auth')
 
-const userValidator = require('../validators/userValidator')
+const userValidator = require('validators/userValidator')
 const helper = require('./helper')
 
 const nameValidator = () => body('name').not().isEmpty()

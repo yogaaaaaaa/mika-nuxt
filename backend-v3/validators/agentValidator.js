@@ -12,7 +12,7 @@ const generalLocationLongValidator = () => body('generalLocationLong').isNumeric
 const generalLocationLatValidator = () => body('generalLocationLat').isNumeric()
 const generalLocationRadiusMeterValidator = () => body('generalLocationRadiusMeter').isNumeric()
 
-const outletIdValidator = () => body('outletId').not().isEmpty()
+const outletIdValidator = () => body('outletId').isInt()
 
 const defaultValidator = [
   helper.bodyRemove('userId'),

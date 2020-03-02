@@ -5,12 +5,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
 
-    idAlias: DataTypes.CHAR(25),
+    idAlias: DataTypes.STRING(25),
 
     serialNumber: DataTypes.STRING,
     imei: DataTypes.STRING,
 
-    status: DataTypes.CHAR(32),
+    status: DataTypes.STRING(32),
 
     terminalModelId: DataTypes.INTEGER,
     terminalBatchId: DataTypes.INTEGER,

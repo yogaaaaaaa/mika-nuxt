@@ -58,32 +58,6 @@ module.exports = {
         merchantId: 1
       },
       {
-        id: 5,
-        name: 'Kartu Debit Maju Tembak',
-        gateway: false,
-        hidden: false,
-        shareAcquirer: 0.02,
-        shareMerchant: 0.9800,
-        minimumAmount: 25000,
-        processFee: 0,
-        acquirerTypeId: 5,
-        acquirerConfigId: 10,
-        merchantId: 1
-      },
-      {
-        id: 6,
-        name: 'Kartu Kredit Maju Tembak',
-        gateway: false,
-        hidden: false,
-        shareAcquirer: 0.02,
-        shareMerchant: 0.9800,
-        processFee: 0,
-        minimumAmount: 25000,
-        acquirerTypeId: 6,
-        acquirerConfigId: 10,
-        merchantId: 1
-      },
-      {
         id: 7,
         name: 'Kuma Pay Maju Tembak',
         gateway: false,
@@ -107,6 +81,20 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 7,
         acquirerConfigId: 4,
+        merchantId: 1
+      },
+      {
+        id: 9,
+        name: 'Gopay Production Maju Tembak',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 1,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 2,
+        acquirerConfigId: 5,
+        acquirerCompanyId: 2,
         merchantId: 1
       },
 
@@ -188,6 +176,20 @@ module.exports = {
         shareMerchant: 0.9800,
         acquirerTypeId: 7,
         acquirerConfigId: 4,
+        merchantId: 2
+      },
+      {
+        id: 17,
+        name: 'Gopay Production Super Moe',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 1,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 2,
+        acquirerConfigId: 5,
+        acquirerCompanyId: 2,
         merchantId: 2
       },
 
@@ -341,7 +343,7 @@ module.exports = {
         shareAcquirer: 0.02,
         shareMerchant: 0.9800,
         acquirerTypeId: 5,
-        acquirerConfigId: 10,
+        acquirerConfigId: 101,
         merchantId: 5
       },
       {
@@ -354,7 +356,7 @@ module.exports = {
         shareAcquirer: 0.02,
         shareMerchant: 0.9800,
         acquirerTypeId: 6,
-        acquirerConfigId: 10,
+        acquirerConfigId: 101,
         merchantId: 5
       },
       {

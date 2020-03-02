@@ -4,11 +4,9 @@
  * Default Dtimer Config
  */
 
-const uid = require('../libs/uid')
-const commonConfig = require('./commonConfig')
-const redisConfig = require('./redisConfig')
-
-const configName = 'dTimerConfig'
+const uid = require('libs/uid')
+const commonConfig = require('configs/commonConfig')
+const redisConfig = require('configs/redisConfig')
 
 let baseConfig = {
   redisUrl: Array.isArray(redisConfig.urls) ? redisConfig.urls[0] : redisConfig.urls,
@@ -19,14 +17,8 @@ let baseConfig = {
   disabled: false
 }
 
-/**
- * Load external config file
- */
-try {
-  const extraConfig = require(`./_configs/${configName}`)
-  baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`${configName} is mixed`)
-} catch (error) { }
+// Load external config file
+baseConfig = require('./helper').loadAndMerge(__filename, baseConfig)
 
 if (!baseConfig.nodename) {
   baseConfig.nodeName = `${commonConfig.name}-${uid.randomString()}`

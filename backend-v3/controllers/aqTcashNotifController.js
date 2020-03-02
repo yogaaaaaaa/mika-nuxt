@@ -15,7 +15,7 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
         model: models.acquirer.scope('id'),
         include: [
           {
-            model: models.acquirerConfig.scope('acquirerConfigKv'),
+            model: models.acquirerConfig,
             where: { handler: tcash.handlerName }
           }
         ]
@@ -54,14 +54,14 @@ module.exports.tcashHandleInquiryAndPay = async function (req, res, next) {
         return
       } else if (req.body.trx_type === tcash.tcashTrxType.TCASH_PAY) {
         transaction.status = trxManager.transactionStatuses.SUCCESS
-        transaction.referenceNumber = req.body.trx_id
-        transaction.referenceNumberName = 'trx_id'
+        transaction.reference = req.body.trx_id
+        transaction.referenceName = 'trx_id'
         transaction.customerReference = req.body.msisdn
         transaction.customerReferenceName = 'msisdn'
 
         await models.sequelize.transaction(async t => {
           await transaction.save({ transaction: t })
-          await trxManager.emitStatusChange(transaction, t)
+          await trxManager.emitTransactionEvent(transaction, t)
         })
 
         res

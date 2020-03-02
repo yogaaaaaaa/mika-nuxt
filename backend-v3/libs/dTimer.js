@@ -15,7 +15,7 @@ ready.addModule('dtimer')
 
 const config = require('../configs/dTimerConfig')
 
-if (config.disabled) console.log('dtimer is disabled')
+if (config.disabled) console.log('dtimer : is disabled')
 
 const redisClientSub = redis.createClient(config.redisUrl)
 const redisClientPub = redis.createClient(config.redisUrl)

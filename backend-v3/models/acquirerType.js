@@ -25,5 +25,9 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: false
   })
 
+  acquirerType.addScope('agent', {
+    paranoid: false
+  })
+
   return acquirerType
 }

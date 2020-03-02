@@ -2,17 +2,17 @@
 
 const msg = require('../libs/msg')
 const models = require('../models')
-const err = require('../libs/err')
+const error = require('libs/error')
 
 const errorMiddleware = require('../middlewares/errorMiddleware')
-const userValidator = require('../validators/userValidator')
+const userValidator = require('validators/userValidator')
 
-const validatorHelper = require('../validators/helper')
+const validatorHelper = require('validators/helper')
 
 module.exports.checkUserPassword = async (req, res, next) => {
   const user = await models.user.findByPk(req.params.userId)
   if (!user) {
-    throw err.createError(err.genericErrorTypes.ENTITY_NOT_FOUND)
+    throw error.createError({ name: error.genericErrorTypes.ENTITY_NOT_FOUND })
   }
 
   if (!validatorHelper.isStandardPassword(req.body.password)) {

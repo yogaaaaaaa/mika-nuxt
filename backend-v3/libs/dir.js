@@ -13,6 +13,10 @@ module.exports.getCachesDirPath = (...bases) => {
   return path.join(dirConfig.cachesDir, ...bases)
 }
 
+module.exports.getKeyDirPath = (...bases) => {
+  return path.join(dirConfig.keyDir, ...bases)
+}
+
 module.exports.createCacheDir = (dirName) => {
   return new Promise((resolve, reject) => {
     const dirPath = exports.getCachesDirPath(dirName)

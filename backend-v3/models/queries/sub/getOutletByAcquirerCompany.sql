@@ -1,14 +1,14 @@
 (SELECT
-  `outlet`.`id` 
+  "outlet"."id" 
 FROM
-  `outlet` 
+  "outlet" 
 WHERE
-  `outlet`.`merchantId` IN (
+  "outlet"."merchantId" IN (
     SELECT 
-      `acquirer`.`merchantId`
+      "acquirer"."merchantId"
     FROM 
-      `acquirer`
+      "acquirer"
     WHERE
-      `acquirer`.`acquirerCompanyId` = ?
+      "acquirer"."acquirerCompanyId" = ?
   ) 
 )

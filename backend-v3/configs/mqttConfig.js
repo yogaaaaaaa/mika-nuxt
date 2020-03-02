@@ -5,9 +5,9 @@
  * Including auth generation for mosquitto_auth_plugin
  */
 
-const uid = require('../libs/uid')
+const uid = require('libs/uid')
 
-const commonConfig = require('./commonConfig')
+const commonConfig = require('configs/commonConfig')
 const redisConfig = require('./redisConfig')
 
 const isEnvProduction = process.env.NODE_ENV === 'production'
@@ -30,14 +30,7 @@ let baseConfig = {
 
 baseConfig.clientId = `${commonConfig.name}-${baseConfig.superuserName}-${uid.randomString()}`
 
-/**
- * Load external config file
- */
-try {
-  const configName = require('path').basename(__filename, '.js')
-  const extraConfig = require(`./${process.env.MIKA_CONFIG_GROUP ? `_configs.${process.env.MIKA_CONFIG_GROUP}` : '_configs'}/${configName}`)
-  baseConfig = Object.assign({}, baseConfig, extraConfig)
-  console.log(`${configName} is mixed`)
-} catch (error) {}
+// Load external config file
+baseConfig = require('./helper').loadAndMerge(__filename, baseConfig)
 
 module.exports = baseConfig

@@ -43,6 +43,15 @@ module.exports = (sequelize, DataTypes) => {
     acquirer.belongsTo(models.acquirerType, { foreignKey: 'acquirerTypeId' })
 
     acquirer.hasMany(models.transaction, { foreignKey: 'acquirerId' })
+
+    acquirer.belongsTo(models.acquirerConfigAgent, {
+      foreignKey: 'acquirerConfigId',
+      targetKey: 'acquirerConfigId'
+    })
+    acquirer.belongsTo(models.acquirerConfigOutlet, {
+      foreignKey: 'acquirerConfigId',
+      targetKey: 'acquirerConfigId'
+    })
   }
 
   acquirer.addScope('excludeShare', {
@@ -75,7 +84,7 @@ module.exports = (sequelize, DataTypes) => {
   }))
   acquirer.addScope('acquirerConfig', () => ({
     include: [
-      sequelize.models.acquirerConfig.scope('acquirerConfigKv')
+      sequelize.models.acquirerConfig
     ]
   }))
   acquirer.addScope('agentExclusion', (agentId) => ({

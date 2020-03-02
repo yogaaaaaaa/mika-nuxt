@@ -26,6 +26,15 @@ module.exports = {
       {
         name: 'Suharto',
         userId: 6
+      },
+
+      {
+        name: 'Qisti Rahmatillah',
+        userId: 500
+      },
+      {
+        name: 'Syamsu Fajar',
+        userId: 501
       }
     ]
     , {})

@@ -23,6 +23,11 @@ module.exports.sessionTokenCheckValidator = [
     .isString()
 ]
 
+module.exports.passwordCheckValidator = [
+  body('password')
+    .isString()
+]
+
 module.exports.changePasswordValidator = [
   body('oldPassword')
     .isString(),

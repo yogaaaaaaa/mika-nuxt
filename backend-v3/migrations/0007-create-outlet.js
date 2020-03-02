@@ -10,9 +10,9 @@ module.exports = {
         type: Sequelize.INTEGER
       },
 
-      idAlias: { // NOTE: Optional for now
+      idAlias: {
         unique: true,
-        type: Sequelize.CHAR(25, true)
+        type: Sequelize.STRING(25)
       },
 
       name: {
@@ -25,7 +25,7 @@ module.exports = {
       },
 
       status: { // NOTE: Optional for now
-        type: Sequelize.CHAR(32)
+        type: Sequelize.STRING(32)
       },
 
       email: {
@@ -79,14 +79,14 @@ module.exports = {
       },
 
       outletPhotoResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'
         }
       },
       cashierDeskPhotoResourceId: {
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'

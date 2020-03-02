@@ -1,5 +1,7 @@
 'use strict'
 
+// TODO: timeGroup is not working in postgres
+
 const { query, sanitizeQuery } = require('express-validator')
 
 const time = require('../../libs/time')

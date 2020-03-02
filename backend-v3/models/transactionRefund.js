@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   var transactionRefund = sequelize.define('transactionRefund', {
     id: {
       primaryKey: true,
-      type: DataTypes.CHAR(27)
+      type: DataTypes.STRING(27)
     },
 
     amount: DataTypes.DECIMAL(28, 2),
@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     reference: DataTypes.STRING,
     referenceName: DataTypes.STRING,
 
-    transactionId: DataTypes.CHAR(27)
+    transactionId: DataTypes.STRING(27)
   }, {
     timestamps: true,
     freezeTableName: true,

@@ -1,9 +1,9 @@
 module.exports = {
   development: {
     host: '192.168.255.250',
-    port: 3306,
+    port: 5432,
     username: 'mikadev',
     password: 'mikadev',
-    database: 'mika_v3_31'
+    database: 'mika_dev_vagrant'
   }
 }

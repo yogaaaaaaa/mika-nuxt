@@ -4,13 +4,13 @@ module.exports = (sequelize, DataTypes) => {
   const Op = sequelize.Sequelize.Op
 
   const merchant = sequelize.define('merchant', {
-    idAlias: DataTypes.CHAR(25),
+    idAlias: DataTypes.STRING(25),
 
     name: DataTypes.STRING,
-    shortName: DataTypes.CHAR(25),
+    shortName: DataTypes.STRING(25),
     description: DataTypes.STRING,
 
-    status: DataTypes.CHAR(32),
+    status: DataTypes.STRING(32),
 
     companyForm: DataTypes.STRING,
 
@@ -25,18 +25,18 @@ module.exports = (sequelize, DataTypes) => {
     phoneNumber: DataTypes.STRING,
 
     taxCardNumber: DataTypes.STRING,
-    scannedTaxCardResourceId: DataTypes.CHAR(27),
+    scannedTaxCardResourceId: DataTypes.STRING(27),
 
     bankName: DataTypes.STRING,
     bankBranchName: DataTypes.STRING,
     bankAccountName: DataTypes.STRING,
     bankAccountNumber: DataTypes.STRING,
 
-    scannedBankStatementResourceId: DataTypes.CHAR(27),
-    scannedSkmenkumhamResourceId: DataTypes.CHAR(27),
-    scannedSiupResourceId: DataTypes.CHAR(27),
-    scannedTdpResourceId: DataTypes.CHAR(27),
-    scannedSkdpResourceId: DataTypes.CHAR(27),
+    scannedBankStatementResourceId: DataTypes.STRING(27),
+    scannedSkmenkumhamResourceId: DataTypes.STRING(27),
+    scannedSiupResourceId: DataTypes.STRING(27),
+    scannedTdpResourceId: DataTypes.STRING(27),
+    scannedSkdpResourceId: DataTypes.STRING(27),
 
     ownerName: DataTypes.STRING,
     ownerOccupation: DataTypes.STRING,
@@ -46,10 +46,8 @@ module.exports = (sequelize, DataTypes) => {
     ownerIdCardType: DataTypes.STRING,
     ownerTaxCardNumber: DataTypes.STRING,
 
-    ownerScannedIdCardResourceId: DataTypes.CHAR(27),
-    ownerScannedTaxCardResourceId: DataTypes.CHAR(27),
-
-    partnerId: DataTypes.INTEGER
+    ownerScannedIdCardResourceId: DataTypes.STRING(27),
+    ownerScannedTaxCardResourceId: DataTypes.STRING(27)
   }, {
     timestamps: true,
     freezeTableName: true,
@@ -91,7 +89,6 @@ module.exports = (sequelize, DataTypes) => {
       as: 'ownerScannedTaxCardResource'
     })
 
-    merchant.belongsTo(models.partner, { foreignKey: 'partnerId' })
     merchant.hasMany(models.outlet, { foreignKey: 'merchantId' })
     merchant.hasMany(models.acquirer, { foreignKey: 'merchantId' })
     merchant.hasMany(models.acquirerConfig, { foreignKey: 'merchantId' })
@@ -135,13 +132,6 @@ module.exports = (sequelize, DataTypes) => {
       ]
     }
   })
-  merchant.addScope('excludePartner', {
-    attributes: {
-      exclude: [
-        'partnerId'
-      ]
-    }
-  })
   merchant.addScope('acquirerConfig', {
     include: [
       {
@@ -155,12 +145,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   })
-
-  merchant.addScope('partner', (partnerId) => ({
-    where: {
-      partnerId
-    }
-  }))
 
   merchant.addScope('admin', () => ({
     paranoid: false,

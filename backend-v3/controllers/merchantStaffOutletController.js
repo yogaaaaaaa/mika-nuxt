@@ -5,6 +5,7 @@ const models = require('../models')
 
 const { body } = require('express-validator')
 
+const identifierValidator = require('./helpers/identifierValidator')
 const errorMiddleware = require('../middlewares/errorMiddleware')
 
 const defaultValidator = [
@@ -80,12 +81,18 @@ module.exports.dissociateOutlets = async (req, res, next) => {
 }
 
 module.exports.associateOutletsMiddlewares = [
+  identifierValidator.identifierIntValidator([
+    'params.merchantStaffId'
+  ]),
   defaultValidator,
   errorMiddleware.validatorErrorHandler,
   exports.associateOutlets
 ]
 
 module.exports.dissociateOutletsMiddlewares = [
+  identifierValidator.identifierIntValidator([
+    'params.merchantStaffId'
+  ]),
   defaultValidator,
   exports.dissociateOutlets
 ]

@@ -1,0 +1,6 @@
+id,name,description
+unknown,Unknown type,
+many,Many type,
+debit,Debit Card,
+credit,Credit Card,
+prepaid,Prepaid Card,

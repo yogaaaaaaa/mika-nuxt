@@ -6,7 +6,7 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.CHAR(27, true)
+        type: Sequelize.STRING(27)
       },
 
       originalFilename: {
@@ -30,7 +30,7 @@ module.exports = {
 
       resourceId: {
         allowNull: false,
-        type: Sequelize.CHAR(27, true),
+        type: Sequelize.STRING(27),
         references: {
           model: 'resource',
           key: 'id'

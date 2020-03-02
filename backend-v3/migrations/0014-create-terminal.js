@@ -1,8 +1,6 @@
 'use strict'
 
-/**
- * TODO: This is a stub migration for terminal
- */
+// TODO: This is a stub migration for terminal
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -15,9 +13,9 @@ module.exports = {
           type: Sequelize.INTEGER
         },
 
-        idAlias: { // NOTE: Optional for now
+        idAlias: {
           unique: true,
-          type: Sequelize.CHAR(25, true)
+          type: Sequelize.STRING(25)
         },
 
         name: {
@@ -35,7 +33,7 @@ module.exports = {
           unique: true
         },
         status: { // NOTE: Optional for now
-          type: Sequelize.CHAR(32)
+          type: Sequelize.STRING(32)
         },
 
         terminalModelId: {

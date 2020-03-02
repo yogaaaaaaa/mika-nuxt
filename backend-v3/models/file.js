@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   const file = sequelize.define('file', {
     id: {
       primaryKey: true,
-      type: DataTypes.CHAR(27)
+      type: DataTypes.STRING(27)
     },
 
     originalFilename: DataTypes.STRING,
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     mime: DataTypes.STRING,
     size: DataTypes.INTEGER,
 
-    resourceId: DataTypes.CHAR(27)
+    resourceId: DataTypes.STRING(27)
   }, {
     timestamps: true,
     freezeTableName: true,

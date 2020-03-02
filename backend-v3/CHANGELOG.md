@@ -16,6 +16,78 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.11.0] - 2020-03-02
+### Added
+  - Added `cardBniDebit` and `cardBniCredit` handler, an implementation of bank-type acquirer
+    - New fields in `transaction` for bank-type acquirer 
+      (e.g `traceNumber`,`voidReference`, `voidTraceNumber`, etc) 
+    - Application level data encryption key (DEK) with key management shell
+    - Agent and session level data encryption key (DEK)
+    - New fields `encryptedProperties` in `transaction` 
+      for storing sensitive data using application level DEK
+    - Per agent settlement
+      - `settleBatch` and `settleBatchIn` for settlement
+    - Card issuer identification number (IIN) store and query
+      - Added table/model `cardIin`,`cardType`, `cardIssuer`, and `cardScheme`   
+    - Transaction redirect to another acquirer, 
+      with `cardSwitcher` handler as implementation 
+      for IIN based acquirer redirects
+    - Per agent and outlet acquirer config
+      - Added table/model `acquirerConfigAgent` and `acquirerConfigOutlet` is added
+    - Acquirer config for acquirer company's "virtual" terminal (e.g bank-type acquirer)
+      - Added table/model `acquirerTerminal` and `acquirerTerminalCommon` is added 
+    - Self password check, currently used to validate void transaction
+  - Mandatory agent transaction lock, no more than one transaction operation per agent is allowed
+  - Optional, single transaction processing per acquirer enforcement
+  - `transaction` fields
+      - Added `references`, used for additional internal references
+      - Added `properties`, used for additional transaction information
+      - Added Reference to `settleBatch`, `settleBatchIn`, `acquirerConfigAgent`, `acquirerConfigOutlet` is added to `transaction`
+  - Debug utilities
+    - Log HTTP Request/Response header and body
+    - HTTP Path specific, before and after request delay
+    - On demand (defined by client) server side HTTP delay
+    - MQTT Publish log
+    - MQTT Topic specific and message specific publish delay and drop
+  - Added elastic search in vagrant provisioning
+  - Helpers to seed from CSV
+### Changed
+  - Database changes from MySQL/MariaDB to PostgreSQL__
+    - To accommodate PostgreSQL strict nature, `filter` middleware is changed
+      to be more strict with data type
+    - Replaced any key-value or EAV to JSONB, provided by PostgreSQL
+  - Replaced WET CRUD operation in controller with DRY function generator
+  - Module path now uses absolute path by placing symbolic link in node_modules (e.g `libs/trxManager` instead `../libs/trxManager`)
+  - Session token
+    - Changes session token generation mechanism from JsonWebToken to simpler random id and MAC
+    - Session data is stored as hash map in redis
+  - Transaction manager (`trxManager`)
+    - Major refactor in `trxManager` to be more modular
+    - Unified reverse and cancel handler (`create` -> `cancelled`, `processing` -> `reversed`)
+    - Changes in handler load mechanism
+  - `cipherbox` library
+    - Specification changes to cb0 (AES only), cb1 (HMAC key generation) and cb2 (RSA Key generation), more shorter fields__
+    - Refactored to more be DRY
+  - Uses `debug` as module level log in internal library
+  - No more centralized constants in `libs`
+  - More concise log (environment, ready and `trxManager` handlers)
+  - Merchant staff transaction statistics and aggregation is broken in this release.
+    Will be fixed in future release when its actually used.
+  - Restructured `emv` library to several library (`emvCrypto`, `hexstring`, and `emv`)
+  - Refactored user's config loader and merge mechanism
+  - `referenceNumber` and `referenceNumberName` in `transaction` is deprecated in favor to `reference` and `referenceName`
+### Fixed
+  - Wrong roles definition for agent password reset
+  - Field duplication in validation error
+
+### Removed
+  - External/Public API
+  - `fairpay` handler
+  - `settlementStatus` field in `transaction`
+  - `transaction` fields
+     - Removed all `card*` fields, it should be placed in `properties`
+
+
 ## [3.10.0] - 2019-10-09
 ### Added
   - Added `kumabank` transaction manager handler for testing card payment in development environment,

@@ -4,11 +4,11 @@ module.exports = (sequelize, DataTypes) => {
   const cipherboxKey = sequelize.define('cipherboxKey', {
     id: {
       primaryKey: true,
-      type: DataTypes.CHAR(27)
+      type: DataTypes.STRING(27)
     },
 
     keys: DataTypes.TEXT,
-    status: DataTypes.CHAR(32),
+    status: DataTypes.STRING(32),
 
     terminalId: DataTypes.INTEGER
   }, {

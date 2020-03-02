@@ -25,6 +25,27 @@ module.exports = {
       },
 
       {
+        outletId: 1,
+        merchantStaffId: 500
+      },
+      {
+        outletId: 2,
+        merchantStaffId: 500
+      },
+      {
+        outletId: 3,
+        merchantStaffId: 500
+      },
+      {
+        outletId: 4,
+        merchantStaffId: 500
+      },
+      {
+        outletId: 5,
+        merchantStaffId: 500
+      },
+
+      {
         outletId: 2,
         merchantStaffId: 2
       },

@@ -37,7 +37,7 @@ module.exports = {
       },
       {
         id: 5,
-        class: 'emvDebit',
+        class: 'cardDebit',
         name: 'Kartu Debit',
         thumbnail: 'card.png',
         thumbnailGray: 'card-gray.png',
@@ -45,7 +45,7 @@ module.exports = {
       },
       {
         id: 6,
-        class: 'emvCredit',
+        class: 'cardCredit',
         name: 'Kartu Kredit',
         thumbnail: 'card.png',
         thumbnailGray: 'card-gray.png',
@@ -58,6 +58,22 @@ module.exports = {
         thumbnail: 'bi.png',
         thumbnailGray: 'bi-gray.png',
         chartColor: '#0A4678'
+      },
+      {
+        id: 8,
+        class: 'cardPrepaid',
+        name: 'Kartu Prepaid',
+        thumbnail: 'card.png',
+        thumbnailGray: 'card-gray.png',
+        chartColor: '#0A4678'
+      },
+      {
+        id: 50,
+        class: 'cardSwitcher',
+        name: 'Pembayaran Kartu',
+        thumbnail: 'card.png',
+        thumbnailGray: 'card-gray.png',
+        chartColor: null
       },
       {
         id: 100,

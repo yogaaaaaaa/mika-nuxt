@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
   merchantStaff.addScope('merchantStaff', () => ({
     attributes: { exclude: ['archivedAt'] },
     include: [
-      sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank', 'excludePartner')
+      sequelize.models.merchant.scope('excludeTimestamp', 'excludeLegal', 'excludeBank')
     ]
   }))
   merchantStaff.addScope('merchantStaffAcquirer', (acquirerId) => ({
@@ -80,12 +80,6 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: false,
     include: [
       sequelize.models.user.scope('excludePassword')
-    ]
-  }))
-  merchantStaff.addScope('adminUpdate', () => ({
-    paranoid: false,
-    include: [
-      sequelize.models.user
     ]
   }))
 
