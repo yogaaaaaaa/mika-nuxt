@@ -16,8 +16,16 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.11.1] - 2020-03-03  
+### Removed
+  - `kumabank` will not store sensitive information
+### Fixed
+  - Invalid function call `kumabank` handler
+  - More realistic rrn and approval code generation `kumabank` handler
+
 ## [3.11.0] - 2020-03-02
 ### Added
+  - Added API for fraud detection configuration
   - Added `cardBniDebit` and `cardBniCredit` handler, an implementation of bank-type acquirer
     - New fields in `transaction` for bank-type acquirer 
       (e.g `traceNumber`,`voidReference`, `voidTraceNumber`, etc) 

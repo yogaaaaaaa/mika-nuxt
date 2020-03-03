@@ -69,7 +69,7 @@ module.exports = {
     let track2
     if (userToken.emv) {
       emvTags = card.tlvDecode(userToken.emv)
-      track2 = card.tlvTagFind(emvTags, card.emvTags.TRACK_2_EQUIVALENT_DATA)
+      track2 = card.tlvValueFind(emvTags, card.emvTags.TRACK_2_EQUIVALENT_DATA)
     } else {
       track2 = userToken.track2
     }
@@ -77,11 +77,11 @@ module.exports = {
     const track2Component = card.track2GetComponent(track2)
 
     ctx.transaction.status = transactionStatuses.SUCCESS
-    ctx.transaction.reference = String(Math.floor(1 + Math.random() * Number.MAX_SAFE_INTEGER))
+    ctx.transaction.reference = String(Math.floor(1 + Math.random() * 999999999998)).padStart(12, '0')
     ctx.transaction.referenceName = 'rrn'
     ctx.transaction.customerReference = track2Component.truncatedPan
     ctx.transaction.customerReferenceName = 'truncatedPan'
-    ctx.transaction.authorizationReference = String(Math.floor(1 + Math.random() * Number.MAX_SAFE_INTEGER))
+    ctx.transaction.authorizationReference = String(Math.floor(1 + Math.random() * 999998)).padStart(6, '0')
     ctx.transaction.authorizationReferenceName = 'approvalCode'
 
     ctx.transaction.properties.iin = track2Component.first6
@@ -94,12 +94,14 @@ module.exports = {
       }
     }
 
+    /*
     ctx.transaction.encryptedProperties.track2Component = {
       pan: track2Component.pan,
       expirationDate: track2Component.expirationDate,
       serviceCode: track2Component.serviceCode
     }
     ctx.transaction.changed('encryptedProperties', 'true')
+    */
 
     // Random delay
     await timer.delay(100 + Math.random() * 5000)
