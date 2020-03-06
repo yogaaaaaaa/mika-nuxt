@@ -31,7 +31,8 @@ module.exports = {
   settleByAcquirerConfigAgent: true,
   properties: {
     flows: [
-      transactionFlows.GET_TOKEN
+      transactionFlows.GET_TOKEN,
+      transactionFlows.VOID
     ],
     tokenTypes: [],
     userTokenTypes: [
@@ -118,6 +119,10 @@ module.exports = {
       })
     }
     */
+  },
+  async voidHandler (ctx) {
+    // const debug = require('debug')('mika:trxManager:kumabank:voidHandler')
+    ctx.transaction.status = transactionStatuses.VOIDED
   },
   async agentSettleHandler (ctx) {
     // const debug = require('debug')('mika:trxManager:kumabank:agentSettleHandler')
