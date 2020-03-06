@@ -14,7 +14,8 @@ const {
   transactionStatuses,
   transactionFlows,
   paymentClasses,
-  userTokenTypes
+  userTokenTypes,
+  settleBatchStatuses
 } = require('../constants')
 
 module.exports = {
@@ -23,10 +24,11 @@ module.exports = {
     paymentClasses.CARD_CREDIT,
     paymentClasses.CARD_DEBIT
   ],
-  defaultMinimumAmount: 25000,
+  defaultMinimumAmount: 1,
   defaultMaximumAmount: null,
-  singleTransactionOnly: false,
+  singleTransactionOnly: true,
   useTraceNumber: true,
+  settleByAcquirerConfigAgent: true,
   properties: {
     flows: [
       transactionFlows.GET_TOKEN
@@ -37,6 +39,8 @@ module.exports = {
     ]
   },
   async handler (ctx) {
+    // const debug = require('debug')('mika:trxManager:kumabank:handler')
+
     const userToken = ctx.userToken
 
     userToken.emv = userToken.emv || userToken.emvData
@@ -107,10 +111,17 @@ module.exports = {
     await timer.delay(100 + Math.random() * 5000)
 
     // Random failure
+    /*
     if (Math.random() < 0.01) {
       throw createError({
         name: errorTypes.ACQUIRER_HOST_NO_RESPONSE
       })
     }
+    */
+  },
+  async agentSettleHandler (ctx) {
+    // const debug = require('debug')('mika:trxManager:kumabank:agentSettleHandler')
+    ctx.settleBatch.status = settleBatchStatuses.CLOSED
+    ctx.settleBatch.acquirerTimeAt = (new Date()).toISOString()
   }
 }
