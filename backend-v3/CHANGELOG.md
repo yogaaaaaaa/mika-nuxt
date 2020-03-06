@@ -20,6 +20,8 @@ After version 3.1.0, this project follow these guidelines,
 ### Added
   - `kumabank` settlement on agent level
   - `kumabank` void transaction
+  - `_handler` in get `agent` transaction data
+  - New `logo` fields in `merchant` for storing merchant logo in base64
 ### Removed
   - `kumabank` random failure in creating transaction
 

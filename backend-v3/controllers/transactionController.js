@@ -306,6 +306,20 @@ module.exports.getAgentTransactionsMiddlewares = [
       path: 'params.transactionId',
       as: 'id'
     },
+    responseHandler: ({ crudCtx }) => {
+      if (Array.isArray(crudCtx.modelInstance)) {
+        crudCtx.response = crudCtx.modelInstance.map((transaction) => {
+          transaction = transaction.toJSON()
+          transaction.acquirer._handler =
+            trxManager.getAcquirerInfo(transaction.acquirer.acquirerConfig.handler) || null
+          return transaction
+        })
+      } else {
+        crudCtx.response = crudCtx.modelInstance.toJSON()
+        crudCtx.response.acquirer._handler =
+            trxManager.getAcquirerInfo(crudCtx.response.acquirer.acquirerConfig.handler) || null
+      }
+    },
     sequelizeCommonScopeParam: {},
     sequelizePaginationScopeParam: {
       validModels: ['transaction']
