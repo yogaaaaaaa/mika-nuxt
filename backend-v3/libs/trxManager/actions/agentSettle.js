@@ -10,13 +10,15 @@ const {
 module.exports.agentSettle = async ({
   agentId,
   settleBatchId,
-  callback
+  callback,
+  ctxOptions = {}
 }) => {
   const ctx = ctxSettle.init({
     buildOptions: {
       settleBatchId: settleBatchId,
       agentId: agentId
-    }
+    },
+    ...ctxOptions
   })
   await ctxCommon.doAgentLock(ctx, agentId)
   try {
@@ -64,7 +66,8 @@ module.exports.agentSettle = async ({
 
 module.exports.agentSettleAsync = ({
   agentId,
-  settleBatchId
+  settleBatchId,
+  ctxOptions = {}
 }) => {
   return new Promise((resolve, reject) => {
     exports.agentSettle({
@@ -76,7 +79,8 @@ module.exports.agentSettleAsync = ({
         } else {
           resolve(result)
         }
-      }
+      },
+      ctxOptions
     }).catch((err) => reject(err))
   })
 }

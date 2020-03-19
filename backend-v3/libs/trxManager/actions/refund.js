@@ -20,9 +20,9 @@ const {
 module.exports.refund = async ({
   agentId,
   transactionRefund,
-  ctx = {}
+  ctxOptions = {}
 }) => {
-  ctx = ctxTrx.init({
+  const ctx = ctxTrx.init({
     transactionRefund,
     buildOptions: {
       transactionId: transactionRefund.transactionId,
@@ -32,7 +32,7 @@ module.exports.refund = async ({
         transactionStatuses.REFUNDED_PARTIAL
       ]
     },
-    ...ctx
+    ...ctxOptions
   })
   await ctxCommon.doAgentLock(ctx, agentId)
 

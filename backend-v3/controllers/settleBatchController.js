@@ -13,6 +13,8 @@ const errorMiddleware = require('middlewares/errorMiddleware')
 const crudGenerator = require('./helpers/crudGenerator')
 const trxManager = require('libs/trxManager')
 
+const isEnvProduction = process.NODE_ENV === 'production'
+
 module.exports.startAgentSettle = async (req, res, next) => {
   await trxManager.agentSettle({
     agentId: req.auth.agentId,
@@ -21,6 +23,9 @@ module.exports.startAgentSettle = async (req, res, next) => {
       if (err) {
         console.error(err)
       }
+    },
+    ctxOptions: {
+      debug: isEnvProduction ? undefined : req.body.debug
     }
   })
   msg.expressResponse(
@@ -64,7 +69,10 @@ module.exports.startAgentSettleBulk = async (req, res, next) => {
         try {
           const agentSettleResult = await trxManager.agentSettleAsync({
             agentId: req.auth.agentId,
-            settleBatchId: settleBatch.id
+            settleBatchId: settleBatch.id,
+            ctxOptions: {
+              debug: isEnvProduction ? undefined : req.body.debug
+            }
           })
           if (agentSettleResult.settleBatchStatus === trxManager.settleBatchStatuses.CLOSED) {
             closedSettleBatchIds.push(settleBatch.id)
