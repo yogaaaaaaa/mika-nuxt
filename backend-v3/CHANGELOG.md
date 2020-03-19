@@ -16,6 +16,14 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.11.3] - 2020-03-19
+### Added
+  - `kumabank` debug mode
+### Changed
+  - `kumabank` field overhaul to be like real bank
+### Fixed
+  - Fixed server error when `transaction` id is not found on get agent transaction
+
 ## [3.11.2] - 2020-03-06
 ### Added
   - `kumabank` settlement on agent level

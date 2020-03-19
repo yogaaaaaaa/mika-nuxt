@@ -15,7 +15,8 @@ module.exports.forceStatusUpdate = async ({
   transactionId,
   newTransactionStatus,
   acquirerHostDoUpdate = false,
-  syncWithAcquirerHost = false
+  syncWithAcquirerHost = false,
+  ctxOptions = {}
 }) => {
   const ctx = ctxTrx.init({
     newTransactionStatus,
@@ -25,7 +26,8 @@ module.exports.forceStatusUpdate = async ({
     buildOptions: {
       transactionId,
       agentId
-    }
+    },
+    ...ctxOptions
   })
   await ctxCommon.doAgentLock(ctx, agentId)
 

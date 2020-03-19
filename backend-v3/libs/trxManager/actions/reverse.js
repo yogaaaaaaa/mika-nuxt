@@ -22,7 +22,8 @@ const {
 module.exports.reverse = async ({
   agentId,
   transactionId = undefined,
-  agentOrderReference = undefined
+  agentOrderReference = undefined,
+  ctxOptions = {}
 }) => {
   const ctx = ctxTrx.init({
     buildOptions: {
@@ -40,7 +41,8 @@ module.exports.reverse = async ({
         transactionStatuses.VOIDING,
         transactionStatuses.VOIDED
       ]
-    }
+    },
+    ...ctxOptions
   })
   await ctxCommon.doAgentLock(ctx, agentId)
 

@@ -115,11 +115,13 @@ module.exports.create = async ({
           })
         }
 
-        const newCtx = {}
-        newCtx.redirectName = ctx.redirectName
-        newCtx.redirectFromAcquirerId = transaction.acquirerId
-        newCtx.local = ctx.local
-        newCtx.lockDone = ctx.lockDone
+        const newCtx = {
+          redirectName: ctx.redirectName,
+          redirectFromAcquirerId: transaction.acquirerId,
+          local: ctx.local,
+          lockDone: ctx.lockDone,
+          debug: ctx.debug
+        }
 
         transaction.acquirerId = ctx.redirectToAcquirerId
 

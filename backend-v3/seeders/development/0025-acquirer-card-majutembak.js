@@ -20,6 +20,12 @@ module.exports = {
             }
           }),
           acquirerCompanyId: 3
+        },
+        {
+          id: 2,
+          name: 'Common Config for Terminal Kuma',
+          config: JSON.stringify({}),
+          acquirerCompanyId: 101
         }
       ], { transaction: t })
 
@@ -77,6 +83,14 @@ module.exports = {
             },
             terminalKeyCredit: {}
           })
+        },
+        {
+          id: 3,
+          mid: 'KUMABANK12345',
+          tid: '12345672',
+          acquirerTerminalCommonId: 2,
+          type: 'terminalKuma',
+          config: JSON.stringify({})
         }
       ], { transaction: t })
 
@@ -160,6 +174,33 @@ module.exports = {
             ]
           }),
           merchantId: 1
+        },
+
+        // Switcher Kuma Bank
+        {
+          id: 2004,
+          name: 'Card Switcher Maju Tembak 2',
+          handler: 'cardSwitcher',
+          config: JSON.stringify({
+            rules: [
+              {
+                name: 'Debit via Kuma Bank',
+                acquirerId: 2100,
+                cardTypeIds: [
+                  'debit'
+                ]
+              },
+              {
+                name: 'Credit via Kuma Bank',
+                acquirerId: 2101,
+                cardTypeIds: [
+                  'credit',
+                  'many'
+                ]
+              }
+            ]
+          }),
+          merchantId: 1
         }
       ], { transaction: t })
 
@@ -193,6 +234,15 @@ module.exports = {
           agentId: 3,
           acquirerConfigId: 2002,
           acquirerTerminalId: 2,
+          batchNumberCounter
+        },
+
+        // Acquirer config kuma bank for agent 4
+        {
+          id: 2005,
+          agentId: 4,
+          acquirerConfigId: 101,
+          acquirerTerminalId: 3,
           batchNumberCounter
         }
       ], { transaction: t })
@@ -284,9 +334,36 @@ module.exports = {
           acquirerTypeId: 50,
           acquirerConfigId: 2003,
           merchantId: 1
+        },
+
+        {
+          id: 2201,
+          name: 'Pembayaran Kartu Maju Tembak 2',
+          gateway: true,
+          hidden: false,
+          minimumAmount: 1,
+          acquirerTypeId: 50,
+          acquirerConfigId: 2004,
+          merchantId: 1
         }
 
       ], { transaction: t })
+
+      await queryInterface.bulkInsert('agentAcquirerExclusion', [
+        {
+          agentId: 2,
+          acquirerId: 2201 // maju tembak 2
+        },
+        {
+          agentId: 3,
+          acquirerId: 2201 // maju tembak 2
+        },
+        {
+          agentId: 4,
+          acquirerId: 2200 // maju tembak
+        }
+      ]
+      , { transaction: t })
     })
   },
   down: (queryInterface, Sequelize) => {

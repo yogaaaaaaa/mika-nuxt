@@ -11,6 +11,8 @@ const crudGenerator = require('./helpers/crudGenerator')
 
 const transactionValidator = require('validators/transactionValidator')
 
+const isEnvProduction = process.NODE_ENV === 'production'
+
 module.exports.createTransaction = async (req, res, next) => {
   const trxCreateResult = await trxManager.create(
     {
@@ -32,7 +34,8 @@ module.exports.createTransaction = async (req, res, next) => {
         userTokenType: req.body.userTokenType
       },
       ctxOptions: {
-        flags: req.body.flags
+        flags: req.body.flags,
+        debug: isEnvProduction ? undefined : req.body.debug
       }
     }
   )
@@ -89,7 +92,10 @@ module.exports.reverseTransaction = async (req, res, next) => {
   const trxReverseResult = await trxManager.reverse({
     agentId: req.auth.agentId,
     transactionId: req.params.transactionId,
-    agentOrderReference: req.params.agentOrderReference
+    agentOrderReference: req.params.agentOrderReference,
+    ctxOptions: {
+      debug: isEnvProduction ? undefined : req.body.debug
+    }
   })
   trxReverseResult.transaction = await models.transaction
     .scope('agent')
@@ -122,7 +128,10 @@ module.exports.voidTransaction = async (req, res, next) => {
   const trxVoidResult = await trxManager.void({
     agentId: req.auth.agentId,
     transactionId: req.params.transactionId,
-    voidReason: req.body.voidReason
+    voidReason: req.body.voidReason,
+    ctxOptions: {
+      debug: isEnvProduction ? undefined : req.body.debug
+    }
   })
   trxVoidResult.transaction = await models.transaction
     .scope('agent')
@@ -164,6 +173,9 @@ module.exports.refundTransaction = async (req, res, next) => {
       transactionId: req.params.transactionId,
       amount: req.body.amount,
       reason: req.body.reason
+    },
+    ctxOptions: {
+      debug: isEnvProduction ? undefined : req.body.debug
     }
   })
   trxRefundResult.transaction = await models.transaction
@@ -191,7 +203,10 @@ module.exports.changeAgentTransactionStatus = async (req, res, next) => {
       agentId: req.auth.agentId,
       transactionId: req.body.transactionId,
       newTransactionStatus: req.body.status,
-      syncWithAcquirerHost: req.body.syncWithAcquirerHost
+      syncWithAcquirerHost: req.body.syncWithAcquirerHost,
+      ctxOptions: {
+        debug: isEnvProduction ? undefined : req.body.debug
+      }
     }
   )
   msg.expressResponse(
@@ -315,9 +330,11 @@ module.exports.getAgentTransactionsMiddlewares = [
           return transaction
         })
       } else {
-        crudCtx.response = crudCtx.modelInstance.toJSON()
-        crudCtx.response.acquirer._handler =
+        if (crudCtx.modelInstance) {
+          crudCtx.response = crudCtx.modelInstance.toJSON()
+          crudCtx.response.acquirer._handler =
             trxManager.getAcquirerInfo(crudCtx.response.acquirer.acquirerConfig.handler) || null
+        }
       }
     },
     sequelizeCommonScopeParam: {},

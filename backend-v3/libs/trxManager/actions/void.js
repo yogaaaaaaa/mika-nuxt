@@ -17,7 +17,8 @@ const {
 module.exports.void = async ({
   agentId,
   transactionId,
-  voidReason = null
+  voidReason = null,
+  ctxOptions = {}
 }) => {
   const ctx = ctxTrx.init({
     reversed: false,
@@ -27,7 +28,8 @@ module.exports.void = async ({
       transactionStatuses: [
         transactionStatuses.SUCCESS
       ]
-    }
+    },
+    ...ctxOptions
   })
   await ctxCommon.doAgentLock(ctx, agentId)
 
