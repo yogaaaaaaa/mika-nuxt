@@ -37,7 +37,7 @@ class KeyManager extends Events {
     } = options
 
     this._defaultKeyFile = defaultKeyFile
-    this._defaultKeyFilePath = dir.getKeyDirPath(this._defaultKeyFile)
+    this._defaultKeyFilePath = dir.getkeysDirPath(this._defaultKeyFile)
 
     this._isKeyMaster = isKeyMaster || false
     this._dekRedisKey = redisKey('dek')
@@ -121,7 +121,7 @@ class KeyManager extends Events {
 
     if (encryptedKeyBox) {
       try {
-        const newFilePath = dir.getKeyDirPath(`${moment().unix()}-${this._defaultKeyFile}`)
+        const newFilePath = dir.getkeysDirPath(`${moment().unix()}-${this._defaultKeyFile}`)
         await rename(this._defaultKeyFilePath, newFilePath)
       } catch (err) {}
       await jsonFile.save(this._defaultKeyFilePath, encryptedKeyBox)

@@ -8,6 +8,7 @@ const models = require('models')
 const error = require('./error')
 const redis = require('libs/redis')
 const moment = require('moment')
+const { Op } = models.Sequelize
 
 const fraudDetectionApiConfig = require('configs/fraudDetectionApiConfig')
 
@@ -17,7 +18,7 @@ class FraudDetectionApi {
 
     this._redis = redis
     this._cacheKeyPrefix = 'FraudDetection_Rules_'
-    this._cacheExpiry = 60 * 60 * 4 // 4 hours
+    this._cacheExpiry = 60 * 10 // 10 minutes
   }
 
   _getCacheKey (cachePattern) {
@@ -49,9 +50,9 @@ class FraudDetectionApi {
     await this._redis.deletePattern(`${this._cacheKeyPrefix}*`)
   }
 
-  async getRule (id) {
+  async getMerchantRule (id) {
     // Get from cache if available
-    const cache = await this._getCache(id)
+    const cache = await this._getCache(`merchant_rule_id_${id}`)
     if (cache) return cache
 
     const url = this._config.url + '/rules/' + id
@@ -68,11 +69,11 @@ class FraudDetectionApi {
     return rule
   }
 
-  async getRules (query) {
+  async getMerchantRules (query) {
     // get data from fraud detection api
     let queries = '?'
-    let cachePattern = ''
-    Object.keys(query).map(q => {
+    let cachePattern = 'merchant_rules_'
+    Object.keys(query).forEach(q => {
       queries += `${q}=${query[q]}&`
       cachePattern += `${query[q]}_`
     })
@@ -82,12 +83,10 @@ class FraudDetectionApi {
     if (cache) return cache
 
     const url = this._config.url + '/rules' + queries
-    const rules = await this._request('GET', url)
+    const resp = await this._request('GET', url)
 
     // fill in the merchant names
-    const merchantIds = []
-    rules.data.map(rule => merchantIds.push(rule.id_merchant))
-    const Op = models.Sequelize.Op
+    const merchantIds = resp.data.map(r => r.id_merchant)
     const merchants = await models.merchant.findAll({
       attributes: ['name'],
       where: {
@@ -96,17 +95,17 @@ class FraudDetectionApi {
         }
       }
     })
-    merchants.map((m, index) => {
-      rules.data[index].merchant = m.name
+    merchants.forEach((m, index) => {
+      resp.data[index].merchant = m.name
     })
 
     // Save to cache
-    await this._setCache(cachePattern, rules)
+    await this._setCache(cachePattern, resp)
 
-    return rules
+    return resp
   }
 
-  async createRule (data) {
+  async createMerchantRule (data) {
     debug('data.id_merchant', data.id_merchant)
     const merchant = await models.merchant.findByPk(parseInt(data.id_merchant))
     if (!merchant) {
@@ -125,25 +124,20 @@ class FraudDetectionApi {
     return response
   }
 
-  async updateRule (data, id) {
-    const merchant = await models.merchant.findByPk(data.id_merchant)
-    if (!merchant) {
-      throw error.createError({
-        name: error.genericErrorTypes.INVALID_REFERENCES,
-        data: ['id_merchant']
-      })
-    }
+  async updateMerchantRule (data, id) {
+    const merchant = await models.merchant.findByPk(id)
+
     const url = this._config.url + '/rules/' + id
-    const response = await this._request('PUT', url, data)
-    response.data.merchant = merchant ? merchant.name : null
+    const resp = await this._request('PUT', url, data)
+    resp.data.merchant = merchant ? merchant.name : null
 
     // Clear cache
     await this._clearCache()
 
-    return response
+    return resp
   }
 
-  async destroyRule (id) {
+  async destroyMerchantRule (id) {
     const url = this._config.url + '/rules/' + id
     const response = await this._request('DELETE', url)
 

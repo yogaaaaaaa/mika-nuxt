@@ -1,8 +1,24 @@
 'use strict'
 
+const { query } = require('express-validator')
 const _ = require('lodash')
 
 const passwd = require('../libs/passwd')
+
+/**
+ * Generic pagination/order validator
+ */
+module.exports.paginationValidator = [
+  query('page').isNumeric().optional(),
+  query('per_page').isNumeric().optional(),
+  query('get_count').isBoolean().optional(),
+  query('order')
+    .isIn(['desc', 'asc'])
+    .optional(),
+  query('order_by')
+    .isString()
+    .optional()
+]
 
 module.exports.default = (object, path, value) => {
   _.set(object, path, value)

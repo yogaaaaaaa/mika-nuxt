@@ -2,7 +2,7 @@
 
 // TODO: timeGroup is not working in postgres
 
-const { query, sanitizeQuery } = require('express-validator')
+const { query } = require('express-validator')
 
 const time = require('../../libs/time')
 
@@ -23,7 +23,7 @@ module.exports.timeGroupValidator = (validModel) => [
   query('group')
     .custom((group) => models[validModel].rawAttributes[group].type.constructor.name === Sequelize.DATE.name)
     .optional(),
-  sanitizeQuery('group').customSanitizer(group => `${validModel}.${group}`),
+  query('group').customSanitizer(group => `${validModel}.${group}`),
   query('group_time')
     .isIn(['minute', 'hour', 'day', 'month', 'year'])
     .optional(),

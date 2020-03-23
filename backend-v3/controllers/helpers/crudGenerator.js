@@ -218,6 +218,11 @@ module.exports.generateCreateEntityController = ({
     })
     crudCtx.msgType = undefined
 
+    if (req.audit) {
+      req.audit.event.type = 'CREATE'
+      req.audit.event.entityName = crudCtx.modelName
+    }
+
     await models.sequelize.transaction(async t => {
       crudCtx.t = t
       crudCtx.modelOptions.transaction = t
@@ -248,6 +253,10 @@ module.exports.generateCreateEntityController = ({
         await responseHandler({ crudCtx, req, res })
       } else {
         crudCtx.response = crudCtx.modelInstance
+      }
+
+      if (req.audit) {
+        req.audit.event.entityIds.push(crudCtx.modelInstance.id)
       }
     })
 
@@ -338,6 +347,11 @@ module.exports.generateReadEntityController = ({
       identifierSource
     })
 
+    if (req.audit) {
+      req.audit.event.type = 'READ'
+      req.audit.event.entityName = crudCtx.modelName
+    }
+
     const applySequelizeCommonScopeExist = typeof req.applySequelizeCommonScope === 'function'
     const applySequelizePaginationScopeExist = typeof req.applySequelizePaginationScope === 'function'
     const applySequelizeFilterScopeExist = typeof req.applySequelizeFilterScope === 'function'
@@ -391,6 +405,15 @@ module.exports.generateReadEntityController = ({
         crudCtx.response
       )
     }
+
+    if (req.audit) {
+      if (Array.isArray(crudCtx.modelInstance)) {
+        req.audit.event.entityIds =
+          req.audit.event.entityIds.concat(crudCtx.modelInstance.map((m) => m.id))
+      } else {
+        req.audit.event.entityIds.push(crudCtx.modelInstance.id)
+      }
+    }
   }
 
   return createMiddlewares({
@@ -436,6 +459,11 @@ module.exports.generateUpdateEntityController = ({
     crudCtx.msgType = undefined
     crudCtx.updated = false
 
+    if (req.audit) {
+      req.audit.event.type = 'UPDATE'
+      req.audit.event.entityName = crudCtx.modelName
+    }
+
     if (crudCtx.secondaryIdentifierAvailable ? crudCtx.secondaryIdentifierValid : true) {
       if (crudCtx.identifierAvailable && crudCtx.identifierValid) {
         await models.sequelize.transaction(async t => {
@@ -445,6 +473,10 @@ module.exports.generateUpdateEntityController = ({
           if (paranoid !== undefined) crudCtx.modelOptions.paranoid = paranoid
 
           crudCtx.modelInstance = await crudCtx.modelScoped.findOne(crudCtx.modelOptions)
+
+          if (req.audit) {
+            crudCtx.local.beforeModelInstance = crudCtx.modelInstance.toJSON()
+          }
 
           if (crudCtx.modelInstance) {
             if (typeof preUpdateHandler === 'function') {
@@ -491,6 +523,12 @@ module.exports.generateUpdateEntityController = ({
               await responseHandler({ crudCtx, req, res })
             } else {
               crudCtx.response = crudCtx.modelInstance
+            }
+
+            if (req.audit && crudCtx.updated) {
+              req.audit.event.entityBefore = crudCtx.local.beforeModelInstance
+              req.audit.event.entityAfter =
+                  (await crudCtx.modelScoped.findOne(crudCtx.modelOptions)).toJSON() // WHY DO I HAVE TO DO DIS ?
             }
           }
         })
@@ -547,6 +585,11 @@ module.exports.generateDeleteEntityController = ({
     })
     crudCtx.msgType = undefined
 
+    if (req.audit) {
+      req.audit.event.type = 'DELETE'
+      req.audit.event.entityName = crudCtx.modelName
+    }
+
     if (crudCtx.secondaryIdentifierAvailable ? crudCtx.secondaryIdentifierValid : true) {
       if (crudCtx.identifierAvailable && crudCtx.identifierValid) {
         await models.sequelize.transaction(async t => {
@@ -558,6 +601,10 @@ module.exports.generateDeleteEntityController = ({
           crudCtx.modelInstance = await crudCtx.modelScoped.findOne(crudCtx.modelOptions)
 
           if (crudCtx.modelInstance) {
+            if (req.audit) {
+              req.audit.event.entityIds.push(crudCtx.modelInstance.id)
+            }
+
             await crudCtx.modelInstance.destroy(crudCtx.modelOptions)
           }
 

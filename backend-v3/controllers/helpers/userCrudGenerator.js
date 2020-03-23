@@ -37,6 +37,11 @@ module.exports.generateResetUserPasswordController = ({ modelName, identifierSou
       }),
       identifierSource,
       actionHandler: async ({ crudCtx, req }) => {
+        if (req.audit) {
+          req.audit.event.type = 'AUTH/RESET_PASSWORD'
+          req.audit.event.entityName = crudCtx.modelName
+        }
+
         crudCtx.local.generatedPassword = await auth.resetPassword(
           crudCtx.modelInstance.user,
           !!req.query.humane_password

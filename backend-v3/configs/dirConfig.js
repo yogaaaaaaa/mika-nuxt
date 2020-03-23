@@ -15,7 +15,8 @@ let baseConfig = {
   templatesDir: null,
   thumbnailsDir: null,
   customThumbnailsDir: null,
-  keyDir: null
+  logsDir: null,
+  keysDir: null
 }
 
 // Load external config file
@@ -29,8 +30,9 @@ baseConfig.assetsDir = baseConfig.assetsDir || path.join(baseConfig.workDir, 'as
 baseConfig.thumbnailsDir = baseConfig.thumbnailsDir || path.join(baseConfig.assetsDir, 'images')
 baseConfig.templatesDir = baseConfig.templatesDir || path.join(baseConfig.assetsDir, 'templates')
 baseConfig.customThumbnailsDir = path.join(baseConfig.uploadsDir, 'customThumbnails')
+baseConfig.logsDir = baseConfig.keysDir || path.join(baseConfig.workDir, 'logs')
 
-baseConfig.keyDir = baseConfig.keyDir || path.join(baseConfig.workDir, 'keys')
+baseConfig.keysDir = baseConfig.keysDir || path.join(baseConfig.workDir, 'keys')
 
 fs.accessSync(baseConfig.workDir, fs.constants.W_OK | fs.constants.R_OK)
 fs.accessSync(baseConfig.assetsDir, fs.constants.R_OK)
@@ -48,13 +50,17 @@ if (!fs.existsSync(baseConfig.customThumbnailsDir)) {
   fs.mkdirSync(baseConfig.customThumbnailsDir)
 }
 
-if (!fs.existsSync(baseConfig.keyDir)) {
-  fs.mkdirSync(baseConfig.keyDir)
+if (!fs.existsSync(baseConfig.keysDir)) {
+  fs.mkdirSync(baseConfig.keysDir)
 }
-fs.chmodSync(baseConfig.keyDir,
+fs.chmodSync(baseConfig.keysDir,
   fs.constants.S_IRUSR |
     fs.constants.S_IWUSR |
     fs.constants.S_IXUSR
 )
+
+if (!fs.existsSync(baseConfig.logsDir)) {
+  fs.mkdirSync(baseConfig.logsDir)
+}
 
 module.exports = baseConfig

@@ -6804,6 +6804,87 @@
 								}
 							],
 							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Audit",
+							"item": [
+								{
+									"name": "{{baseUrl}}/api/back_office/audits",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/back_office/audits/:auditId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"back_office",
+												"audits",
+												":auditId"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "per_page",
+													"value": "10",
+													"disabled": true
+												},
+												{
+													"key": "get_count",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "order",
+													"value": "desc",
+													"disabled": true
+												},
+												{
+													"key": "order_by",
+													"value": "transport.type",
+													"disabled": true
+												},
+												{
+													"key": "search",
+													"value": "audits",
+													"disabled": true
+												},
+												{
+													"key": "with_audit",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "no_user",
+													"value": "1",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "auditId",
+													"value": ""
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
 						}
 					],
 					"description": "API for human resource role.\nIt able to create create/modify other admin user.",
@@ -9578,7 +9659,7 @@
 									]
 								},
 								{
-									"name": "{{baseUrl}}/api/back_office/acquirer_configs/:acquirerConfigId",
+									"name": "{{baseUrl}}/api/back_office/acquirer_config_agents/:acquirerConfigId",
 									"request": {
 										"method": "DELETE",
 										"header": [
@@ -9589,20 +9670,20 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/back_office/acquirer_configs/:acquirerConfigId",
+											"raw": "{{baseUrl}}/api/back_office/acquirer_config_agents/:acquirerConfigId",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"api",
 												"back_office",
-												"acquirer_configs",
+												"acquirer_config_agents",
 												":acquirerConfigId"
 											],
 											"variable": [
 												{
 													"key": "acquirerConfigId",
-													"value": "21"
+													"value": "3000"
 												}
 											]
 										}
@@ -12127,7 +12208,7 @@
 							"name": "Fraud Detection",
 							"item": [
 								{
-									"name": "{{baseUrl}}/api/back_office/fraud_detections/rules",
+									"name": "{{baseUrl}}/api/back_office/fraud_detection/merchant_rules",
 									"request": {
 										"auth": {
 											"type": "bearer",
@@ -12163,22 +12244,22 @@
 											}
 										},
 										"url": {
-											"raw": "{{baseUrl}}/api/back_office/fraud_detections/rules",
+											"raw": "{{baseUrl}}/api/back_office/fraud_detection/merchant_rules",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"api",
 												"back_office",
-												"fraud_detections",
-												"rules"
+												"fraud_detection",
+												"merchant_rules"
 											]
 										}
 									},
 									"response": []
 								},
 								{
-									"name": "{{baseUrl}}/api/back_office/fraud_detections/rules/:ruleId",
+									"name": "{{baseUrl}}/api/back_office/fraud_detection/merchant_rules/:merchantId",
 									"request": {
 										"auth": {
 											"type": "bearer",
@@ -12214,20 +12295,20 @@
 											}
 										},
 										"url": {
-											"raw": "{{baseUrl}}/api/back_office/fraud_detections/rules/:ruleId",
+											"raw": "{{baseUrl}}/api/back_office/fraud_detection/merchant_rules/:merchantId",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"api",
 												"back_office",
-												"fraud_detections",
-												"rules",
-												":ruleId"
+												"fraud_detection",
+												"merchant_rules",
+												":merchantId"
 											],
 											"variable": [
 												{
-													"key": "ruleId",
+													"key": "merchantId",
 													"value": ""
 												}
 											]
@@ -12236,7 +12317,7 @@
 									"response": []
 								},
 								{
-									"name": "{{baseUrl}}/api/back_office/fraud_detections/rules/:ruleId",
+									"name": "{{baseUrl}}/api/back_office/fraud_detection/merchant_rules/:merchantId",
 									"request": {
 										"auth": {
 											"type": "bearer",
@@ -12263,21 +12344,21 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/back_office/fraud-detections/rules/:rule_id",
+											"raw": "{{baseUrl}}/api/back_office/fraud_detection/merchant_rules/:merchantId",
 											"host": [
 												"{{baseUrl}}"
 											],
 											"path": [
 												"api",
 												"back_office",
-												"fraud-detections",
-												"rules",
-												":rule_id"
+												"fraud_detection",
+												"merchant_rules",
+												":merchantId"
 											],
 											"variable": [
 												{
-													"key": "rule_id",
-													"value": "34"
+													"key": "merchantId",
+													"value": ""
 												}
 											]
 										}
@@ -12812,107 +12893,6 @@
 							]
 						}
 					],
-					"_postman_isSubFolder": true
-				},
-				{
-					"name": "Audit Log",
-					"item": [
-						{
-							"name": "{{baseUrl}}/api/back_office/audits",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "x-access-token",
-										"type": "text",
-										"value": "{{mikaSessionToken}}"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/api/back_office/audits/:auditId",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"api",
-										"back_office",
-										"audits",
-										":auditId"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "per_page",
-											"value": "10",
-											"disabled": true
-										},
-										{
-											"key": "get_count",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "order",
-											"value": "asc",
-											"disabled": true
-										},
-										{
-											"key": "order_by",
-											"value": "createdAt",
-											"disabled": true
-										},
-										{
-											"key": "filters[field,groupOp]",
-											"value": "op,value",
-											"disabled": true
-										},
-										{
-											"key": "f[field,groupOp]",
-											"value": "op,value",
-											"disabled": true
-										},
-										{
-											"key": "f[field]",
-											"value": "op,value",
-											"disabled": true
-										},
-										{
-											"key": "f[field,or]",
-											"value": "op,value",
-											"disabled": true
-										},
-										{
-											"key": "f[field,or]",
-											"value": "op,value",
-											"disabled": true
-										},
-										{
-											"key": "f[createdAt]",
-											"value": "gte,2018-01-01T00:00:00.000Z",
-											"disabled": true
-										},
-										{
-											"key": "f[createdAt]",
-											"value": "lte,2018-12-30T00:00:00.000Z",
-											"disabled": true
-										}
-									],
-									"variable": [
-										{
-											"key": "auditId",
-											"value": ""
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
 			]
@@ -13582,7 +13562,7 @@
 							"response": []
 						},
 						{
-							"name": "{{baseUrl}}/debug/path_delay",
+							"name": "{{baseUrl}}/debug/http_delay",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -13603,13 +13583,47 @@
 									"raw": "{\n\t\"pathDelays\": [\n\t\t{\n\t\t\t\"path\": \"/**\",\n\t\t\t\"before\": 0,\n\t\t\t\"after\": 700\n\t\t}\n\t]\n}"
 								},
 								"url": {
-									"raw": "{{baseUrl}}/debug/path_delay",
+									"raw": "{{baseUrl}}/debug/http_delay",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"debug",
-										"path_delay"
+										"http_delay"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{{baseUrl}}/debug/mqtt_delay",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-mika-debug",
+										"type": "text",
+										"value": "{{mikaDebugKey}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"pathDelays\": [\n\t\t{\n\t\t\t\"path\": \"**\",\n\t\t\t\"matches\": {\n\t\t\t\t\"eventType\": \"transactionSuccess\"\n\t\t\t},\n\t\t\t\"before\": 0\n\t\t}\n\t]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/debug/mqtt_delay",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"debug",
+										"mqtt_delay"
 									]
 								}
 							},
@@ -13814,7 +13828,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"transactionId\": \"1NGIO4uEkmvL1c1mkQXkO7s5HVN\",\n\t\"status\": \"success\",\n\t\"syncWithAcquirerHost\": false\n}"
+									"raw": "{\n\t\"transactionId\": \"2iQCkAMytQYBAbRNEnCI4\",\n\t\"status\": \"success\",\n\t\"syncWithAcquirerHost\": false\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/debug/transaction/change_status",
@@ -14420,6 +14434,339 @@
 					"name": "For Agent",
 					"item": [
 						{
+							"name": "Kuma Bank Debug Mode",
+							"item": [
+								{
+									"name": "{{baseUrl}}/api/agent/transactions",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"acquirerId\": 2201,\n\t\"amount\": 30000,\n\t\n\t\"debug\": {\n\t\t\"createDelay\": 0,\n\t\t\"createNoResponse\": false,\n\t\t\"createResponseCode\": \"\",\n\t\t\"createPinError\": false,\n\t\t\"voidDelay\": 0,\n\t\t\"voidNoResponse\": false,\n\t\t\"voidResponseCode\": \"\",\n\t\t\"reverseDelay\": 0,\n\t\t\"reverseNoResponse\": false,\n\t\t\"reverseResponseCode\": \"00\",\n\t\t\"reverseVoidDelay\": 0,\n\t\t\"reverseVoidNoResponse\": false,\n\t\t\"reverseVoidResponseCode\": \"00\"\n\t},\n\t\n\t\"userToken\": {\n\t\t\"emv\" : \"57104096750145500416D22032061000072882023C00950500800080009A031901229C01005F2A0203605F3401019F02060000000050009F03060000000000009F100706010A03A010029F1A0203609F2608D02323CDF6066D3F9F2701809F3303E008FF9F34031F00029F3501229F360200019F37049A47388B8F01089F49039F3704\",\n\t\t\"pin\":\"123456\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/agent/transactions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"agent",
+												"transactions"
+											]
+										},
+										"description": "Create transaction"
+									},
+									"response": [
+										{
+											"name": "{{baseUrl}}/agent/transaction with user token",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-access-token",
+														"type": "text",
+														"value": "{{mikaSessionToken}}"
+													},
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/javascript",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/agent/transaction",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"agent",
+														"transaction"
+													]
+												}
+											},
+											"_postman_previewlanguage": "json",
+											"header": [],
+											"cookie": [],
+											"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+										}
+									]
+								},
+								{
+									"name": "{{baseUrl}}/api/agent/transactions/:transactionId/void",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"debug\": {\n\t\t\"createDelay\": 0,\n\t\t\"createNoResponse\": false,\n\t\t\"createResponseCode\": \"\",\n\t\t\"createPinError\": false,\n\t\t\"voidDelay\": 100,\n\t\t\"voidNoResponse\": true,\n\t\t\"voidResponseCode\": \"\",\n\t\t\"reverseDelay\": 0,\n\t\t\"reverseNoResponse\": false,\n\t\t\"reverseResponseCode\": \"00\",\n\t\t\"reverseVoidDelay\": 0,\n\t\t\"reverseVoidNoResponse\": false,\n\t\t\"reverseVoidResponseCode\": \"00\"\n\t}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/agent/transactions/:transactionId/void",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"agent",
+												"transactions",
+												":transactionId",
+												"void"
+											],
+											"variable": [
+												{
+													"key": "transactionId",
+													"value": "2iaZirZ9lrXFHTFJSkua0"
+												}
+											]
+										},
+										"description": "Create transaction"
+									},
+									"response": [
+										{
+											"name": "{{baseUrl}}/agent/transaction with user token",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-access-token",
+														"type": "text",
+														"value": "{{mikaSessionToken}}"
+													},
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/javascript",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/agent/transaction",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"agent",
+														"transaction"
+													]
+												}
+											},
+											"_postman_previewlanguage": "json",
+											"header": [],
+											"cookie": [],
+											"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+										}
+									]
+								},
+								{
+									"name": "{{baseUrl}}/api/agent/transactions/:transactionId/reverse",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"debug\": {\n\t\t\"createDelay\": 0,\n\t\t\"createNoResponse\": false,\n\t\t\"createResponseCode\": \"\",\n\t\t\"createPinError\": false,\n\t\t\"voidDelay\": 0,\n\t\t\"voidNoResponse\": false,\n\t\t\"voidResponseCode\": \"\",\n\t\t\"reverseDelay\": 0,\n\t\t\"reverseNoResponse\": false,\n\t\t\"reverseResponseCode\": \"00\",\n\t\t\"reverseVoidDelay\": 0,\n\t\t\"reverseVoidNoResponse\": false,\n\t\t\"reverseVoidResponseCode\": \"00\"\n\t}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/agent/transactions/:transactionId/reverse",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"agent",
+												"transactions",
+												":transactionId",
+												"reverse"
+											],
+											"variable": [
+												{
+													"key": "transactionId",
+													"value": "2iaZgLlX9Eca9UaziMjEx"
+												}
+											]
+										},
+										"description": "Create transaction"
+									},
+									"response": [
+										{
+											"name": "{{baseUrl}}/agent/transaction with user token",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "x-access-token",
+														"type": "text",
+														"value": "{{mikaSessionToken}}"
+													},
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/javascript",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/agent/transaction",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"agent",
+														"transaction"
+													]
+												}
+											},
+											"_postman_previewlanguage": "json",
+											"header": [],
+											"cookie": [],
+											"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+										}
+									]
+								},
+								{
+									"name": "{{baseUrl}}/api/agent/settle_batches/:settleBatchId/settle",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"debug\": {\n      \"agentSettleDelay\": 0,\n      \"agentSettleNoResponse\": false,\n      \"agentSettleResponseCode\": \"00\"\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/agent/settle_batches/:settleBatchId/settle",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"agent",
+												"settle_batches",
+												":settleBatchId",
+												"settle"
+											],
+											"variable": [
+												{
+													"key": "settleBatchId",
+													"value": "3003"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "{{baseUrl}}/api/agent/bulk_settle",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-access-token",
+												"type": "text",
+												"value": "{{mikaSessionToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"debug\": {\n      \"agentSettleDelay\": 0,\n      \"agentSettleNoResponse\": false,\n      \"agentSettleResponseCode\": \"00\"\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/agent/bulk_settle",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"agent",
+												"bulk_settle"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
 							"name": "{{baseUrl}}/api/agent/transactions (EMV Chip) Example",
 							"request": {
 								"method": "POST",
@@ -14438,7 +14785,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"acquirerId\": 6,\n\t\"amount\": 30000,\n\t\n\t\"userToken\": {\n\t\t\"emv\" : \"57104096750145500416D22032061000072882023C00950500800080009A031901229C01005F2A0203605F3401019F02060000000050009F03060000000000009F100706010A03A010029F1A0203609F2608D02323CDF6066D3F9F2701809F3303E008FF9F34031F00029F3501229F360200019F37049A47388B8F01089F49039F3704\",\n\t\t\"pin\":\"123456\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+									"raw": "{\n\t\"acquirerId\": 2201,\n\t\"amount\": 30000,\n\t\n\t\"debug\": {\n\t\t\"createNoResponse\": false,\n\t\t\"createResponseCode\": \"06\",\n\t\t\"reverseNoResponse\": false,\n\t\t\"reverseResponseCode\": \"00\"\n\t},\n\t\n\t\"userToken\": {\n\t\t\"emv\" : \"57104096750145500416D22032061000072882023C00950500800080009A031901229C01005F2A0203605F3401019F02060000000050009F03060000000000009F100706010A03A010029F1A0203609F2608D02323CDF6066D3F9F2701809F3303E008FF9F34031F00029F3501229F360200019F37049A47388B8F01089F49039F3704\",\n\t\t\"pin\":\"123456\"\n\t},\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/agent/transactions",
@@ -16104,13 +16451,13 @@
 	],
 	"variable": [
 		{
-			"id": "12ac91f4-f8d9-4bde-b765-2515778cc012",
+			"id": "62770762-a071-4277-8907-9173365f8ae2",
 			"key": "baseUrl",
 			"value": "https://stg31api.mikaapp.id",
 			"type": "string"
 		},
 		{
-			"id": "3bf3c84b-dfc4-4ec1-a23f-3b9cb6467a7a",
+			"id": "63d77d8b-1071-4440-b7f4-8a7e4bfb8e19",
 			"key": "mikaDebugKey",
 			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
 			"type": "string"

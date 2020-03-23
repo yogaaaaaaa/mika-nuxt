@@ -17,6 +17,12 @@ const publicDetails = {
 }
 
 module.exports.login = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'AUTH/LOGIN'
+  }
+
+  req.auth = undefined
+
   const options = {}
   options.userTypes = req.body.userTypes
   // Supply terminalId from cipherbox middleware
@@ -25,6 +31,7 @@ module.exports.login = async (req, res, next) => {
   const authResult = await auth.doAuth(req.body.username, req.body.password, options)
 
   if (authResult) {
+    req.auth = authResult.auth
     const response = {
       ...authResult.auth,
       sessionToken: authResult.sessionToken,
@@ -56,6 +63,10 @@ module.exports.login = async (req, res, next) => {
 }
 
 module.exports.logout = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'AUTH/LOGOUT'
+  }
+
   if (await auth.removeAuth(req.sessionToken)) {
     msg.expressResponse(
       res,
@@ -65,6 +76,10 @@ module.exports.logout = async (req, res, next) => {
 }
 
 module.exports.sessionTokenCheck = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'AUTH/SESSION_CHECK'
+  }
+
   const sessionData = await auth.checkAuth(req.body.sessionToken)
 
   if (sessionData) {
@@ -95,6 +110,10 @@ module.exports.sessionTokenCheck = async (req, res, next) => {
 }
 
 module.exports.changePassword = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'AUTH/CHANGE_PASSWORD'
+  }
+
   await auth.changePassword(
     req.auth.userId,
     req.body.password,
@@ -107,6 +126,9 @@ module.exports.changePassword = async (req, res, next) => {
 }
 
 module.exports.changeExpiredPassword = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'AUTH/CHANGE_EXPIRED_PASSWORD'
+  }
   if (!await auth.changeExpiredPassword(
     req.body.username,
     req.body.password,
@@ -118,7 +140,6 @@ module.exports.changeExpiredPassword = async (req, res, next) => {
     )
     return
   }
-
   msg.expressResponse(
     res,
     msg.msgTypes.MSG_SUCCESS_AUTH_CHANGE_PASSWORD
