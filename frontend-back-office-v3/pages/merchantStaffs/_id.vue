@@ -6,12 +6,13 @@
           Dashboard
           <span class="ml-3">/</span>
         </v-breadcrumbs-item>
-        <v-breadcrumbs-item to="/merchants" exact>Merchant</v-breadcrumbs-item>
+        <v-breadcrumbs-item to="/merchantStaffs" exact>
+          Merchant Staff
+          <span class="ml-3">/</span>
+        </v-breadcrumbs-item>
+        <v-breadcrumbs-item>{{ currentEdit.name }}</v-breadcrumbs-item>
       </v-breadcrumbs>
     </div>
-    <!-- <v-container>
-      <detail />
-    </v-container>-->
 
     <v-tabs>
       <v-tab href="#detail">Detail</v-tab>
@@ -50,6 +51,11 @@ export default {
       urlLoginAttempt: `/back_office/merchant_staffs/${this.$route.params.id}`,
       permissionRole: 'adminMarketing',
     }
+  },
+  computed: {
+    currentEdit() {
+      return this.$store.state.currentEdit
+    },
   },
   async fetch({ store, params, redirect, $axios }) {
     try {

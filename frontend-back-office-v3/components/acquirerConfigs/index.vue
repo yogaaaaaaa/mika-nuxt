@@ -25,30 +25,17 @@
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.createdAt="{ item }">
-          {{ $moment(item.createdAt).format('YYYY-MM-DD') }}
+        <template
+          v-slot:item.createdAt="{ item }"
+        >{{ $moment(item.createdAt).format('YYYY-MM-DD') }}</template>
+        <template v-slot:item.archivedAt="{ item }" class="text-center">
+          <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
+          <span v-else>-</span>
         </template>
       </v-data-table>
     </v-card>
-    <v-dialog v-model="modalAddForm" fullscreen hide-overlay>
-      <v-card>
-        <v-toolbar color="primary" dark flat>
-          <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
-          <v-spacer />
-          <v-btn icon dark @click="modalAddForm = false">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-card-text class="mt-5">
-          <formAdd
-            :form-field="formField"
-            :sm6="true"
-            :permission-role="permissionRole"
-            @close="modalAddForm = false"
-            @onSubmit="submit"
-          />
-        </v-card-text>
-      </v-card>
+    <v-dialog v-model="modalAddForm" width="600">
+      <dform :show-toolbar="showToolbar" @onClose="modalAddForm = false" @onSubmit="submit"></dform>
     </v-dialog>
   </div>
 </template>
@@ -58,15 +45,16 @@ import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
 import { tableHeader, formAdd } from '~/components/commons'
 import formField from './formField'
+import dform from './dform'
 
 export default {
   components: {
     tableHeader,
-    formAdd,
+    dform,
   },
   mixins: [catchError, tableMixin],
   props: {
-    condirionalUrl: {
+    conditionalUrl: {
       type: String,
       required: false,
       default: '',
@@ -91,15 +79,22 @@ export default {
         },
         {
           text: 'Created At',
-          align: 'left',
+          align: 'center',
           sortable: true,
           value: 'createdAt',
+        },
+        {
+          text: 'Archived At',
+          align: 'center',
+          sortable: true,
+          value: 'archivedAt',
         },
       ],
       dataToDownload: [],
       modalAddForm: false,
       permissionRole: 'adminMarketing',
       formField: formField,
+      showToolbar: true,
     }
   },
   watch: {
@@ -115,6 +110,9 @@ export default {
     this.populateData()
   },
   methods: {
+    prettier(value) {
+      return JSON.stringify(value)
+    },
     async populateData() {
       try {
         this.loading = true
@@ -152,11 +150,17 @@ export default {
     },
     async submit(data) {
       try {
-        data.shareAcquirer = data.shareAcquirer / 100
-        data.shareMerchant = data.shareMerchant / 100
-        data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
-        data.sharePartner = data.sharePartner / 100
-        const response = await this.$axios.$post(this.url, data)
+        // data.config = JSON.parse(`{ ${data.config.replace(/\s+/g, '')} }`)
+        const config = data.config
+        const postData = {
+          name: data.formData.name,
+          handler: data.formData.handler,
+          description: data.formData.description,
+          merchantId: data.formData.merchantId ? data.merchantId : undefined,
+          config: data.config,
+          imageReceipt: data.image,
+        }
+        const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)
         this.showSnackbar('success', `${this.btnAddText} success`)
       } catch (e) {

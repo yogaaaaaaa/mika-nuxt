@@ -4,7 +4,7 @@
       <v-layout align-center justify-center>
         <v-card class="card-login">
           <v-layout>
-            <v-flex lg6 md6>
+            <v-flex lg6>
               <div class="logo">
                 <v-img
                   src="/img/logonew.png"
@@ -45,10 +45,10 @@
                   <div class="mt-2">
                     <v-btn color="primary" block x-large :loading="loading" @click="login">Login</v-btn>
                     <confirmationBox
-                      :confirm-show="confirmShowExpired"
-                      :confirm-title="confirmTitleExpired"
-                      :confirm-text="confirmTextExpired"
-                      :confirm-color="'warning'"
+                      :show="confirmShowExpired"
+                      :title="confirmTitleExpired"
+                      :text="confirmTextExpired"
+                      :color="'warning'"
                       @onClose="confirmShowExpired = false"
                       @onConfirm="toExpired"
                     />
@@ -61,9 +61,21 @@
                 </div>
               </div>
             </v-flex>
-            <v-flex class="hidden-sm-and-down px-6"></v-flex>
+            <v-flex class="hidden-md-and-down" lg6 md7>
+              <v-img :src="imageLogin" class="login-right" aspect-ratio="1">
+                <v-img :src="imageCard" cover></v-img>
+              </v-img>
+            </v-flex>
           </v-layout>
         </v-card>
+        <confirmationBox
+          :show="countdownShow"
+          :title="countdownTitle"
+          :text="countdownText"
+          :color="'warning'"
+          @onConfirm="countdownShow = false"
+          @onClose="countdownShow = false"
+        />
       </v-layout>
     </v-container>
   </v-img>
@@ -88,10 +100,17 @@ export default {
     show1: false,
     loading: false,
     confirmShowExpired: false,
+    imageLogin: require('~/static/img/login_bg_illustration.png'),
+    imageCard: require('~/static/img/login-illustration.svg'),
     imageBackground: require('~/static/img/Login-bg.png'),
     confirmTitleExpired: 'Kata Sandi Kadaluarsa',
     confirmTextExpired:
       'Kata sandi yang dimasukan telah kadaluarsa. Anda harus mengubah kata sandi anda sekarang untuk bisa login!',
+    countError: 6,
+    countdownText:
+      'Anda dapat login lagi 30 menit kedepan atau silakan hubungi admin',
+    countdownTitle: '',
+    countdownShow: false,
   }),
   mounted() {
     const nodenv = process.env.NODE_ENV
@@ -126,6 +145,11 @@ export default {
           this.loading = false
         }
         this.catchError(e)
+        this.countError--
+        if (this.countError <= 0) {
+          console.log('countdown', this.countError)
+          this.countdownShow = true
+        }
       }
     },
     toExpired() {
@@ -149,6 +173,11 @@ export default {
 .card-login {
   // height: 80;
   width: 60%;
+}
+.login-right {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .background-image {
   width: 100%;

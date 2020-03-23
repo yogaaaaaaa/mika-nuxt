@@ -26,18 +26,18 @@
       </v-layout>
     </v-card>
     <confirmation
-      :confirm-show="confirmShowLogin"
-      :confirm-title="confirmTitleLogin"
-      :confirm-text="confirmTextLogin"
-      :confirm-color="warningColor"
+      :show="confirmShowLogin"
+      :title="confirmTitleLogin"
+      :text="confirmTextLogin"
+      :color="warningColor"
       @onClose="confirmShowLogin = false"
       @onConfirm="loginAttempt"
     />
     <confirmation
-      :confirm-show="confirmShowPassword"
-      :confirm-title="confirmTitlePassword"
-      :confirm-text="confirmTextPassword"
-      :confirm-color="'error'"
+      :show="confirmShowPassword"
+      :title="confirmTitlePassword"
+      :text="confirmTextPassword"
+      :color="'error'"
       @onClose="confirmShowPassword = false"
       @onConfirm="setPassword"
     />
@@ -78,7 +78,7 @@ export default {
       confirmShowPassword: false,
       confirmTitlePassword: 'Atur Ulang Kata Sandi',
       confirmTextPassword:
-        'Apakah anda yakin ingin mengatur ulang kata sandi? Perintah ini tidak dapat dibataklan.',
+        'Apakah anda yakin ingin mengatur ulang kata sandi? Perintah ini tidak dapat dibatalkan.',
       confirmShowLogin: false,
       confirmTitleLogin: 'Hapus dari daftar ',
       confirmTextLogin: 'Apakah anda yakin ingin membuka blokir pengguna ini?',

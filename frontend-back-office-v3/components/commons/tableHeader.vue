@@ -3,6 +3,7 @@
     <v-layout row wrap>
       <v-flex md3 sm6 xs12>
         <v-select
+          :menu-props="{ maxHeight: '400' }"
           v-model="selectedFilterBy"
           :items="filtered"
           item-text="text"

@@ -48,6 +48,7 @@
             :form-field="formField"
             :sm6="true"
             :permission-role="permissionRole"
+            :btnShowArchive="showArchiveBtn"
             @close="modalAddForm = false"
             @onSubmit="submit"
           />
@@ -109,6 +110,7 @@ export default {
       modalAddForm: false,
       permissionRole: 'adminMarketing',
       formField: formField,
+      showArchiveBtn: true,
     }
   },
   watch: {
@@ -146,19 +148,30 @@ export default {
     generateDownload(data) {
       data.map(d => {
         this.dataToDownload.push({
+          class: d.class,
           name: d.name,
           description: d.description,
+          thumbnail: d.thumbnail,
+          thumbnailGray: d.thumbnailGray,
+          chartColor: d.chartColor,
           created_at: this.$moment(d.created_at).format('YYYY-MM-DD HH:mm:ss'),
           updated_at: this.$moment(d.updated_at).format('YYYY-MM-DD HH:mm:ss'),
+          archived_at: this.$moment(d.archived_at).format(
+            'YYYY-MM-DD HH:mm:ss'
+          ),
         })
       })
     },
     async submit(data) {
       try {
-        data.shareAcquirer = data.shareAcquirer / 100
-        data.shareMerchant = data.shareMerchant / 100
-        data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
-        data.sharePartner = data.sharePartner / 100
+        const postData = {
+          class: data.class,
+          name: data.name,
+          description: data.description,
+          thumbnail: data.thumbnail,
+          thumbnailGray: data.thumbnailGray,
+          chartColor: data.chartColor,
+        }
         const response = await this.$axios.$post(this.url, data)
         this.items.unshift(response.data)
         this.showSnackbar('success', `${this.btnAddText} success`)

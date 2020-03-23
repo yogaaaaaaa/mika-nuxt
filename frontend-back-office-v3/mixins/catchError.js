@@ -1,6 +1,7 @@
 export default {
   methods: {
     catchError(error) {
+      // this.showSnackbar('error', error.response.data.message)
       if (error.response) {
         if (
           error.response.status === 400 ||
@@ -14,6 +15,9 @@ export default {
               'error',
               'Nama pengguna atau kata sandi yang anda masukkan salah'
             )
+          }
+          if (error.response.data.status === 'auth-410') {
+            return this.showSnackbar('error', error.response.message)
           }
           if (error.response.data.status === 'auth-412') {
             return this.showSnackbar(
@@ -49,6 +53,7 @@ export default {
               'Akun anda telah terblokir karena salah memasukan nama pengguna atau kata sandi sebanyak 6 kali'
             )
           }
+          return this.showSnackbar('error', error.response.message)
         }
       } else if (error.request) {
         this.showSnackbar('error', 'Network Error')

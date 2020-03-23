@@ -26,31 +26,31 @@
 </template>
 
 <script>
-import recency from '~/components/fraudRules/recency'
-import frequency from '~/components/fraudRules/frequency'
-import monetary from '~/components/fraudRules/monetary'
-import velocity from '~/components/fraudRules/velocity'
+import recency from "~/components/fraudRules/recency";
+import frequency from "~/components/fraudRules/frequency";
+import monetary from "~/components/fraudRules/monetary";
+import velocity from "~/components/fraudRules/velocity";
 export default {
   components: { recency, frequency, monetary, velocity },
   computed: {
     rule() {
-      return this.$store.state.currentEdit
-    },
+      return this.$store.state.currentEdit;
+    }
   },
   async fetch({ store, params, redirect, $axios }) {
     try {
       let resp = await $axios.$get(
-        '/back_office/fraud-detections/rules/' + params.id
-      )
-      store.commit('currentEdit', resp.data)
+        "/back_office/fraud_detection/merchant_rules/" + params.id
+      );
+      store.commit("currentEdit", resp.data);
     } catch (e) {
-      if (process.client) this.catchError(e)
+      if (process.client) this.catchError(e);
       else {
-        redirect('/')
+        redirect("/");
       }
     }
-  },
-}
+  }
+};
 </script>
 
 <style lang="scss" scoped></style>

@@ -63,7 +63,7 @@
 import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
 import { tableHeader, formAdd, pageTitle } from '~/components/commons'
-import formField, { fakeData } from '~/components/merchants/formField'
+import formField from '~/components/merchants/formField'
 
 export default {
   components: {
@@ -90,7 +90,6 @@ export default {
       dataToDownload: [],
       modalAddForm: false,
       formField: formField,
-      fakeData: fakeData,
       permissionRole: 'adminMarketing',
       btnShowArchive: false,
     }
@@ -179,6 +178,7 @@ export default {
           phoneNumber: data.phoneNumber,
           taxCardNumber: data.taxCardNumber,
           website: data.website,
+          logo: data.logo,
         }
         const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)

@@ -6,21 +6,21 @@
           Dashboard
           <span class="ml-3">/</span>
         </v-breadcrumbs-item>
-        <v-breadcrumbs-item to="/merchants" exact>
-          Merhchant
+        <v-breadcrumbs-item to="/acquirerTypes" exact>
+          Acquirer Type
           <span class="ml-3">/</span>
         </v-breadcrumbs-item>
-        <v-breadcrumbs-item to="/outlets" exact>Outlet</v-breadcrumbs-item>
+        <v-breadcrumbs-item exact>{{ currentEdit.name }}</v-breadcrumbs-item>
       </v-breadcrumbs>
     </div>
     <v-tabs>
       <v-tab href="#detail-outlet">Detail</v-tab>
       <v-tab href="#transaction-list">Transaction List</v-tab>
       <v-tab-item id="detail-outlet">
-        <detail />
+        <detail/>
       </v-tab-item>
       <v-tab-item :id="'transaction-list'">
-        <tableTransaction :conditional-url="transactionUrl" />
+        <tableTransaction :conditional-url="transactionUrl"/>
       </v-tab-item>
     </v-tabs>
   </div>
@@ -41,6 +41,11 @@ export default {
     return {
       transactionUrl: `f[acquirerId]=eq,${this.$route.params.id}`,
     }
+  },
+  computed: {
+    currentEdit() {
+      return this.$store.state.currentEdit
+    },
   },
   async fetch({ store, params, redirect, $axios }) {
     try {

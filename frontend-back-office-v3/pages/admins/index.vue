@@ -167,13 +167,13 @@ export default {
     },
     downloadCsv() {
       this.generateDownload(this.items)
-      console.log('apa ini')
       this.csvExport(
         `Mika Admin Report ${this.$moment(new Date()).format(
           'YYYY-MM-DD HH:mm:ss'
         )}`,
         this.dataToDownload
       )
+      this.dataToDownload = []
     },
     generateDownload(data) {
       data.map(d => {

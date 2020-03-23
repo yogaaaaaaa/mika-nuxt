@@ -9,14 +9,6 @@
 
       <v-list>
         <template v-for="item in items">
-          <!-- <v-row v-if="item.heading" :key="item.heading" align="center">
-            <v-col cols="6">
-              <v-subheader v-if="item.heading">{{ item.heading }}</v-subheader>
-            </v-col>
-            <v-col cols="6" class="text-center">
-              <a href="#!" class="body-2 black--text">EDIT</a>
-            </v-col>
-          </v-row>-->
           <v-list-group v-if="item.children" :key="item.text" v-model="item.model" append-icon>
             <template v-slot:activator>
               <v-list-item class="pa-0" :to="item.to">
@@ -44,14 +36,21 @@
               </v-list-item-content>
             </v-list-item>
           </v-list-group>
-          <v-list-item v-else :key="item.text" :to="item.to" link>
-            <v-list-item-action>
-              <v-icon>{{ item.icon }}</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>{{ item.text }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
+          <div v-else :key="item.text">
+            <v-list-item
+              v-if="checkRoles(item.role) || item.role == 'default'"
+              :key="item.text"
+              :to="item.to"
+              link
+            >
+              <v-list-item-action>
+                <v-icon>{{ item.icon }}</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>{{ item.text }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </div>
         </template>
       </v-list>
     </v-navigation-drawer>
@@ -94,10 +93,10 @@
     <snackbar/>
     <!-- <confirmation-box v-if="login == false" @onConfirm="logout" /> -->
     <confirmation
-      :confirm-show="confirmationLogout"
-      :confirm-title="logoutTitle"
-      :confirm-color="logoutColor"
-      :confirm-text="confirmationLogoutText"
+      :show="confirmationLogout"
+      :title="logoutTitle"
+      :color="logoutColor"
+      :text="confirmationLogoutText"
       @onClose="confirmationLogout = false"
       @onConfirm="logout"
     />
@@ -106,7 +105,6 @@
       @onClose="showChangePasswordForm = false"
       :text="changePasswordText"
     />
-    <changePasswordForm :show="showChangePasswordForm" @onClose="showChangePasswordForm = false"/>
   </v-app>
 </template>
 
@@ -118,6 +116,7 @@ import {
 } from '~/components/commons'
 import confirmation from '~/components/commons/confirmation'
 import { mapState } from 'vuex'
+import { checkRoles } from '~/mixins'
 
 export default {
   components: {
@@ -126,6 +125,7 @@ export default {
     confirmation,
     changePasswordForm,
   },
+  mixins: [checkRoles],
   data() {
     return {
       clipped: false,
@@ -137,13 +137,23 @@ export default {
       changePasswordText:
         'Demi keamanan dan kenyamanan, silahkan ganti password anda!',
       items: [
-        { icon: "supervisor_account", text: "Admins", to: "/admins" },
-        { icon: "domain", text: "Merchants", to: "/merchants" },
-        { icon: "store", text: "Outlets", to: "/outlets" },
+        {
+          icon: 'supervisor_account',
+          text: 'Admins',
+          to: '/admins',
+          role: 'default',
+        },
+        {
+          icon: 'domain',
+          text: 'Merchants',
+          to: '/merchants',
+          role: 'default',
+        },
+        { icon: 'store', text: 'Outlets', to: '/outlets', role: 'default' },
         {
           icon: 'account_balance',
           text: 'Acquirers',
-          // to: '/acquirers',
+          role: 'default',
           children: [
             {
               text: 'List Acquirer',
@@ -157,91 +167,98 @@ export default {
               text: 'Acquirer Configs',
               to: '/acquirerConfigs',
             },
-            // {
-            //   text: 'Acquirer Config Agents',
-            //   to: '/acquirerConfigAgents',
-            // },
-            // {
-            //   text: 'Acquirer Config Outlets',
-            //   to: '/acquirerConfigOutlets',
-            // },
+            {
+              text: 'Acquirer Config Agents',
+              to: '/acquirerConfigAgents',
+            },
+            {
+              text: 'Acquirer Config Outlets',
+              to: '/acquirerConfigOutlets',
+            },
             {
               text: 'Acquirer Terminals',
               to: '/acquirerTerminals',
             },
+            {
+              text: 'Acquirer Terminal Commons',
+              to: '/acquirerTerminalCommons',
+            },
           ],
         },
-        { icon: "person", text: "Agents", to: "/agents" },
+        { icon: 'person', text: 'Agents', to: '/agents', role: 'default' },
         {
-          icon: "confirmation_number",
-          text: "Transactions",
-          to: "/transactions"
+          icon: 'confirmation_number',
+          text: 'Transactions',
+          to: '/transactions',
+          role: 'default',
         },
         {
           icon: 'home',
           text: 'Acquirer Companies',
           to: '/acquirerCompanies',
+          role: 'default',
         },
-        // {
-        //   icon: 'people_outline',
-        //   text: 'Partners',
-        //   to: '/partners',
-        // },
         {
           icon: 'keyboard_arrow_down',
           text: 'Terminal',
-          // to: '/terminalModels',
+          role: 'default',
           children: [
+            // {
+            //   text: 'Procurement',
+            //   to: '/',
+            // },
             {
-              icon: 'delete',
-              text: 'Procurement',
-              to: '/',
-            },
-            {
-              icon: 'add',
               text: 'Batches',
               to: '/terminalModels',
             },
+            // {
+            //   text: 'Inventory',
+            //   to: '/inventories',
+            // },
+            // {
+            //   text: 'Deliveries',
+            //   to: '/deliveries',
+            // },
+            // {
+            //   text: 'Tickets',
+            //   to: '/tickets',
+            // },
+          ],
+        },
+        {
+          icon: 'credit_card',
+          text: 'Cards',
+          role: 'default',
+          children: [
             {
-              text: 'Inventory',
-              to: '/inventories',
+              text: 'Card IIN',
+              to: '/cardIins',
             },
             {
-              text: 'Deliveries',
-              to: '/deliveries',
+              text: 'Card Types',
+              to: '/cardTypes',
             },
             {
-              text: 'Tickets',
-              to: '/tickets',
+              text: 'Card Issuer',
+              to: '/cardIssuers',
+            },
+            {
+              text: 'Card Scheme',
+              to: '/cardSchemes',
             },
           ],
         },
-        // {
-        //   icon: 'credit_card',
-        //   text: 'Cards',
-        //   children: [
-        //     {
-        //       text: 'Card IIN',
-        //       to: '/cards/iins',
-        //     },
-        //     {
-        //       text: 'Card Types',
-        //       to: '/cards/types',
-        //     },
-        //     {
-        //       text: 'Card Issuer',
-        //       to: '/cards/issuers',
-        //     },
-        //     {
-        //       text: 'Card Scheme',
-        //       to: '/cards/schemes',
-        //     },
-        //   ],
-        // },
         {
           icon: 'bug_report',
           text: 'Fraud Rules',
           to: '/fraudRules',
+          role: 'adminMarketing',
+        },
+        {
+          icon: 'supervisor_account',
+          text: 'Audits',
+          to: '/audits',
+          role: 'adminHead',
         },
       ],
       logoutTitle: 'Logout ?',
@@ -250,25 +267,23 @@ export default {
   },
   computed: {
     user() {
-      return this.$store.state.auth.user;
+      return this.$store.state.auth.user
     },
-    ...mapState(["login"])
+    ...mapState(['login']),
   },
   beforeMounted() {
-    this.$store.dispatch("clearFilter");
+    this.$store.dispatch('clearFilter')
   },
   mounted() {
     this.$store.commit('login', true)
     if (this.user.user.lastPasswordChangeAt == null) {
-      console.log('last password')
       this.checkPassword()
     }
-    console.log('user', this.user)
   },
   methods: {
     async logout() {
-      await this.$auth.logout();
-      this.$router.push("/login");
+      await this.$auth.logout()
+      this.$router.push('/login')
     },
     showConfirm() {
       this.confirmationLogout = true
@@ -279,3 +294,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.v-list-item__title {
+  font-size: 0.9rem;
+}
+</style>
+
