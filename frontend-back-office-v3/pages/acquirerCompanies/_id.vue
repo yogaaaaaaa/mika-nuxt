@@ -6,7 +6,7 @@
           Dashboard
           <span class="ml-3">/</span>
         </v-breadcrumbs-item>
-        <v-breadcrumbs-item to="/acquirers" exact>
+        <v-breadcrumbs-item to="/acquirerCompanies" exact>
           Acquirer Companies
           <span class="ml-3">/</span>
         </v-breadcrumbs-item>

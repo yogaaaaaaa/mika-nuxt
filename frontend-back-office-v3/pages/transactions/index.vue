@@ -32,8 +32,7 @@
                   class="d-inline-block text-truncate"
                   style="max-width: 100px;"
                   @click="toDetail(item.id)"
-                  >{{ item.id }}</a
-                >
+                >{{ item.id }}</a>
               </span>
             </template>
             <span>{{ item.id }}</span>
@@ -47,17 +46,16 @@
                   class="d-inline-block text-truncate"
                   style="max-width: 100px;"
                   @click="toDetail(item.id)"
-                  >{{ item.idAlias }}</a
-                >
+                >{{ item.idAlias }}</a>
               </span>
             </template>
             <span>{{ item.idAlias }}</span>
           </v-tooltip>
         </template>
         <template v-slot:item.amount="{ item }">
-          <span style="font-family: Roboto">
-            {{ item.amount | currency('', 0, { thousandsSeparator: '.' }) }}
-          </span>
+          <span
+            style="font-family: Roboto"
+          >{{ item.amount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
         </template>
         <template v-slot:item.status="{ item }">
           <v-btn
@@ -66,19 +64,20 @@
             dark
             small
             class="elevation-0 text-lowercase"
-            >{{ item.status }}</v-btn
-          >
+          >{{ item.status }}</v-btn>
         </template>
-        <template v-slot:item.updatedAt="{ item }">{{
+        <template v-slot:item.updatedAt="{ item }">
+          {{
           $moment(item.updatedAt).format('YYYY-MM-DD, HH:mm:ss')
-        }}</template>
+          }}
+        </template>
       </v-data-table>
     </v-card>
     <v-dialog v-model="modalAddForm" fullscreen hide-overlay>
       <v-card>
         <v-toolbar color="primary" dark flat>
           <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
-          <v-spacer />
+          <v-spacer/>
           <v-btn icon dark @click="modalAddForm = false">
             <v-icon>close</v-icon>
           </v-btn>
@@ -92,7 +91,6 @@
 import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
 import { tableHeader } from '~/components/commons'
-import formField, { fakeData } from '~/components/merchants/formField'
 import Filters from 'vue2-filters'
 const allowedLinks = ['acquirers', 'status']
 import includes from 'lodash/includes'
@@ -126,8 +124,6 @@ export default {
       ],
       dataToDownload: [],
       modalAddForm: false,
-      formField: formField,
-      fakeData: fakeData,
       showAddBtn: false,
       showArchiveBtn: false,
       color: '',

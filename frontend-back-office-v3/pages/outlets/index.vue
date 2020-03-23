@@ -1,7 +1,7 @@
 <template>
   <div>
     <pageTitle title="Outlet List" icon="store"></pageTitle>
-    <tableOutlet />
+    <tableOutlet :show-add-btn="showAddBtn" />
   </div>
 </template>
 
@@ -14,6 +14,11 @@ export default {
     tableOutlet,
     pageTitle,
   },
+  data() {
+    return {
+      showAddBtn: false
+    }
+  }
 }
 </script>
 

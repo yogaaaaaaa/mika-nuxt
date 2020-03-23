@@ -58,7 +58,7 @@ export default {
           `${this.url}/${this.currentEdit.id}`,
           postData
         )
-        if (response.status !== 'ent-406') {
+        if (response.status == 'ent-202') {
           this.$store.commit('currentEdit', response.data)
           this.showSnackbar('success', `Data successfuly edited`)
         }

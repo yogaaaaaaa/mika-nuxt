@@ -69,14 +69,19 @@ export default {
     },
     populateInitialData() {
       if (this.currentEdit) {
+        // const outlet = this.currentEdit.outlet
         this.initialData = {
           id: this.currentEdit.id,
-          name: this.currentEdit.name,
+          name: this.currentEdit.name ? this.currentEdit.name : '',
           username: this.currentEdit.user ? this.currentEdit.user.username : '',
           generalLocationLat: this.currentEdit.generalLocationLat,
           generalLocationLong: this.currentEdit.generalLocationLong,
-          outletName: this.currentEdit.outlet.name,
-          merchantName: this.currentEdit.outlet.merchant.name,
+          outletName: this.currentEdit.outlet
+            ? this.currentEdit.outlet.name
+            : '',
+          merchantName: this.currentEdit.outlet
+            ? this.currentEdit.outlet.merchant.name
+            : '',
           description: this.currentEdit.description,
           createdAt: this.currentEdit.createdAt,
           archivedAt: this.currentEdit.archivedAt

@@ -109,6 +109,26 @@
                 </template>
                 <v-date-picker v-model="formData[field.key]" no-title @input="menu1 = false"></v-date-picker>
               </v-menu>
+              <picture-input
+                v-if="field.fieldType == 'file'"
+                v-model="formData[field.key]"
+                ref="pictureInput"
+                @change="onChange"
+                width="300"
+                height="150"
+                margin="16"
+                accept="image/jpeg"
+                size="10"
+                buttonClass="btn"
+                :prefill="formData[field.key]"
+                :prefillOptions="{mediaType: 'image/jpeg'}"
+                :customStrings="{
+        upload: '',
+        drag: '<span>Drag or click<span>'
+      }"
+                :removable="true"
+                :crop="true"
+              ></picture-input>
               <v-menu
                 v-if="field.fieldType == 'colorPicker'"
                 ref="menu2"
@@ -168,18 +188,18 @@
       </v-card>
     </form>
     <confirmation
-      :confirm-show="confirmShowArchive"
-      :confirm-title="confirmTitleArchive"
-      :confirm-text="confirmTextArchive"
-      :confirm-color="warningColor"
+      :show="confirmShowArchive"
+      :title="confirmTitleArchive"
+      :text="confirmTextArchive"
+      :color="warningColor"
       @onClose="confirmShowArchive = false"
       @onConfirm="archive"
     />
     <confirmation
-      :confirm-show="confirmShowUnarchive"
-      :confirm-title="confirmTitleUnarchive"
-      :confirm-text="confirmTextUnarchive"
-      :confirm-color="warningColor"
+      :show="confirmShowUnarchive"
+      :title="confirmTitleUnarchive"
+      :text="confirmTextUnarchive"
+      :color="warningColor"
       @onClose="confirmShowUnarchive = false"
       @onConfirm="unarchived"
     />
@@ -248,6 +268,7 @@ export default {
       confirmTitleUnarchive: 'Unarchive',
       confirmTextUnarchive: '',
       warningColor: 'warning',
+      image: null,
     }
   },
 
@@ -317,6 +338,13 @@ export default {
     },
     onReset() {
       this.formData = {}
+    },
+    onChange(image) {
+      if (image) {
+        this.formData.logo = image
+      } else {
+        console.log('FileReader API not supported: use the <form>, Luke!')
+      }
     },
   },
 }

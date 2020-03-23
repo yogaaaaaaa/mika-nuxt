@@ -41,7 +41,6 @@ export default {
           idAlias: this.currentEdit.idAlias,
           amount: this.currentEdit.amount,
           status: this.currentEdit.status,
-          settlementStatus: this.currentEdit.settlementStatus,
           referenceNumber: this.currentEdit.referenceNumber,
           shareMerchant: this.currentEdit.acquirer.shareMerchant,
           sharePartner: this.currentEdit.acquirer.sharePartner,
@@ -53,6 +52,9 @@ export default {
           outletName: this.currentEdit.agent.outlet.name,
           merchantName: this.currentEdit.agent.outlet.merchant.name,
           acquirerTypeName: this.currentEdit.acquirer.acquirerType.name,
+          settlementStatus: this.currentEdit.settleBatchId
+            ? this.currentEdit.settleBatch.status
+            : '-',
           date: this.currentEdit.updatedAt,
         }
       }

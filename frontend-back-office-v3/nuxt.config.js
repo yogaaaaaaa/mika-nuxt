@@ -11,7 +11,11 @@ export default {
     title: 'Mika Admin Dashboard',
     meta: [
       { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      {
+        name: 'viewport',
+        content:
+          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui',
+      },
       {
         hid: 'description',
         name: 'description',
@@ -59,6 +63,7 @@ export default {
     '~/plugins/chance',
     '~/plugins/filters',
     '~/plugins/clipboard',
+    { src: '~/plugins/pictureInput', ssr: false },
   ],
   /*
    ** Nuxt.js dev-modules

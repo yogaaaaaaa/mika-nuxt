@@ -10,7 +10,7 @@
           Terminal Models
           <span class="ml-3">/</span>
         </v-breadcrumbs-item>
-        <v-breadcrumbs-item>{{ admin.name }}</v-breadcrumbs-item>
+        <v-breadcrumbs-item>{{ currentEdit.name }}</v-breadcrumbs-item>
       </v-breadcrumbs>
     </div>
     <v-tabs>
@@ -32,7 +32,7 @@ export default {
     return {}
   },
   computed: {
-    admin() {
+    currentEdit() {
       return this.$store.state.currentEdit
     },
   },

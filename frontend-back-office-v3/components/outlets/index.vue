@@ -6,6 +6,7 @@
           :filter="headers"
           :btn-add-text="btnAddText"
           :permission-role="permissionRole"
+          :show-add-btn="showAddBtn"
           @showForm="modalAddForm = !modalAddForm"
           @applyFilter="populateData"
           @downloadCsv="downloadCsv"
@@ -25,13 +26,13 @@
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.createdAt="{ item }">{{
+        <template v-slot:item.createdAt="{ item }">
+          {{
           $moment(item.createdAt).format('YYYY-MM-DD')
-        }}</template>
+          }}
+        </template>
         <template v-slot:item.archivedAt="{ item }" class="text-center">
-          <div v-if="item.archivedAt">
-            {{ $moment(item.archivedAt).format('YYYY-MM-DD') }}
-          </div>
+          <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
           <span v-else>-</span>
         </template>
       </v-data-table>
@@ -40,7 +41,7 @@
       <v-card>
         <v-toolbar color="primary" dark flat>
           <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
-          <v-spacer />
+          <v-spacer/>
           <v-btn icon dark @click="modalAddForm = false">
             <v-icon>close</v-icon>
           </v-btn>
@@ -50,6 +51,8 @@
             :form-field="formField"
             :sm6="true"
             :permission-role="permissionRole"
+            :initial-data="initialData"
+            :btn-show-archive="btnShowArchive"
             @close="modalAddForm = false"
             @onSubmit="submit"
           />
@@ -64,6 +67,7 @@ import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
 import { tableHeader, formAdd } from '../commons'
 import formField from './formField'
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -76,6 +80,16 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    showAddBtn: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    currentEdit: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
   data() {
@@ -95,7 +109,8 @@ export default {
       formField: formField,
       frontendUrl: `/outlets`,
       permissionRole: 'adminMarketing',
-      // merchantId: this.$route.params.id
+      initialData: {},
+      btnShowArchive: false,
     }
   },
   watch: {
@@ -135,9 +150,14 @@ export default {
       this.$router.push(`${this.frontendUrl}/${id}`)
     },
     downloadCsv() {
+      this.populateData()
       this.generateDownload(this.items)
-      this.csvExport(this.titlePage, this.dataToDownload)
-      this.dataToDownload = []
+      this.csvExport(
+        `${this.currentEdit.name} Outlet Report ${this.$moment().format(
+          'YYYY-MM-DD_HH:mm:ss'
+        )}`,
+        this.dataToDownload
+      )
     },
     generateDownload(data) {
       data.map(d => {
@@ -148,6 +168,14 @@ export default {
           email: d.email,
           website: d.website,
           phoneNumber: d.phoneNumber,
+          locationLat: d.locationLat,
+          locationLong: d.locationLong,
+          streetAddress: d.streetAddress,
+          locality: d.locality,
+          district: d.district,
+          city: d.city,
+          province: d.province,
+          postalCode: d.postalCode,
           ownershipType: d.ownershipType,
           rentStartDate: d.rentStartDate,
           rentDurationMonth: d.rentDurationMonth,
@@ -171,6 +199,14 @@ export default {
           email: data.email,
           website: data.website,
           phoneNumber: data.phoneNumber,
+          locationLat: data.locationLat ? data.locationLat : 0,
+          locationLong: data.locationLong ? data.locationLong : 0,
+          streetAddress: data.streetAddress,
+          locality: data.locality,
+          district: data.district,
+          city: data.city,
+          province: data.province,
+          postalCode: data.postalCode,
           ownershipType: data.ownershipType,
           rentStartDate: data.rentStartDate,
           rentDurationMonth: data.rentDurationMonth,

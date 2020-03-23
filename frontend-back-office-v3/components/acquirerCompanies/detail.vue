@@ -41,12 +41,9 @@ export default {
   methods: {
     async submit(data) {
       try {
-        const postData = {
-          name: data.name,
-        }
         const response = await this.$axios.$put(
           `${this.url}/${this.$route.params.id}`,
-          postData
+          data
         )
         if (response.status !== 'ent-406') {
           this.$store.commit('currentEdit', response.data)
@@ -60,7 +57,7 @@ export default {
       if (this.currentEdit) {
         this.initialData = {
           name: this.currentEdit.name,
-          descripition: this.currentEdit.descripition,
+          description: this.currentEdit.description,
           createdAt: this.currentEdit.createdAt,
           archivedAt: this.currentEdit.archivedAt
             ? this.currentEdit.archivedAt

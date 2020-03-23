@@ -35,12 +35,14 @@
         </template>
       </v-data-table>
     </v-card>
-    <dform
-      :initial-data="formField"
-      :show="modalAddForm"
-      @onClose="modalAddForm = false"
-      @onSubmit="submit"
-    ></dform>
+    <v-dialog v-model="modalAddForm">
+      <dform
+        :initial-data="formField"
+        :permission-role="permissionRole"
+        @onClose="modalAddForm = false"
+        @onSubmit="submit"
+      ></dform>
+    </v-dialog>
   </div>
 </template>
 
@@ -164,7 +166,6 @@ export default {
         data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
         data.sharePartner = data.sharePartner / 100
         data.acquirerCompanyId = this.acquirerCompanyId
-        console.log('acquirer company id', data)
         const response = await this.$axios.$post(this.url, data)
         this.items.unshift(response.data)
         if (response.status === 'ent-201') {

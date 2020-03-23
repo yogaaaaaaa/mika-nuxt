@@ -16,12 +16,16 @@
     <v-tabs>
       <v-tab href="#detail-agent">Detail</v-tab>
       <v-tab href="#transaction-list">Transaction List</v-tab>
+      <v-tab href="#acquirer-config">Acquirer Config</v-tab>
       <v-tab href="#reset" v-if="checkRoles(permissionRole)">Reset</v-tab>
       <v-tab-item id="detail-agent">
         <detail/>
       </v-tab-item>
       <v-tab-item :id="'transaction-list'">
         <tableTransaction :conditional-url="transactionUrl"/>
+      </v-tab-item>
+      <v-tab-item :id="'acquirer-config'">
+        <tableAcquirerConfigAgent :conditional-url="transactionUrl"/>
       </v-tab-item>
       <v-tab-item :id="'reset'">
         <reset :url-reset-password="urlResetPassword" :url-login-attempt="urlLoginAttempt"/>
@@ -33,6 +37,7 @@
 <script>
 import detail from '~/components/agents/detail'
 import tableTransaction from '~/components/transactions'
+import tableAcquirerConfigAgent from '~/components/acquirerConfigAgents'
 import { catchError, checkRoles } from '~/mixins'
 import { mapState } from 'vuex'
 import { reset } from '~/components/commons'
@@ -42,6 +47,7 @@ export default {
     detail,
     tableTransaction,
     reset,
+    tableAcquirerConfigAgent,
   },
   mixins: [catchError, checkRoles],
   data() {

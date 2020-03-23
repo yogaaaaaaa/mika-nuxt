@@ -44,7 +44,15 @@
         </template>
       </v-data-table>
     </v-card>
-    <dform :show="modalAddForm" @onClose="modalAddForm = false" @onSubmit="submit"></dform>
+    <v-dialog v-model="modalAddForm" fullscreen>
+      <dform
+        :permission-role="permissionRole"
+        :form-field="formField"
+        :btn-show-archive="btnShowArchive"
+        @onClose="modalAddForm = false"
+        @onSubmit="submit"
+      ></dform>
+    </v-dialog>
   </div>
 </template>
 
@@ -53,6 +61,7 @@ import { catchError, tableMixin } from '~/mixins'
 import debounce from 'lodash/debounce'
 import { tableHeader, pageTitle } from '~/components/commons'
 import dform from '~/components/acquirers/dform'
+import formField from '~/components/acquirers/formField'
 
 export default {
   components: {
@@ -105,7 +114,9 @@ export default {
       dataToDownload: [],
       modalAddForm: false,
       permissionRole: 'adminMarketing',
-      showAddBtn: false,
+      showAddBtn: true,
+      btnShowArchive: false,
+      formField: formField,
     }
   },
   watch: {
@@ -155,11 +166,24 @@ export default {
     },
     async submit(data) {
       try {
-        data.shareAcquirer = data.shareAcquirer / 100
-        data.shareMerchant = data.shareMerchant / 100
-        data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
-        data.sharePartner = data.sharePartner / 100
-        const response = await this.$axios.$post(this.url, data)
+        const postData = {
+          name: data.name,
+          description: data.description,
+          minimumAmount: data.minimumAmount,
+          maximumAmount: data.maximumAmount,
+          processFee: data.processFee,
+          shareAcquirer: data.shareAcquirer / 100,
+          shareMerchant: data.shareMerchant / 100,
+          shareMerchantWithPartner: data.shareMerchantWithPartner / 100,
+          sharePartner: data.sharePartner / 100,
+          directSettlement: data.directSettlement,
+          gateway: data.gateway,
+          hidden: data.hidden,
+          merchantId: data.merchantId,
+          acquirerConfigId: data.acquirerConfigId,
+          acquirerTypeId: data.acquirerTypeId,
+        }
+        const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)
         this.showSnackbar('success', `${this.btnAddText} success`)
       } catch (e) {

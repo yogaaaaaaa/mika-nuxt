@@ -94,7 +94,7 @@ export default {
       ],
       dataToDownload: [],
       modalAddForm: false,
-      permissionRole: 'adminSupport',
+      permissionRole: 'adminLogistic',
       formField: formField,
     }
   },
@@ -117,17 +117,20 @@ export default {
         const response = await this.$axios.$get(this.url + queries)
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
       }
     },
     downloadCsv() {
+      this.generateDownload(this.items)
       this.csvExport(
-        `${this.$changeCase.titleCase(this.resource)}s`,
+        `Mika Terminal Models Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
         this.dataToDownload
       )
+      this.dataToDownload = []
     },
     generateDownload(data) {
       data.map(d => {

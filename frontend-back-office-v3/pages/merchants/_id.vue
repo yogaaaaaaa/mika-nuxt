@@ -8,31 +8,29 @@
       </v-breadcrumbs>
     </div>
     <v-tabs v-model="tab">
-      <v-tab v-for="t in tabItem" :key="t.text" :href="`#${t.to}`">
-        {{ t.text }}
-      </v-tab>
+      <v-tab v-for="t in tabItem" :key="t.text" :href="`#${t.to}`">{{ t.text }}</v-tab>
       <v-tab-item value="#detail-merchant">
-        <detail />
+        <detail/>
       </v-tab-item>
 
       <v-tab-item value="#outlet-list">
-        <tableOutlet :conditional-url="outletUrl" />
+        <tableOutlet :conditional-url="outletUrl" :current-edit="currentEdit"/>
       </v-tab-item>
 
       <v-tab-item value="#agent-list">
-        <tableAgent :conditional-url="agentUrl" />
+        <tableAgent :conditional-url="agentUrl"/>
       </v-tab-item>
 
       <v-tab-item value="#acquirer-list">
-        <tableAcquirer :conditional-url="acquirerUrl" />
+        <tableAcquirer :conditional-url="acquirerUrl"/>
       </v-tab-item>
 
       <v-tab-item value="#transaction-list">
-        <tableTransaction :conditional-url="transactionUrl" />
+        <tableTransaction :conditional-url="transactionUrl"/>
       </v-tab-item>
 
       <v-tab-item value="#merchant-staff-list">
-        <tableMerchantStaff :conditional-url="merchantStaffUrl" />
+        <tableMerchantStaff :conditional-url="merchantStaffUrl"/>
       </v-tab-item>
     </v-tabs>
   </div>
@@ -83,6 +81,11 @@ export default {
       btnAddTextOutlet: 'Add Outlet',
       modalAddOutlet: false,
     }
+  },
+  computed: {
+    currentEdit() {
+      return this.$store.state.currentEdit
+    },
   },
   async fetch({ store, params, redirect, $axios }) {
     try {

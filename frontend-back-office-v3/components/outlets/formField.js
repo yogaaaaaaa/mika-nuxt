@@ -36,7 +36,7 @@ export default [
     caption: 'Location Longitude',
     fieldType: 'text',
     rules: '',
-    type: 'point',
+    type: 'decimal',
     value: 0,
   },
   {
@@ -44,7 +44,7 @@ export default [
     caption: 'Location Latitude',
     fieldType: 'text',
     rules: '',
-    type: 'point',
+    type: 'decimal',
     value: 0,
   },
   {
@@ -83,7 +83,7 @@ export default [
     key: 'postalCode',
     caption: 'Postal Code',
     fieldType: 'text',
-    rules: 'number',
+    rules: 'numeric',
     type: 'text',
     value: '',
   },
@@ -158,6 +158,7 @@ export default [
     rules: '',
     type: 'text',
     value: '',
+    readonly: true,
   },
   {
     key: 'rentStartDate',

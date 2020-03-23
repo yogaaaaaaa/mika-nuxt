@@ -54,83 +54,83 @@
   </div>
 </template>
 <script>
-import { catchError } from '~/mixins'
-import formAdd from '~/components/commons/formAdd'
-import formField from '~/components/fraudRules/formField'
-import subStepper from '~/components/fraudRules/subStepper'
+import { catchError } from "~/mixins";
+import formAdd from "~/components/commons/formAdd";
+import formField from "~/components/fraudRules/formField";
+import subStepper from "~/components/fraudRules/subStepper";
 export default {
   components: { formAdd, subStepper },
   mixins: [catchError],
   data() {
     return {
-      steps: ['recency', 'frequency', 'monetary', 'velocity'],
+      steps: ["recency", "frequency", "monetary", "velocity"],
       e1: 1,
       formField: formField,
-      permissionRole: 'adminMarketing',
+      permissionRole: "adminMarketing",
       merchants: [],
       form: {
-        id_merchant: '',
+        id_merchant: "",
         recency: {},
         frequency: [],
         monetary: [],
-        velocity: [],
-      },
-    }
+        velocity: []
+      }
+    };
   },
   mounted() {
-    this.getMerchants()
+    this.getMerchants();
   },
   methods: {
     async getMerchants() {
       try {
         const resp = await this.$axios.$get(
-          '/back_office/merchants?per_page=50&order_by=name&order=asc'
-        )
+          "/back_office/merchants?per_page=50&order_by=name&order=asc"
+        );
         resp.data.map(r =>
           this.merchants.push({
             value: r.id,
-            text: r.name,
+            text: r.name
           })
-        )
+        );
       } catch (e) {
-        this.catchError(e)
+        this.catchError(e);
       }
     },
     recencySubmit(data) {
-      this.form.id_merchant = data.id_merchant.toString()
-      delete data['id_merchant']
-      let result = {}
+      this.form.id_merchant = data.id_merchant.toString();
+      delete data["id_merchant"];
+      let result = {};
       Object.keys(data).map(key => {
-        const splitKey = key.split('.')
-        if (!result[splitKey[0]]) result[splitKey[0]] = {}
+        const splitKey = key.split(".");
+        if (!result[splitKey[0]]) result[splitKey[0]] = {};
         if (!result[splitKey[0]][splitKey[1]])
-          result[splitKey[0]][splitKey[1]] = {}
-        result[splitKey[0]][splitKey[1]] = parseInt(data[key])
-      })
-      this.form.recency = result
-      this.e1++
+          result[splitKey[0]][splitKey[1]] = {};
+        result[splitKey[0]][splitKey[1]] = parseInt(data[key]);
+      });
+      this.form.recency = result;
+      this.e1++;
     },
     stepNext(data) {
-      const key = Object.keys(data)
-      this.form[key] = data[key]
+      const key = Object.keys(data);
+      this.form[key] = data[key];
       if (this.e1 > 3) {
-        this.submit()
+        this.submit();
       } else {
-        this.e1++
+        this.e1++;
       }
     },
     async submit() {
       try {
         await this.$axios.$post(
-          '/back_office/fraud-detections/rules',
+          "/back_office/fraud_detection/merchant_rules",
           this.form
-        )
-        this.$router.push('/fraudRules')
+        );
+        this.$router.push("/fraudRules");
       } catch (e) {
-        this.e1 = 1
-        this.catchError(e)
+        this.e1 = 1;
+        this.catchError(e);
       }
-    },
-  },
-}
+    }
+  }
+};
 </script>

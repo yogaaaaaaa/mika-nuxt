@@ -1,33 +1,36 @@
 <template>
   <v-card class="mt-6" flat>
-    <formAdd
+    <dform
+      :show-toolbar="show"
       :form-field="formField"
       :initial-data="initialData"
-      :sm6="true"
       :permission-role="permissionRole"
-      @onSubmit="submit"
+      :btn-show-archive="btnShowArchive"
       @archive="archive"
-      @unarchived="unarchived"
+      @unarchive="unarchived"
+      @onSubmit="submit"
     />
   </v-card>
 </template>
 
 <script>
-import { formAdd } from '~/components/commons'
-import formField from './formField'
+import dform from './dform'
+import formFieldEdit from './formFieldEdit'
 import { catchError, toArchive } from '~/mixins'
 
 export default {
   components: {
-    formAdd,
+    dform,
   },
   mixins: [catchError, toArchive],
   data() {
     return {
-      formField: formField,
+      formField: formFieldEdit,
       permissionRole: 'adminMarketing',
       url: `/back_office/acquirers`,
       initialData: {},
+      show: false,
+      btnShowArchive: true,
     }
   },
   computed: {

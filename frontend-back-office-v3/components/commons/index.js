@@ -8,8 +8,10 @@ import tableHeader from './tableHeader'
 import tooltipButton from './tooltipButton'
 import dialogPassword from './dialogPassword'
 import reset from './reset'
+import confirmation from './confirmation'
 
 export {
+  confirmation,
   confirmationBox,
   snackbar,
   tableHeader,

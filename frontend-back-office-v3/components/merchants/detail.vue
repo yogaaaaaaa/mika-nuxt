@@ -37,9 +37,28 @@ export default {
   methods: {
     async submit(data) {
       try {
+        const postData = {
+          name: data.name,
+          companyForm: data.companyForm,
+          email: data.email,
+          website: data.website,
+          phoneNumber: data.phoneNumber,
+          taxCardNumer: data.taxCardNumber,
+          bankName: data.bankName,
+          bankBranchName: data.bankBranchName,
+          bankaAccountName: data.bankAccountName,
+          ownerName: data.ownerName,
+          ownerEmail: data.ownerEmail,
+          ownerPhoneNumber: data.ownerPhoneNumber,
+          ownerIdCardNumber: data.ownerIdCardNumber,
+          ownerIdCardType: data.ownerIdCardType,
+          ownerTaxCardNumber: data.ownerTaxCardNumber,
+          description: data.description,
+          logo: data.logo,
+        }
         const response = await this.$axios.$put(
           `${this.url}/${this.$route.params.id}`,
-          data
+          postData
         )
         if (response.status !== 'ent-406') {
           this.$store.commit('currentEdit', response.data)

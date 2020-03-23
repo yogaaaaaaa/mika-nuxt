@@ -94,7 +94,7 @@ export default [
     value: '',
   },
   {
-    key: 'settlementStattus',
+    key: 'settlementStatus',
     caption: 'Settlement Status',
     fieldType: 'text',
     rules: '',

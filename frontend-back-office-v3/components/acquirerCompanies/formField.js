@@ -15,4 +15,20 @@ export default [
     type: 'text',
     value: '',
   },
+  {
+    key: 'createdAt',
+    caption: 'Created At',
+    fieldType: 'date',
+    rules: '',
+    type: 'text',
+    value: '',
+  },
+  {
+    key: 'archivedAt',
+    caption: 'Archived At',
+    fieldType: 'date',
+    rules: '',
+    type: 'text',
+    value: '',
+  },
 ]

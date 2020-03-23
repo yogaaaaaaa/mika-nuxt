@@ -26,13 +26,13 @@
         <template v-slot:item.name="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.createdAt="{ item }">{{
+        <template v-slot:item.createdAt="{ item }">
+          {{
           $moment(item.createdAt).format('YYYY-MM-DD')
-        }}</template>
+          }}
+        </template>
         <template v-slot:item.archivedAt="{ item }" class="text-center">
-          <div v-if="item.archivedAt">
-            {{ $moment(item.archivedAt).format('YYYY-MM-DD') }}
-          </div>
+          <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
           <span v-else>-</span>
         </template>
       </v-data-table>
@@ -41,7 +41,7 @@
       <v-card>
         <v-toolbar color="primary" dark flat>
           <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
-          <v-spacer />
+          <v-spacer/>
           <v-btn icon dark @click="modalAddForm = false">
             <v-icon>close</v-icon>
           </v-btn>
@@ -141,7 +141,6 @@ export default {
         )
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        this.generateDownload(this.items)
         this.loading = false
       } catch (e) {
         this.catchError(e)
@@ -151,14 +150,21 @@ export default {
       this.$router.push(`${this.frontendUrl}/${id}`)
     },
     downloadCsv() {
-      this.csvExport(this.titlePage, this.dataToDownload)
+      this.generateDownload(this.items)
+      this.csvExport(
+        `Mika Agent Report ${this.$moment(new Date()).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )}`,
+        this.dataToDownload
+      )
+      this.dataToDownload = []
     },
     generateDownload(data) {
       data.map(d => {
         this.dataToDownload.push({
           id: d.id,
           name: d.name,
-          username: d.user.username,
+          username: d.user ? d.user.username : '-',
           created_at: this.$moment(d.created_at).format('YYYY-MM-DD HH:mm:ss'),
           updated_at: this.$moment(d.updated_at).format('YYYY-MM-DD HH:mm:ss'),
         })
