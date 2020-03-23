@@ -1,9 +1,9 @@
 'use strict'
 
+const helper = require('./helper')
 const { body } = require('express-validator')
 
-module.exports.bodyCreate = [
-  body('id_merchant').isNumeric().not().isEmpty(),
+const commonValidator = [
   body('recency.masked_pan.high').isNumeric().optional(),
   body('recency.masked_pan.low').isNumeric().optional(),
   body('recency.msisdn.high').isNumeric().optional(),
@@ -59,5 +59,14 @@ module.exports.bodyCreate = [
   body('velocity.*.id_agent.low').isNumeric().optional(),
   body('velocity.*.id_merchant.low').isNumeric().optional(),
   body('velocity.*.id_merchant.low').isNumeric().optional()
+]
 
+module.exports.bodyMerchantRuleCreate = [
+  commonValidator,
+  body('id_merchant').isNumeric().not().isEmpty()
+]
+
+module.exports.bodyMerchantRuleUpdate = [
+  commonValidator,
+  helper.bodyRemove('id_merchant')
 ]

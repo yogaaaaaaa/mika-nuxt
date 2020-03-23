@@ -71,5 +71,5 @@ module.exports.listAuthPropsMiddlewares = [
 ]
 
 module.exports.listThumbnailsMiddlewares = [
-  exports.listAuthProps
+  exports.listThumbnails
 ]

@@ -13,8 +13,8 @@ module.exports.getCachesDirPath = (...bases) => {
   return path.join(dirConfig.cachesDir, ...bases)
 }
 
-module.exports.getKeyDirPath = (...bases) => {
-  return path.join(dirConfig.keyDir, ...bases)
+module.exports.getkeysDirPath = (...bases) => {
+  return path.join(dirConfig.keysDir, ...bases)
 }
 
 module.exports.createCacheDir = (dirName) => {

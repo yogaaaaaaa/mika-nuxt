@@ -44,6 +44,7 @@ const transactionController = require('controllers/transactionController')
 const userController = require('controllers/userController')
 const fraudDetectionController = require('../controllers/fraudDetectionController')
 const utilitiesController = require('controllers/utilitiesController')
+const auditController = require('controllers/auditController')
 
 const debugMiddleware = require('middlewares/debugMiddleware')
 const authMiddleware = require('middlewares/authMiddleware')
@@ -1093,41 +1094,49 @@ router.delete('/back_office/card_iins/:cardIinId',
  */
 router.get(
   [
-    '/back_office/fraud-detections/rules',
-    '/back_office/fraud_detections/rules',
-    '/back_office/fraud-detections/rules/:ruleId',
-    '/back_office/fraud_detections/rules/:ruleId'
+    '/back_office/fraud_detection/merchant_rules',
+    '/back_office/fraud_detection/merchant_rules/:merchantId'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  fraudDetectionController.getRules
+  fraudDetectionController.getMerchantRules
 )
 router.post(
   [
-    '/back_office/fraud-detections/rules',
-    '/back_office/fraud_detections/rules'
+    '/back_office/fraud_detection/merchant_rules'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  fraudDetectionController.createRuleMiddlewares
+  fraudDetectionController.createMerchantRuleMiddlewares
 )
 router.put(
   [
-    '/back_office/fraud-detections/rules/:ruleId',
-    '/back_office/fraud_detections/rules/:ruleId'
+    '/back_office/fraud_detection/merchant_rules/:merchantId'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  fraudDetectionController.updateRuleMiddlewares
+  fraudDetectionController.updateMerchantRuleMiddlewares
 )
 router.delete(
   [
-    '/back_office/fraud-detections/rules/:ruleId',
-    '/back_office/fraud_detections/rules/:ruleId'
+    '/back_office/fraud_detection/merchant_rules/:merchantId'
   ],
   authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
-  fraudDetectionController.destroyRule
+  fraudDetectionController.destroyMerchantRule
+)
+
+/**
+ * Audit Log
+ */
+router.get(
+  [
+    '/back_office/audits',
+    '/back_office/audits/:auditId'
+  ],
+  authMiddleware.auth([auth.userTypes.ADMIN]),
+  authMiddleware.authErrorHandler,
+  auditController.getAuditsMiddlewares
 )
 
 router.use(errorMiddleware.notFoundErrorHandler)

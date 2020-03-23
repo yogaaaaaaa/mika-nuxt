@@ -7,6 +7,7 @@ const morgan = require('morgan')
 const serviceBroker = require('libs/serviceBroker')
 const express = require('libs/express')
 const ready = require('libs/ready')
+const auditLog = require('libs/auditLog')
 
 const keyManagementShellServer = require('shells/keyManagement')
 
@@ -45,6 +46,19 @@ coreApp.use(require('routes/notifTcashQrn'))
 if (!isEnvProduction) {
   coreApp.use(require('routes/debug'))
 }
+
+/**
+ * Audit Log Middleware/Interceptor
+ */
+coreApp.use(auditLog.expressAttach({
+  paths: [
+    '/api/**'
+  ],
+  exceptPaths: [
+    '/api/utilities/**'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PUT']
+}))
 
 /**
  * Internal API

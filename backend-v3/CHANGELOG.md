@@ -16,6 +16,17 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.12.0] - 2020-03-23
+### Added
+  - Audit log feature with elasticsearch
+  - Log directory feature, unused for now
+### Changed
+  - Increase vagrant VM memory to accommodate elasticsearch
+  - Fixed fraud detection feature
+    - Name refactor
+    - More consistent API
+    - Accommodate for audit log
+
 ## [3.11.3] - 2020-03-19
 ### Added
   - `kumabank` debug mode

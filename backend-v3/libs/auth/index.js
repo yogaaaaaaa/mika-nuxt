@@ -43,14 +43,14 @@ async function createSessionToken (userId) {
   const secretKey = commonConfig.authSecretKey
   const id = (await uid.ksuid.random()).string
   const hmac = createSessionTokenHmac(secretKey, userId, id)
-  return `${userId}.${id}.${hmac.toString('hex')}`
+  return `${userId}.${id}.${hmac.toString('base64')}`
 }
 
 function verifySessionToken (sessionToken) {
   try {
     const secretKey = commonConfig.authSecretKey
     const [userId, id, hmacHex] = sessionToken.split('.')
-    const hmac = Buffer.from(hmacHex, 'hex')
+    const hmac = Buffer.from(hmacHex, 'base64')
     const calcHmac = createSessionTokenHmac(secretKey, userId, id)
     if (crypto.timingSafeEqual(calcHmac, hmac)) return userId
   } catch (err) {}

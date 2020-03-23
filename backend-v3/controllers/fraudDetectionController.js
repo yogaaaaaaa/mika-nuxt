@@ -6,63 +6,114 @@ const fraudDetectionApi = require('libs/fraudDetectionApi')
 const errorMiddleware = require('middlewares/errorMiddleware')
 const fraudDetectionValidator = require('validators/fraudDetectionValidator')
 
-module.exports.getRules = async (req, res, next) => {
-  let rules = null
+module.exports.getMerchantRules = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'READ'
+    req.audit.event.entityName = 'fraudDetectionMerchantRule'
+  }
 
   req.query.page = parseInt(req.query.page) || 1
   req.query.per_page = parseInt(req.query.per_page) || 30
 
-  if (req.params.ruleId) {
-    rules = await fraudDetectionApi.getRule(req.params.ruleId)
+  let resp
+  if (req.params.merchantId) {
+    resp = await fraudDetectionApi.getMerchantRule(req.params.merchantId)
   } else {
-    rules = await fraudDetectionApi.getRules(req.query)
+    resp = await fraudDetectionApi.getMerchantRules(req.query)
   }
 
   if (req.query.get_count) {
     msg.expressGetEntityResponse(
       res,
-      rules.data,
-      rules.meta.totalCount,
-      rules.meta.page,
+      resp.data,
+      resp.meta.totalCount,
+      resp.meta.page,
       req.query.per_page
     )
   } else {
     msg.expressGetEntityResponse(
       res,
-      rules.data
+      resp.data
     )
+  }
+
+  if (req.audit) {
+    if (Array.isArray(resp.data)) {
+      req.audit.event.entityIds =
+        req.audit.event.entityIds.concat(resp.data.map(r => r.id_merchant))
+    } else {
+      req.audit.event.entityIds.push(resp.data.id_merchant)
+    }
   }
 }
 
-module.exports.createRule = async (req, res, next) => {
-  const body = req.body
-  const resp = await fraudDetectionApi.createRule(body)
+module.exports.createMerchantRule = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'CREATE'
+    req.audit.event.entityName = 'fraudDetectionMerchantRule'
+  }
+
+  const resp = await fraudDetectionApi.createMerchantRule(req.body)
+
   msg.expressCreateEntityResponse(res, resp.data)
+
+  if (req.audit) {
+    req.audit.event.entityIds.push(resp.data.id_merchant)
+  }
 }
 
-module.exports.updateRule = async (req, res, next) => {
-  const id = req.params.ruleId
-  const body = req.body
-  const response = await fraudDetectionApi.updateRule(body, id)
+module.exports.updateMerchantRule = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'UPDATE'
+    req.audit.event.entityName = 'fraudDetectionMerchantRule'
+  }
+
   const updated = true
-  const found = true
-  msg.expressUpdateEntityResponse(res, updated, response.data, found)
+  let found = false
+  let findResp
+  let resp
+
+  try {
+    findResp = await fraudDetectionApi.getMerchantRule(req.params.merchantId)
+    if (findResp.data) found = true
+  } catch (err) {}
+
+  if (found) {
+    resp = await fraudDetectionApi.updateMerchantRule(req.body, req.params.merchantId)
+    if (req.audit) {
+      req.audit.event.entityIds.push(req.params.merchantId)
+      if (updated) {
+        req.audit.event.entityBefore = findResp.data
+        req.audit.event.entityAfter = resp.data
+      }
+    }
+  }
+
+  msg.expressUpdateEntityResponse(res, updated, resp.data, found)
 }
 
-module.exports.destroyRule = async (req, res, next) => {
-  const id = req.params.ruleId
-  const response = await fraudDetectionApi.destroyRule(id)
-  msg.expressDeleteEntityResponse(res, response)
+module.exports.destroyMerchantRule = async (req, res, next) => {
+  if (req.audit) {
+    req.audit.event.type = 'DELETE'
+    req.audit.event.entityName = 'fraudDetectionMerchantRule'
+  }
+
+  const resp = await fraudDetectionApi.destroyMerchantRule(req.params.merchantId)
+  msg.expressDeleteEntityResponse(res, resp)
+
+  if (req.audit) {
+    req.audit.event.entityIds.push(req.params.merchantId)
+  }
 }
 
-module.exports.createRuleMiddlewares = [
-  fraudDetectionValidator.bodyCreate,
+module.exports.createMerchantRuleMiddlewares = [
+  fraudDetectionValidator.bodyMerchantRuleUpdate,
   errorMiddleware.validatorErrorHandler,
-  exports.createRule
+  exports.createMerchantRule
 ]
 
-module.exports.updateRuleMiddlewares = [
-  fraudDetectionValidator.bodyCreate,
+module.exports.updateMerchantRuleMiddlewares = [
+  fraudDetectionValidator.bodyMerchantRuleUpdate,
   errorMiddleware.validatorErrorHandler,
-  exports.updateRule
+  exports.updateMerchantRule
 ]

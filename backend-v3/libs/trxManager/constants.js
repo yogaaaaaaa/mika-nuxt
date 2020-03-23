@@ -76,8 +76,13 @@ module.exports.tokenTypes = {
 module.exports.userTokenTypes = {
   USER_TOKEN_QRCODE_CONTENT: 'userTokenQrCodeContent',
   USER_TOKEN_URL_IMAGE: 'userTokenQrCodeUrlImage',
-  USER_TOKEN_PIN: 'userTokenPin',
-  USER_TOKEN_CARD: 'userTokenCard@57_82_84_95_98_9A_9B_9C_5F2A_9F02_9F03_9F09_9F10_9F1A_9F1E_9F26_9F27_9F33_9F34_9F35_9F36_9F37_9F41_9F53_5F34_9F12'
+  USER_TOKEN_CODE: 'userTokenCode',
+
+  USER_TOKEN_CARD: 'userTokenCard@57_82_84_95_98_9A_9B_9C_5F2A_9F02_9F03_9F09_9F10_9F1A_9F1E_9F26_9F27_9F33_9F34_9F35_9F36_9F37_9F41_9F53_5F34_9F12',
+  USER_TOKEN_CARD_PAN: 'userTokenCardPan',
+  USER_TOKEN_CARD_CVM_FOLLOW_CARD: 'userTokenCardCvmFollowCard',
+  USER_TOKEN_CARD_CVM_ONLINE_PIN: 'userTokenCardCvmOnlinePin',
+  USER_TOKEN_CARD_CVM_SIGNATURE: 'userTokenCardCvmSignature'
 }
 
 /**
