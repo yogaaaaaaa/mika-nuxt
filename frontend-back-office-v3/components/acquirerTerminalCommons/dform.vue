@@ -218,7 +218,6 @@ export default {
   watch: {
     show() {
       this.dialog = this.show
-      this.initiateData()
     },
     searchCompany: {
       handler: debounce(function() {
@@ -262,9 +261,6 @@ export default {
     }
   },
   methods: {
-    initiateData() {
-      this.formData.description = this.$faker.sentence()
-    },
     async submit() {
       this.$validator.validateAll().then(result => {
         if (result) {
