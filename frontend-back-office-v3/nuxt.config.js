@@ -56,11 +56,9 @@ export default {
    ** Plugins to load before mounting the App
    */
   plugins: [
-    '~/plugins/moment',
     '~/plugins/changeCase',
     { src: '~/plugins/datePicker', ssr: false },
     '~/plugins/veeValidate',
-    '~/plugins/chance',
     '~/plugins/filters',
     '~/plugins/clipboard',
     { src: '~/plugins/pictureInput', ssr: false },
@@ -68,7 +66,7 @@ export default {
   /*
    ** Nuxt.js dev-modules
    */
-  buildModules: ['@nuxtjs/vuetify'],
+  buildModules: ['@nuxtjs/vuetify', '@nuxtjs/moment'],
   /*
    ** Nuxt.js modules
    */
@@ -77,7 +75,6 @@ export default {
   axios: {
     baseURL: process.env.API_URL,
   },
-  // https://stg31api.mikaapp.id
   auth: {
     strategies: {
       local: {

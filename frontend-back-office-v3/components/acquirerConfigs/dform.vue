@@ -321,7 +321,6 @@ export default {
       this.formData.directSettlement = false
       this.formData.sandbox = [false]
       this.formData.hidden = false
-      this.formData.description = this.$faker.sentence()
     },
     async submit() {
       this.$validator.validateAll().then(result => {

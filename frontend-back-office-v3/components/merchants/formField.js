@@ -1,6 +1,3 @@
-import Chance from 'chance'
-const faker = new Chance()
-
 export default [
   {
     key: 'name',

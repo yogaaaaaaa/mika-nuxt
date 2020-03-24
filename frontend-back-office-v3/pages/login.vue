@@ -102,7 +102,7 @@ export default {
     confirmShowExpired: false,
     imageLogin: require('~/static/img/login_bg_illustration.png'),
     imageCard: require('~/static/img/login-illustration.svg'),
-    imageBackground: require('~/static/img/Login-bg.png'),
+    imageBackground: require('~/static/img/login-bg.jpg'),
     confirmTitleExpired: 'Kata Sandi Kadaluarsa',
     confirmTextExpired:
       'Kata sandi yang dimasukan telah kadaluarsa. Anda harus mengubah kata sandi anda sekarang untuk bisa login!',
