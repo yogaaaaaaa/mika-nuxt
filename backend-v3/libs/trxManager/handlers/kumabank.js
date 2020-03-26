@@ -200,7 +200,7 @@ module.exports = {
     ctx.handlerResponse = getResponseMessage(ctx.debug.voidResponseCode)
 
     if (ctx.handlerResponse.responseCode === '00') {
-      ctx.transaction.status = transactionStatuses.SUCCESS
+      ctx.transaction.status = transactionStatuses.VOIDED
 
       ctx.transaction.voidReference = String(Math.floor(1 + Math.random() * 999999999998)).padStart(12, '0')
       ctx.transaction.voidReferenceName = 'rrn'

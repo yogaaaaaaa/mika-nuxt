@@ -89,14 +89,17 @@ module.exports.createTransaction = async (req, res, next) => {
 }
 
 module.exports.reverseTransaction = async (req, res, next) => {
-  const trxReverseResult = await trxManager.reverse({
+  const reverseParams = {
     agentId: req.auth.agentId,
     transactionId: req.params.transactionId,
     agentOrderReference: req.params.agentOrderReference,
     ctxOptions: {
       debug: isEnvProduction ? undefined : req.body.debug
     }
-  })
+  }
+  if (Array.isArray(req.reverseTypes)) reverseParams.reverseTypes = req.reverseTypes
+  const trxReverseResult = await trxManager.reverse(reverseParams)
+
   trxReverseResult.transaction = await models.transaction
     .scope('agent')
     .findByPk(trxReverseResult.transactionId)
@@ -266,6 +269,15 @@ module.exports.createTransactionMiddlewares = [
 
 module.exports.reverseTransactionMiddlewares = [
   cipherboxMiddleware.processCipherbox(true),
+  exports.reverseTransaction
+]
+
+module.exports.reverseVoidTransactionMiddlewares = [
+  cipherboxMiddleware.processCipherbox(true),
+  (req, res, next) => {
+    req.reverseTypes = ['void']
+    next()
+  },
   exports.reverseTransaction
 ]
 
