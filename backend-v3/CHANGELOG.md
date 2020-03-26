@@ -16,6 +16,12 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.12.1] - 2020-03-26
+### Added
+    - Added endpoint for specific void, fixed possible invalid reverse
+### Fixed
+    - `kumabank`, invalid transaction status on void
+
 ## [3.12.0] - 2020-03-23
 ### Added
   - Audit log feature with elasticsearch

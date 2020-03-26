@@ -243,6 +243,15 @@ router.post(
   authMiddleware.authErrorHandler,
   transactionController.reverseTransactionMiddlewares
 )
+router.post(
+  [
+    '/agent/transactions/:transactionId/reverse_void',
+    '/agent/transactions/:agentOrderReference/reverse_void_by_aor'
+  ],
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  transactionController.reverseVoidTransactionMiddlewares
+)
 router.post('/agent/transactions/:transactionId/void',
   authMiddleware.auth([auth.userTypes.AGENT]),
   authMiddleware.authErrorHandler,

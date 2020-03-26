@@ -23,8 +23,27 @@ module.exports.reverse = async ({
   agentId,
   transactionId = undefined,
   agentOrderReference = undefined,
+  reverseTypes = ['created', 'success', 'void'],
   ctxOptions = {}
 }) => {
+  const createdStatuses = [
+    transactionStatuses.CREATED
+  ]
+  const successStatuses = [
+    transactionStatuses.PROCESSING,
+    transactionStatuses.SUCCESS
+  ]
+  const voidStatuses = [
+    transactionStatuses.VOIDING,
+    transactionStatuses.VOIDED
+  ]
+
+  let reverseStatuses = []
+
+  if (reverseTypes.includes('created')) reverseStatuses = reverseStatuses.concat(createdStatuses)
+  if (reverseTypes.includes('success')) reverseStatuses = reverseStatuses.concat(successStatuses)
+  if (reverseTypes.includes('void')) reverseStatuses = reverseStatuses.concat(voidStatuses)
+
   const ctx = ctxTrx.init({
     buildOptions: {
       transactionId: transactionId,
@@ -34,13 +53,7 @@ module.exports.reverse = async ({
       ignoreUnfinishedTransaction: true,
       getLastTransaction: !(transactionId || agentOrderReference),
 
-      transactionStatuses: [
-        transactionStatuses.CREATED,
-        transactionStatuses.PROCESSING,
-        transactionStatuses.SUCCESS,
-        transactionStatuses.VOIDING,
-        transactionStatuses.VOIDED
-      ]
+      transactionStatuses: reverseStatuses
     },
     ...ctxOptions
   })
@@ -53,16 +66,7 @@ module.exports.reverse = async ({
 
     ctx.handlerTimeMs = new Date().getTime()
     try {
-      const successStatuses = [
-        transactionStatuses.PROCESSING,
-        transactionStatuses.SUCCESS
-      ]
-      const voidStatuses = [
-        transactionStatuses.VOIDING,
-        transactionStatuses.VOIDED
-      ]
-
-      if (ctx.transaction.status === transactionStatuses.CREATED) {
+      if (createdStatuses.includes(ctx.transaction.status)) {
         ctx.transaction.status = transactionStatuses.CANCELED
         if (typeof ctx.acquirerHandler.cancelHandler === 'function') {
           await ctx.acquirerHandler.cancelHandler(ctx)
