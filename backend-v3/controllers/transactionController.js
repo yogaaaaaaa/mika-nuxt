@@ -465,6 +465,54 @@ module.exports.getAgentTransactionTotalSuccessMiddlewares = [
   })
 ]
 
+module.exports.getAgentTransactionTotalSuccessMiddlewares = [
+  crudGenerator.generateReadEntityController({
+    modelName: 'transaction',
+    modelScope: ({ req }) =>
+      ([
+        'totalSuccessAmount',
+        {
+          where: { agentId: req.auth.agentId },
+          include: [
+            {
+              model: models.acquirer,
+              attributes: [],
+              include: [
+                {
+                  model: models.acquirerType,
+                  attributes: []
+                }
+              ]
+            }
+          ],
+          raw: true
+        }
+      ]),
+    responseHandler: ({ crudCtx }) => {
+      if (crudCtx.modelInstance) {
+        crudCtx.response = crudCtx.modelInstance[0]
+        crudCtx.response.totalAmount = crudCtx.response.totalAmount || '0.00'
+        crudCtx.response.transactionCount = parseInt(crudCtx.response.transactionCount)
+        crudCtx.msgType = crudCtx.msg.msgTypes.MSG_SUCCESS
+      }
+    },
+    sequelizeCommonScopeParam: {},
+    sequelizeFilterScopeParam: {
+      validModels: [
+        'transaction',
+        'acquirer',
+        'acquirerType',
+        'acquirerConfig',
+        'acquirerConfigAgent',
+        'acquirerConfigOutlet',
+        'acquirerTerminal',
+        'acquirerTerminalCommon',
+        'acquirerCompany'
+      ]
+    }
+  })
+]
+
 // TODO: not working in postgres
 module.exports.getMerchantStaffAcquirerTransactionStatsMiddlewares = [
   queryToSequelizeMiddleware.filterValidator(
