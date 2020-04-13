@@ -391,7 +391,14 @@ module.exports.generateReadEntityController = ({
       }
     }
 
-    if (crudCtx.pagination) {
+    if (crudCtx.msgType) {
+      msg.expressResponse(
+        res,
+        crudCtx.msgType,
+        crudCtx.response,
+        crudCtx.responseMeta
+      )
+    } else if (crudCtx.pagination) {
       msg.expressGetEntityResponse(
         res,
         crudCtx.response,
@@ -409,8 +416,14 @@ module.exports.generateReadEntityController = ({
     if (req.audit) {
       if (Array.isArray(crudCtx.modelInstance)) {
         req.audit.event.entityIds =
-          req.audit.event.entityIds.concat(crudCtx.modelInstance.map((m) => m.id))
-      } else {
+          req.audit.event.entityIds.concat(
+            crudCtx.modelInstance
+              .reduce((ids, m) => {
+                if (m && m.id) ids.push(m.id)
+                return ids
+              }, [])
+          )
+      } else if (req.audit && crudCtx.modelInstance) {
         req.audit.event.entityIds.push(crudCtx.modelInstance.id)
       }
     }

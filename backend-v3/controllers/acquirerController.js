@@ -140,10 +140,10 @@ module.exports.getAcquirersMiddlewares = [
     },
     sequelizeCommonScopeParam: {},
     sequelizePaginationScopeParam: {
-      validModels: ['acquirer']
+      validModels: ['acquirer', 'merchant']
     },
     sequelizeFilterScopeParam: {
-      validModels: ['acquirer']
+      validModels: ['acquirer', 'merchant']
     }
   })
 ]

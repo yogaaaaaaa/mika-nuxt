@@ -198,6 +198,14 @@ router.get(
 )
 router.get(
   [
+    '/agent/statistic/transaction_total_success'
+  ],
+  authMiddleware.auth([auth.userTypes.AGENT]),
+  authMiddleware.authErrorHandler,
+  transactionController.getAgentTransactionTotalSuccessMiddlewares
+)
+router.get(
+  [
     '/agent/settle_batches',
     '/agent/settle_batches/:settleBatchId'
   ],

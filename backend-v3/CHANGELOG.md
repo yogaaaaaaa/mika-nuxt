@@ -16,6 +16,12 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.12.2] - 2020-04-13
+### Added
+  - Get successful transaction amount and count aggregate for each agent
+### Fixed
+  - Invalid nested order by parse
+
 ## [3.12.1] - 2020-03-26
 ### Added
     - Added endpoint for specific void, fixed possible invalid reverse

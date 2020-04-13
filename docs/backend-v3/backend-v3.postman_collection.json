@@ -1644,6 +1644,75 @@
 					"response": []
 				},
 				{
+					"name": "{{baseUrl}}/api/agent/statistic/transaction_total_success",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/statistic/transaction_total_success?",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"statistic",
+								"transaction_total_success"
+							],
+							"query": [
+								{
+									"key": "f[field,groupOp]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[field,or]",
+									"value": "op,value",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "gte,2018-01-01T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[createdAt]",
+									"value": "lte,2018-12-30T00:00:00.000Z",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,success",
+									"disabled": true
+								},
+								{
+									"key": "f[status,or]",
+									"value": "eq,failed",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get current agent transactions"
+					},
+					"response": []
+				},
+				{
 					"name": "{{baseUrl}}/api/agent/settle_batches",
 					"request": {
 						"method": "GET",
@@ -2161,7 +2230,89 @@
 								}
 							]
 						},
-						"description": "Refund specified transaction.\n\n\n# Optional Field\n- `amount` (Numeric, nullable)\n\t- If `undefined` or `null` will refund to fully possible amount\n- `reason` (String, nullable)\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-205\n- Transaction Partially Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-206\n- Refund not supported by transaction acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-415\n- Partial Refund not supported by transaction acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-416\n- Invalid amount for refund (too low or too high)\n\t- HTTP Status : 400\n\t- Status Code : trx-417\n"
+						"description": "Reverse a transaction.\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-203"
+					},
+					"response": [
+						{
+							"name": "{{baseUrl}}/agent/transaction with user token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/javascript",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/agent/transaction",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"agent",
+										"transaction"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+						}
+					]
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions/:transactionId/reverse_void",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions/:transactionId/reverse_void",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions",
+								":transactionId",
+								"reverse_void"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "1O8NJeNvL9OCKw6uQUZ1cZHg6JX"
+								}
+							]
+						},
+						"description": "Reverse void a transaction.\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-203"
 					},
 					"response": [
 						{
@@ -2243,7 +2394,89 @@
 								}
 							]
 						},
-						"description": "Refund specified transaction.\n\n\n# Optional Field\n- `amount` (Numeric, nullable)\n\t- If `undefined` or `null` will refund to fully possible amount\n- `reason` (String, nullable)\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-205\n- Transaction Partially Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-206\n- Refund not supported by transaction acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-415\n- Partial Refund not supported by transaction acquirer\n\t- HTTP Status : 400\n\t- Status Code : trx-416\n- Invalid amount for refund (too low or too high)\n\t- HTTP Status : 400\n\t- Status Code : trx-417\n"
+						"description": "Reverse a transaction by agent order reference.\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-203"
+					},
+					"response": [
+						{
+							"name": "{{baseUrl}}/agent/transaction with user token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-access-token",
+										"type": "text",
+										"value": "{{mikaSessionToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/javascript",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/agent/transaction",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"agent",
+										"transaction"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n\t\"amount\": 1000,\n\t\"paymentProviderId\": 4,\n\t\"userTokenType\": \"userTokenQrContent\",\n\t\"userToken\": \"http://alipay.co\"\n}"
+						}
+					]
+				},
+				{
+					"name": "{{baseUrl}}/api/agent/transactions/:agentOrderReference/reverse_void_by_aor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/transactions/:agentOrderReference/reverse_void_by_aor",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"transactions",
+								":agentOrderReference",
+								"reverse_void_by_aor"
+							],
+							"variable": [
+								{
+									"key": "agentOrderReference",
+									"value": ""
+								}
+							]
+						},
+						"description": "Reverse void a transaction by agent order reference.\n\n# Specific Status Code\n- Transaction Refunded\n\t- HTTP Status : 200\n\t- Status Code : trx-203"
 					},
 					"response": [
 						{
@@ -14529,7 +14762,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n\t\"debug\": {\n\t\t\"createDelay\": 0,\n\t\t\"createNoResponse\": false,\n\t\t\"createResponseCode\": \"\",\n\t\t\"createPinError\": false,\n\t\t\"voidDelay\": 100,\n\t\t\"voidNoResponse\": true,\n\t\t\"voidResponseCode\": \"\",\n\t\t\"reverseDelay\": 0,\n\t\t\"reverseNoResponse\": false,\n\t\t\"reverseResponseCode\": \"00\",\n\t\t\"reverseVoidDelay\": 0,\n\t\t\"reverseVoidNoResponse\": false,\n\t\t\"reverseVoidResponseCode\": \"00\"\n\t}\n}"
+											"raw": "{\n\t\"debug\": {\n\t\t\"createDelay\": 0,\n\t\t\"createNoResponse\": false,\n\t\t\"createResponseCode\": \"\",\n\t\t\"createPinError\": false,\n\t\t\"voidDelay\": 100,\n\t\t\"voidNoResponse\": false,\n\t\t\"voidResponseCode\": \"\",\n\t\t\"reverseDelay\": 0,\n\t\t\"reverseNoResponse\": false,\n\t\t\"reverseResponseCode\": \"00\",\n\t\t\"reverseVoidDelay\": 0,\n\t\t\"reverseVoidNoResponse\": false,\n\t\t\"reverseVoidResponseCode\": \"00\"\n\t}\n}"
 										},
 										"url": {
 											"raw": "{{baseUrl}}/api/agent/transactions/:transactionId/void",
@@ -14546,7 +14779,7 @@
 											"variable": [
 												{
 													"key": "transactionId",
-													"value": "2iaZirZ9lrXFHTFJSkua0"
+													"value": "2ifjKPNTky72r9Axlrx0t"
 												}
 											]
 										},
@@ -14628,7 +14861,7 @@
 											"variable": [
 												{
 													"key": "transactionId",
-													"value": "2iaZgLlX9Eca9UaziMjEx"
+													"value": "a3"
 												}
 											]
 										},
@@ -16451,13 +16684,13 @@
 	],
 	"variable": [
 		{
-			"id": "62770762-a071-4277-8907-9173365f8ae2",
+			"id": "8bd1ef8d-d66f-49c0-a081-405f6857b0c9",
 			"key": "baseUrl",
 			"value": "https://stg31api.mikaapp.id",
 			"type": "string"
 		},
 		{
-			"id": "63d77d8b-1071-4440-b7f4-8a7e4bfb8e19",
+			"id": "57f3220e-35f2-4b7e-afe8-cc7787b61493",
 			"key": "mikaDebugKey",
 			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
 			"type": "string"
