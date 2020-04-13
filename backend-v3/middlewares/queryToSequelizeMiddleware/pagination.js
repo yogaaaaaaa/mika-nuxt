@@ -43,10 +43,9 @@ module.exports.pagination = (req, res, next) => {
     if (models[fieldComponent]) {
       return models[fieldComponent]
     } else {
-      return fieldComponent
+      return fieldComponent.replace(/[>]+/g, '.')
     }
   })
-  orderBy[0] = orderBy[0].replace(/[>]+/g, '.')
   orderBy.push(req.query.order)
 
   req.applySequelizePaginationScope = (model) => {
