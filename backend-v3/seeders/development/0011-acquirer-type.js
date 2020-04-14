@@ -72,7 +72,7 @@ module.exports = {
         class: 'dana',
         name: 'Dana',
         thumbnail: 'dana.png',
-        thumbnailGray: 'dana.png',
+        thumbnailGray: 'dana-gray.png',
         chartColor: '#0A4678'
       },
       {
