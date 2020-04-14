@@ -68,6 +68,14 @@ module.exports = {
         chartColor: '#0A4678'
       },
       {
+        id: 9,
+        class: 'dana',
+        name: 'Dana',
+        thumbnail: 'dana.png',
+        thumbnailGray: 'dana.png',
+        chartColor: '#0A4678'
+      },
+      {
         id: 50,
         class: 'cardSwitcher',
         name: 'Pembayaran Kartu',

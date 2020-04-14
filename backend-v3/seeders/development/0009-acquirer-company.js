@@ -18,6 +18,10 @@ module.exports = {
           name: 'Bank BNI'
         },
         {
+          id: 4,
+          name: 'Dana'
+        },
+        {
           id: 100,
           name: 'Kuma Pay'
         },

@@ -228,13 +228,11 @@ module.exports.generateCreateEntityController = ({
       crudCtx.modelOptions.transaction = t
 
       crudCtx.data.archivedAt = undefined
-
       if (typeof createHandler === 'function') {
         await createHandler({ crudCtx, req, res })
       } else {
         crudCtx.modelInstance = await crudCtx.modelScoped.create(crudCtx.data, crudCtx.modelOptions)
       }
-
       if (typeof findBackHandler === 'function') {
         await findBackHandler({ crudCtx, req, res })
       } else {
@@ -251,11 +249,11 @@ module.exports.generateCreateEntityController = ({
 
       if (typeof responseHandler === 'function') {
         await responseHandler({ crudCtx, req, res })
-      } else {
+      } else if (crudCtx.modelInstance) {
         crudCtx.response = crudCtx.modelInstance
       }
 
-      if (req.audit) {
+      if (req.audit && crudCtx.modelInstance) {
         req.audit.event.entityIds.push(crudCtx.modelInstance.id)
       }
     })
@@ -269,7 +267,6 @@ module.exports.generateCreateEntityController = ({
       )
       return
     }
-
     msg.expressCreateEntityResponse(
       res,
       crudCtx.response
@@ -471,7 +468,6 @@ module.exports.generateUpdateEntityController = ({
     })
     crudCtx.msgType = undefined
     crudCtx.updated = false
-
     if (req.audit) {
       req.audit.event.type = 'UPDATE'
       req.audit.event.entityName = crudCtx.modelName
@@ -541,7 +537,7 @@ module.exports.generateUpdateEntityController = ({
             if (req.audit && crudCtx.updated) {
               req.audit.event.entityBefore = crudCtx.local.beforeModelInstance
               req.audit.event.entityAfter =
-                  (await crudCtx.modelScoped.findOne(crudCtx.modelOptions)).toJSON() // WHY DO I HAVE TO DO DIS ?
+                (await crudCtx.modelScoped.findOne(crudCtx.modelOptions)).toJSON() // WHY DO I HAVE TO DO DIS ?
             }
           }
         })

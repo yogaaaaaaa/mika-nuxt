@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     phoneNumber: DataTypes.STRING,
 
     logo: DataTypes.TEXT,
+    icon: DataTypes.TEXT,
 
     taxCardNumber: DataTypes.STRING,
     scannedTaxCardResourceId: DataTypes.STRING(27),

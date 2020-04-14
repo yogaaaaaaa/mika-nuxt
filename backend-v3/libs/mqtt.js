@@ -38,33 +38,9 @@ module.exports.aclKeyTypes = {
   READ_WRITE: 2
 }
 
-module.exports.waitUntilConnected = (client = mqttClient) => {
-  return new Promise((resolve, reject) => {
-    if (!client.connected) {
-      let timeoutHandler = 0
-
-      const _resolve = () => {
-        clearTimeout(timeoutHandler)
-        resolve(true)
-      }
-
-      client.once('connect', _resolve)
-
-      timeoutHandler = setTimeout(() => {
-        client.off('connect', _resolve)
-        reject(new Error('Timeout waiting MQTT to be connected'))
-      }, config.waitConnectTimeoutSecond * 1000)
-    } else {
-      resolve(true)
-    }
-  })
-}
-
 module.exports.pathDelays = []
 
 module.exports.publish = async (topic, message, options = {}) => {
-  await exports.waitUntilConnected()
-
   options = Object.assign({
     qos: config.qosDefault,
     retain: false,

@@ -166,6 +166,13 @@ module.exports = {
         outletId: 94,
         traceNumberCounter
       },
+      {
+        id: 97,
+        name: 'Agent Mika Dana Test',
+        userId: 97,
+        outletId: 95,
+        traceNumberCounter
+      },
 
       {
         id: 500,

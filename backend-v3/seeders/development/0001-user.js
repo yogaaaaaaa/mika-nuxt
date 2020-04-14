@@ -236,6 +236,13 @@ module.exports = {
         userType: 'agent'
       },
       {
+        id: 97,
+        secure: false,
+        username: 'danaMikaAgent1',
+        password: await hash.bcryptHash('danaMikaAgent1'),
+        userType: 'agent'
+      },
+      {
         id: 101,
         secure: false,
         username: 'mikastaff',

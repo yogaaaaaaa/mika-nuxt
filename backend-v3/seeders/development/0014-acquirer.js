@@ -371,6 +371,19 @@ module.exports = {
         acquirerTypeId: 7,
         acquirerConfigId: 4,
         merchantId: 5
+      },
+      {
+        id: 98,
+        name: 'Mika Dana Test',
+        gateway: false,
+        hidden: false,
+        minimumAmount: 100,
+        processFee: 0,
+        shareAcquirer: 0.01,
+        shareMerchant: 0.9800,
+        acquirerTypeId: 9,
+        acquirerConfigId: 6,
+        merchantId: 6
       }
     ]
     , {})

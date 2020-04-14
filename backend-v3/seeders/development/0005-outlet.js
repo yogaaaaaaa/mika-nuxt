@@ -136,6 +136,16 @@ module.exports = {
         postalCode: '10120',
         province: 'DKI Jakarta',
         merchantId: 5
+      },
+      {
+        id: 95,
+        name: 'Mika Dana Outlet Test',
+        streetAddress: 'Jalan Arus Rendah Nomor 15MA',
+        phoneNumber: '555-254384',
+        city: 'Jakarta',
+        postalCode: '10120',
+        province: 'DKI Jakarta',
+        merchantId: 6
       }
     ]
     , {})

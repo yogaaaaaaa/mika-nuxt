@@ -1,6 +1,6 @@
 {
   "name": "backend-v3",
-  "version": "3.12.2",
+  "version": "3.13.0",
   "private": true,
   "scripts": {
     "preinstall": "command -v link-module-alias && link-module-alias clean || true",
@@ -36,6 +36,7 @@
     "cors": "^2.8.5",
     "csv-parse": "^4.8.8",
     "debug": "^4.1.1",
+    "digital-signature": "^1.0.4",
     "dtimer": "^0.3.3",
     "dukpt": "^3.0.0",
     "elasticsearch": "^16.6.0",
@@ -45,7 +46,7 @@
     "express-async-errors": "^3.1.1",
     "express-validator": "^6.4.0",
     "fastest-validator": "^1.1.0",
-    "handlebars": "^4.7.3",
+    "handlebars": "^4.7.6",
     "id128": "^1.4.0",
     "ioredis": "^4.16.0",
     "json-diff": "^0.5.4",
