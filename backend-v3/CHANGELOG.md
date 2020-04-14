@@ -18,8 +18,9 @@ After version 3.1.0, this project follow these guidelines,
 
 ## [3.13.1] - 2020-04-14
 ### Fixed
-  - Fixed invalid logo in seeder
-  - Fixed missing logo
+  - Fixed missing get count meta
+  - Fixed invalid `dana` logo in seeder
+  - Fixed missing `dana` logo
 
 ## [3.13.0] - 2020-04-14
 ### Added

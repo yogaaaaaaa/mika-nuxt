@@ -344,6 +344,8 @@ module.exports.generateReadEntityController = ({
       identifierSource
     })
 
+    crudCtx.msgType = undefined
+
     if (req.audit) {
       req.audit.event.type = 'READ'
       req.audit.event.entityName = crudCtx.modelName
