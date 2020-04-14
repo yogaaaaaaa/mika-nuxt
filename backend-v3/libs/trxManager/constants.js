@@ -27,6 +27,7 @@ module.exports.paymentClasses = {
   GOPAY: 'gopay',
   ALIPAY: 'alipay',
   WECHATPAY: 'wechatpay',
+  DANA: 'dana',
 
   CARD_SWITCHER: 'cardSwitcher'
 }

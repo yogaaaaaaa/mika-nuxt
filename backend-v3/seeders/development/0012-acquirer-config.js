@@ -55,6 +55,15 @@ module.exports = {
           midtransMerchantId: 'G314363658'
         })
       },
+      {
+        id: 6,
+        name: 'Mika Dana Development',
+        handler: 'dana',
+        config: JSON.stringify({
+          externalShopId: 'bg-20-1-1',
+          externalDivisionId: 'bg-20-1'
+        })
+      },
 
       {
         id: 100,

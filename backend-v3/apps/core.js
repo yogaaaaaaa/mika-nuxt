@@ -39,6 +39,7 @@ coreApp.use(require('routes/notifTcash'))
 coreApp.use(require('routes/notifAlto'))
 coreApp.use(require('routes/notifMidtrans'))
 coreApp.use(require('routes/notifTcashQrn'))
+coreApp.use(require('routes/notifDana'))
 
 /**
  * Debug Route

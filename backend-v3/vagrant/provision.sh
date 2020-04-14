@@ -9,6 +9,16 @@ yum -y -q update
 yum -y -q install nano net-tools unzip epel-release gcc gcc-c++ make
 yum -y -q update
 
+# yumi repo
+yum -y -q install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+# nodesource repo
+curl -sL https://rpm.nodesource.com/setup_10.x | bash -
+
+# arangodb repo
+cd /etc/yum.repos.d/
+curl -s -OL https://download.arangodb.com/arangodb34/RPM/arangodb.repo
+
 # mariadb repo herdocs
 cat <<-MARIADBREPO > /etc/yum.repos.d/MariaDB.repo
 	[mariadb]
@@ -18,24 +28,15 @@ cat <<-MARIADBREPO > /etc/yum.repos.d/MariaDB.repo
 	gpgcheck=1
 MARIADBREPO
 
-# arangodb repo
-cd /etc/yum.repos.d/
-curl -s -OL https://download.arangodb.com/arangodb34/RPM/arangodb.repo
-
-# nodesource repo
-curl -sL https://rpm.nodesource.com/setup_10.x | bash -
-
-# yumi repo
-yum -y -q install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
-
 # postgres repo
 yum -y -q install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
 # Installation of mariadb, postgres, nodejs and redis
 yum -y -q update
-yum -y -q install nodejs MariaDB-server MariaDB-client arangodb3-3.4.7-1.0
-yum -y -q install postgresql11
-yum -y -q install postgresql11-server
+yum -y -q install nodejs
+yum -y -q install arangodb3-3.4.7-1.0
+yum -y -q install MariaDB-server MariaDB-client
+yum -y -q install postgresql11 postgresql11-server
 yum -y -q --enablerepo=remi install redis
 
 # Installation of elasticsearch
@@ -122,6 +123,7 @@ cat <<-ELASTICSEARCHYML >> /etc/elasticsearch/elasticsearch.yml
 	http.host: 0.0.0.0
 	http.port: 9200
 ELASTICSEARCHYML
+systemctl enable elasticsearch
 systemctl restart elasticsearch
 
 ## Mosquitto build preparation

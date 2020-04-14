@@ -16,6 +16,10 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.13.0] - 2020-04-14
+### Added
+  - Added acquirer handler `dana`
+
 ## [3.12.2] - 2020-04-13
 ### Added
   - Get successful transaction amount and count aggregate for each agent
