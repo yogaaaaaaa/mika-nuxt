@@ -104,7 +104,7 @@ captures
 # Runtime specific
 cache*
 upload*
-_configs*
+_config*
 
 # Common Runtime
 ecosystem.config.js
