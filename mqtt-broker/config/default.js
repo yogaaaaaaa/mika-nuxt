@@ -1,14 +1,25 @@
 module.exports = {
-  redisUrl: 'redis://192.168.255.250',
+  /**
+   * Redis URI, used by broker and auth
+   */
+  redisUri: 'redis://localhost',
 
+  /**
+   * Redis auth configuration
+   */
   authEnabled: true,
-  authPattern: 'mqtt-broker:mosq:%u',
-  authAclPattern: 'mqtt-broker:mosqacl:%u:%t',
+  authPattern: 'mqtt-broker:auth:%u',
+  authAclPattern: 'mqtt-broker:acl:%u:%t',
   authRootUser: 'superuser',
+  authRootPassword: null, // Optional
 
+  /**
+   * Listening servers
+   * Supported type : 'tcp', 'ws' (websocket)
+   */
   servers: [
     {
-      type: 'tcp', // 'tcp', 'ws'
+      type: 'tcp',
       port: 1883
     },
     {

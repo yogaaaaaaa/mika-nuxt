@@ -22,11 +22,11 @@ module.exports.authenticate = async function (client, username, password, callba
   if (passwordHash) {
     if (await mosqAuthHash.checkPassword(password, passwordHash)) {
       client.username = username
-      console.log('auth', username)
+      console.log(`auth '${username}' '${client.id}'`)
       return callback(null, true)
     }
   }
-  console.log('auth failed', username)
+  console.log(`auth failed '${username}' '${client.id}'`)
   callback(null, false)
 }
 
