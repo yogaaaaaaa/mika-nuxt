@@ -16,27 +16,32 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.13.2] - 2020-04-17
+### Removed
+  - Removed `midtrans` refund capability
+
 ## [3.13.1] - 2020-04-14
 ### Fixed
-  - Fixed missing get count meta
+  - Fixed missing `meta` on `get_count` query
   - Fixed invalid `dana` logo in seeder
   - Fixed missing `dana` logo
 
 ## [3.13.0] - 2020-04-14
 ### Added
+  - New `icon` fields in `merchant`, for storing small merchant logo in base64
   - Added acquirer handler `dana`
 
 ## [3.12.2] - 2020-04-13
 ### Added
   - Get successful transaction amount and count aggregate for each agent
 ### Fixed
-  - Invalid nested order by parse
+  - Invalid parse on nested `order_by` field
 
 ## [3.12.1] - 2020-03-26
 ### Added
-    - Added endpoint for specific void, fixed possible invalid reverse
+  - Added endpoint for specific void, fixed possible invalid reverse
 ### Fixed
-    - `kumabank`, invalid transaction status on void
+  - `kumabank`, invalid transaction status on void
 
 ## [3.12.0] - 2020-03-23
 ### Added

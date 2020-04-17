@@ -70,9 +70,10 @@ module.exports = {
   useTraceNumber: false,
   properties: {
     flows: [
-      transactionFlows.PROVIDE_TOKEN,
-      transactionFlows.REFUND,
-      transactionFlows.PARTIAL_REFUND
+      transactionFlows.PROVIDE_TOKEN
+      // Refund is not allowed by midtrans
+      // transactionFlows.REFUND,
+      // transactionFlows.PARTIAL_REFUND
     ],
     tokenTypes: [
       tokenTypes.TOKEN_QRCODE_URL_IMAGE
