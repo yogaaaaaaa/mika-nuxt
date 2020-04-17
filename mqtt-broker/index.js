@@ -11,7 +11,7 @@ function begin () {
   const broker = aedes()
   const servers = []
 
-  console.log(`Starting mika mqtt broker v${version}`)
+  console.log(`Mika MQTT Broker v${version}`)
   if (config.authEnabled) {
     Object.assign(broker, authRedisHandler)
     console.log('Redis auth enabled')
