@@ -173,7 +173,6 @@ export default {
         }
         const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)
-        console.log(response)
         this.showSnackbar('success', `${this.btnAddText} success`)
       } catch (e) {
         this.catchError(e)

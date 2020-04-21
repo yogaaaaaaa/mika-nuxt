@@ -107,7 +107,6 @@ export default {
         const response = await this.$axios.$get(this.url + queries)
         this.totalCount = response.meta ? response.meta.totalCount : 0
         this.items = response.data
-        console.log(this.items[0])
         this.loading = false
       } catch (e) {
         this.catchError(e)

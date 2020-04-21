@@ -193,7 +193,6 @@ export default {
           this.showSnackbar('success', response.message)
         }
       } catch (e) {
-        console.log('error')
         this.catchError(e)
       }
     },

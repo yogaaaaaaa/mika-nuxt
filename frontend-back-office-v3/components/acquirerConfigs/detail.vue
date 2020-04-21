@@ -84,7 +84,6 @@ export default {
         }
         this.configKeys = Object.keys(this.currentEdit.config)
         this.configValues = Object.values(this.currentEdit.config)
-        console.log('config', this.configKeys, this.configValues)
       }
     },
   },

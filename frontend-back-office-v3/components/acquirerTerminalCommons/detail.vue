@@ -72,7 +72,6 @@ export default {
           createdAt: this.currentEdit.createdAt,
           archivedAt: this.currentEdit.archivedAt,
         }
-        console.log('detail page config', this.initialData.config)
       }
     },
   },

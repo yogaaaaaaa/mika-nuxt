@@ -109,19 +109,41 @@
                 </template>
                 <v-date-picker v-model="formData[field.key]" no-title @input="menu1 = false"></v-date-picker>
               </v-menu>
+              <span v-if="field.key == 'logo'">Logo</span>
               <picture-input
-                v-if="field.fieldType == 'file'"
+                v-if="field.fieldType == 'file' && field.key == 'logo'"
                 v-model="formData[field.key]"
                 ref="pictureInput"
-                @change="onChange"
+                @change="onChangeLogo"
                 width="300"
                 height="150"
                 margin="16"
-                accept="image/jpeg"
+                accept="image/jpeg, image/png"
                 size="10"
                 buttonClass="btn"
                 :prefill="formData[field.key]"
                 :prefillOptions="{mediaType: 'image/jpeg'}"
+                :customStrings="{
+        upload: '',
+        drag: '<span>Drag or click<span>'
+      }"
+                :removable="true"
+                :crop="true"
+              ></picture-input>
+              <span v-if="field.key == 'icon'">Icon</span>
+              <picture-input
+                v-if="field.fieldType == 'file' && field.key == 'icon'"
+                v-model="formData[field.key]"
+                ref="pictureInput"
+                @change="onChangeIcon"
+                width="100"
+                height="100"
+                margin
+                accept="image/jpeg, image/png"
+                size="10"
+                buttonClass="btn"
+                :prefill="formData[field.key]"
+                :prefillOptions="{mediaType: 'image/png'}"
                 :customStrings="{
         upload: '',
         drag: '<span>Drag or click<span>'
@@ -303,7 +325,6 @@ export default {
         ).format('YYYY-MM-DD, HH:mm:ss')
       }
       this.created = true
-      console.log(this.initialData)
     }
   },
   methods: {
@@ -339,11 +360,24 @@ export default {
     onReset() {
       this.formData = {}
     },
-    onChange(image) {
+    onChangeIcon(value) {
+      if (value) {
+        this.formData.icon = value
+      } else {
+        this.showSnackbar(
+          'error',
+          'FileReader API not supported: use the <form>, Luke!'
+        )
+      }
+    },
+    onChangeLogo(image) {
       if (image) {
         this.formData.logo = image
       } else {
-        console.log('FileReader API not supported: use the <form>, Luke!')
+        this.showSnackbar(
+          'error',
+          'FileReader API not supported: use the <form>, Luke!'
+        )
       }
     },
   },

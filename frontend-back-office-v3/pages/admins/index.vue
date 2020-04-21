@@ -205,11 +205,8 @@ export default {
         this.newUser = response.data.name
         this.password = response.data.user.password
         this.passwordDialog = true
-        console.log(response.status)
         if (response.status === 'sys-200') {
-          console.log(response)
           this.showSnackbar('success', 'Berhasil menambahkan admin baru')
-          // this.showSnackbar('success', `${this.btnAddText} success`)
         }
       } catch (e) {
         this.catchError(e)

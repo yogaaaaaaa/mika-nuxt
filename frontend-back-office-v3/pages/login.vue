@@ -147,7 +147,6 @@ export default {
         this.catchError(e)
         this.countError--
         if (this.countError <= 0) {
-          console.log('countdown', this.countError)
           this.countdownShow = true
         }
       }

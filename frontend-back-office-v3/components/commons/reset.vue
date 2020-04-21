@@ -98,7 +98,6 @@ export default {
   methods: {
     checkBlocked(params) {
       if (params.failedLoginAttempt > 5) {
-        console.log(params.failedLoginAttempt)
         return false
       }
       return true

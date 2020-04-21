@@ -150,7 +150,6 @@ export default {
     },
     async submit(data) {
       try {
-        console.log(data)
         const response = await this.$axios.$post(this.url, data)
         this.items.unshift(response.data)
         this.showSnackbar('success', `${this.btnAddText} success`)

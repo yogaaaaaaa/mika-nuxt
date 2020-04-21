@@ -3,6 +3,7 @@
     <formAdd
       :form-field="formField"
       :initial-data="initialData"
+      :permission-role="permissionRole"
       :sm6="true"
       @onSubmit="submit"
       @archive="archive"
