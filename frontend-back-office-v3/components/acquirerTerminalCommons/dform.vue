@@ -256,7 +256,6 @@ export default {
           this.formData.archivedAt
         ).format('YYYY-MM-DD, HH:mm:ss')
       }
-      console.log('formData config', this.initialData.config)
       this.created = true
     }
   },

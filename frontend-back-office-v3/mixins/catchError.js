@@ -1,7 +1,6 @@
 export default {
   methods: {
     catchError(error) {
-      // this.showSnackbar('error', error.response.data.message)
       if (error.response) {
         if (
           error.response.status === 400 ||
@@ -17,7 +16,7 @@ export default {
             )
           }
           if (error.response.data.status === 'auth-410') {
-            return this.showSnackbar('error', error.response.message)
+            return this.showSnackbar('error', error.response.data.message)
           }
           if (error.response.data.status === 'auth-412') {
             return this.showSnackbar(
@@ -31,11 +30,7 @@ export default {
               'Pembaharuan kata sandi gagal dikarenakan nama pengguna tidak ditemukan atau kata sandi lama salah atau kata sandi baru menggunakan kata sandi sebelumnya'
             )
           }
-          return this.showSnackbar('error', error.response.message)
-          // else {
-          //   console.log('error3', error.response.data.status)
-          //   this.showSnackbar('error', error.response.data.message)
-          // }
+          return this.showSnackbar('error', error.response.data.message)
         }
         if (error.response.status === 401) {
           if (error.response.data.status === 'auth-401') {
@@ -48,17 +43,17 @@ export default {
             }, 3000)
           }
           if (error.response.data.status === 'auth-421') {
-            this.showSnackbar(
+            return this.showSnackbar(
               'error',
               'Akun anda telah terblokir karena salah memasukan nama pengguna atau kata sandi sebanyak 6 kali'
             )
           }
-          return this.showSnackbar('error', error.response.message)
+          return this.showSnackbar('error', error.response.data.message)
         }
       } else if (error.request) {
-        this.showSnackbar('error', 'Network Error')
+        return this.showSnackbar('error', 'Network Error')
       } else {
-        this.showSnackbar('error', error.message)
+        return this.showSnackbar('error', error.message)
       }
     },
     logout() {

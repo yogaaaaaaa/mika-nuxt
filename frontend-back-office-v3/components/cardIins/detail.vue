@@ -55,7 +55,6 @@ export default {
           cardIssuerId: data.cardIssuerId,
           description: data.description,
         }
-        console.log('isi post data', postData)
         const response = await this.$axios.$put(
           `${this.url}/${this.$route.params.id}`,
           postData
