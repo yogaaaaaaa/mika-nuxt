@@ -16,6 +16,10 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.13.3] - 2020-04-21
+### Fixed
+  - Fixed invalid `acquirerConfig.handler` validator.
+
 ## [3.13.2] - 2020-04-17
 ### Removed
   - Removed `midtrans` refund capability
