@@ -53,8 +53,8 @@ export default {
   data() {
     return {
       transactionUrl: `f[agentId]=eq,${this.$route.params.id}`,
-      urlResetPassword: `/back_office/acquirer_staffs/${this.$route.params.id}/reset_password`,
-      urlLoginAttempt: `/back_office/acquirer_staffs/${this.$route.params.id}`,
+      urlResetPassword: `/back_office/agents/${this.$route.params.id}/reset_password`,
+      urlLoginAttempt: `/back_office/agents/${this.$route.params.id}`,
       permissionRole: 'adminMarketing',
     }
   },
