@@ -16,6 +16,11 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.13.4] - 2020-04-22
+### Fixed
+  - Fixed invalid invalid roles for admins 'agent', 'acquirerStaff' 
+    and 'merchantStaff' reset password
+
 ## [3.13.3] - 2020-04-21
 ### Fixed
   - Fixed invalid `acquirerConfig.handler` validator.
