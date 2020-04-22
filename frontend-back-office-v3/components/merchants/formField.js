@@ -44,7 +44,7 @@ export default [
     key: 'taxCardNumber',
     caption: 'Tax Card Number',
     fieldType: 'text',
-    rules: 'numeric|required',
+    rules: 'numeric|required|length:15',
     type: 'numeric',
     value: '',
   },
