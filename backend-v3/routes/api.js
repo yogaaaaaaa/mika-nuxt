@@ -535,7 +535,7 @@ router.delete('/back_office/agents/:agentId',
   agentController.deleteAgentMiddlewares
 )
 router.post('/back_office/agents/:agentId/reset_password',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
   agentController.resetAgentPasswordMiddlewares
 )
@@ -568,7 +568,7 @@ router.delete('/back_office/merchant_staffs/:merchantStaffId',
   merchantStaffController.deleteMerchantStaffMiddlewares
 )
 router.post('/back_office/merchant_staffs/:merchantStaffId/reset_password',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
   merchantStaffController.resetMerchantStaffPasswordMiddlewares
 )
@@ -605,7 +605,7 @@ router.delete(
 )
 router.post(
   '/back_office/acquirer_staffs/:acquirerStaffId/reset_password',
-  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_HEAD]),
+  authMiddleware.auth([auth.userTypes.ADMIN], [auth.userRoles.ADMIN_MARKETING]),
   authMiddleware.authErrorHandler,
   acquirerStaffController.resetAcquirerStaffPasswordMiddlewares
 )
