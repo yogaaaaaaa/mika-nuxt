@@ -150,13 +150,14 @@ export default {
     },
     async submit(data) {
       try {
-        // data.config = JSON.parse(`{ ${data.config.replace(/\s+/g, '')} }`)
         const config = data.config
         const postData = {
           name: data.formData.name,
           handler: data.formData.handler,
           description: data.formData.description,
-          merchantId: data.formData.merchantId ? data.merchantId : undefined,
+          merchantId: data.formData.merchantId
+            ? data.formData.merchantId
+            : null,
           config: data.config,
           imageReceipt: data.image,
         }
