@@ -16,6 +16,13 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.13.5] - 2020-05-28
+### Security
+  - Fixed invalid production environment (NODE_ENV) check. Inadvertently exposing
+    development specific function into production environment. Exposing, 
+      - Global debug interface, fortunately is secured using debug key
+      - Agent level, transaction debug function (e.g change transaction status)
+
 ## [3.13.4] - 2020-04-22
 ### Fixed
   - Fixed invalid invalid roles for admins 'agent', 'acquirerStaff' 

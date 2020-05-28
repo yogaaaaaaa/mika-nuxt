@@ -1,7 +1,7 @@
 'use strict'
 
 require('libs/appInit').environmentInit('core')
-const isEnvProduction = process.NODE_ENV === 'production'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 const morgan = require('morgan')
 const serviceBroker = require('libs/serviceBroker')

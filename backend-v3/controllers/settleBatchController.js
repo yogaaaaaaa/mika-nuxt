@@ -13,7 +13,7 @@ const errorMiddleware = require('middlewares/errorMiddleware')
 const crudGenerator = require('./helpers/crudGenerator')
 const trxManager = require('libs/trxManager')
 
-const isEnvProduction = process.NODE_ENV === 'production'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 module.exports.startAgentSettle = async (req, res, next) => {
   await trxManager.agentSettle({
