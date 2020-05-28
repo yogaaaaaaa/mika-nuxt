@@ -67,7 +67,7 @@ const productionConfig = {
   ]
 }
 
-if (process.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production') {
   module.exports = productionConfig
 } else {
   module.exports = developmentConfig

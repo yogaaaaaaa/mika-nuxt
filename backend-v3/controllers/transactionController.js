@@ -11,7 +11,7 @@ const crudGenerator = require('./helpers/crudGenerator')
 
 const transactionValidator = require('validators/transactionValidator')
 
-const isEnvProduction = process.NODE_ENV === 'production'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 module.exports.createTransaction = async (req, res, next) => {
   const trxCreateResult = await trxManager.create(
