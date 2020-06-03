@@ -269,7 +269,10 @@ export default {
         { id: 'kumabank', value: '' },
         { id: 'sample', value: '' },
         { id: 'tcash', value: '' },
-        { id: 'tcashqrn', value: '' },
+        {
+          id: 'tcashqrn',
+          value: ['tcashQrnMerchantID', 'tcashQrnMerchantCriteria'],
+        },
       ],
       columnConfig: [],
       tempConfig: '',
@@ -352,10 +355,10 @@ export default {
       this.$validator.validateAll().then(result => {
         if (result) {
           this.toConfig()
-          // this.$emit('onSubmit', {
-          //   formData: this.formData,
-          //   config: this.config,
-          // })
+          this.$emit('onSubmit', {
+            formData: this.formData,
+            config: this.config,
+          })
           this.close()
         }
       })
