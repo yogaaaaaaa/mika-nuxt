@@ -36,7 +36,7 @@
 
             <v-autocomplete
               v-if="field.key === 'handler'"
-              v-model="formData[field.key]"
+              v-model="tempConfig"
               v-validate="field.rules"
               :type="field.type"
               :error-messages="errors.collect(field.key)"
@@ -110,7 +110,12 @@
         <div v-if="created == false">
           <h4 class="mb-4">
             Config
-            <tooltip :icon="'add'" :tooltip-text="'add field config'" @onClick="configFields++"/>
+            <tooltip
+              v-if="!columnConfig"
+              :icon="'add'"
+              :tooltip-text="'add field config'"
+              @onClick="configFields++"
+            />
             <tooltip
               v-if="configFields > 1"
               :icon="'remove'"
@@ -118,29 +123,23 @@
               @onClick="configFields--"
             />
           </h4>
-          <div v-for="(item, index) in configFields" :key="item">
-            <v-text-field label="Config Key" v-model="configKeys[index]"/>
-            <v-text-field label="Config Value" v-model="configValues[index]"/>
-          </div>
-        </div>
-        <div>
-          <div v-if="initialData.handler !== 'cardSwitcher' && created == true">
-            <div v-if="edit == false">
-              <div v-for="(data, index) in configKeys" :key="index">
-                <v-text-field
-                  :label="configKeys[index]"
-                  v-model="configValues[index]"
-                  v-if="configValues[index].length < 100"
-                />
+          <div>
+            <div v-if="!columnConfig">
+              <div v-for="(item, index) in configFields" :key="item">
+                <v-text-field label="Config Key" v-model="configKeys[index]"/>
+                <v-textarea label="Config Value" v-model="configValues[index]" rows="1" auto-grow/>
+              </div>
+            </div>
+            <div v-else>
+              <div v-for="(data, index) in columnConfig" :key="index">
                 <v-textarea
-                  :label="configKeys[index]"
+                  :label="columnConfig[index]"
                   v-model="configValues[index]"
-                  v-else
+                  rows="1"
                   auto-grow
                 />
               </div>
             </div>
-            <v-textarea v-model="formData.config" auto-grow v-if="edit == true"></v-textarea>
           </div>
         </div>
       </v-container>
@@ -252,6 +251,28 @@ export default {
       textUnarchive: 'Are you sure want to unarchive this data?',
       dataArchived: '',
       configFields: 1,
+      configHandler: [
+        { id: 'dana', value: '' },
+        {
+          id: 'midtrans',
+          value: [
+            'baseUrl',
+            'midtransClientKey',
+            'midtransServerKey',
+            'midtransMerchantId',
+          ],
+        },
+        { id: 'alto', value: '' },
+        { id: 'cardBniDebit', value: '' },
+        { id: 'cardBniCredit', value: '' },
+        { id: 'cardSwitcher', value: '' },
+        { id: 'kumabank', value: '' },
+        { id: 'sample', value: '' },
+        { id: 'tcash', value: '' },
+        { id: 'tcashqrn', value: '' },
+      ],
+      columnConfig: [],
+      tempConfig: '',
     }
   },
   watch: {
@@ -264,6 +285,12 @@ export default {
         if (this.handlerLoading) return
         if (this.searchHandler == null) this.searchHandler = ''
         this.getHandlers()
+      }, 500),
+    },
+    tempConfig: {
+      handler: debounce(function() {
+        console.log('temp config', this.tempConfig)
+        this.checkHandler(this.tempConfig)
       }, 500),
     },
     initialData() {
@@ -326,10 +353,10 @@ export default {
       this.$validator.validateAll().then(result => {
         if (result) {
           this.toConfig()
-          this.$emit('onSubmit', {
-            formData: this.formData,
-            config: this.config,
-          })
+          // this.$emit('onSubmit', {
+          //   formData: this.formData,
+          //   config: this.config,
+          // })
           this.close()
         }
       })
@@ -373,11 +400,26 @@ export default {
       this.showUnarchive = false
     },
     toConfig() {
-      const config = Object.assign(
-        {},
-        ...this.configKeys.map((a, b) => ({ [a]: this.configValues[b] }))
-      )
-      this.config = JSON.parse(JSON.stringify(config))
+      if (!this.columnConfig) {
+        const config = Object.assign(
+          {},
+          ...this.configKeys.map((a, b) => ({ [a]: this.configValues[b] }))
+        )
+        this.config = JSON.parse(JSON.stringify(config))
+        console.log('isi config key', this.config)
+      } else {
+        const config = Object.assign(
+          {},
+          ...this.columnConfig.map((a, b) => ({ [a]: this.configValues[b] }))
+        )
+        this.config = JSON.parse(JSON.stringify(config))
+        console.log('isi config key', this.config)
+      }
+    },
+    checkHandler(params) {
+      let config = this.configHandler.filter(x => x.id == params)
+      this.columnConfig = config[0] ? config[0].value : ''
+      return this.columnConfig
     },
   },
 }
