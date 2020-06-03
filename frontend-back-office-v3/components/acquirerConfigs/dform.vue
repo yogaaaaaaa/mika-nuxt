@@ -289,7 +289,6 @@ export default {
     },
     tempConfig: {
       handler: debounce(function() {
-        console.log('temp config', this.tempConfig)
         this.checkHandler(this.tempConfig)
       }, 500),
     },
@@ -406,14 +405,12 @@ export default {
           ...this.configKeys.map((a, b) => ({ [a]: this.configValues[b] }))
         )
         this.config = JSON.parse(JSON.stringify(config))
-        console.log('isi config key', this.config)
       } else {
         const config = Object.assign(
           {},
           ...this.columnConfig.map((a, b) => ({ [a]: this.configValues[b] }))
         )
         this.config = JSON.parse(JSON.stringify(config))
-        console.log('isi config key', this.config)
       }
     },
     checkHandler(params) {
