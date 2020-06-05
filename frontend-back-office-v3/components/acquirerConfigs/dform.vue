@@ -293,6 +293,7 @@ export default {
     tempConfig: {
       handler: debounce(function() {
         this.checkHandler(this.tempConfig)
+        this.formData.handler = this.tempConfig
       }, 500),
     },
     initialData() {
