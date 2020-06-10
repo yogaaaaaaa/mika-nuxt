@@ -1,0 +1,22 @@
+[
+  {
+    "name": "JCB",
+    "aid": "A0000000651010",
+    "cvmLmt": "000000000000",
+    "termClssLmt": "000000000000",
+    "termClssOfflineFloorLmt": "000000000000",
+    "termOfflineFloorLmt": "000000000000",
+    "selFlag": "01",
+    "version": "0001",
+    "targetPer": "0070",
+    "maxTargetPer": "0070",
+    "floorLimit": "00000100",
+    "tacDefault": "FC6024A800",
+    "tacDenial": "0010000000",
+    "tacOnline": "FC60ACF800",
+    "threshold": "00000000",
+    "dDol": "9F3704",
+    "tDol": "9F02065F2A029A039C0195059F3704",
+    "referCurrCode": "0360"
+  }
+]

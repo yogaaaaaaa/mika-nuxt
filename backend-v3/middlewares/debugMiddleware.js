@@ -69,6 +69,10 @@ module.exports.pathDelay = () => {
           debug('before', req.path, duration, 'ms')
         }
         await delay(duration)
+      } else {
+        if (!isAfter) {
+          debug('path', req.path, 'not match', pathDelay.path)
+        }
       }
     }
   }

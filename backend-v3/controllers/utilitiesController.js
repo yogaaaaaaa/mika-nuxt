@@ -6,8 +6,16 @@ const trxManager = require('libs/trxManager')
 const msg = require('libs/msg')
 const auth = require('libs/auth')
 const cipherbox = require('libs/cipherbox')
+const configStatic = require('libs/configStatic')
 
 const dirConfig = require('configs/dirConfig')
+const agentClientConfig = require('configs/agentClientConfig')
+
+const aidsFilepath = configStatic.loadAndCacheAids()
+const capksFilePath = configStatic.loadAndCacheCapks()
+
+module.exports.staticFileAids = (req, res, next) => res.sendFile(aidsFilepath)
+module.exports.staticFileCapks = (req, res, next) => res.sendFile(capksFilePath)
 
 module.exports.listTrxManagerProps = (req, res, next) => {
   msg.expressResponse(
@@ -58,6 +66,14 @@ module.exports.listThumbnails = async (req, res, next) => {
   )
 }
 
+module.exports.getAgentClientConfig = async (req, res, next) => {
+  msg.expressResponse(
+    res,
+    msg.msgTypes.MSG_SUCCESS,
+    agentClientConfig
+  )
+}
+
 module.exports.listTrxManagerPropsMiddlewares = [
   exports.listTrxManagerProps
 ]
@@ -72,4 +88,16 @@ module.exports.listAuthPropsMiddlewares = [
 
 module.exports.listThumbnailsMiddlewares = [
   exports.listThumbnails
+]
+
+module.exports.staticFileAidsMiddlewares = [
+  exports.staticFileAids
+]
+
+module.exports.staticFileCapksMiddlewares = [
+  exports.staticFileCapks
+]
+
+module.exports.getAgentClientConfigMiddlewares = [
+  exports.getAgentClientConfig
 ]

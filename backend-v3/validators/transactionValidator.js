@@ -20,7 +20,11 @@ module.exports.createTransactionValidator = [
   body('userTokenType').isString().optional(),
   body('locationLong').isNumeric().optional({ nullable: true }),
   body('locationLat').isNumeric().optional({ nullable: true }),
-  body('flags').isArray().optional()
+  body('flags').isArray().optional(),
+  body('agentOrderReference').isString().optional({ nullable: true }),
+  body('orderReference').isString().optional({ nullable: true }),
+  body('properties').custom(val => _.isPlainObject(val)).optional(),
+  body('references').custom(val => _.isPlainObject(val)).optional()
 ]
 
 module.exports.refundTransactionValidator = [

@@ -349,11 +349,11 @@ module.exports.msgTypes = {
     status: 'trx-405',
     message: 'Unfinished transaction with same acquirer and agent exist'
   },
-  MSG_ERROR_TRANSACTION_REJECTED_BY_FRAUD_MANAGEMENT: {
+  MSG_ERROR_TRANSACTION_ORDER_REFERENCE_FINISHED: {
     isError: true,
     httpStatus: 400,
     status: 'trx-406',
-    message: 'Transaction rejected by fraud management'
+    message: 'Order reference is already finished by another transaction'
   },
   MSG_ERROR_TRANSACTION_NEED_USER_TOKEN: {
     isError: true,

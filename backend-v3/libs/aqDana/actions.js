@@ -21,8 +21,11 @@ module.exports.createTransaction = async ctx => {
   const postData = createTransactionData(ctx)
   const signature = await generateSignature(postData.request)
   postData.signature = signature
-  debug('Create Qris Post Data', JSON.stringify(postData))
+
+  debug('Create transaction', JSON.stringify(postData, null, 2))
   const resp = await sendRequest(config.createQrisEndpoint, postData)
+  debug('Create transaction response', JSON.stringify(resp, null, 2))
+
   return resp
 }
 
@@ -33,8 +36,12 @@ module.exports.cancelTransaction = async ctx => {
   const postData = cancelTransactionData(ctx)
   const signature = generateSignature(postData.request)
   postData.signature = signature
-  debug('Cancel Post Data', JSON.stringify(postData))
-  return sendRequest(config.cancelTransaction, postData)
+
+  debug('Cancel transaction', JSON.stringify(postData, null, 2))
+  const resp = await sendRequest(config.cancelTransaction, postData)
+  debug('Cancel transaction response', JSON.stringify(resp, null, 2))
+
+  return resp
 }
 
 /**
@@ -44,9 +51,12 @@ module.exports.queryTransaction = async ctx => {
   const postData = queryTransactionData(ctx)
   const signature = generateSignature(postData.request)
   postData.signature = signature
-  debug('queryTransaction Post Data', JSON.stringify(postData))
 
-  return sendRequest(config.queryTransaction, postData)
+  debug('Query transaction', JSON.stringify(postData, null, 2))
+  const resp = await sendRequest(config.queryTransaction, postData)
+  debug('Query transaction response', JSON.stringify(resp, null, 2))
+
+  return resp
 }
 
 /**
@@ -56,9 +66,12 @@ module.exports.refundTransaction = async ctx => {
   const postData = refundTransactionData(ctx)
   const signature = generateSignature(postData.request)
   postData.signature = signature
-  debug('refundTransaction Post Data', JSON.stringify(postData))
 
-  return sendRequest(config.refundTransaction, postData)
+  debug('Refund transaction', JSON.stringify(postData, null, 2))
+  const resp = await sendRequest(config.refundTransaction, postData)
+  debug('Refund transaction response', JSON.stringify(resp, null, 2))
+
+  return resp
 }
 
 /**
@@ -68,9 +81,14 @@ module.exports.createDivision = async ctx => {
   const postData = createDivisionData(ctx)
   const signature = generateSignature(postData.request)
   postData.signature = signature
-  debug('createDivision Post Data: ', JSON.stringify(postData))
-  return sendRequest(config.createDivision, postData)
+
+  debug('Create division', JSON.stringify(postData, null, 2))
+  const resp = sendRequest(config.createDivision, postData)
+  debug('Create division response', JSON.stringify(resp, null, 2))
+
+  return resp
 }
+
 /**
  * Create Dana Shop
  */
@@ -78,8 +96,12 @@ module.exports.createShop = async ctx => {
   const postData = createShopData(ctx)
   const signature = generateSignature(postData.request)
   postData.signature = signature
-  debug('createShop Post Data: ', JSON.stringify(postData))
-  return sendRequest(config.createShop, postData)
+
+  debug('Create shop', JSON.stringify(postData, null, 2))
+  const resp = await sendRequest(config.createShop, postData)
+  debug('Create shop response', JSON.stringify(resp, null, 2))
+
+  return resp
 }
 
 /**
@@ -143,7 +165,6 @@ module.exports.generateDanaAcquirerConfig = async ({ crudCtx }) => {
 
     // Dana Create Division
     const danaCreateDivisionResponse = await exports.createDivision({ merchant, ...config })
-    debug('danaCreateDivisionResponse', JSON.stringify(danaCreateDivisionResponse))
     resultCode = danaCreateDivisionResponse.response.body.resultInfo.resultCode
     if (resultCode !== 'SUCCESS') {
       crudCtx.msgType = msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION
@@ -156,7 +177,6 @@ module.exports.generateDanaAcquirerConfig = async ({ crudCtx }) => {
 
     // Dana Create Shop
     const danaCreateShopResponse = await exports.createShop({ merchant, ...config })
-    debug('danaCreateShopResponse', JSON.stringify(danaCreateShopResponse))
     resultCode = danaCreateShopResponse.response.body.resultInfo.resultCode
     if (!resultCode || resultCode !== 'SUCCESS') {
       crudCtx.msgType = msg.msgTypes.MSG_ERROR_BAD_REQUEST_VALIDATION

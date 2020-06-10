@@ -15,8 +15,6 @@ module.exports.findUnfinishedTransaction = async (ctx, t) => {
         [Op.in]: [
           transactionStatuses.CREATED,
           transactionStatuses.PROCESSING,
-          transactionStatuses.REVERSING,
-          transactionStatuses.REVERSING_VOID,
           transactionStatuses.VOIDING
         ]
       }
@@ -92,6 +90,18 @@ module.exports.newTransaction.findAcquirerConfigOutlet = async (ctx, t) => {
       },
       transaction: t
     })
+}
+
+module.exports.newTransaction.getTransactionWithFinishedOrderReference = async (ctx, t) => {
+  const transaction = await models.transaction.findOne({
+    where: {
+      orderReference: ctx.transaction.orderReference,
+      status: transactionStatuses.SUCCESS
+    },
+    transaction: t
+  })
+
+  return transaction
 }
 
 module.exports.existingTransaction = {}

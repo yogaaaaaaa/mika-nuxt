@@ -50,7 +50,9 @@ module.exports.transactionStatuses = {
   FAILED: 'failed',
   VOIDED: 'voided',
   REFUNDED_PARTIAL: 'refundedPartial',
-  REFUNDED: 'refunded'
+  REFUNDED: 'refunded',
+
+  INVALIDATED: 'invalidated'
 }
 
 /**
@@ -117,6 +119,7 @@ module.exports.errorTypes = {
   INVALID_AGENT: 'trxManagerInvalidAgent',
   INVALID_ACQUIRER: 'trxManagerInvalidAcquirer',
   UNFINISHED_TRANSACTION_EXIST: 'trxManagerUnfinishedTransactionExist',
+  ORDER_REFERENCE_FINISHED: 'trxManagerOrderReferenceFinished',
 
   UNFINISHED_SETTLE_BATCH: 'trxManagerUnfinishedSettleBatch',
   INVALID_SETTLE_BATCH: 'trxManagerInvalidSettleBatch',
