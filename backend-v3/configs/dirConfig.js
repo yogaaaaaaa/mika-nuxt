@@ -16,7 +16,11 @@ let baseConfig = {
   thumbnailsDir: null,
   customThumbnailsDir: null,
   logsDir: null,
-  keysDir: null
+  keysDir: null,
+  staticConfigsDir: null,
+
+  capksDir: null,
+  aidsDir: null
 }
 
 // Load external config file
@@ -31,12 +35,20 @@ baseConfig.thumbnailsDir = baseConfig.thumbnailsDir || path.join(baseConfig.asse
 baseConfig.templatesDir = baseConfig.templatesDir || path.join(baseConfig.assetsDir, 'templates')
 baseConfig.customThumbnailsDir = path.join(baseConfig.uploadsDir, 'customThumbnails')
 baseConfig.logsDir = baseConfig.keysDir || path.join(baseConfig.workDir, 'logs')
+baseConfig.staticConfigsDir = baseConfig.staticConfigsDir || path.join(baseConfig.assetsDir, 'configs')
+
+baseConfig.capksDir = baseConfig.capksDir || path.join(baseConfig.staticConfigsDir, 'capks')
+baseConfig.aidsDir = baseConfig.aidsDir || path.join(baseConfig.staticConfigsDir, 'aids')
 
 baseConfig.keysDir = baseConfig.keysDir || path.join(baseConfig.workDir, 'keys')
 
 fs.accessSync(baseConfig.workDir, fs.constants.W_OK | fs.constants.R_OK)
 fs.accessSync(baseConfig.assetsDir, fs.constants.R_OK)
 fs.accessSync(baseConfig.thumbnailsDir, fs.constants.R_OK)
+fs.accessSync(baseConfig.staticConfigsDir, fs.constants.R_OK)
+
+fs.accessSync(baseConfig.capksDir, fs.constants.R_OK)
+fs.accessSync(baseConfig.aidsDir, fs.constants.R_OK)
 
 if (!fs.existsSync(baseConfig.uploadsDir)) {
   fs.mkdirSync(baseConfig.uploadsDir)

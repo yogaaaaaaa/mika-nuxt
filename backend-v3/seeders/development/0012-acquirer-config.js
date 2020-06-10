@@ -41,7 +41,7 @@ module.exports = {
         handler: 'tcashqrn',
         config: JSON.stringify({
           tcashQrnMerchantCriteria: 'UMI',
-          tcashQrnMerchantID: '190717011228001'
+          tcashQrnMerchantID: '200326041029001'
         })
       },
       {

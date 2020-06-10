@@ -124,6 +124,21 @@ router.get('/utilities/thumbnail_lists',
   authMiddleware.authErrorHandler,
   utilitiesController.listThumbnailsMiddlewares
 )
+router.get('/utilities/statics/aids.json',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  utilitiesController.staticFileAidsMiddlewares
+)
+router.get('/utilities/statics/capks.json',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  utilitiesController.staticFileCapksMiddlewares
+)
+router.get('/utilities/client_configs/agent',
+  authMiddleware.auth(),
+  authMiddleware.authErrorHandler,
+  utilitiesController.getAgentClientConfigMiddlewares
+)
 router.get(
   [
     '/utilities/card_iins',

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "NSICCS",
+    "aid": "A0000006021010",
+    "cvmLmt": "000000000000",
+    "termClssLmt": "000000000000",
+    "termClssOfflineFloorLmt": "000000000000",
+    "termOfflineFloorLmt": "000000000000",
+    "selFlag": "01",
+    "version": "0001",
+    "targetPer": "0020",
+    "maxTargetPer": "0050",
+    "floorLimit": "00000100",
+    "tacDefault": "FC50A80000",
+    "tacDenial": "0000000000",
+    "tacOnline": "FC50A80000",
+    "threshold": "00000000",
+    "dDol": "9F3704",
+    "tDol": "9F02065F2A029A039C0195059F3704",
+    "referCurrCode": "0360"
+  }
+]

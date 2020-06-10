@@ -1,9 +1,9 @@
 'use strict'
 
 const path = require('path')
+const fs = require('fs').promises
 const puppeteer = require('puppeteer')
 const excel = require('exceljs')
-const base64img = require('base64-img')
 
 const trxManager = require('../../libs/trxManager')
 const time = require('../../libs/time')
@@ -20,12 +20,12 @@ const dirConfig = require('../../configs/dirConfig')
 
 let browser = null
 
-function getImageBase64 (path) {
-  return new Promise((resolve, reject) => {
-    base64img.base64(
-      path,
-      (err, data) => err ? reject(err) : resolve(data))
-  })
+async function getImageBase64 (filepath) {
+  let extname = path.extname(filepath).substr(1) || 'png'
+
+  if (extname === 'svg') extname = 'svg+xml'
+
+  return `data:image/${extname};base64,${(await fs.readFile(filepath)).toString('base64')}`
 }
 
 async function getBrowser () {

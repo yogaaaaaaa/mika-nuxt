@@ -325,7 +325,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/api/agent/purchases?",
+											"raw": "{{baseUrl}}/api/agent/purchases",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -1550,7 +1550,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/agent/transactions/:transactionId?",
+							"raw": "{{baseUrl}}/api/agent/transactions/:transactionId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1655,7 +1655,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/agent/statistic/transaction_total_success?",
+							"raw": "{{baseUrl}}/api/agent/statistic/transaction_total_success",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1695,16 +1695,6 @@
 									"key": "f[createdAt]",
 									"value": "lte,2018-12-30T00:00:00.000Z",
 									"disabled": true
-								},
-								{
-									"key": "f[status,or]",
-									"value": "eq,success",
-									"disabled": true
-								},
-								{
-									"key": "f[status,or]",
-									"value": "eq,failed",
-									"disabled": true
 								}
 							]
 						},
@@ -1724,7 +1714,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/agent/settle_batches/:settleBatchId?",
+							"raw": "{{baseUrl}}/api/agent/settle_batches/:settleBatchId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1893,7 +1883,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"acquirerId\": 9,\n\t\"amount\": 100,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": []\n}"
+							"raw": "{\n\t\"acquirerId\": 9,\n\t\"amount\": 100,\n\t\n\t\"userToken\": {},\n\t\"userTokenType\":\"\",\n\t\n\t\"locationLat\":\"-6.951581\",\n\t\"locationLong\":\"107.649605\",\n\t\n\t\"flags\": [],\n\t\n\t\"agentOrderReference\": null,\n\t\"orderReference\": null,\n\t\n\t\"properties\": {\n\t\t\"customField\": \"good transaction\"\n\t},\n\t\n\t\"references\": {\n\t\t\"customReferences\": \"trx123\"\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/agent/transactions",
@@ -3207,7 +3197,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/merchant_staff/agents/:agentId?",
+							"raw": "{{baseUrl}}/api/merchant_staff/agents/:agentId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -3644,7 +3634,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/acquirer_staff/agents/:agentId?",
+							"raw": "{{baseUrl}}/api/acquirer_staff/agents/:agentId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -3744,7 +3734,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/acquirer_staff/outlets/:outletId?",
+							"raw": "{{baseUrl}}/api/acquirer_staff/outlets/:outletId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -13564,6 +13554,84 @@
 					"response": []
 				},
 				{
+					"name": "{{baseUrl}}/api/utilities/statics/aids.json",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/utilities/statics/aids.json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utilities",
+								"statics",
+								"aids.json"
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/utilities/statics/capks.json",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/utilities/statics/capks.json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utilities",
+								"statics",
+								"capks.json"
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				},
+				{
 					"name": "{{baseUrl}}/api/utilities/card_iins",
 					"event": [
 						{
@@ -13681,6 +13749,58 @@
 									"key": "cardIInId",
 									"value": ""
 								}
+							]
+						},
+						"description": "Logout from mika backend"
+					},
+					"response": []
+				},
+				{
+					"name": "{{baseUrl}}/api/utilities/client_configs/agent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7519c3a-79aa-4e69-945c-6b2f1b48a6b1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-access-token",
+								"type": "text",
+								"value": "{{mikaSessionToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/utilities/client_configs/agent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utilities",
+								"client_configs",
+								"agent"
 							]
 						},
 						"description": "Logout from mika backend"
@@ -13813,7 +13933,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"pathDelays\": [\n\t\t{\n\t\t\t\"path\": \"/**\",\n\t\t\t\"before\": 0,\n\t\t\t\"after\": 700\n\t\t}\n\t]\n}"
+									"raw": "{\n\t\"pathDelays\": [\n\t\t{\n\t\t\t\"path\": \"**/agent/transactions\",\n\t\t\t\"method\": \"POST\",\n\t\t\t\"before\": 0,\n\t\t\t\"after\": 15000\n\t\t}\n\t]\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/debug/http_delay",
@@ -16684,13 +16804,13 @@
 	],
 	"variable": [
 		{
-			"id": "8bd1ef8d-d66f-49c0-a081-405f6857b0c9",
+			"id": "16f3fa96-c333-4ca1-b88f-0cbab7f07312",
 			"key": "baseUrl",
 			"value": "https://stg31api.mikaapp.id",
 			"type": "string"
 		},
 		{
-			"id": "57f3220e-35f2-4b7e-afe8-cc7787b61493",
+			"id": "113813bc-3fcc-479e-851f-e661941f7b3f",
 			"key": "mikaDebugKey",
 			"value": "1K24vDZGaGmJGCTTVIRyLxPPiHY",
 			"type": "string"

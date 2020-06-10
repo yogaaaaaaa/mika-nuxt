@@ -52,11 +52,13 @@ module.exports = {
     ctx.transactionRefund.reference = `ref-${ctx.transactionRefund.id}`
     ctx.transactionRefund.referenceName = 'refund_key'
     // Throw probability of error
+    /*
     if (Math.random() >= 0.8) {
       throw createError({
         name: errorTypes.ACQUIRER_HOST_RESPONSE_ERROR
       })
     }
+    */
   },
   async forceStatusUpdateHandler (ctx) {
   }

@@ -155,8 +155,8 @@ module.exports.create = async ({
     if (ctx.settleBatchIn) {
       ctx.transaction.settleBatchId = ctx.settleBatchIn.id
     }
-    ctx.transaction.references = {}
-    ctx.transaction.properties = {}
+    ctx.transaction.references = ctx.transaction.references || {}
+    ctx.transaction.properties = ctx.transaction.properties || {}
     ctx.transaction.encryptedProperties = {}
 
     ctx.transaction.userToken = undefined
@@ -165,29 +165,32 @@ module.exports.create = async ({
     ctx.transaction = models.transaction.build(ctx.transaction)
     ctx.transaction.setupEncryptedProperties(ctx.dekBuffer)
 
-    if (ctx.transaction.agentOrderReference) {
-      // await ctx.transaction.save()
-    }
-
-    ctxCommon.doHandlerTimeStart(ctx)
-
-    await ctxCommon.doHandlerCall(ctx, 'handler')
-
-    // Call reverse handler with new context, if status is still processing
-    if (ctx.transaction.status === transactionStatuses.PROCESSING) {
-      ctx.handlerFailed = true
-      await ctxCommon.doHandlerCallAndIgnoreError(
-        Object.assign({}, ctx),
-        'reverseHandler'
-      )
-      if (ctx.transaction.status === transactionStatuses.REVERSED) {
-        ctx.reversed = true
+    await models.sequelize.transaction(async t => {
+      // if agentOrderReference is exist let save to test for uniqueness
+      if (ctx.transaction.agentOrderReference) {
+        await ctx.transaction.save()
       }
-    }
 
-    ctxCommon.doHandlerTimeEnd(ctx)
+      ctxCommon.doHandlerTimeStart(ctx)
 
-    await ctx.transaction.save()
+      await ctxCommon.doHandlerCall(ctx, 'handler')
+
+      // Call reverse handler with new context, if status is still processing
+      if (ctx.transaction.status === transactionStatuses.PROCESSING) {
+        ctx.handlerFailed = true
+        await ctxCommon.doHandlerCallAndIgnoreError(
+          Object.assign({}, ctx),
+          'reverseHandler'
+        )
+        if (ctx.transaction.status === transactionStatuses.REVERSED) {
+          ctx.reversed = true
+        }
+      }
+
+      ctxCommon.doHandlerTimeEnd(ctx)
+
+      await ctx.transaction.save()
+    })
 
     // Create expiry handler, if status is created
     if (ctx.transaction.status === transactionStatuses.CREATED) {

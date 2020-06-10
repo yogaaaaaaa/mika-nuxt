@@ -7,6 +7,7 @@ const _ = require('lodash')
 
 const { createError } = require('libs/error')
 const bni = require('libs/aqBni')
+
 const ctxSettle = require('../ctxHelpers/ctxSettle')
 
 const {
@@ -169,8 +170,6 @@ function assignBatchUploadConfig (ctx, config) {
 }
 
 function assignSaleTransaction (config, ctx, response) {
-  ctx.transaction.properties.createHandlerResponse = ctx.handlerResponse
-
   ctx.transaction.reference = response.ReferenceNumber
   ctx.transaction.referenceName = 'rrn'
   ctx.transaction.customerReference = config.track2Component.truncatedPan
@@ -191,15 +190,18 @@ function assignSaleTransaction (config, ctx, response) {
       type: ctx.local.cardIin.cardTypeId
     }
   }
+
+  ctx.transaction.references.ecr = config.ecr
+  ctx.transaction.changed('references', true)
+
+  ctx.transaction.properties.createHandlerResponse = ctx.handlerResponse
   ctx.transaction.properties.emv = config.commonEmvTags
+  ctx.transaction.properties.hostEmvResponse = response.EmvData
   ctx.transaction.properties.emvResponse = response.EmvData
   ctx.transaction.properties.posCode = config.posCode
   ctx.transaction.properties.entryMode = config.entryMode
   ctx.transaction.properties.signature = config.signature
   ctx.transaction.changed('properties', true)
-
-  ctx.transaction.references.ecr = config.ecr
-  ctx.transaction.changed('references', true)
 
   ctx.transaction.encryptedProperties.cardData = {
     appPan: config.appPan,
@@ -210,8 +212,6 @@ function assignSaleTransaction (config, ctx, response) {
 }
 
 function assignVoidSaleTransaction (config, ctx, response) {
-  ctx.transaction.properties.voidHandlerResponse = ctx.handlerResponse
-
   ctx.transaction.voidTraceNumber = config.traceNumber
 
   ctx.transaction.voidReference = response.ReferenceNumber
@@ -220,13 +220,13 @@ function assignVoidSaleTransaction (config, ctx, response) {
   ctx.transaction.voidAuthorizationReferenceName = 'approvalCode'
   ctx.transaction.voidAcquirerTimeAt = response.TransactionDateTime
 
-  // ctx.transaction.changed('references', true)
-  // ctx.transaction.changed('encryptedProperties', true)
+  ctx.transaction.properties.voidHandlerResponse = ctx.handlerResponse
+  ctx.transaction.changed('properties', true)
 }
 
 const handlerCommon = {
   defaultMinimumAmount: 1,
-  defaultMaximumAmount: null,
+  defaultMaximumAmount: 9999999999,
   singleTransactionOnly: true,
   useTraceNumber: true,
   useDek: true,
@@ -316,7 +316,7 @@ const handlerCommon = {
     }
 
     ctx.transaction.properties.reverseHandlerResponse = ctx.handlerResponse
-    ctx.transaction.changed('references', true)
+    ctx.transaction.changed('properties', true)
   },
   async reverseVoidHandler (ctx) {
     const config = assignCommonConfig(ctx)
@@ -336,7 +336,7 @@ const handlerCommon = {
     }
 
     ctx.transaction.properties.voidReverseHandlerResponse = ctx.handlerResponse
-    ctx.transaction.changed('references', true)
+    ctx.transaction.changed('properties', true)
   },
   async agentSettleHandler (ctx) {
     const debug = require('debug')('mika:trxManager:cardBni:agentSettleHandler')

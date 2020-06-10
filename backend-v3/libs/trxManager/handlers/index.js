@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 
 module.exports.acquirerHandlers = new Map()
+module.exports.acquirerHandlerNames = []
 
 /**
  * Construct a displayable handler information from acquirer handler object
@@ -31,6 +32,8 @@ module.exports.getAcquirerInfo = (handlerName) => {
  * Load all acquirer handler in current directory
  */
 module.exports.loadHandlers = () => {
+  module.exports.acquirerHandlers = new Map()
+
   fs
     .readdirSync(__dirname)
     .filter(file => {
@@ -51,4 +54,7 @@ module.exports.loadHandlers = () => {
         }
       })
     })
+
+  module.exports.acquirerHandlerNames =
+    Array.from(module.exports.acquirerHandlers.keys())
 }

@@ -249,7 +249,7 @@ module.exports.saleReverse = async (config) => {
   assignTransactionBody(config, body)
   assignReverseBody(config, body)
 
-  return ftieRequest(config, body, config.hostRetry)
+  return ftieRequest(config, body, config.hostReverseRetry)
 }
 
 module.exports.saleVoidReverse = async (config) => {
@@ -259,7 +259,7 @@ module.exports.saleVoidReverse = async (config) => {
   assignTransactionBody(config, body)
   assignReverseBody(config, body)
 
-  return ftieRequest(config, body, config.hostRetry)
+  return ftieRequest(config, body, config.hostReverseRetry)
 }
 
 module.exports.initialSettlement = async (config) => {

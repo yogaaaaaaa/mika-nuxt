@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
     acquirerTimeAt: DataTypes.DATE,
 
     agentOrderReference: DataTypes.STRING,
+    orderReference: DataTypes.STRING,
 
     processFee: DataTypes.DECIMAL(28, 2),
     shareAcquirer: DataTypes.DECIMAL(5, 4),

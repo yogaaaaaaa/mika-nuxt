@@ -14,39 +14,59 @@ exports.state = {
 
 const modules = new Map()
 
+function setTimer (name) {
+  return setInterval(() => console.log(`Ready: '${name}' is NOT ready in last 10 seconds`), 10000)
+}
+
 module.exports.addModule = async (name) => {
   if (!modules.get(name)) {
     console.log(`Ready: new module '${name}'`)
-    modules.set(name, exports.state.NOT_READY)
+    modules.set(name, {
+      state: exports.state.NOT_READY,
+      _timer: setTimer(name)
+    })
   }
 }
 
 module.exports.checkReadyAll = () => {
-  let component = 0
-  let readyModules = 0
+  let moduleCount = 0
+  let readyModuleCount = 0
 
-  for (const state of modules) {
-    if (state[1] === exports.state.READY) {
-      readyModules++
-    }
-    component++
+  for (const module of modules) {
+    if (module[1].state === exports.state.READY) readyModuleCount++
+    moduleCount++
   }
 
-  if (component === readyModules) {
+  if (moduleCount === readyModuleCount) {
     events.emit('ready')
   }
 }
 
 module.exports.ready = (name) => {
-  modules.set(name, exports.state.READY)
-  console.log('Ready:', name)
-  exports.checkReadyAll()
+  const module = modules.get(name)
+  if (module) {
+    module.state = exports.state.READY
+    clearInterval(module._timer)
+    module._timer = null
+    modules.set(name, module)
+
+    console.log('Ready:', name)
+
+    exports.checkReadyAll()
+  }
 }
 
 module.exports.notReady = (name) => {
-  console.log('Not Ready:', name)
-  modules.set(name, exports.state.NOT_READY)
-  events.emit('notReady')
+  const module = modules.get(name)
+  if (module) {
+    module.state = exports.state.NOT_READY
+    module._timer = setTimer(name)
+    modules.set(name, module)
+
+    console.log('Not Ready:', name)
+
+    events.emit('notReady')
+  }
 }
 
 module.exports.onReadyAllOnce = (handler) => {

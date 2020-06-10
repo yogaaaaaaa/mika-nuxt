@@ -14,7 +14,7 @@ const { generateSignature, verifySignature } = require('libs/aqDana/util')
  * Callback handler to notify if transaction is succeeded or not
  */
 module.exports.danaNotifHandle = async (req, res, next) => {
-  debug('====== Dana Notify Handle ======')
+  debug('Dana notify handle')
 
   let danaResponse = {}
   if (!req.rawBody) {
@@ -22,13 +22,15 @@ module.exports.danaNotifHandle = async (req, res, next) => {
   }
 
   danaResponse = JSON.parse(req.rawBody)
-  debug('Dana Finish Notify Data', JSON.stringify(danaResponse))
+  debug('Notify data :', JSON.stringify(danaResponse, null, 2))
+
   const verified = verifySignature(
     danaResponse.request,
     danaResponse.signature
   )
-  debug('verified:', verified)
+
   if (!verified) {
+    debug('Invalid notify message')
     return res.status(403).send({ message: 'Message not verified' })
   }
 
@@ -55,7 +57,7 @@ module.exports.danaNotifHandle = async (req, res, next) => {
   })
 
   if (!transaction) {
-    debug('no transaction')
+    debug('Invalid transaction')
     return sendAck(res, danaResponse)
   }
 
@@ -119,7 +121,7 @@ const sendAck = async (res, danaResponse) => {
   }
   delete ackResponse.response.head.reqTime
   const ack = await generateAck(ackResponse)
-  debug('dana ack:', JSON.stringify(ack))
+  debug('Notify ack :', JSON.stringify(ack, null, 2))
   return res.status(200).send(ack)
 }
 
