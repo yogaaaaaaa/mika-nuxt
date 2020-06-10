@@ -3,13 +3,15 @@ const developmentConfig = {
     {
       name: 'ftie-dev',
       script: '/usr/bin/java',
-      args: '-jar target/ftie-0.0.6-SNAPSHOT.jar',
+      args: '-jar target/ftie-1.0.0.jar',
       exec_interpreter: 'none',
       exec_mode: 'fork',
       watch: true,
-      ignore_watch: ['target/ftie-0.0.6-SNAPSHOT.jar'],
       time: true,
-      env: {}
+      env: {
+        SERVER_PORT: '9090',
+        LOGGING_LEVEL_ID_GETMIKA: 'DEBUG'
+      }
     }
   ]
 }
@@ -19,12 +21,14 @@ const productionConfig = {
     {
       name: 'ftie',
       script: '/usr/bin/java',
-      args: '-jar target/ftie-0.0.6-SNAPSHOT.jar',
+      args: '-jar target/ftie-1.0.0.jar',
       exec_interpreter: 'none',
       exec_mode: 'fork',
       watch: false,
       time: true,
-      env: {}
+      env: {
+        SERVER_PORT: '9090'
+      }
     }
   ]
 }

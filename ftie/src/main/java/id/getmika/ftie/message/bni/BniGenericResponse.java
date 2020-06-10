@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -26,7 +27,6 @@ import id.getmika.ftie.message.TransactionMessage;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "De57"})
 public class BniGenericResponse extends FtieResponse {
-
 	protected TransactionMessage tm;
 	private boolean beenParsed;
 	private byte[] ltwkDEK;
@@ -62,6 +62,8 @@ public class BniGenericResponse extends FtieResponse {
 		
 		if (key != null)
 			ltwkDEK = CommonUtil.hexStringToBytes(key);
+		
+		compose();
 	}
 	
 	public void compose() {
@@ -73,17 +75,13 @@ public class BniGenericResponse extends FtieResponse {
 		this.tm.parse(data, 0);
 	}
 	
-	public void printDE(Logger logger) {
-		for(DataElement de : tm.getIsomsg().getDataElements()) {
-			if (!de.isBeenParsed())
-				continue;
-			logger.info("DE " + de.getNumber() + ": " + CommonUtil.bytesToHexString(de.getBytes()));
-		}
+	@JsonIgnore
+	public TransactionMessage getTm() {
+		return tm;
 	}
 	
 	public String getMti() {
-		if (!beenParsed)
-			return null;
+		if (!beenParsed) return null;
 		return tm.getIsomsg().getMti();
 	}
 	
@@ -304,43 +302,45 @@ public class BniGenericResponse extends FtieResponse {
 		return CommonUtil.bytesToHexString(de.getValueElement().getBytes());
 	}
 	
-	public String getDe57() {
-		if (!beenParsed)
-			return null;
+	public void decomposeTle() {
+		if (!beenParsed) return;
+
 		DataElement de = this.tm.getIsomsg().getDE(57);
 		if (de == null) {
 			getMeta().setStatus("01");
-			getMeta().setReason("missing DE57 - DE 57");
-			return null;
+			getMeta().setReason("TLE decompose error - missing DE 57");
+			return;
 		}
-		if (!de.isBeenParsed())
-			return null;
+		if (!de.isBeenParsed()) return;
+
+		int lenDe57 = de.getLengthElement().toInt();
+		if (lenDe57 - 36 < 1) return;
 		
-		int lende57 = de.getLengthElement().toInt();
-		byte[] bufenc;
-		if (lende57 - 36 < 1)
-			return null;
-		
-		bufenc = new byte[lende57 - 36];
-		System.arraycopy(de.getValueBytes(), 36, bufenc, 0, lende57 - 36);
+		byte[] buffEncrypt = new byte[lenDe57 - 36];
+		byte[] buffDecrypt;
+		System.arraycopy(de.getValueBytes(), 36, buffEncrypt, 0, lenDe57 - 36);
+
 		try {
-			byte[] bufdecrypt = decrypt3DES(bufenc, ltwkDEK, new byte[8]);
-			TLV tlv = new TLV();
-			tlv.parse(bufdecrypt, 0);
-			
-			DataElement dex = tm.getIsomsg().getDE(tlv.getType());	
-			if (dex == null)
-				throw new IllegalArgumentException("Error. missing DE " + tlv.getType());
-			
-			tm.getIsomsg().addDE(dex);
-			dex.compose();
-			dex.parse(tlv.getBytes(), 0);
-			
+			buffDecrypt = decrypt3DES(buffEncrypt, ltwkDEK, new byte[8]);
 		} catch (Exception e) {
-			return null;
+			getMeta().setStatus("01");
+			getMeta().setReason("TLE decryption error");
+			return;
 		}
-				
-		return null;
+
+		TLV tlv = new TLV();
+		tlv.parse(buffDecrypt, 0);
+			
+		DataElement dex = tm.getIsomsg().getDE(tlv.getType());	
+		if (dex == null) {
+			getMeta().setStatus("01");
+			getMeta().setReason("TLE decompose error. unknown DE " + tlv.getType());
+			return;
+		}
+		
+		tm.getIsomsg().addDE(dex);
+		dex.compose();
+		dex.parse(tlv.getBytes(), 0);
 	}
 	
 	public String getPrivateData58() {
@@ -421,7 +421,6 @@ public class BniGenericResponse extends FtieResponse {
 	      System.arraycopy(tdesKeyData, 0, key, 0, 16);
 	      System.arraycopy(tdesKeyData, 0, key, 16, 8);
 	    } else {
-	      
 	      key = tdesKeyData;
 	    } 
 	    

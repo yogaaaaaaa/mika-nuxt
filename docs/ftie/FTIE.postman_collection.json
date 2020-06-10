@@ -1,0 +1,196 @@
+{
+	"info": {
+		"_postman_id": "0f8875e8-68f6-4d64-a453-1c21781180ce",
+		"name": "FTIE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "BNI",
+			"item": [
+				{
+					"name": "BNI SIT Tle Debit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Options\": {\n    \"HostAddress\": \"localhost\",\n    \"HostPort\": \"2010\",\n    \"HostTimeout\": 20000,\n    \"TpduNii\": \"82\"\n  },\n  \"Mti\": \"0200\",\n  \"ProcessingCode\": \"000000\",\n  \"TraceNumber\": \"1568\",\n  \"TerminalID\": \"12194621\",\n  \"MerchantID\": \"000100012001946\",\n  \"Nii\": \"82\",\n  \"TleOptions\": {\n    \"LtwkID\": \"0174\",\n    \"TleAcquirerID\": \"001\",\n    \"LtwkDEK\": \"8FA20889FB0B5B9EBAE364293D34B94F\",\n    \"LtwkMAK\": \"58203DA1CBF2E3DAF268FE97D64F1A8C\"\n  },\n  \"Pan\": \"5371762590002924\",\n  \"ExpirationDate\": \"2412\",\n  \"PinBlock\": \"CF6451C6AC5CB0B8\",\n  \"Amount\": \"1.00\",\n  \"EntryMode\": \"051\",\n  \"PosCode\": \"00\",\n  \"AppPan\": \"00\",\n  \"Track2\": \"5371762590002924D2412221764F\",\n  \"EmvData\": \"570E5371762590002924D2412221764F820274008407A00000060210109505008004000098009A032006059B02E8009C01005F2A0203609F02060000000000019F03060000000000009F090200019F101C0101A000800000E76EC99A00000000000000000000000000000000009F1A0203609F1E0830303030303930359F2608694E4E54E988126F9F2701809F3303E0F8C89F34030200009F3501229F3602032F9F3704E61B9C329F4104000035115F3401009F12064E5349434353\",\n  \"PrivateData62\": \"353437343932\"\n}"
+						},
+						"url": {
+							"raw": "{{ftieBaseUrl}}/bni/tle",
+							"host": [
+								"{{ftieBaseUrl}}"
+							],
+							"path": [
+								"bni",
+								"tle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BNI SIT No Tle Debit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Options\": {\n    \"HostAddress\": \"10.20.0.250\",\n    \"HostPort\": \"2010\",\n    \"HostTimeout\": 15000,\n    \"TpduNii\": \"78\"\n  },\n  \"Mti\": \"0320\",\n  \"ProcessingCode\": \"000000\",\n  \"TransmissionDateTime\": \"2020-01-08T08:21:33.290Z\",\n  \"TraceNumber\": \"2245\",\n  \"TerminalID\": \"12194620\",\n  \"MerchantID\": \"000100012001946\",\n  \"Nii\": \"78\",\n  \"Pan\": \"4512490001230016\",\n  \"ExpirationDate\": \"2402\",\n  \"Amount\": \"323.00\",\n  \"ReferenceNumber\": \"000331002242\",\n  \"ApprovalCode\": \"000041\",\n  \"ResponseCode\": \"00\",\n  \"EntryMode\": \"052\",\n  \"PosCode\": \"00\",\n  \"AppPan\": \"00\",\n  \"PrivateData60\": \"30323030303032323432303030333331303032323432\",\n  \"PrivateData62\": \"303032323432\"\n  \n}"
+						},
+						"url": {
+							"raw": "{{ftieBaseUrl}}/bni/notle",
+							"host": [
+								"{{ftieBaseUrl}}"
+							],
+							"path": [
+								"bni",
+								"notle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BNI SIT No Tle handshake",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Options\": {\n    \"HostAddress\": \"localhost\",\n    \"HostPort\": \"2010\",\n    \"HostTimeout\": 15000,\n    \"TpduNii\": \"74\"\n  },\n  \"Mti\": \"0800\",\n  \"ProcessingCode\": \"990000\",\n  \"TerminalID\": \"12194620\",\n  \"MerchantID\": \"000100012001946\",\n  \"Nii\": \"74\"\n}"
+						},
+						"url": {
+							"raw": "{{ftieBaseUrl}}/bni/notle",
+							"host": [
+								"{{ftieBaseUrl}}"
+							],
+							"path": [
+								"bni",
+								"notle"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Debug Response",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"Options\": {\n    \"HostTimeout\": \"60000\",\n    \"TpduNii\": \"82\"\n  },\n  \"TleOptions\": {\n    \"LtwkDEK\": \"37383123AD4CFDF43492A45D2CB93437\",\n    \"LtwkMAK\": \"5EC4FD46613E0119F4F7C1B3AE4C266B\",\n    \"TleAcquirerID\": \"001\",\n    \"LtwkID\": \"0056\"\n  },\n  \"Mti\": \"0200\",\n  \"Pan\": \"5178631000000049\",\n  \"ProcessingCode\": \"000000\",\n  \"Amount\": \"000000000100\",\n  \"TraceNumber\": \"15001\",\n  \"ExpirationDate\": \"2307\",\n  \"EntryMode\": \"051\",\n  \"Nii\": \"82\",\n  \"AppPan\": \"000\",\n  \"PosCode\": \"00\",\n  \"Track2\": \"5178631000000049D2307221041F\",\n  \"TerminalID\": \"12194620\",\n  \"MerchantID\": \"000100012001946\",\n  \"PinBlock\": \"2B51F86BDE1E5B2B\",\n  \"EmvData\": \"570E5178631000000049D2307221041F820218008407A0000000041010950580000480009A031912029C01005F2A0203609F02060000000000019F03060000000000009F090200029F10120110A00001220000000000000000000000FF9F1A0203609F1E0830303030303930359F26082C22E684DF0EB0689F2701809F3303E0F8C89F34034203009F3501229F360201B29F370412D823C29F4104000008735F340100\"\n}"
+				},
+				"url": {
+					"raw": "{{ftieBaseUrl}}/debug_response",
+					"host": [
+						"{{ftieBaseUrl}}"
+					],
+					"path": [
+						"debug_response"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Debug Trigger",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"Options\": {\n    \"HostTimeout\": \"60000\",\n    \"TpduNii\": \"82\"\n  },\n  \"TleOptions\": {\n    \"LtwkDEK\": \"37383123AD4CFDF43492A45D2CB93437\",\n    \"LtwkMAK\": \"5EC4FD46613E0119F4F7C1B3AE4C266B\",\n    \"TleAcquirerID\": \"001\",\n    \"LtwkID\": \"0056\"\n  },\n  \"Mti\": \"0200\",\n  \"Pan\": \"5178631000000049\",\n  \"ProcessingCode\": \"000000\",\n  \"Amount\": \"000000000100\",\n  \"TraceNumber\": \"15001\",\n  \"ExpirationDate\": \"2307\",\n  \"EntryMode\": \"051\",\n  \"Nii\": \"82\",\n  \"AppPan\": \"000\",\n  \"PosCode\": \"00\",\n  \"Track2\": \"5178631000000049D2307221041F\",\n  \"TerminalID\": \"12194620\",\n  \"MerchantID\": \"000100012001946\",\n  \"PinBlock\": \"2B51F86BDE1E5B2B\",\n  \"EmvData\": \"570E5178631000000049D2307221041F820218008407A0000000041010950580000480009A031912029C01005F2A0203609F02060000000000019F03060000000000009F090200029F10120110A00001220000000000000000000000FF9F1A0203609F1E0830303030303930359F26082C22E684DF0EB0689F2701809F3303E0F8C89F34034203009F3501229F360201B29F370412D823C29F4104000008735F340100\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9090/debug_trigger",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"debug_trigger"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "63f19380-7e65-4d04-a603-076b3c3a47d7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "c23b9fac-b200-4f06-b894-6f0ee8034648",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "0c89c09a-224f-4a2d-879b-92a6646d510c",
+			"key": "ftieBaseUrl",
+			"value": "http://localhost:9090",
+			"type": "string"
+		}
+	]
+}

@@ -12,13 +12,18 @@ import id.getmika.ftie.message.TransactionMessage;
 
 public class BniGenericRequest {
 
-	private int[] encDElist = new int[] {2, 14, 35, 42, 55, 63};
+	private int[] encryptedDEList = new int[] {2, 14, 35, 42, 55, 63};
 
 	private TransactionMessage tm;
 	private RequestOption options;
 	private RequestTLEOption TleOptions;
+
+	private String mti;
+	private String processingCode;
+	private String terminalID;
+	private String merchantID;
+	private String traceNumber;
 	
-	private int _mti;
 	private int _track2len;
 	private int _proccode;
 	private int _entrymode;	
@@ -33,7 +38,7 @@ public class BniGenericRequest {
 			
 	public BniGenericRequest() {
 		tm = new TransactionMessage();
-		tm.getIsomsg().setEncryptedDEList(encDElist);
+		tm.getIsomsg().setEncryptedDEList(encryptedDEList);
 		options = new RequestOption();
 		TleOptions = new RequestTLEOption();
 		tm.setProtoId(0x60);
@@ -99,13 +104,13 @@ public class BniGenericRequest {
 		this.tm.setDest(val);
 	}
 
-	public int getMti() {
-		return _mti;
+	public String getMti() {
+		return this.mti;
 	}
 	
-	public void setMti(int mti) {
-		_mti = mti;
-		tm.getIsomsg().setMti(mti);
+	public void setMti(String mti) {
+		this.mti = mti;
+		tm.getIsomsg().setMti(Integer.parseInt(mti));
 	}
 	
 	// ========== Data Element
@@ -123,7 +128,12 @@ public class BniGenericRequest {
 		}		
 	}
 	
+	public String getProcessingCode() {
+		return processingCode;
+	}
+
 	public void setProcessingCode(String processingCode) {
+		this.processingCode = processingCode;
 		try {
 			_proccode = Integer.parseInt(processingCode);
 			if (_proccode < 0)
@@ -149,19 +159,24 @@ public class BniGenericRequest {
 		}		
 	}
 	
-	public void setTransmissionDateTime(String strdttm) {
+	public void setTransmissionDateTime(String transmissionDateTime) {
 		try {
-			_zdtTransmit = ZonedDateTime.parse(strdttm, DateTimeFormatter.ISO_DATE_TIME);			
+			_zdtTransmit = ZonedDateTime.parse(transmissionDateTime, DateTimeFormatter.ISO_DATE_TIME);			
 			int time = _zdtTransmit.getHour() * 10000 + _zdtTransmit.getMinute() * 100 + _zdtTransmit.getSecond();
 			int date = _zdtTransmit.getMonthValue() * 100000000 + _zdtTransmit.getDayOfMonth() * 1000000;
 			this.tm.getIsomsg().addDE(new DataElement(7, date + time, 10));
 		}
 		catch (DateTimeParseException dtpe) {
-			throw new IllegalArgumentException("Invalid TransactionDateTime: " + strdttm);
+			throw new IllegalArgumentException("Invalid TransactionDateTime: " + transmissionDateTime);
 		}
 	}
 
+	public String getTraceNumber() {
+		return this.traceNumber;
+	}
+
 	public void setTraceNumber(String traceNumber) {
+		this.traceNumber = traceNumber;
 		try {
 			int number = Integer.parseInt(traceNumber);			
 			if (number < 0)
@@ -304,8 +319,12 @@ public class BniGenericRequest {
 		this.tm.getIsomsg().addDE(new DataElement(39, responseCode));
 	}
 
+	public String getTerminalID () {
+		return this.terminalID;
+	}
+
 	public void setTerminalID(String terminalID) {
-		
+		this.terminalID = terminalID;
 		if (terminalID.length() != 8)
 			throw new IllegalArgumentException("Must be 8 chars - TerminalID: " + terminalID);
 		
@@ -313,7 +332,12 @@ public class BniGenericRequest {
 		tm.getIsomsg().setTerminalId(terminalID);	
 	}
 
-	public void setMerchantID(String merchantID) {		
+	public String getMerchantID () {
+		return this.merchantID;
+	}
+
+	public void setMerchantID(String merchantID) {
+		this.merchantID = merchantID;
 		if (merchantID.length() != 15)
 			throw new IllegalArgumentException("Must be 15 chars - TerminalID: " + merchantID);
 

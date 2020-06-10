@@ -17,25 +17,21 @@ import id.getmika.ftie.message.EncodeType;
 import id.getmika.ftie.message.IsoMessage;
 import id.getmika.ftie.message.TLV;
 import id.getmika.ftie.message.bni.BniGenericResponse;
-import id.getmika.ftie.message.bni.credit.BniCreditSaleResponse;
 
 @RestController
-public class AppController extends BniBaseController {
+public class DebugController extends BaseController {
 
-	@Value("${bni.tpdu.srccredit}")
-	int tpdusrc;
+	private int tpdusrc = 82;
 	
-	@GetMapping("/")
-	//public void home() {
-	public BniGenericResponse home() {
-		
-		/*testBinary();
-		testNumeric();
-		testAlphaNumeric();
-		testAlphaNumericPacked();
-		testDataTypeWithValue();
-		testParse();
-		testDataElement();*/
+	@GetMapping("/debug_response")
+	public BniGenericResponse debugResponse() {
+		//testBinary();
+		//testNumeric();
+		//testAlphaNumeric();
+		//testAlphaNumericPacked();
+		//testDataTypeWithValue();
+		//testParse();
+		//testDataElement();
 		//testIsoMessage();
 		//testCreditSaleRequest();
 		//testParseCreditSaleRequest();
@@ -48,8 +44,33 @@ public class AppController extends BniBaseController {
 		//testToInt();
 		//testZonedDateTime();
 		//testTLV();
-		//return testLTMK();		
+		//return testLTMK();
 		return testLoadKey();
+	}
+
+	@GetMapping("/debug_trigger")
+	public void debugTrigger() {
+		//testBinary();
+		//testNumeric();
+		//testAlphaNumeric();
+		//testAlphaNumericPacked();
+		//testDataTypeWithValue();
+		//testParse();
+		//testDataElement();
+		//testIsoMessage();
+		//testCreditSaleRequest();
+		//testParseCreditSaleRequest();
+		//testParseDate();
+		//getLogger().info("tpdusrc: " + tpdusrc);
+		//testEmv();
+		//return new BniResponse();
+		//testPAN();
+		//testBatchNumber();
+		//testToInt();
+		//testZonedDateTime();
+		//testTLV();
+		//return testLTMK();
+		//return testLoadKey();
 	}
 	
 	public BniGenericResponse testLoadKey() {
@@ -72,14 +93,6 @@ public class AppController extends BniBaseController {
 		response.parse(respbuf);
 		return response;
 	}
-	/*@PostMapping("/")
-	public BniResponseNew postHome(@RequestBody BniDebitSaleRequestNew request) {
-		BniDebitSaleResponseNew response = new BniDebitSaleResponseNew();
-		setDebitTpdu(request);		
-
-		postTransactionNew(request, response);
-		return response;
-	}*/
 	
 	public void testTLV() {
 		String data = "570E5178631000000049D2307221041F82021800950580000480009A031911289C01005F2A0203609F02060000000000019F03060000000000009F090200029F10120110A00001220000000000000000000000FF9F1A0203609F1E0830303030303930359F26082338CF0616A6AF139F2701809F3303E0F8C89F34034203009F3501229F360201669F370475FC5DEB9F4104000016635F340100";
@@ -102,6 +115,7 @@ public class AppController extends BniBaseController {
 		int date = zdt.getMonthValue() * 100 + zdt.getDayOfMonth();
 		getLogger().info("time: " + time + " - date: " + date);
 	}
+
 	public void testParseDate() {
 		/*String strTime = "180634";
 		String strDate = "20191104";*/
@@ -185,19 +199,6 @@ public class AppController extends BniBaseController {
 		im.addDE(new DataElement(35, str).setPacked(true).setL2(EncodeType.BINARY).setLnVal(24));		
 		im.compose();
 		getLogger().info("testIsoMessage: " + CommonUtil.bytesToHexString(im.getBytes()));
-	}
-	
-	
-	public void testParseCreditSaleRequest() {
-		String strResp = "006c60000100800210303801000e8000810000000000000001000526232344151031008030303030313130353236323320202020202030333132313934363230003648544c453033303031313231393436323032303130303230303030303030300000000000a3c6bc8300000000";
-		byte[] bufResp = CommonUtil.hexStringToBytes(strResp);
-		BniCreditSaleResponse resp = new BniCreditSaleResponse();
-		resp.compose();
-		resp.parse(bufResp);
-		resp.getResponseCode();
-		//resp.getDateTime();
-		/*getLogger().info("TLED: " + CommonUtil.bytesToHexString(resp.getTLED()));
-		getLogger().info("MAC: " + CommonUtil.bytesToHexString(resp.getMAC()));*/
 	}
 	
 	public void testEmv() {
