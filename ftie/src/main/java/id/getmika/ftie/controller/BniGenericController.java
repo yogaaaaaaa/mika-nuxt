@@ -13,76 +13,97 @@ import id.getmika.ftie.message.bni.BniGenericResponse;
 @RestController
 public class BniGenericController extends BaseController {
 
-	/*@Qualifier("bniHost")
-	@Autowired
-	protected InetSocketAddress host;*/
-	
 	@PostMapping("/bni/tle")
 	public BniGenericResponse postTle(@RequestBody BniGenericRequest request) {
-		getLogger().info(" ");
-		getLogger().info("=======================================================================================");
+		long startTime = System.currentTimeMillis();
 		BniGenericResponse response = new BniGenericResponse(request.getTleOptions().getLtwkDEK());
-		postTleTransaction(request, response, "/bni/tle");
-		if (!response.getMeta().getStatus().equals("10"))
-			getLogger().info(">>> MTI : " + response.getMti() + " <<<");
-		response.printDE(getLogger());
-		
+		processTransaction(request, response, true);
+		long endTime = System.currentTimeMillis();
+		long durationMs = (endTime - startTime);
+
+		logRequest("/bni/tle", request, response, durationMs);
+
 		return response;
 	}
 	
 	@PostMapping("/bni/notle")
 	public BniGenericResponse postNoTle(@RequestBody BniGenericRequest request) {
-		getLogger().info(" ");
-		getLogger().info("=======================================================================================");
+		long startTime = System.currentTimeMillis();
 		BniGenericResponse response = new BniGenericResponse(null);
-		postNoTleTransaction(request, response, "/bni/notle");
-		if (!response.getMeta().getStatus().equals("10"))
-			getLogger().info(">>> MTI : " + response.getMti() + " <<<");
-		response.printDE(getLogger());
+		processTransaction(request, response, false);
+		long endTime = System.currentTimeMillis();
+		long durationMs = (endTime - startTime);
+
+		logRequest("/bni/notle", request, response, durationMs);
+		
 		return response;
 	}
-		
-	private void postTleTransaction(BniGenericRequest request, BniGenericResponse response, String logmsg) {
-		response.compose();
-		request.compose();
-		
-		getLogger().info(">>> TPDU NII: " + request.getOptions().getTpduNii() + " - MTI: " + request.getMti() + " <<<");
-		for (DataElement de: request.getTm().getIsomsg().getDataElements())
-			getLogger().info("DE " + de.getNumber() + ": " + CommonUtil.bytesToHexString(de.getBytes()));
-		
+
+	private void logRequest (String logMessage, BniGenericRequest request, BniGenericResponse response, long durationMs) {
+		int tpduNii = request.getOptions().getTpduNii();
+		String mti = request.getMti();
+		String procCode = request.getProcessingCode();
+		String stan = request.getTraceNumber();
+		String tid = request.getTerminalID();
+		String mid = request.getMerchantID();
+
+		String mtiResponse = response.getMti();
+		String responseCode = response.getResponseCode();
+
+		String logSend = "[Send]" + " NII:" + tpduNii + " MTI:" + mti + " PC:" + procCode + " TID:" + tid + " MID:" + mid + " STAN:" + stan;
+		String logReceive;
+		if(response.getMeta().getStatus().equals("00")) {
+			logReceive = "[Receive] " + "MTI:" + mtiResponse + " RC:" + responseCode;
+		} else {
+			logReceive = "[Error] " + response.getMeta().getStatus() + " - " + response.getMeta().getReason();
+		}
+		getLogger().info(logMessage + " " + logSend + " " + logReceive + " [" + durationMs + " ms]");
+	}
+
+	private void processTransaction(BniGenericRequest request, BniGenericResponse response, boolean isTle) {
+		if(getLogger().isDebugEnabled()) {
+			request.compose();
+			getLogger().debug("");
+			getLogger().debug(">>> TPDU NII: " + request.getOptions().getTpduNii() + " - MTI: " + request.getMti() + " <<<");
+			for (DataElement de: request.getTm().getIsomsg().getDataElements()) {
+				getLogger().debug("DE " + de.getNumber() + ": " + CommonUtil.bytesToHexString(de.getBytes()));
+			}
+			getLogger().debug("Composed: " + CommonUtil.bytesToHexString(request.getBytes()));
+		}
+
 		try {
-			request.composeTLE();
-			getLogger().info("To Send: " + CommonUtil.bytesToHexString(request.getBytes()));
-			processTransaction(request, response, logmsg);
+			if(isTle) {
+				request.composeTLE();
+			} else {
+				request.compose();
+			}
+
+			InetSocketAddress host = new InetSocketAddress(request.getOptions().getHostAddress(), request.getOptions().getHostPort());
+			byte[] bufferRequest = request.getBytes();
+			if(getLogger().isDebugEnabled()) {
+				getLogger().debug("Send: " + bufferRequest.length + " bytes > " + CommonUtil.bytesToHexString(bufferRequest));
+			}
+			byte[] bufferResponse = sendMessage(host, bufferRequest , response, request.getOptions().getTimeOut());
+
+			if (response.getMeta().getStatus().equals("00")) {
+				if(getLogger().isDebugEnabled()) {
+					getLogger().debug("Receive: " + bufferResponse.length + " bytes < " + CommonUtil.bytesToHexString(bufferResponse));
+				}
+
+				response.parse(bufferResponse);
+				if(isTle) response.decomposeTle();
+
+				if(getLogger().isDebugEnabled()) {
+					getLogger().debug(">>> MTI : " + response.getMti() + " <<<");
+					for (DataElement de: response.getTm().getIsomsg().getDataElements()) {
+						if (!de.isBeenParsed()) continue;
+						getLogger().debug("DE " + de.getNumber() + ": " + CommonUtil.bytesToHexString(de.getBytes()));
+					}
+				}
+			}
 		} catch (Exception e) {
 			response.getMeta().setStatus("01");
 			response.getMeta().setReason(e.getMessage());
 		}
 	}
-	
-	private void postNoTleTransaction(BniGenericRequest request, BniGenericResponse response, String logmsg) {
-		response.compose();
-		request.compose();
-		
-		getLogger().info(">>> TPDU NII: " + request.getOptions().getTpduNii() + " - MTI: " + request.getMti() + " <<<");
-		for (DataElement de: request.getTm().getIsomsg().getDataElements())
-			getLogger().info("DE " + de.getNumber() + ": " + CommonUtil.bytesToHexString(de.getBytes()));
-		
-		getLogger().info("To Send: " + CommonUtil.bytesToHexString(request.getBytes()));
-		processTransaction(request, response, logmsg);
-	}
-
-	private void processTransaction(BniGenericRequest request, BniGenericResponse response, String logmsg) {
-		
-		InetSocketAddress host = new InetSocketAddress(request.getOptions().getHostAddress(), request.getOptions().getHostPort());
-		byte[] bufReq = request.getBytes();
-		byte[] bufResp = sendMessage(host, bufReq, response, request.getOptions().getTimeOut(), logmsg);
-		
-		if (!response.getMeta().getStatus().equals("00"))
-			return;
-
-		response.parse(bufResp);
-	}
-	
-	
 }
