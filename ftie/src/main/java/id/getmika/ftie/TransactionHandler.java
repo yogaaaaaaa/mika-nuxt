@@ -5,13 +5,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.timeout.ReadTimeoutException;
 
 public class TransactionHandler extends SimpleChannelInboundHandler<ByteBuf> {
 	private byte[] bufferRequest;
 	private byte[] bufferResponse;
-	private boolean readTimeout = false;
-	private ChannelFuture writeFuture;
+
+	private Throwable writeException;
+	private Throwable channelException;
 	
 	public TransactionHandler(byte[] bufferRequest) {
 		this.bufferRequest = bufferRequest;
@@ -19,8 +19,9 @@ public class TransactionHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) {		
-		this.writeFuture = ctx.write(Unpooled.wrappedBuffer(this.bufferRequest));
+		ChannelFuture writeFuture = ctx.write(Unpooled.wrappedBuffer(this.bufferRequest));
 		ctx.flush();
+		if(!writeFuture.isSuccess()) this.writeException = writeFuture.cause();
 	}
 	
 	@Override
@@ -32,22 +33,22 @@ public class TransactionHandler extends SimpleChannelInboundHandler<ByteBuf> {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		if(cause instanceof ReadTimeoutException) {
-			this.readTimeout = true;
-		} else {
-			super.exceptionCaught(ctx, cause);
-		}
+		this.channelException = cause;
 	}
 	
 	public byte[] getBufferResponse() {
 		return this.bufferResponse;
 	}
-
-	public ChannelFuture getWriteFuture() {
-		return this.writeFuture;
+	
+	public Throwable getChannelException() {
+		return this.channelException;
 	}
 
-	public boolean isReadTimeout() {
-		return this.readTimeout;
+	public Throwable getWriteException() {
+		return this.writeException;
+	}
+
+	public boolean isHandlerFailed() {
+		return this.channelException != null || this.writeException != null;
 	}
 }

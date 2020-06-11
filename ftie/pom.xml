@@ -12,7 +12,7 @@
 	<groupId>id.getmika</groupId>
 	<artifactId>ftie</artifactId>
 	<name>ftie</name>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<description>Financial Transaction Interface Engine</description>
 
 	<properties>
