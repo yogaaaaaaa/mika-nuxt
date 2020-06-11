@@ -16,5 +16,11 @@ This project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [1.1.0] - 2019-06-11
+### Changed
+  - Default config level for `id.getmika.*` to `INFO`
+### Fixed
+  - Fixed invalid error message when remote host suddenly close the connection
+
 ## [1.0.0] - 2019-06-10
   - Initial release
