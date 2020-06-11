@@ -34,6 +34,7 @@ After version 3.1.0, this project follow these guidelines,
   - `kumapay` is no longer randomly failing on refund
   - Changed `cardBni*` handler default maximum amount to 9999999999, 
     which follow maximum numeric part allowed by ISO8583
+  - Package update, see `package.json`
 ### Fixed
   - Fixed broken agent acquirer exclusion in which agent will list all acquirers regardless of
     `agentAcquirerExclusion` table. Probably caused by changes in sequelize merge method
@@ -52,7 +53,7 @@ After version 3.1.0, this project follow these guidelines,
   - Display correct error when `acquirerConfigAgent` does not exist when creating a transaction 
     with a handler that needs it
 ### Security
-  - Removed `base64-img` module because of vulnerabilities. Functionality of the module
+  - Removed `base64-img` package because of vulnerabilities. Functionality of the package
     is already replaced with self implementation
 
 ## [3.13.5] - 2020-05-28
