@@ -3,7 +3,7 @@ const developmentConfig = {
     {
       name: 'ftie-dev',
       script: '/usr/bin/java',
-      args: '-jar target/ftie-1.0.0.jar',
+      args: '-jar target/ftie-1.1.0.jar',
       exec_interpreter: 'none',
       exec_mode: 'fork',
       watch: true,
@@ -21,7 +21,7 @@ const productionConfig = {
     {
       name: 'ftie',
       script: '/usr/bin/java',
-      args: '-jar target/ftie-1.0.0.jar',
+      args: '-jar target/ftie-1.1.0.jar',
       exec_interpreter: 'none',
       exec_mode: 'fork',
       watch: false,
