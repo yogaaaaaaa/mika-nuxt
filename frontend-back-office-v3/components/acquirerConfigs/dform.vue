@@ -107,7 +107,7 @@
             />
           </v-flex>
         </v-layout>
-        <div v-if="created == false">
+        <div>
           <h4 class="mb-4">
             Config
             <tooltip
@@ -288,6 +288,7 @@ export default {
         if (this.handlerLoading) return
         if (this.searchHandler == null) this.searchHandler = ''
         this.getHandlers()
+        this.checkHandler(this.formData.handler)
       }, 500),
     },
     tempConfig: {
