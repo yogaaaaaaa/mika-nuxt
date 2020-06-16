@@ -16,6 +16,11 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.14.1] - 2020-06-16
+### Fixed
+  - Fix possible empty `properties` object when `kumabank` trx handler is used, 
+    caused by missing `changed` flag.
+
 ## [3.14.0] - 2020-06-10
 ### Added
   - Added `orderReference` in transaction. It can be used as merchant 3rd party references
