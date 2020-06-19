@@ -16,6 +16,10 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.14.2] - 2020-06-19
+### Fixed
+  - Fixed ignored check on `followPasswordExpiry` 
+
 ## [3.14.1] - 2020-06-16
 ### Fixed
   - Fix possible empty `properties` object when `kumabank` trx handler is used, 
