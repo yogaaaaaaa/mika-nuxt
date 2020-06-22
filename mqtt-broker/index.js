@@ -6,8 +6,10 @@ const { version } = require('./package.json')
 const config = require('config')
 const serverFactory = require('./lib/serverFactory')
 const authRedisHandler = require('./lib/authRedisHandler')
+const redis = require('./lib/redis')
+const mosqAuthHash = require('./lib/mosqAuthHash')
 
-function begin () {
+async function begin () {
   const broker = aedes()
   const servers = []
 
@@ -15,6 +17,11 @@ function begin () {
   if (config.authEnabled) {
     Object.assign(broker, authRedisHandler)
     console.log('Redis auth enabled')
+    if (config.authRootPassword) {
+      const rootUserKey = config.authPattern.replace(/%u/g, config.authRootUser)
+      await redis.set(rootUserKey, await mosqAuthHash.hashPassword(config.authRootPassword))
+      console.log('Root user password set')
+    }
   }
 
   if (Array.isArray(config.servers)) {
