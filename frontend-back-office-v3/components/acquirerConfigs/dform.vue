@@ -421,6 +421,9 @@ export default {
     checkHandler(params) {
       let config = this.configHandler.filter(x => x.id == params)
       this.columnConfig = config[0] ? config[0].value : ''
+      if (this.initialData.handler) {
+        this.tempConfig = this.initialData.handler
+      }
       return this.columnConfig
     },
   },

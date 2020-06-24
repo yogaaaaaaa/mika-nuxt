@@ -185,6 +185,7 @@ export default {
           taxCardNumber: data.taxCardNumber,
           website: data.website,
           logo: data.logo,
+          icon: data.icon,
         }
         const response = await this.$axios.$post(this.url, postData)
         this.items.unshift(response.data)
