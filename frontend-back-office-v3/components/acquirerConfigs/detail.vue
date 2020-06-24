@@ -49,12 +49,12 @@ export default {
       try {
         data.config = JSON.parse(JSON.stringify(data.config))
         const postData = {
-          name: data.name,
-          description: data.description,
+          name: data.formData.name,
+          description: data.formData.description,
           config: data.config,
-          handler: data.handler,
-          sandbox: data.sandbox,
-          merchantId: data.merchantId,
+          handler: data.formData.handler,
+          sandbox: data.formData.sandbox,
+          merchantId: data.formData.merchantId,
         }
         const response = await this.$axios.$put(
           `${this.url}/${this.$route.params.id}`,
