@@ -40,7 +40,7 @@
         <v-toolbar color="primary" dark flat>
           <v-toolbar-title>{{ btnAddText }}</v-toolbar-title>
           <v-spacer/>
-          <v-btn icon dark @click="modalAddForm = false">
+          <v-btn data-test="addMerchant" icon dark @click="modalAddForm = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-toolbar>
@@ -168,6 +168,12 @@ export default {
           description: data.description,
           email: data.email,
           name: data.name,
+          streetAddress: data.streetAddress,
+          locality: data.locality,
+          district: data.district,
+          city: data.city,
+          province: data.province,
+          postalCode: data.postalCode,
           ownerEmail: data.ownerEmail,
           ownerIdCardNumber: data.ownerIdCardNumber,
           ownerIdCardType: data.ownerIdCardType,
