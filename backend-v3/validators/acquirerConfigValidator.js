@@ -5,12 +5,12 @@ const _ = require('lodash')
 const { body } = require('express-validator')
 
 const helper = require('./helper')
-const acquirerHandlers = Array.from(require('../libs/trxManager').acquirerHandlers.keys())
+const { acquirerHandlerNames } = require('libs/trxManager')
 
 const nameValidator = () => body('name').not().isEmpty()
 const configValidator = () => body('config').custom((config) => _.isPlainObject(config))
 const merchantIdValidator = () => body('merchantId').isInt()
-const handlerValidator = () => body('handler').isIn(Object.values(acquirerHandlers)).not().isEmpty()
+const handlerValidator = () => body('handler').isIn(Object.values(acquirerHandlerNames)).not().isEmpty()
 
 const defaultValidator = [
   helper.archivedAtValidator,
@@ -21,12 +21,10 @@ const defaultValidator = [
 
 module.exports.bodyCreate = [
   defaultValidator,
-  handlerValidator(),
   nameValidator()
 ]
 
 module.exports.bodyUpdate = [
   defaultValidator,
-  handlerValidator().optional(),
   nameValidator().optional()
 ]

@@ -33,6 +33,8 @@ module.exports = (err) => {
       return msgTypes.MSG_ERROR_TRANSACTION_INVALID_SETTLE_BATCH
     case trxManagerErrorTypes.UNFINISHED_SETTLE_BATCH:
       return msgTypes.MSG_ERROR_TRANSACTION_UNFINISHED_SETTLE_BATCH
+    case trxManagerErrorTypes.ORDER_REFERENCE_FINISHED:
+      return msgTypes.MSG_ERROR_TRANSACTION_ORDER_REFERENCE_FINISHED
 
     case trxManagerErrorTypes.INVALID_USER_TOKEN:
       return msgTypes.MSG_ERROR_TRANSACTION_INVALID_USER_TOKEN

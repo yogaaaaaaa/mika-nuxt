@@ -22,6 +22,10 @@ module.exports.eventTypes = constants.eventTypes
 module.exports.errorTypes = constants.errorTypes
 module.exports.paymentClasses = constants.paymentClasses
 
+// Load all acquirer handler
+handlers.loadHandlers(exports)
+
+module.exports.acquirerHandlerNames = handlers.acquirerHandlerNames
 module.exports.acquirerHandlers = handlers.acquirerHandlers
 module.exports.formatAcquirerInfo = handlers.formatAcquirerInfo
 module.exports.getAcquirerInfo = handlers.getAcquirerInfo
@@ -42,6 +46,3 @@ module.exports.agentSettle = require('./actions/agentSettle').agentSettle
 module.exports.agentSettleAsync = require('./actions/agentSettle').agentSettleAsync
 module.exports.check = null
 module.exports.followUp = null
-
-// Load all acquirer handler
-handlers.loadHandlers(exports)

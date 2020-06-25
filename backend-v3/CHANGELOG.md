@@ -16,6 +16,67 @@ After version 3.1.0, this project follow these guidelines,
     Remember, to include any hotfix changes in this changelog and incorporate 
     any changes in next release.
 
+## [3.14.2] - 2020-06-19
+### Fixed
+  - Fixed ignored check on `followPasswordExpiry` 
+
+## [3.14.1] - 2020-06-16
+### Fixed
+  - Fix possible empty `properties` object when `kumabank` trx handler is used, 
+    caused by missing `changed` flag.
+
+## [3.14.0] - 2020-06-10
+### Added
+  - Added `orderReference` in transaction. It can be used as merchant 3rd party references
+  - Agent can provide its custom field in `properties` and `references` when creating transaction
+  - Serve static config for agent in which provide lists of CAPK (Certificate authority Public Key) 
+    and AID (Application Identifier) for agent's EMV usage
+  - Serve client config for agent in which provide unifying changeable config
+  - `x-forwarded-ip` is added as an alternative HTTP header to get real client IP when 
+    creating transaction and recording audit
+  - When module is taking too long to load/ready (e.g `Ready: 'mqtt'`) it will continuously logs,
+    ```
+    Ready: 'mqtt' is NOT ready in last 10 seconds
+    ``` 
+  - Partially added integration test
+### Changed
+  - `kumapay` is no longer randomly failing on refund
+  - Changed `cardBni*` handler default maximum amount to 9999999999, 
+    which follow maximum numeric part allowed by ISO8583
+  - Package update, see `package.json`
+### Fixed
+  - Fixed broken agent acquirer exclusion in which agent will list all acquirers regardless of
+    `agentAcquirerExclusion` table. Probably caused by changes in sequelize merge method
+  - Fixed `dana` missing acquirer reference (`acquirementId`) saves in expiry handler, 
+    which causes error in refund
+  - Fixed invalid migration file name `0037-add-column-merchant-logo.js`, renamed to
+    `0037-add-column-merchant-icon.js`. Manual rename is maybe needed in `sequelizeMeta` table for
+    existing environment before upgrading to this version
+  - Fixed several missing changed flag for `properties` and `references` field 
+    in `cardBni*` handler
+  - Fixed invalid expiration date check in `card.js`
+  - Default MID config for `tcashQrn` is now empty, it prevent accidental transaction    
+    creation when config is invalid
+  - Added validation and uniqueness check for `agentOrderReference` when creating transaction
+  - Acquirer configs for `tcashQrn` in development seeder is now using Mika owns MID
+  - Display correct error when `acquirerConfigAgent` does not exist when creating a transaction 
+    with a handler that needs it
+### Security
+  - Removed `base64-img` package because of vulnerabilities. Functionality of the package
+    is already replaced with self implementation
+
+## [3.13.5] - 2020-05-28
+### Security
+  - Fixed invalid production environment (NODE_ENV) check. Inadvertently exposing
+    development specific function into production environment. Exposing, 
+      - Global debug interface, fortunately is secured using debug key
+      - Agent level, transaction debug function (e.g change transaction status)
+
+## [3.13.4] - 2020-04-22
+### Fixed
+  - Fixed invalid invalid roles for admins 'agent', 'acquirerStaff' 
+    and 'merchantStaff' reset password
+
 ## [3.13.3] - 2020-04-21
 ### Fixed
   - Fixed invalid `acquirerConfig.handler` validator.

@@ -89,11 +89,15 @@ module.exports = (sequelize, DataTypes) => {
   }))
   acquirer.addScope('agentExclusion', (agentId) => ({
     where: {
-      id: {
-        [Op.notIn]: Sequelize.literal(
-          query.get('sub/getAcquirerExclusionByAgent.sql', [agentId])
-        )
-      }
+      [Op.and]: [
+        {
+          id: {
+            [Op.notIn]: Sequelize.literal(
+              query.get('sub/getAcquirerExclusionByAgent.sql', [agentId])
+            )
+          }
+        }
+      ]
     }
   }))
 

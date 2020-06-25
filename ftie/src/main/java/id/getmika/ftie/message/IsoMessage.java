@@ -21,7 +21,7 @@ public class IsoMessage {
 	
 	private byte[] ltwkDEK;
 	private byte[] ltwkMAK;
-	private int[] encDElist;
+	private int[] encDEList;
 	private String acquirerId;
 	private String terminalId;
 	private String ltwkId;
@@ -53,8 +53,8 @@ public class IsoMessage {
 		this.ltwkMAK = CommonUtil.hexStringToBytes(ltwkMAK);
 	}
 	
-	public void setEncryptedDEList(int[] encDElist) {
-		this.encDElist = encDElist;
+	public void setEncryptedDEList(int[] encryptedDEList) {
+		this.encDEList = encryptedDEList;
 	}
 
 	public void setAcquirerId(String acquirerId) {
@@ -177,18 +177,17 @@ public class IsoMessage {
 	
 	public void composeTLE() throws Exception {		
 		compose();
-		this.logger.info("Iso Msg: " + CommonUtil.bytesToHexString(getBytes()));
 		this.bitmap.setBit(64);
 		
 		byte[] de64MAC = MACSHA1(getBytes(), this.ltwkMAK);		
 		
 		int tlv_len = 0;
 		ArrayList<TLV> arrTLV = new ArrayList<TLV>();
-		for(int index = 0; index < this.encDElist.length; index++) {
-			DataElement de = this.getDE(this.encDElist[index]);
+		for(int index = 0; index < this.encDEList.length; index++) {
+			DataElement de = this.getDE(this.encDEList[index]);
 			if (de == null)
 				continue;
-			TLV tlv = new TLV(this.encDElist[index], de.getDataSize(), de.getBytes());
+			TLV tlv = new TLV(this.encDEList[index], de.getDataSize(), de.getBytes());
 			tlv.compose();
 			arrTLV.add(tlv);
 			tlv_len += tlv.getBytes().length;
@@ -209,7 +208,7 @@ public class IsoMessage {
 			idx += src.length;
 		}
 		
-		logger.info("ProtText: " + CommonUtil.bytesToHexString(TLVbuf));
+		logger.debug("ProtText: " + CommonUtil.bytesToHexString(TLVbuf));
 		
 		byte[] encTLV = null;
 	    if (TLVbuf.length > 0)
@@ -255,7 +254,6 @@ public class IsoMessage {
 		
 		return MAC;
 	}
-
 
 	private byte[] encrypt3DES(byte[] plaintext, byte[] tdesKeyData, byte[] initVector) throws Exception {
 		

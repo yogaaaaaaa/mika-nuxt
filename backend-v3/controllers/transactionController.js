@@ -11,7 +11,7 @@ const crudGenerator = require('./helpers/crudGenerator')
 
 const transactionValidator = require('validators/transactionValidator')
 
-const isEnvProduction = process.NODE_ENV === 'production'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 module.exports.createTransaction = async (req, res, next) => {
   const trxCreateResult = await trxManager.create(
@@ -24,14 +24,18 @@ module.exports.createTransaction = async (req, res, next) => {
         amount: req.body.amount,
 
         agentOrderReference: req.body.agentOrderReference,
+        orderReference: req.body.orderReference,
 
-        ipAddress: req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip,
+        ipAddress: req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip,
 
         locationLat: req.body.locationLat,
         locationLong: req.body.locationLong,
 
         userToken: req.body.userToken,
-        userTokenType: req.body.userTokenType
+        userTokenType: req.body.userTokenType,
+
+        properties: req.body.properties,
+        references: req.body.references
       },
       ctxOptions: {
         flags: req.body.flags,
@@ -264,7 +268,8 @@ module.exports.createTransactionMiddlewares = [
   cipherboxMiddleware.processCipherbox(true),
   transactionValidator.createTransactionValidator,
   errorMiddleware.validatorErrorHandler,
-  exports.createTransaction
+  exports.createTransaction,
+  errorMiddleware.sequelizeErrorHandler
 ]
 
 module.exports.reverseTransactionMiddlewares = [

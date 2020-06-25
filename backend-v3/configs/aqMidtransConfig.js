@@ -6,7 +6,7 @@
 
 const commonConfig = require('configs/commonConfig')
 
-const isEnvProduction = process.NODE_ENV === 'production'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 let baseConfig = {
   notifEndpoint: '/acquirer_notif/midtrans',

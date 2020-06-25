@@ -12,8 +12,6 @@ const {
   queryTransaction,
   refundTransaction
 } = require('libs/aqDana')
-const trxManager = require('../../trxManager')
-const models = require('models')
 const debug = require('debug')('mika:dana:handler')
 const config = require('configs/aqDanaConfig')
 const {
@@ -81,7 +79,6 @@ module.exports = {
   async handler (ctx) {
     debug('Handler')
     const response = await createTransaction(ctx)
-    debug('Handler Dana Response: ', JSON.stringify(response))
     checkResponse(response)
     const danaResponse = response.response
     ctx.transaction.token = danaResponse.body.qrisCode
@@ -93,13 +90,11 @@ module.exports = {
    */
   async cancelHandler (ctx) {
     const response = await cancelTransaction(ctx)
-    debug('cancelHandler Dana Response: ', JSON.stringify(response))
     checkResponse(response)
   },
 
   /**
    * To make Dana transaction expires
-   * @param {*} ctx
    */
   async expiryHandler (ctx) {
     debug('Expiry Handler')
@@ -108,6 +103,7 @@ module.exports = {
     const response = await queryTransaction(ctx)
 
     // Check Dana Query Status if Success
+    // if not, cancel transaction on Dana Side
     if (response) {
       const danaResponse = response.response
       const resultCode = danaResponse.body.resultInfo.resultCode
@@ -116,31 +112,19 @@ module.exports = {
           danaResponse.body.statusDetail.acquirementStatus
         if (acquirementStatus && acquirementStatus === 'SUCCESS') {
           transaction.status = transactionStatuses.SUCCESS
+          transaction.reference = danaResponse.body.acquirementId
+          transaction.referenceName = 'acquirementId'
         }
         if (acquirementStatus === 'INIT') {
-          transaction.status = transactionStatuses.CANCELED
           await this.cancelHandler({ transaction })
         }
-
-        return models.sequelize.transaction(async t => {
-          await transaction.save({ transaction: t })
-          await trxManager.emitTransactionEvent(transaction, t)
-        })
       }
     }
-
-    // if not, continue expiring
-    transaction.status = transactionStatuses.EXPIRED
-    debug('transaction status: ', transaction.status)
-    return models.sequelize.transaction(async t => {
-      await transaction.save({ transaction: t })
-      await trxManager.emitTransactionEvent(transaction, t)
-    })
+    debug('transaction status :', transaction.status)
   },
 
   /**
    * Same thing with Dana Cancel Transaction
-   * @param {*} ctx
    */
   async reverseHandler (ctx) {
     debug('Reverse Handler')
@@ -149,18 +133,12 @@ module.exports = {
 
   /**
    * To refund Dana Success Transaction
-   * @param {*} ctx
    */
   async refundHandler (ctx) {
     debug('Refund Handler')
     const { transaction } = ctx
     const response = await refundTransaction(ctx)
-    debug('refundHandler Dana Response: ', JSON.stringify(response))
     checkResponse(response, ctx)
     transaction.status = transactionStatuses.REFUNDED
-    return models.sequelize.transaction(async t => {
-      await transaction.save({ transaction: t })
-      await trxManager.emitTransactionEvent(transaction, t)
-    })
   }
 }

@@ -11,6 +11,18 @@ const query = require('./query')
 const ctxCommon = require('./ctxCommon')
 
 async function doNewTransaction (ctx, t) {
+  if (ctx.transaction.orderReference) {
+    const transaction = await query.newTransaction.getTransactionWithFinishedOrderReference(ctx, t)
+    if (transaction) {
+      throw createError({
+        name: errorTypes.ORDER_REFERENCE_FINISHED,
+        data: {
+          transactionId: transaction.id
+        }
+      })
+    }
+  }
+
   ctx.agent = await query.newTransaction.findAgentAndFriends(ctx, t)
   if (!ctx.agent) {
     throw createError({
@@ -101,7 +113,7 @@ async function doCommon (ctx, t) {
 
 async function doSettleBatch (ctx, t) {
   if (ctx.acquirerHandler.settleByAcquirerConfigAgent) {
-    if (!ctx.acquirerConfigAgent.acquirerTerminalId) {
+    if (!ctx.acquirerConfigAgent || !ctx.acquirerConfigAgent.acquirerTerminalId) {
       throw createError({
         name: errorTypes.INVALID_ACQUIRER_CONFIG
       })

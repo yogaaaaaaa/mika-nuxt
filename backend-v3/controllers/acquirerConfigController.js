@@ -3,7 +3,6 @@
 const crudGenerator = require('./helpers/crudGenerator')
 const acquirerConfigValidator = require('validators/acquirerConfigValidator')
 const { generateDanaAcquirerConfig } = require('libs/aqDana')
-const { paymentClasses } = require('libs/trxManager/constants')
 
 module.exports.createAcquirerConfigMiddlewares = [
   acquirerConfigValidator.bodyCreate,
@@ -12,7 +11,7 @@ module.exports.createAcquirerConfigMiddlewares = [
 
     createHandler: async ({ crudCtx, res }) => {
       crudCtx.modelInstance = crudCtx.modelScoped.build(crudCtx.data)
-      if (crudCtx.data.handler === paymentClasses.DANA) {
+      if (crudCtx.data.handler === 'dana') {
         crudCtx.modelInstance.config = await generateDanaAcquirerConfig({ crudCtx, res })
       }
       if (crudCtx.modelInstance) {

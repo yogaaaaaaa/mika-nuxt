@@ -5,7 +5,7 @@ const FastestValidator = require('fastest-validator')
 const PasswordValidator = require('password-validator')
 const PasswordGenerator = require('strict-password-generator').default
 
-const commonConfig = require('../configs/commonConfig')
+const commonConfig = require('configs/commonConfig')
 
 const defaultFormat = commonConfig.authValidPassword ||
 {

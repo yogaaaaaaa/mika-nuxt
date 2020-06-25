@@ -127,7 +127,7 @@ module.exports.expressAttach = ({
       }
 
       req.audit.transport.type = String(req.protocol || '')
-      req.audit.transport.ipAddr = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip
+      req.audit.transport.ipAddr = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip
 
       req.audit.transport.httpMethod = String(req.method || '')
       req.audit.transport.httpPath = String(req.originalUrl || '')

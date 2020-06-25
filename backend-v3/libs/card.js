@@ -199,43 +199,6 @@ module.exports.getPINEntryMode = (posEntryMode) => {
 }
 
 /**
- * Search value from TLV list (an array)
- */
-module.exports.tlvValueFind = (tlvList, tag, toHexString = true) => {
-  for (let i = 0; i < tlvList.length; i++) {
-    if (tlvList[i].tag === tag) {
-      if (toHexString) {
-        return tlvList[i].value.toString('hex').toUpperCase() || null
-      } else {
-        return tlvList[i].value
-      }
-    }
-  }
-  return null
-}
-
-/**
- * Encode TLV array list into TLV String
- */
-module.exports.tlvEncode = (tlvList) => {
-  return berTlv.TlvFactory.serialize(tlvList)
-}
-
-/**
- * Decode TLV String into TLV array list
- */
-module.exports.tlvDecode = (hsTlv, toTlvMap = false) => {
-  return berTlv.TlvFactory.parse(hsTlv)
-}
-
-/**
- * Annotate current TLV object
- */
-module.exports.tlvAnnotate = (tlvAnnotate) => {
-  return berTlvRegistry.lookupAnnotation(tlvAnnotate)
-}
-
-/**
  * Replace '=' symbol with 'D' in Track2, to be compatible with EMV TLV
  */
 module.exports.track2RemoveSymbol = (hsTrack2) => {
@@ -294,7 +257,7 @@ module.exports.track2GetComponent = (hsTrack2) => {
     first6,
     last4,
     expirationDate,
-    expirationDateValid: moment(expirationDate, 'yymm').isBefore(moment())
+    expirationDateValid: moment().isBefore(moment(expirationDate, 'YYMM'))
   }
 }
 
@@ -343,4 +306,65 @@ module.exports.getPinFromISO0Pinblock = (hsPinblock, hsPan) => {
   const pinLength = Number(pinHs.slice(0, 2))
 
   return pinHs.slice(2).slice(0, pinLength)
+}
+
+/**
+ * Encode TLV array into TLV buffer or hexstring
+ */
+module.exports.tlvEncode = (tlvs, toHexString = true) => {
+  const encodedTlv = berTlv.TlvFactory.serialize(tlvs)
+  if (toHexString) {
+    return encodedTlv.toString('hex').toUpperCase()
+  } else {
+    return encodedTlv
+  }
+}
+
+/**
+ * Decode TLV String into TLV array
+ */
+module.exports.tlvDecode = (hsTlv) => {
+  return berTlv.TlvFactory.parse(hsTlv)
+}
+
+/**
+ * Search value from TLV array
+ */
+module.exports.tlvValueFind = (tlvs, tag, toHexString = true) => {
+  for (let i = 0; i < tlvs.length; i++) {
+    if (tlvs[i].tag === tag) {
+      if (toHexString) {
+        return tlvs[i].value.toString('hex').toUpperCase() || null
+      } else {
+        return tlvs[i].value
+      }
+    }
+  }
+  return null
+}
+
+/**
+ * Search tlv object from TLV array
+ */
+module.exports.tlvFind = (tlvs, tag) => {
+  for (let i = 0; i < tlvs.length; i++) {
+    if (tlvs[i].tag === tag) {
+      return tlvs[i]
+    }
+  }
+  return null
+}
+
+/**
+ * Annotate TLV object
+ */
+module.exports.tlvAnnotate = (tlv) => {
+  return berTlvRegistry.lookupAnnotation(tlv)
+}
+
+/**
+ * Annotate TLV array
+ */
+module.exports.tlvArrayAnnotate = (tlvs) => {
+  return berTlvRegistry.look(tlvs)
 }

@@ -112,9 +112,11 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   user.prototype.isPasswordExpired = function () {
+    if (!this.followPasswordExpiry) return
+
     const expiryMoment = this.getPasswordExpiryMoment()
-    if (!expiryMoment && this.followPasswordExpiry) return true
-    if (expiryMoment && moment().isAfter(expiryMoment)) return true
+    if (!expiryMoment) return
+    if (moment().isAfter(expiryMoment)) return true
   }
 
   user.prototype.isIncludedInLastPasswords = async function (newPassword) {

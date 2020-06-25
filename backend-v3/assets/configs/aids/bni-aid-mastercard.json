@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Mastercard",
+    "aid": "A0000000041010",
+    "cvmLmt": "000000000000",
+    "termClssLmt": "000000000000",
+    "termClssOfflineFloorLmt": "000000000000",
+    "termOfflineFloorLmt": "000000000000",
+    "selFlag": "01",
+    "version": "0002",
+    "targetPer": "0020",
+    "maxTargetPer": "0050",
+    "floorLimit": "00000000",
+    "tacDefault": "FC50A80000",
+    "tacDenial": "0010000000",
+    "tacOnline": "FC50A88000",
+    "threshold": "00000000",
+    "dDol": "9F3704",
+    "tDol": "9F02065F2A029A039C0195059F3704",
+    "referCurrCode": "0360"
+  }
+]

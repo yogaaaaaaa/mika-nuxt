@@ -13,7 +13,7 @@ let baseConfig = {
   tcashQrnSecretKey: 'linkaja#mika',
   tcashQrnPwd: 'bvu38pe4f6TZc1NRBYXCiO3C',
 
-  tcashQrnMerchantID: '190717011155001',
+  tcashQrnMerchantID: '',
   tcashQrnMerchantCriteria: 'UMI',
 
   tcashQrnMerchantPanPrefix: '93600911002'

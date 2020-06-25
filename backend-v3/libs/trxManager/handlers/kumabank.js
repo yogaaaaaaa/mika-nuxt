@@ -132,6 +132,8 @@ module.exports = {
     ctx.transaction.properties.entryMode = entryMode
     ctx.transaction.properties.signature = userToken.signature
 
+    ctx.transaction.changed('properties', true)
+
     ctx.debug = {
       createDelay: 0,
       createNoResponse: false,

@@ -1,7 +1,7 @@
 'use strict'
 
 require('libs/appInit').environmentInit('core')
-const isEnvProduction = process.NODE_ENV === 'production'
+const isEnvProduction = process.env.NODE_ENV === 'production'
 
 const morgan = require('morgan')
 const serviceBroker = require('libs/serviceBroker')
@@ -29,7 +29,7 @@ const coreApp = express()
 coreApp.disable('x-powered-by')
 coreApp.set('etag', false)
 morgan.token('mika-status', (req, res) => res.msgType && res.msgType.status)
-morgan.token('ip-addr', (req, res) => req.headers['x-real-ip'] || req.ip)
+morgan.token('ip-addr', (req, res) => req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip)
 coreApp.use(morgan(':method :url :ip-addr :status :mika-status :res[content-length] bytes :response-time ms'))
 
 /**
