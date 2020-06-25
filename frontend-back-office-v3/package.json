@@ -11,9 +11,9 @@
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "lintfix": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
-    "reload-staging": "pm2 delete mika-v3-backoffice-dev && npm run generate && pm2 start npm --name mika-v3-backoffice-dev -- start",
-    "staging": "npm run generate && pm2 start npm --name mika-v3-backoffice-dev -- start",
-    "production": "npm run generate && pm2 start npm --name mika-v3-backoffice -- start"
+    "reload-staging": "pm2 delete mika-v3-backoffice-dev && npm run build && pm2 start npm --name mika-v3-backoffice-dev -- start",
+    "staging": "npm run build && pm2 start npm --name mika-v3-backoffice-dev -- start",
+    "production": "npm run build && pm2 start npm --name mika-v3-backoffice -- start"
   },
   "dependencies": {
     "@nuxtjs/auth": "^4.8.1",
