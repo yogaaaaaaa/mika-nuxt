@@ -53,24 +53,28 @@
               clearable
             ></v-autocomplete>
 
-            <v-autocomplete
-              v-if="field.key === 'acquirerConfigId'"
-              v-model="formData[field.key]"
-              v-validate="field.rules"
-              :type="field.type"
-              :error-messages="errors.collect(field.key)"
-              :name="field.key"
-              :data-vv-name="field.key"
-              :data-vv-as="field.caption"
-              :label="field.caption"
-              :items="configs"
-              :loading="configLoading"
-              :search-input.sync="searchConfig"
-              item-text="name"
-              item-value="id"
-              placeholder="Start typing to Search"
-              clearable
-            ></v-autocomplete>
+            <v-container v-if="field.key === 'acquirerConfigId'" class="pa-0">
+              <v-row class="ma-0 pa-0">
+                <v-col cols="4" class="pl-0">
+                  <v-select
+                    v-model="configType"
+                    :items="configTypes"
+                    item-text="text"
+                    item-value="value"
+                    label="Acquirer Config Type"
+                  />
+                </v-col>
+                <v-col cols="8" class="pl-0">
+                  <v-select
+                    v-model="formData[field.key]"
+                    :items="configs"
+                    item-text="name"
+                    item-value="id"
+                    label="Acquirer Config Name"
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
 
             <v-autocomplete
               v-if="field.key === 'acquirerTypeId'"
@@ -89,6 +93,7 @@
               item-value="id"
               placeholder="Start typing to Search"
               clearable
+              class="mt-4"
             ></v-autocomplete>
 
             <v-textarea
@@ -201,9 +206,6 @@ export default {
       merchantLoading: false,
       searchMerchant: '',
       merchants: [],
-
-      configLoading: false,
-      searchConfig: '',
       configs: [],
 
       typeLoading: false,
@@ -217,6 +219,16 @@ export default {
       textUnarchive: 'Are you sure want to unarchive this data?',
       created: false,
       dataArchived: false,
+      configType: '',
+      configTypes: [
+        'DANA',
+        'LinkAja',
+        'Credit',
+        'Debit',
+        'Gopay',
+        'Alipay',
+        'QR',
+      ],
     }
   },
   watch: {
@@ -233,6 +245,7 @@ export default {
         }
         this.created = true
         this.dataArchived = this.formData.archivedAt
+        this.checkAConfigType(this.formData.acquirerConfigName)
       }
     },
     searchMerchant: {
@@ -243,13 +256,10 @@ export default {
         this.getMerchants()
       }, 500),
     },
-    searchConfig: {
+    configType: {
       handler: debounce(function() {
-        if (this.configs.length > 0) return
-        if (this.configLoading) return
-        if (this.searchConfig == null) this.searchConfig = ''
         this.getConfigs()
-      }, 500),
+      }),
     },
 
     searchType: {
@@ -274,8 +284,9 @@ export default {
           this.formData.archivedAt
         ).format('YYYY-MM-DD, HH:mm:ss')
       }
-
+      this.searchConfig = ' '
       this.dataArchived = this.formData.archivedAt
+      this.checkAConfigType(this.formData.acquirerConfigName)
     }
   },
   methods: {
@@ -319,7 +330,8 @@ export default {
       try {
         this.configLoading = true
         const search =
-          this.searchConfig != '' ? `f[name]=like,%${this.searchConfig}%` : ''
+          this.configType != '' ? `f[name]=like,%${this.configType}%` : ''
+
         const url =
           '/back_office/acquirer_configs?order_by=name&order=asc&' + search
         const resp = await this.$axios.$get(url)
@@ -352,6 +364,15 @@ export default {
     unarchive() {
       this.$emit('unarchive')
       this.showUnarchive = false
+    },
+    checkAConfigType(params) {
+      this.configTypes.map(x => {
+        let y = this.$changeCase
+          .lowerCase(params)
+          .split(' ')
+          .includes(this.$changeCase.lowerCase(x))
+        if (y === true) return (this.configType = x)
+      })
     },
   },
 }
