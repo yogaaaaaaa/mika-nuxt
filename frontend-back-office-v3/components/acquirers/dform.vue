@@ -206,6 +206,7 @@ export default {
       merchantLoading: false,
       searchMerchant: '',
       merchants: [],
+      configs: [],
 
       typeLoading: false,
       searchType: '',
