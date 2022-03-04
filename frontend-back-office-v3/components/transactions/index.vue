@@ -21,7 +21,7 @@
         class="elevation-0 pa-2 align-self-center"
         :footer-props="footerProps"
       >
-        <template v-slot:item.id="{ item }">
+        <template v-slot:[`item.id`]="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <span v-on="on">
@@ -35,7 +35,7 @@
             <span>{{ item.id }}</span>
           </v-tooltip>
         </template>
-        <template v-slot:item.idAlias="{ item }">
+        <template v-slot:[`item.idAlias`]="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <span v-on="on">
@@ -49,12 +49,12 @@
             <span>{{ item.idAlias }}</span>
           </v-tooltip>
         </template>
-        <template v-slot:item.amount="{ item }">
+        <template v-slot:[`item.amount`]="{ item }">
           <span
             style="font-family: Roboto"
           >{{ item.amount | currency('', 0, { thousandsSeparator: ',' }) }}</span>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template v-slot:[`item.status`]="{ item }">
           <v-btn
             :color="colorStatus(item.status)"
             rounded
@@ -63,7 +63,7 @@
             class="elevation-0 text-lowercase font-weight-bold"
           >{{ item.status }}</v-btn>
         </template>
-        <template v-slot:item.updatedAt="{ item }">
+        <template v-slot:[`item.updatedAt`]="{ item }">
           {{
           $moment(item.updatedAt).format('YYYY-MM-DD, HH:mm:ss')
           }}

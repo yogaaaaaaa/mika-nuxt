@@ -22,23 +22,23 @@
         :footer-props="footerProps"
         class="elevation-0 pa-2"
       >
-        <template v-slot:item.name="{ item }">
+        <template v-slot:[`item.name`]="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template v-slot:item.minimumAmount="{ item }">
+        <template v-slot:[`item.minimumAmount`]="{ item }">
           <span
             style="font-family: Roboto"
           >{{ item.minimumAmount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
         </template>
-        <template v-slot:item.maximumAmount="{ item }">
+        <template v-slot:[`item.maximumAmount`]="{ item }">
           <span
             style="font-family: Roboto"
           >{{ item.maximumAmount | currency('', 0, { thousandsSeparator: '.' }) }}</span>
         </template>
         <template
-          v-slot:item.createdAt="{ item }"
+          v-slot:[`item.createdAt`]="{ item }"
         >{{ $moment(item.createdAt).format('YYYY-MM-DD') }}</template>
-        <template v-slot:item.archivedAt="{ item }" class="text-center">
+        <template v-slot:[`item.archivedAt`]="{ item }" class="text-center">
           <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
           <span v-else>-</span>
         </template>
@@ -172,6 +172,10 @@ export default {
           minimumAmount: data.minimumAmount,
           maximumAmount: data.maximumAmount,
           processFee: data.processFee,
+          // shareAcquirer: data.shareAcquirer ,
+          // shareMerchant: data.shareMerchant ,
+          // shareMerchantWithPartner: data.shareMerchantWithPartner,
+          // sharePartner: data.sharePartner ,
           shareAcquirer: data.shareAcquirer / 100,
           shareMerchant: data.shareMerchant / 100,
           shareMerchantWithPartner: data.shareMerchantWithPartner / 100,

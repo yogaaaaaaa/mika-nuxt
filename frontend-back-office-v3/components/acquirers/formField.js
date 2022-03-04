@@ -35,7 +35,7 @@ export default [
   {
     key: 'shareAcquirer',
     caption: 'Share Acquirer (%)',
-    rules: 'required',
+    rules: 'required|between:0,100',
     type: 'number',
     fieldType: 'text',
     value: 0,
@@ -43,7 +43,7 @@ export default [
   {
     key: 'shareMerchant',
     caption: 'Share Merchant (%)',
-    rules: 'required',
+    rules: 'required|between:0,100',
     type: 'number',
     fieldType: 'text',
     value: 0,
@@ -51,7 +51,7 @@ export default [
   {
     key: 'shareMerchantWithPartner',
     caption: 'Share Merchant With Partner (%)',
-    rules: 'required|decimal',
+    rules: 'required|decimal|between:0,100',
     type: 'number',
     fieldType: 'text',
     value: 0,
@@ -59,7 +59,7 @@ export default [
   {
     key: 'sharePartner',
     caption: 'Share Partner (%)',
-    rules: 'required|decimal',
+    rules: 'required|decimal|between:0,100',
     type: 'number',
     fieldType: 'text',
     value: 0,

@@ -23,14 +23,16 @@
         :footer-props="footerProps"
         class="elevation-0 pa-2"
       >
-        <template v-slot:item.name="{ item }">
+        <template v-slot:[`item.name`]="{ item }">
           <a @click="toDetail(item.id)">{{ item.name }}</a>
         </template>
-        <template
-          v-slot:item.createdAt="{ item }"
-        >{{ $moment(item.createdAt).format('YYYY-MM-DD') }}</template>
-        <template v-slot:item.archivedAt="{ item }" class="text-center">
-          <div v-if="item.archivedAt">{{ $moment(item.archivedAt).format('YYYY-MM-DD') }}</div>
+        <template v-slot:[`item.createdAt`]="{ item }">{{
+          $moment(item.createdAt).format('YYYY-MM-DD')
+        }}</template>
+        <template v-slot:[`item.archivedAt`]="{ item }" class="text-center">
+          <div v-if="item.archivedAt">
+            {{ $moment(item.archivedAt).format('YYYY-MM-DD') }}
+          </div>
           <span v-else>-</span>
         </template>
       </v-data-table>
@@ -161,6 +163,10 @@ export default {
     },
     async submit(data) {
       try {
+        // data.shareAcquirer = data.shareAcquirer 
+        // data.shareMerchant = data.shareMerchant 
+        // data.shareMerchantWithPartner = data.shareMerchantWithPartner 
+        // data.sharePartner = data.sharePartner
         data.shareAcquirer = data.shareAcquirer / 100
         data.shareMerchant = data.shareMerchant / 100
         data.shareMerchantWithPartner = data.shareMerchantWithPartner / 100
